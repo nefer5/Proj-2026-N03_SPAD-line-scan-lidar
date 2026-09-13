@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SPAD 线扫 LiDAR 快速评估</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header>
+    <div>
+      <p class="eyebrow">SPAD · VCSEL LINE ARRAY · ROTATING MIRROR</p>
+      <h1>一维线扫 dToF LiDAR 快速评估</h1>
+      <p class="lede">V0.1 · 光子预算、首光子直方图、测距统计与通道串扰</p>
+    </div>
+    <div class="status"><span></span> Physics-first MVP</div>
+  </header>
+
+  <main>
+    <aside class="panel controls">
+      <div class="toolbar">
+        <button id="runButton" class="primary">运行仿真</button>
+        <button id="resetButton">恢复默认</button>
+      </div>
+
+      <details open>
+        <summary>目标与 VCSEL</summary>
+        <div class="field-grid">
+          <label>距离 (m)<input data-key="range_m" type="number" step="1"></label>
+          <label>反射率<input data-key="target_reflectivity" type="number" step="0.01"></label>
+          <label>波长 (nm)<input data-key="wavelength_nm" type="number" step="1"></label>
+          <label>当前角通道脉冲能量 (nJ)<input data-key="pulse_energy_nj" type="number" step="0.1"></label>
+          <label>Tx 效率<input data-key="tx_efficiency" type="number" step="0.01"></label>
+          <label>Tx/Rx overlap<input data-key="overlap_factor" type="number" step="0.01"></label>
+          <label>单程大气透过率<input data-key="atmospheric_one_way_transmission" type="number" step="0.01"></label>
+          <label>VCSEL 脉宽 FWHM (ps)<input data-key="pulse_fwhm_ps" type="number" step="10"></label>
+        </div>
+      </details>
+
+      <details open>
+        <summary>Rx 与环境光</summary>
+        <div class="field-grid">
+          <label>接收口径 (mm)<input data-key="rx_aperture_mm" type="number" step="1"></label>
+          <label>Rx 效率<input data-key="rx_efficiency" type="number" step="0.01"></label>
+          <label>通道 IFOV-H (mrad)<input data-key="channel_ifov_h_mrad" type="number" step="0.01"></label>
+          <label>通道 IFOV-V (mrad)<input data-key="channel_ifov_v_mrad" type="number" step="0.01"></label>
+          <label>滤光片宽度 (nm)<input data-key="filter_bandwidth_nm" type="number" step="0.1"></label>
+          <label>滤光片峰值透过率<input data-key="filter_peak_transmission" type="number" step="0.01"></label>
+          <label class="wide">场景光谱辐亮度 (W/m²/sr/nm)<input data-key="background_spectral_radiance" type="number" step="0.001"></label>
+          <label class="wide file">滤光片曲线 CSV（可选）<input id="filterFile" type="file" accept=".csv,text/csv"><small id="filterStatus">未加载，使用矩形滤光片</small></label>
+        </div>
+      </details>
+
+      <details open>
+        <summary>SPAD、TDC 与采集</summary>
+        <div class="field-grid">
+          <label>每读出通道 SPAD 数<input data-key="spads_per_channel" type="number" step="1"></label>
+          <label>PDE<input data-key="pde" type="number" step="0.01"></label>
+          <label>Fill factor<input data-key="fill_factor" type="number" step="0.01"></label>
+          <label>DCR / SPAD (cps)<input data-key="dcr_cps_per_spad" type="number" step="100"></label>
+          <label>其他噪声 / SPAD (cps)<input data-key="other_noise_cps_per_spad" type="number" step="100"></label>
+          <label>SPAD 抖动 FWHM (ps)<input data-key="spad_jitter_fwhm_ps" type="number" step="10"></label>
+          <label>其他抖动 FWHM (ps)<input data-key="other_jitter_fwhm_ps" type="number" step="10"></label>
+          <label>TDC bin (ps)<input data-key="tdc_bin_ps" type="number" step="10"></label>
+          <label>门起点 (ns)<input data-key="gate_start_ns" type="number" step="1"></label>
+          <label>门宽 (ns)<input data-key="gate_width_ns" type="number" step="10"></label>
+          <label>累计发数<input data-key="laser_shots" type="number" step="1000"></label>
+          <label>重复统计次数<input data-key="monte_carlo_trials" type="number" step="10"></label>
+        </div>
+      </details>
+
+      <details>
+        <summary>通道串扰</summary>
+        <div class="field-grid">
+          <label>线读出通道数<input data-key="line_channels" type="number" step="1"></label>
+          <label>最近邻直接串扰<input data-key="nearest_neighbor_crosstalk" type="number" step="0.001"></label>
+          <label>空间衰减尺度 (channel)<input data-key="crosstalk_decay_channels" type="number" step="0.1"></label>
+          <label>随机种子<input data-key="rng_seed" type="number" step="1"></label>
+        </div>
+      </details>
+
+      <div class="toolbar footer-tools">
+        <button id="saveConfig">导出配置 JSON</button>
+        <button id="saveHistogram" disabled>导出直方图 CSV</button>
+      </div>
+    </aside>
+
+    <section class="results">
+      <div id="errorBox" class="error hidden"></div>
+      <div class="metric-grid">
+        <article><span>估计距离</span><strong id="mRange">—</strong><small>m</small></article>
+        <article><span>重复精度 1σ</span><strong id="mPrecision">—</strong><small>cm</small></article>
+        <article><span>测距偏差</span><strong id="mBias">—</strong><small>cm</small></article>
+        <article><span>成功率</span><strong id="mSuccess">—</strong><small>%</small></article>
+        <article><span>信号探测数 / pulse</span><strong id="mSignal">—</strong><small>期望值</small></article>
+        <article><span>背景+暗计数 / gate</span><strong id="mNoise">—</strong><small>期望值</small></article>
+        <article><span>观测峰值 SNR</span><strong id="mSnr">—</strong><small>快速指标</small></article>
+        <article><span>Pile-up 损失</span><strong id="mPileup">—</strong><small>%</small></article>
+      </div>
+
+      <article class="panel chart-card">
+        <div class="chart-title"><div><h2>TCSPC 直方图</h2><p>观测、期望与纯噪声；下图自动聚焦目标峰</p></div></div>
+        <canvas id="histFull" height="260"></canvas>
+        <canvas id="histZoom" height="260"></canvas>
+      </article>
+
+      <div class="split">
+        <article class="panel chart-card">
+          <h2>距离扫描</h2>
+          <p>累计信号计数与 shot-noise SNR</p>
+          <canvas id="rangeChart" height="330"></canvas>
+        </article>
+        <article class="panel chart-card">
+          <h2>串扰级联矩阵</h2>
+          <p>源通道 → 受扰通道的总诱发雪崩期望</p>
+          <canvas id="xtalkChart" height="330"></canvas>
+          <p id="xtalkSummary" class="note">—</p>
+        </article>
+      </div>
+
+      <article class="panel assumptions">
+        <h2>当前模型假设</h2>
+        <ul id="assumptionList"><li>运行仿真后显示。</li></ul>
+        <p class="warning">注意：本页是架构权衡和快速性能评估工具，不是眼安全、功能安全或最终量产性能认证。</p>
+      </article>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
+
