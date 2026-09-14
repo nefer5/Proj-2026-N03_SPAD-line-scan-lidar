@@ -65,7 +65,7 @@ def test_two_points_flat_and_rectangular_filters():
                                            FilterPoint(wavelength_nm=1000,transmission=0.5)])
         assert FilterResponse(cfg).integral_nm()==pytest.approx(50)
         assert FilterResponse(cfg).evaluate(940)==pytest.approx(0.5)
-    rectangle=filter_profile(SimulationConfig(filter_curve=None))
+    rectangle=filter_profile(SimulationConfig(filter_curve=None,filter_peak_transmission=0.8))
     assert rectangle["original_wavelength_nm"]==[]
     assert rectangle["interpolation"]=="rectangular"
     assert rectangle["weighted_bandwidth_nm"]==pytest.approx(8)

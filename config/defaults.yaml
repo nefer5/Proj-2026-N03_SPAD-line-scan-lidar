@@ -54,7 +54,7 @@ simulation:
       mode: basic
       basic:
         shape: rectangle
-        amplitude: 0.8
+        amplitude: 0.95
         min_nm: 855
         max_nm: 955
         center_nm: 905
