@@ -303,9 +303,10 @@ function renderDebug(result) {
     const latex=d.formulas[step.formula_id];
     try {katex.render(latex,formula,{displayMode:true,throwOnError:true});}
     catch(error){formula.textContent='公式渲染失败：'+error.message+'\n'+latex;}
+    const formulaNote=document.createElement('p');formulaNote.className='formula-note';formulaNote.textContent=d.formula_notes[step.formula_id];
     const data=document.createElement("div");
     table(data,["中间量（名称含单位）","实际数值"],Object.entries(step.values));
-    el.append(summary,formula,data);return el;
+    el.append(summary,formula,formulaNote,data);return el;
   });
   $("debugSteps").replaceChildren(...sections);
   table($("parameterTable"),["参数","本次值","单位","含义与边界"],Object.entries(result.configuration.simulation).map(([key,value])=>{

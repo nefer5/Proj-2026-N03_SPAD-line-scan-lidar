@@ -36,8 +36,9 @@ globalThis.CurveEditors = class {
       }
       panels.basic.append(fields);
       const formula=create("div");formula.className="formula";
+      const formulaNote=create("p");formulaNote.className="formula-note";
       const domainNote=create("p","所有基础波形仅在有效波段内使用，波段外为0。");
-      domainNote.className="editor-note";panels.basic.append(formula,domainNote);
+      domainNote.className="editor-note";panels.basic.append(formula,formulaNote,domainNote);
       const inputFile=create("input");inputFile.type="file";inputFile.accept=".csv,text/csv";inputFile.id=kind+"CurveFile";
       const fileLabel=create("label","CSV表头：wavelength_nm,"+meta.column);fileLabel.append(inputFile);
       const filename=create("p");filename.className="editor-note";
@@ -54,7 +55,7 @@ globalThis.CurveEditors = class {
       }
       methodLabel.append(method);root.append(methodLabel);
       const status=create("p");status.className="editor-note";status.id=kind+"CurveStatus";root.append(status);
-      Object.assign(editor,{mode,shape,panels,inputs,inputFile,filename,filePreview,textarea,methodLabel,method,status,formula});
+      Object.assign(editor,{mode,shape,panels,inputs,inputFile,filename,filePreview,textarea,methodLabel,method,status,formula,formulaNote});
       this.editors[kind]=editor;
       mode.addEventListener("change",()=>{editor.revision++;editor.spec.mode=mode.value;this.visibility(editor);onChange();});
       shape.addEventListener("change",()=>{this.visibility(editor);onChange();});
@@ -74,7 +75,9 @@ globalThis.CurveEditors = class {
     e.methodLabel.classList.toggle("hidden",!["csv","manual"].includes(e.spec.mode));
     const active=this.catalog.shapes[e.shape.value].fields;
     for(const [key,input] of Object.entries(e.inputs))input.closest("label").classList.toggle("hidden",!active.includes(key));
-    e.inputs.width_nm.closest("label").firstChild.textContent=e.shape.value==="gaussian"?"半高全宽 FWHM (nm)":"矩形全宽 (nm)";
+    e.inputs.width_nm.closest("label").firstChild.textContent=e.shape.value==="gaussian"?"半高全宽 W · FWHM (nm)":"矩形全宽 W (nm)";
+    e.inputs.amplitude.closest("label").firstChild.textContent=(e.shape.value==="constant"?"常量 A":"峰值 A")+" ("+e.meta.unit+")";
+    e.formulaNote.textContent=this.catalog.formula_notes["basic_"+e.shape.value];
     const latex=this.catalog.formulas["basic_"+e.shape.value];
     try {katex.render(latex,e.formula,{displayMode:true,throwOnError:true});}
     catch(error){e.formula.textContent="公式渲染失败："+error.message+"\n"+latex;}

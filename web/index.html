@@ -133,6 +133,7 @@
       <article class="panel chart-card">
         <h2>滤光片光谱曲线</h2>
         <p id="filterSummary" aria-live="polite">等待计算；本图与光子预算共用滤光片曲线。</p>
+        <p class="formula-note">∫T dλ：透过率曲线沿波长积分得到的加权带宽（nm）；T为透过率，λ为波长。该数值未除以峰值透过率，不一定等于FWHM。</p>
         <canvas id="filterChart" height="250"></canvas>
         <p>蓝色散点：原始采样点；青色线：插值曲线；橙色标记：激光波长及透过率。区间外为0。插值通过原始点，不进行噪声平滑；修改后直方图需重新运行。</p>
       </article>

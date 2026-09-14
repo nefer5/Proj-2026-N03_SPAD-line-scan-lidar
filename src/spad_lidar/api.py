@@ -56,7 +56,7 @@ def defaults():
 @app.get("/api/catalog")
 def catalog():
     return {"parameters": read_yaml("parameter-help.yaml"),
-            "curve_inputs":{**read_yaml("curve-inputs.yaml"), "formulas":read_yaml("formulas.yaml")},
+            "curve_inputs":{**read_yaml("curve-inputs.yaml"), "formulas":read_yaml("formulas.yaml"), "formula_notes":read_yaml("formula-notes.yaml")},
             "readout_modes":read_yaml("readout-modes.yaml"),
             "algorithms": Algorithms.load().model_dump()}
 

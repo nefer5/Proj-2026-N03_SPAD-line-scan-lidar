@@ -361,6 +361,7 @@ def simulate(cfg: SimulationConfig, debug=False) -> dict:
         result["debug"] = {
             "parameter_help": read_yaml("parameter-help.yaml"),
             "formulas": read_yaml("formulas.yaml"),
+            "formula_notes": read_yaml("formula-notes.yaml"),
             "spectral_audit": derived['spectra'],
             "readout_audit": readout,
             "bin_reference_note": "概率列仅为理想首光子参考；事件模式实际结果由readout_audit和观测直方图描述。",

@@ -117,3 +117,4 @@ input[type=checkbox] { accent-color:var(--cyan); }
 .curve-editor > div, .curve-editor > label { margin-top:10px; display:block; }
 .curve-editor input[type=file] { max-width:100%; font-size:11px; }
 .csv-preview { max-height:160px; overflow:auto; }
+.formula-note { font-size:11px !important; line-height:1.75; color:#a4b6c8 !important; margin:4px 0 12px; overflow-wrap:anywhere; }
