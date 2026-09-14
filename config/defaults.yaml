@@ -3,7 +3,7 @@ schema_version: 1
 simulation:
   range_m: 50
   target_reflectivity: 0.1
-  wavelength_nm: 940
+  wavelength_nm: 905
   pulse_energy_nj: 5
   pulse_shape: gaussian
   laser_prf_hz: 1000000
@@ -54,9 +54,9 @@ simulation:
       basic:
         shape: rectangle
         amplitude: 0.8
-        min_nm: 900
-        max_nm: 980
-        center_nm: 940
+        min_nm: 865
+        max_nm: 945
+        center_nm: 905
         width_nm: 10
         flat_width_nm: 8
         edge_width_nm: 2
@@ -71,7 +71,7 @@ simulation:
         amplitude: 0.02
         min_nm: 350
         max_nm: 1200
-        center_nm: 940
+        center_nm: 905
         width_nm: 100
         flat_width_nm: 80
         edge_width_nm: 20
@@ -104,7 +104,7 @@ simulation:
         amplitude: 0.15
         min_nm: 350
         max_nm: 1200
-        center_nm: 700
+        center_nm: 905
         width_nm: 400
         flat_width_nm: 200
         edge_width_nm: 100
@@ -141,7 +141,7 @@ simulation:
         amplitude: 1
         min_nm: 280
         max_nm: 4000
-        center_nm: 550
+        center_nm: 905
         width_nm: 500
         flat_width_nm: 300
         edge_width_nm: 150

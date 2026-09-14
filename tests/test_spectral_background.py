@@ -35,14 +35,14 @@ def test_constant_limit_matches_known_photon_budget():
 
 
 def test_joint_integral_independent_of_plot_and_quadrature_convergence():
-    cfg=SimulationConfig()
+    cfg=SimulationConfig(wavelength_nm=905)
     a=Algorithms.load()
     first=spectral_components(cfg,a,plot=True)
     second=spectral_components(cfg,a.model_copy(update={'spectral_quadrature_order':8,'spectral_plot_samples':31}),plot=True)
     for key in ('solar_detectable_photons_s_m2_sr','other_detectable_photons_s_m2_sr'):
         assert first[key]==pytest.approx(second[key],rel=1e-12)
     assert len(first['curves']['wavelength_nm'])!=len(second['curves']['wavelength_nm'])
-    assert first['pde_at_laser']==pytest.approx(0.15)
+    assert first['pde_at_laser']==pytest.approx(0.18)
 
 
 def test_background_components_sum_and_reflectivity_only_affects_solar():

@@ -64,7 +64,7 @@ def test_pulse_power_integral_and_prf(shape):
     assert d["peak_power_w"]*width*factor == pytest.approx(cfg.pulse_energy_nj*1e-9)
     assert d["average_power_w"] == pytest.approx(cfg.pulse_energy_nj*1e-9*cfg.laser_prf_hz)
     assert d["acquisition_time_ms"] == pytest.approx(cfg.laser_shots/cfg.laser_prf_hz*1000)
-    higher = derived_quantities(SimulationConfig(pulse_shape=shape, laser_prf_hz=1.1e6))
+    higher = derived_quantities(SimulationConfig(pulse_shape=shape, laser_prf_hz=cfg.laser_prf_hz*1.1))
     assert higher["peak_power_w"] == d["peak_power_w"]
     assert higher["average_power_w"] == pytest.approx(d["average_power_w"]*1.1)
 

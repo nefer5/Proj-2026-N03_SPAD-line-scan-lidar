@@ -14,7 +14,7 @@
       <h1>单角通道 LiDAR 建模评估</h1>
       <p class="lede">当前：A 单通道信号链 · 规划：B 全光斑光学映射 → C 扫描机制</p>
     </div>
-    <nav class="toolbar"><a id="modeLink" href="/debug">专家调试版 →</a><div class="status"><span></span> A / V0.1.5</div></nav>
+    <nav class="toolbar"><a href="#photonBudgetPanel">光子计算公式与逻辑 ↓</a><a id="modeLink" href="/debug">专家调试版 →</a><div class="status"><span></span> A / V0.1.6</div></nav>
   </header>
 
   <main>
@@ -160,6 +160,8 @@
         <canvas id="histZoom" height="260"></canvas>
       </article>
 
+      <article id="photonBudgetPanel" class="panel chart-card"></article>
+
       <div class="split">
         <article class="panel chart-card">
           <h2>距离扫描 · 理想预算</h2>
@@ -200,6 +202,7 @@
 
   <script src="/static/vendor/katex/katex.min.js"></script>
   <script src="/static/curve-editor.js"></script>
+  <script src="/static/photon-flow.js"></script>
   <script src="/static/app.js"></script>
 </body>
 </html>

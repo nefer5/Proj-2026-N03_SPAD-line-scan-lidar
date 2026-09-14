@@ -1,5 +1,7 @@
 # 建模设计参考与演进路线
 
+当前回波、太阳背景和其他环境光的逐步公式以 [光子预算公式与逻辑](photon-budget.md) 为准；该文档从网页共用的公式/步骤定义生成。
+
 本文公式使用 `$...$` 与独立行 `$$`，兼容 VS Code 内置 Markdown 预览。按 `Ctrl+Shift+V` 打开预览；项目工作区已启用 `markdown.math.enabled`。依据：[VS Code 官方数学预览说明](https://code.visualstudio.com/docs/languages/markdown#_math-formula-rendering)。
 
 V0.1.1 已实现的详细公式、参数参考面和审核流程见 [专家调试手册](debug-guide.md)。以下二维阵列/数据库部分为规划，尚未接入当前模型。

@@ -1,7 +1,7 @@
 {
   "range_m": 50.0,
   "target_reflectivity": 0.1,
-  "wavelength_nm": 940.0,
+  "wavelength_nm": 905.0,
   "pulse_energy_nj": 5.0,
   "tx_efficiency": 0.8,
   "overlap_factor": 1.0,
@@ -33,4 +33,3 @@
   "nearest_neighbor_crosstalk": 0.005,
   "crosstalk_decay_channels": 0.8
 }
-

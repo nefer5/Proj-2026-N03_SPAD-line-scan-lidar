@@ -15,7 +15,7 @@ from .curves import CurveSpec
 ROOT = Path(__file__).resolve().parents[2]
 WEB = ROOT / "web"
 
-app = FastAPI(title="SPAD Line-Scanning LiDAR Model", version="0.1.5")
+app = FastAPI(title="SPAD Line-Scanning LiDAR Model", version="0.1.6")
 app.mount("/static", StaticFiles(directory=WEB), name="static")
 
 
@@ -42,7 +42,7 @@ def index():
     html = (WEB / "index.html").read_text(encoding="utf-8")
     # Content-addressed URLs bypass already cached unversioned JS/CSS as well.
     # Recompute on every navigation so editable source requires no release step.
-    for name in ("app.js", "curve-editor.js", "styles.css", "vendor/katex/katex.min.js", "vendor/katex/katex.min.css"):
+    for name in ("app.js", "curve-editor.js", "photon-flow.js", "styles.css", "vendor/katex/katex.min.js", "vendor/katex/katex.min.css"):
         digest = sha256((WEB / name).read_bytes()).hexdigest()
         html = html.replace(f'/static/{name}"', f'/static/{name}?v={digest}"')
     return HTMLResponse(html)

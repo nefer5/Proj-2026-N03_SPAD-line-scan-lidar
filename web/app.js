@@ -175,6 +175,7 @@ function render(result) {
   $("assumptionList").innerHTML=result.assumptions.map(x=>`<li>${x}</li>`).join("");
   $("saveHistogram").disabled=false;
   if (isDebug && result.debug) renderDebug(result);
+  if(isDebug) renderPhotonFlow($('photonBudgetPanel'),result.derived.photon_flow,{snapshot:result.provenance.utc,recorded:m.recorded_counts});
 }
 
 function showError(error) {
@@ -213,6 +214,10 @@ function apertureFields() {
 
 function renderDerived(d) {
   latestDerived=d;
+  if(!isDebug) {
+    const same=lastResult?.derived.photon_flow.input_sha256===d.photon_flow.input_sha256;
+    renderPhotonFlow($('photonBudgetPanel'),d.photon_flow,{recorded:same?lastResult.metrics.recorded_counts:null});
+  }
   $("peakPower").textContent=fmt(d.peak_power_w,4);
   $("averagePower").textContent=fmt(d.average_power_w,6);
   $("acquisitionTime").textContent=fmt(d.acquisition_time_ms,4);
@@ -250,6 +255,7 @@ async function updateDerived() {
       ["peakPower","averagePower","acquisitionTime","apertureArea"].forEach(id=>$(id).textContent="—");
       $("derivedStatus").textContent="参数待修正："+error.message;
       $("filterSummary").textContent="当前参数无效，图中仍为上次有效曲线。";
+      if(!isDebug)markPhotonFlowStale($('photonBudgetPanel'));
     }
   }
 }

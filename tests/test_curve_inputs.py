@@ -12,6 +12,8 @@ client=TestClient(app)
 
 
 def cfg_curve(kind,**basic):
+    if kind=='filter':
+        basic={"center_nm":940,"min_nm":900,"max_nm":980,"width_nm":10,"flat_width_nm":8,"edge_width_nm":2,"amplitude":0.8,**basic}
     return SimulationConfig(spectral_inputs={kind:{"mode":"basic","basic":basic}})
 
 

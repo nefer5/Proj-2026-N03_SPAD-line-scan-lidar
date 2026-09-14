@@ -118,3 +118,12 @@ input[type=checkbox] { accent-color:var(--cyan); }
 .curve-editor input[type=file] { max-width:100%; font-size:11px; }
 .csv-preview { max-height:160px; overflow:auto; }
 .formula-note { font-size:11px !important; line-height:1.75; color:#a4b6c8 !important; margin:4px 0 12px; overflow-wrap:anywhere; }
+.photon-tabs { margin:18px 0; }
+.photon-tabs button[aria-pressed=true] { border-color:var(--cyan); background:var(--cyan-soft); }
+.photon-step { border-top:1px solid var(--line); padding:14px 0; }
+.photon-step h3 { font-size:15px; margin:0 0 8px; }
+.photon-logic { line-height:1.7; }
+.photon-stamp { color:var(--orange) !important; font-size:12px; margin:8px 0 !important; }
+#photonBudgetPanel .table-scroll { max-height:none; }
+#photonBudgetPanel th { position:static; }
+#photonBudgetPanel td:nth-child(2) { font-family:Consolas,monospace; color:var(--cyan); }

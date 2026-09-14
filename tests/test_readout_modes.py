@@ -8,7 +8,7 @@ from spad_lidar.configuration import read_yaml
 
 def config(mode,**kwargs):
     return SimulationConfig(readout_mode=mode,range_m=20,laser_shots=2,
-                            monte_carlo_trials=0,**kwargs)
+                            laser_prf_hz=1000000,monte_carlo_trials=0,**kwargs)
 
 
 def test_independent_single_vs_multi_and_spad_deadtime():

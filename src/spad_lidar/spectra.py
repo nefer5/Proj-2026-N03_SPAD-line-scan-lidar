@@ -92,14 +92,27 @@ def spectral_components(cfg, algorithms=None, plot=False):
     ambient_l = other_l(x)
     t = filt.evaluate(x)
     detector_weight = t*pde_at(x)*x*1e-9/(H*C)
+    photon_factor=x*1e-9/(H*C)
     result = {
         "solar_lux": cfg.solar_illuminance_lux if cfg.solar_enabled else 0.0,
         "solar_reference_lux": reference_lux,
         "solar_irradiance_w_m2": scale*reference_w_m2,
         "solar_scale": scale,
+        "solar_reference_irradiance_w_m2": reference_w_m2,
+        "budget_band_nm": [float(filt.wavelength[0]),float(filt.wavelength[-1])],
+        "solar_irradiance_at_laser_w_m2_nm": float(solar_e(np.array(cfg.wavelength_nm))),
+        "solar_radiance_at_laser_w_m2_sr_nm": float(solar_e(np.array(cfg.wavelength_nm))*cfg.solar_reflectivity/np.pi),
+        "other_raw_radiance_at_laser_w_m2_sr_nm": float(other(np.array(cfg.wavelength_nm))),
+        "other_radiance_at_laser_w_m2_sr_nm": float(other_l(np.array(cfg.wavelength_nm))),
         "pde_at_laser": float(pde_at(np.array(cfg.wavelength_nm))),
         "solar_filtered_radiance_w_m2_sr": float(np.dot(w,sun_l*t)),
         "other_filtered_radiance_w_m2_sr": float(np.dot(w,ambient_l*t)),
+        "solar_incident_radiance_w_m2_sr": float(np.dot(w,sun_l)),
+        "other_incident_radiance_w_m2_sr": float(np.dot(w,ambient_l)),
+        "solar_incident_photons_s_m2_sr": float(np.dot(w,sun_l*photon_factor)),
+        "other_incident_photons_s_m2_sr": float(np.dot(w,ambient_l*photon_factor)),
+        "solar_filtered_photons_s_m2_sr": float(np.dot(w,sun_l*t*photon_factor)),
+        "other_filtered_photons_s_m2_sr": float(np.dot(w,ambient_l*t*photon_factor)),
         "solar_detectable_photons_s_m2_sr": float(np.dot(w,sun_l*detector_weight)),
         "other_detectable_photons_s_m2_sr": float(np.dot(w,ambient_l*detector_weight)),
         "standard": manifest["solar"]["name"] if solar_custom is None else "Custom solar spectral shape",
@@ -136,5 +149,6 @@ def spectral_components(cfg, algorithms=None, plot=False):
             "solar_radiance":sun_l.tolist(),"other_radiance":ambient_l.tolist(),
             "filter_transmission":t.tolist(),"pde":pde_at(x).tolist(),
             "detector_weight":detector_weight.tolist(),
+            "photon_factor_per_joule":photon_factor.tolist(),
         }
     return result

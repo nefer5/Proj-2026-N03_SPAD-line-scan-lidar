@@ -16,6 +16,7 @@ from .models import SimulationConfig
 from .filters import FilterResponse
 from .spectra import spectral_components
 from .readout import event_acquisition
+from .photon_flow import build_photon_flow
 
 
 @dataclass(frozen=True)
@@ -39,6 +40,18 @@ class Budget:
     solar_background_power_w: float
     other_light_background_power_w: float
     pde_at_laser: float
+    tx_output_energy_j: float
+    target_incident_energy_j: float
+    target_reflected_energy_j: float
+    rx_incident_energy_j: float
+    signal_rx_incident_photons_per_pulse: float
+    signal_sensor_incident_photons_per_pulse: float
+    solar_rx_incident_photons_per_gate: float
+    other_rx_incident_photons_per_gate: float
+    solar_sensor_incident_photons_per_gate: float
+    other_sensor_incident_photons_per_gate: float
+    solar_rx_incident_power_w: float
+    other_rx_incident_power_w: float
 
 
 def aperture_area(cfg: SimulationConfig) -> float:
@@ -59,6 +72,9 @@ def timing_sigma_ns(cfg):
 
 def derived_quantities(cfg, algorithms=None):
     a = algorithms or Algorithms.load()
+    spectral=spectral_components(cfg,a,plot=True)
+    budget=photon_budget(cfg,spectral=spectral)
+    gate_fraction=float(_signal_shape(cfg,_time_axis(cfg)[0]).sum())
     width_s = cfg.pulse_fwhm_ps * 1e-12
     energy_j = cfg.pulse_energy_nj * 1e-9
     shape_factor = sqrt(pi / (4 * np.log(2))) if cfg.pulse_shape == "gaussian" else 1.0
@@ -84,7 +100,8 @@ def derived_quantities(cfg, algorithms=None):
         "range_bin_m": C * cfg.tdc_bin_ps * 1e-12 / 2,
         "pulse": {"time_ps": time_ps.tolist(), "power_w": (shape * peak_w).tolist()},
         "filter": filter_profile(cfg, a),
-        "spectra": spectral_components(cfg, a, plot=True),
+        "spectra": spectral,
+        "photon_flow": build_photon_flow(cfg,budget,spectral,gate_fraction),
     }
 
 
@@ -121,7 +138,7 @@ def filter_profile(cfg, algorithms=None):
     }
 
 
-def photon_budget(cfg: SimulationConfig, range_m=None) -> Budget:
+def photon_budget(cfg: SimulationConfig, range_m=None, spectral=None) -> Budget:
     r = cfg.range_m if range_m is None else range_m
     photon_energy = H * C / (cfg.wavelength_nm * 1e-9)
     area = aperture_area(cfg)
@@ -129,10 +146,12 @@ def photon_budget(cfg: SimulationConfig, range_m=None) -> Budget:
     # Input reference plane is BEFORE Tx optics, for this angular channel.
     energy = cfg.pulse_energy_nj * 1e-9
     geometry = area / (pi * r**2)
-    received = (energy * cfg.tx_efficiency * cfg.target_reflectivity * geometry
-                * cfg.rx_efficiency * transmission * cfg.overlap_factor
-                * cfg.atmospheric_one_way_transmission**2)
-    spectral = spectral_components(cfg)
+    tx_output=energy*cfg.tx_efficiency
+    target_incident=tx_output*cfg.atmospheric_one_way_transmission
+    target_reflected=target_incident*cfg.target_reflectivity
+    rx_incident=target_reflected*geometry*cfg.atmospheric_one_way_transmission*cfg.overlap_factor
+    received=rx_incident*cfg.rx_efficiency*transmission
+    spectral = spectral if spectral is not None else spectral_components(cfg)
     effective_pdp = spectral["pde_at_laser"] * cfg.fill_factor
     omega = cfg.channel_ifov_h_mrad * cfg.channel_ifov_v_mrad * 1e-6
     geometry_bg = area*omega*cfg.rx_efficiency
@@ -150,6 +169,14 @@ def photon_budget(cfg: SimulationConfig, range_m=None) -> Budget:
         enbw, transmission, photon_energy, area, received, background_power,
         effective_pdp, omega, energy, geometry, solar_counts, other_counts,
         solar_power, other_power, spectral["pde_at_laser"],
+        tx_output,target_incident,target_reflected,rx_incident,
+        rx_incident/photon_energy,received/photon_energy,
+        spectral['solar_incident_photons_s_m2_sr']*area*omega*gate_s,
+        spectral['other_incident_photons_s_m2_sr']*area*omega*gate_s,
+        spectral['solar_filtered_photons_s_m2_sr']*geometry_bg*gate_s,
+        spectral['other_filtered_photons_s_m2_sr']*geometry_bg*gate_s,
+        spectral['solar_incident_radiance_w_m2_sr']*area*omega,
+        spectral['other_incident_radiance_w_m2_sr']*area*omega,
     )
 
 
@@ -322,7 +349,7 @@ def simulate(cfg: SimulationConfig, debug=False) -> dict:
     fingerprint = sha256(json.dumps(config_snapshot, sort_keys=True).encode()).hexdigest()
     result = {
         "configuration": config_snapshot,
-        "provenance": {"model_version": "0.1.5", "simulation_scope": "A_single_angular_channel", "utc": datetime.now(timezone.utc).isoformat(),
+        "provenance": {"model_version": "0.1.6", "simulation_scope": "A_single_angular_channel", "utc": datetime.now(timezone.utc).isoformat(),
                        "sha256": fingerprint, "defaults_source": "config/defaults.yaml"},
         "derived": derived,
         "readout": readout,
@@ -369,7 +396,7 @@ def simulate(cfg: SimulationConfig, debug=False) -> dict:
             "steps": [
                 {"title": "1. 脉冲能量与功率（Tx 前）",
                  "formula_id": "power",
-                 "values": {k:v for k,v in derived.items() if k not in ("pulse", "filter", "spectra")}},
+                 "values": {k:v for k,v in derived.items() if k not in ("pulse", "filter", "spectra", "photon_flow")}},
                 {"title": "2. 接收孔径与信号能量",
                  "formula_id": "signal",
                  "values": {"area_m2": b.aperture_area_m2, "geometric_collection": b.geometric_collection,
