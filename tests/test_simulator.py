@@ -47,6 +47,7 @@ def test_simulation_returns_finite_metrics():
         range_m=20.0,
         gate_width_ns=300.0,
         pulse_energy_nj=20.0,
+        pde_mode="constant", pde=0.15, fill_factor=0.2,
         laser_shots=100,
         monte_carlo_trials=5,
     )

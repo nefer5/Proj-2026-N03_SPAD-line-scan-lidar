@@ -11,6 +11,7 @@ from .curves import Curve
 from .constants import C, H, K_PHOTOPIC
 from .configuration import read_yaml, Algorithms, ConfigurationError
 from .filters import FilterResponse
+from .pde_data import pde_provenance
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -105,6 +106,8 @@ def spectral_components(cfg, algorithms=None, plot=False):
         "other_raw_radiance_at_laser_w_m2_sr_nm": float(other(np.array(cfg.wavelength_nm))),
         "other_radiance_at_laser_w_m2_sr_nm": float(other_l(np.array(cfg.wavelength_nm))),
         "pde_at_laser": float(pde_at(np.array(cfg.wavelength_nm))),
+        "effective_pde_at_laser": float(pde_at(np.array(cfg.wavelength_nm)))*cfg.fill_factor,
+        "pde_source": pde_provenance(cfg),
         "solar_filtered_radiance_w_m2_sr": float(np.dot(w,sun_l*t)),
         "other_filtered_radiance_w_m2_sr": float(np.dot(w,ambient_l*t)),
         "solar_incident_radiance_w_m2_sr": float(np.dot(w,sun_l)),

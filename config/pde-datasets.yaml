@@ -1,0 +1,28 @@
+van_sieleghem_2022_fig7_3p5v:
+  title: 'Van Sieleghem et al. 2022 · BSI NIR SPAD · Fig.7 · Ve=3.5 V'
+  paper_title: 'A Backside-Illuminated Charge-Focusing Silicon SPAD with Enhanced Near-Infrared Sensitivity'
+  url: https://arxiv.org/abs/2203.01560v1
+  pdf_url: https://arxiv.org/pdf/2203.01560v1
+  pdf_sha256: 151dbf7415638fd7382c4f82a31940a63770c8d6c87a36346b5e8135bfe16419
+  page_index: 7
+  figure: 7
+  excess_bias_v: 3.5
+  csv_path: examples/pde-van-sieleghem-2022-3p5v.csv
+  points_sha256: 1becdb7760c7d4a7beef36fa204251d5481c5da4eac78289d790cf97fd7cf623
+  extraction: PDF vector curve vertices, not the authors' raw measurement table
+  wavelength_range_nm: [460, 960]
+  points: 26
+  reported_peak: {wavelength_nm: 660, pde: 0.66}
+  reported_nir: {wavelength_nm: 905, pde: 0.27}
+  reported_relative_measurement_error_upper: 0.05
+  calibration:
+    x_axis: [[223.83511352539062, 500], [398.656982421875, 900]]
+    y_axis: [[315.8102111816406, 0], [213.47540283203125, 1]]
+    plot_box: [195.4265594482422, 213.47540283203125, 435.8066101074219, 318.8802490234375]
+    curve_rgb: [0.12156862765550613, 0.46666666865348816, 0.7058823704719543]
+    wavelength_digits: 0
+    pde_digits: 4
+  uncertainty_note: '绘图点经矢量坐标反算并四舍五入。小数位仅为插值存储，不表示测量精度；论文的<5%相对测量误差与提取/插值误差是不同来源。905nm不是图中原始标记，使用插值约27.4%，不强行改成正文的约27%。'
+  definition_note: '原文报告器件PDE（EQE与雪崩触发概率的乘积），包含器件自身光学收集特性。不能把小倍增区面积再当作探测面积折减。'
+  fill_factor_note: '本工具仍按用户配置额外乘FF。FF<1相当于对已报告器件PDE施加额外系统折减，不是论文原始PDE口径。按用户要求默认FF=0.92；未同步改动DCR、抖动或死时间。若要近似复现论文PDE，应另设FF=1并明确比较口径。'
+  domain_note: '图7采样仅覆盖460–960nm，范围外的0是当前模型边界假设，不是文献证明响应为0。'

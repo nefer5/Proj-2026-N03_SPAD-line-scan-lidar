@@ -73,7 +73,7 @@ V_binning:
 fill_factor:
   label: "填充因子 FF"
   unit: "1"
-  description: "光敏区面积占比；与PDE相乘作用于信号和光学背景，不作用于器件DCR。"
+  description: "与输入PDE相乘作用于信号和光学背景，不作用于器件DCR。输入若为光敏区PDE，FF表示光敏区面积占比；输入若为已包含器件收集特性的文献PDE，FF表示额外折减，避免重复计入。"
 dcr_cps_per_spad:
   label: "单SPAD暗计数率"
   unit: "cps"

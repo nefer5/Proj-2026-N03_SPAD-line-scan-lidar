@@ -58,7 +58,7 @@ def test_csv_and_manual_banks_are_separate_and_roundtrip():
 
 
 def test_active_empty_csv_invalid_probabilities_and_unknown_fields_rejected():
-    assert client.post("/api/derived",json={"spectral_inputs":{"pde":{"mode":"csv"}}}).status_code==422
+    assert client.post("/api/derived",json={"spectral_inputs":{"pde":{"mode":"csv","csv_points":[]}}}).status_code==422
     for override in ({"amplitude":1.1},{"min_nm":1000,"max_nm":900},{"shape":"triangle"}):
         assert client.post("/api/derived",json={"spectral_inputs":{"pde":{"mode":"basic","basic":override}}}).status_code==422
     assert client.post("/api/derived",json={"spectral_inputs":{"filter":{"mode":"standard"}}}).status_code==422

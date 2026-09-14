@@ -24,7 +24,7 @@ simulation:
   other_light_scale: 1
   H_binning: 4
   V_binning: 4
-  fill_factor: 0.2
+  fill_factor: 0.92
   dcr_cps_per_spad: 1000
   other_noise_cps_per_spad: 0
   spad_dead_time_ns: 20
@@ -99,7 +99,7 @@ simulation:
         value: 0
       csv_name: ''
     pde:
-      mode: manual
+      mode: csv
       basic:
         shape: constant
         amplitude: 0.15
@@ -110,7 +110,59 @@ simulation:
         flat_width_nm: 200
         edge_width_nm: 100
       interpolation: pchip
-      csv_points: []
+      csv_points:
+      - wavelength_nm: 460
+        value: 0.467
+      - wavelength_nm: 480
+        value: 0.4888
+      - wavelength_nm: 500
+        value: 0.5183
+      - wavelength_nm: 520
+        value: 0.5455
+      - wavelength_nm: 540
+        value: 0.5734
+      - wavelength_nm: 560
+        value: 0.5994
+      - wavelength_nm: 580
+        value: 0.6254
+      - wavelength_nm: 600
+        value: 0.6451
+      - wavelength_nm: 620
+        value: 0.653
+      - wavelength_nm: 640
+        value: 0.6629
+      - wavelength_nm: 660
+        value: 0.6637
+      - wavelength_nm: 680
+        value: 0.6633
+      - wavelength_nm: 700
+        value: 0.6469
+      - wavelength_nm: 720
+        value: 0.6412
+      - wavelength_nm: 740
+        value: 0.6291
+      - wavelength_nm: 760
+        value: 0.6046
+      - wavelength_nm: 780
+        value: 0.5827
+      - wavelength_nm: 800
+        value: 0.5209
+      - wavelength_nm: 820
+        value: 0.5043
+      - wavelength_nm: 840
+        value: 0.4402
+      - wavelength_nm: 860
+        value: 0.3834
+      - wavelength_nm: 880
+        value: 0.3286
+      - wavelength_nm: 900
+        value: 0.2861
+      - wavelength_nm: 920
+        value: 0.2373
+      - wavelength_nm: 940
+        value: 0.1996
+      - wavelength_nm: 960
+        value: 0.1609
       manual_points:
       - wavelength_nm: 350
         value: 0
@@ -134,7 +186,7 @@ simulation:
         value: 0.08
       - wavelength_nm: 1100
         value: 0
-      csv_name: ''
+      csv_name: pde-van-sieleghem-2022-3p5v.csv
     solar:
       mode: standard
       basic:

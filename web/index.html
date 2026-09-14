@@ -14,7 +14,7 @@
       <h1>单角通道 LiDAR 建模评估</h1>
       <p class="lede">当前：A 单通道信号链 · 规划：B 全光斑光学映射 → C 扫描机制</p>
     </div>
-    <nav class="toolbar"><a href="#photonBudgetPanel">光子计算公式与逻辑 ↓</a><a id="modeLink" href="/debug">专家调试版 →</a><div class="status"><span></span> A / V0.1.7</div></nav>
+    <nav class="toolbar"><a href="#photonBudgetPanel">光子计算公式与逻辑 ↓</a><a id="modeLink" href="/debug">专家调试版 →</a><div class="status"><span></span> A / V0.1.8</div></nav>
   </header>
 
   <main>
@@ -141,7 +141,7 @@
       </article>
       <article class="panel chart-card"><h2>太阳光谱 · 目标面辐照度</h2><p>所选谱形按lux归一化。标准模式为AM1.5G；自定义谱必须包含非零可见光成分才能归一化正lux。</p><canvas id="solarChart" height="250"></canvas></article>
       <article class="panel chart-card"><h2>接收方向背景谱 · 太阳反射 + 其他环境光</h2><p>纵轴W/(m²·sr·nm)；其他光的散点为用户输入乘强度倍率。目标太阳灰反射率单独设置。</p><canvas id="environmentChart" height="270"></canvas></article>
-      <article class="panel chart-card"><h2>SPAD PDE光谱 · 感光区概率</h2><p id="pdeSummary">示例曲线不对应具体芯片，尚未包含FF。</p><canvas id="pdeChart" height="250"></canvas></article>
+      <article class="panel chart-card"><h2>SPAD PDE光谱</h2><p id="pdeSummary">输入PDE与乘FF后的响应分开显示。</p><p id="pdeSource" class="formula-note"></p><canvas id="pdeChart" height="250"></canvas></article>
       <div class="metric-grid">
         <article><span>太阳背景 / gate</span><strong id="mSolar">—</strong><small>期望雪崩候选数</small></article>
         <article><span>其他环境光 / gate</span><strong id="mOtherLight">—</strong><small>期望雪崩候选数</small></article>

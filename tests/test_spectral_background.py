@@ -35,7 +35,7 @@ def test_constant_limit_matches_known_photon_budget():
 
 
 def test_joint_integral_independent_of_plot_and_quadrature_convergence():
-    cfg=SimulationConfig(wavelength_nm=905)
+    cfg=SimulationConfig(wavelength_nm=905, pde_mode='constant', pde=0.18)
     a=Algorithms.load()
     first=spectral_components(cfg,a,plot=True)
     second=spectral_components(cfg,a.model_copy(update={'spectral_quadrature_order':8,'spectral_plot_samples':31}),plot=True)

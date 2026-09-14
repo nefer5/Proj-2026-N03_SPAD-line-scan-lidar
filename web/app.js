@@ -239,7 +239,14 @@ function renderDerived(d) {
   $('solarSummary').textContent='当前生效：'+s.standard+'；'+fmt(s.solar_lux,0)+' lux → '+fmt(s.solar_irradiance_w_m2,3)+' W/m²；基准 '+fmt(s.solar_reference_lux,0)+' lux。'+(s.input_modes.solar==='basic'?'基础类型按当前特征量生效，不自动对齐激光波长。':'备用基础中心不参与当前谱的计算。');
   drawLines($('solarChart'),c.wavelength_nm,[{name:'太阳辐照度 W/m²/nm',y:c.solar_irradiance,color:colors.orange}],{xLabel:'波长 (nm)',scatter:{x:c.solar_original_x,y:c.solar_original_y}});
   drawLines($('environmentChart'),c.wavelength_nm,[{name:'太阳反射',y:c.solar_radiance,color:colors.orange},{name:'其他光',y:c.other_radiance,color:colors.blue},{name:'合计',y:c.total_radiance,color:colors.cyan}],{xLabel:'波长 (nm)',yDigits:3,ymax:Math.max(...c.total_radiance,Number.EPSILON)*1.12,scatter:{x:c.other_original_x,y:c.other_original_y}});
-  $('pdeSummary').textContent='当前生效：'+curveEditors.catalog.modes[s.input_modes.pde]+'；'+fmt(d.filter.laser_wavelength_nm,1)+' nm处感光区PDE：'+fmt(s.pde_at_laser*100,2)+'%；再乘FF。基础中心只用于矩形/高斯/cosine平顶，不自动对齐激光；默认样例非芯片规格。';
+  $('pdeSummary').textContent='当前生效：'+curveEditors.catalog.modes[s.input_modes.pde]+'；'+fmt(d.filter.laser_wavelength_nm,1)+' nm处输入PDE：'+fmt(s.pde_at_laser*100,2)+'%；乘FF后：'+fmt(s.effective_pde_at_laser*100,2)+'%。基础中心不自动对齐激光。';
+  const source=$('pdeSource');source.replaceChildren();
+  if(s.pde_source){
+    const link=document.createElement('a');link.href=s.pde_source.url;link.textContent=s.pde_source.title;link.target='_blank';link.rel='noopener noreferrer';source.append(link);
+    source.append(document.createTextNode(' · 图中矢量点数字化，非作者原始表格。覆盖 '+s.pde_source.wavelength_range_nm.join('–')+' nm；905 nm为插值值，原文报告约27%。'+s.pde_source.fill_factor_note));
+    const outside=d.filter.laser_wavelength_nm<s.pde_source.wavelength_range_nm[0]||d.filter.laser_wavelength_nm>s.pde_source.wavelength_range_nm[1];
+    if(outside)source.append(document.createTextNode(' 当前激光波长超出文献曲线覆盖；所显示0来自模型边界假设。'));
+  }else source.textContent='当前曲线未匹配已登记文献数据。请确认输入PDE是否已含器件收集效率；FF仍为独立乘数。';
   drawLines($('pdeChart'),c.wavelength_nm,[{name:'PDE',y:c.pde,color:colors.cyan}],{xLabel:'波长 (nm)',ymin:0,ymax:1.05,scatter:{x:c.pde_original_x,y:c.pde_original_y},marker:{x:filter.laser_wavelength_nm,y:s.pde_at_laser,label:'激光 '+fmt(filter.laser_wavelength_nm,1)+' nm'}});
 }
 

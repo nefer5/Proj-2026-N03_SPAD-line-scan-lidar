@@ -6,7 +6,7 @@ modes:
 groups:
   filter: {label: 滤光片透过率, unit: '0–1', column: transmission}
   other: {label: 其他环境光谱, unit: 'W/(m²·sr·nm)', column: radiance}
-  pde: {label: SPAD PDE光谱, unit: '0–1（不含FF）', column: pde}
+  pde: {label: SPAD PDE光谱, unit: '0–1（再乘用户FF）', column: pde}
   solar: {label: 太阳光谱形状, unit: '相对谱值，强度按lux归一化', column: irradiance}
 shapes:
   constant: {label: 常量, fields: [amplitude, min_nm, max_nm]}
