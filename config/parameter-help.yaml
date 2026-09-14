@@ -1,0 +1,236 @@
+range_m:
+  label: "目标距离"
+  unit: "m"
+  description: "正入射大朗伯平面的距离；回波中心为 2R/c 加标定延迟。"
+target_reflectivity:
+  label: "目标反射率"
+  unit: "1"
+  description: "当前激光波长下的朗伯反射率。背景输入已经是场景辐亮度，不再重复乘反射率。"
+wavelength_nm:
+  label: "激光波长"
+  unit: "nm"
+  description: "用于单光子能量 hc/λ 和滤光片激光波长处透过率；背景换算采用窄带近似。"
+pulse_energy_nj:
+  label: "角通道单脉冲能量（Tx前）"
+  unit: "nJ"
+  description: "分配给当前角通道、Tx光学之前的能量；不是整条线阵总能量，也不是峰值功率。"
+pulse_shape:
+  label: "时间脉冲形状"
+  unit: "枚举"
+  description: "gaussian 为高斯，rectangular 为矩形；形状同时参与峰值功率和回波响应，不是空间角度分布。"
+laser_prf_hz:
+  label: "激光重复频率 PRF"
+  unit: "Hz"
+  description: "每秒脉冲数；Pavg=E×PRF，累计时长=Nshots/PRF。当前不模拟扫描驻留；门结束必须不超过周期。"
+tx_efficiency:
+  label: "Tx 光学效率"
+  unit: "1"
+  description: "输入参考面到出射端的能量透过率，乘一次；Tx后功率另行显示。"
+overlap_factor:
+  label: "Tx/Rx 重叠因子"
+  unit: "1"
+  description: "目标角通道的发射照明与接收视场有效重叠比例，仅作用于信号。"
+atmospheric_one_way_transmission:
+  label: "单程大气透过率"
+  unit: "1"
+  description: "信号使用该值平方；距离扫描暂保持该输入固定，不推导消光系数。"
+rx_aperture_shape:
+  label: "Rx 入瞳形状"
+  unit: "枚举"
+  description: "circle/ellipse/rectangle 对应圆形/椭圆/矩形，几何参数用于有效入瞳面积。"
+rx_aperture_mm:
+  label: "圆形入瞳直径"
+  unit: "mm"
+  description: "只在圆形模式生效，是直径不是半径。"
+rx_aperture_width_mm:
+  label: "入瞳水平全尺寸"
+  unit: "mm"
+  description: "椭圆为水平全轴长、矩形为宽；不是椭圆半轴。圆形模式忽略。"
+rx_aperture_height_mm:
+  label: "入瞳垂直全尺寸"
+  unit: "mm"
+  description: "椭圆为垂直全轴长、矩形为高。圆形模式忽略。"
+rx_efficiency:
+  label: "Rx 光学效率"
+  unit: "1"
+  description: "入瞳至探测面光学透过率，不包含另设的滤光片、PDE、fill factor。"
+channel_ifov_h_mrad:
+  label: "通道水平 IFOV"
+  unit: "mrad"
+  description: "通道水平全视场角，小角近似 Ω=H×V（rad²），用于背景收集；与入瞳形状独立。"
+channel_ifov_v_mrad:
+  label: "通道垂直 IFOV"
+  unit: "mrad"
+  description: "通道垂直全视场角；不能与整个线阵或水平扫描视场混用。"
+filter_bandwidth_nm:
+  label: "矩形滤光片宽度"
+  unit: "nm"
+  description: "没有导入曲线时使用；背景加权带宽=宽度×透过率。导入曲线后忽略。"
+filter_peak_transmission:
+  label: "矩形滤光片透过率"
+  unit: "1"
+  description: "无曲线时用于信号透过率及背景积分；有曲线时由曲线覆盖。"
+filter_curve:
+  label: "滤光片原始采样点"
+  unit: "nm,1"
+  description: "手动或CSV导入的离散点，两列 wavelength_nm/transmission，波长严格递增且透过率0–1。区间内按所选方式插值，区间外为0。原始点保持不变，背景积分使用插值曲线而非仅对采样点梯形积分。"
+filter_interpolation:
+  label: "滤光片插值方法"
+  unit: "枚举"
+  description: "pchip：保形分段三次Hermite插值，通过所有原始点，区间内不产生过冲；linear：分段线性。两者均为插值而非噪声平滑/参数拟合。无采样点时维持参数化矩形滤光片，此选项暂不作用。"
+background_spectral_radiance:
+  label: "场景谱辐亮度"
+  unit: "W/(m²·sr·nm)"
+  description: "仅其他环境光constant模式使用；为接收方向平坦谱辐亮度，不是lux或太阳辐照度。"
+spads_per_channel:
+  label: "每通道 SPAD 数"
+  unit: "个"
+  description: "总信号与光学背景均匀分配给这些SPAD；暗计数按数量增长，首光子机会数=Nshots×Nspad。"
+pde:
+  label: "感光区探测概率"
+  unit: "1"
+  description: "本实现以感光区概率使用，再乘fill factor；若数据手册PDE已含填充因子，则FF设1避免重复折减。"
+fill_factor:
+  label: "填充因子 FF"
+  unit: "1"
+  description: "光敏区面积占比；与PDE相乘作用于信号和光学背景，不作用于器件DCR。"
+dcr_cps_per_spad:
+  label: "单SPAD暗计数率"
+  unit: "cps"
+  description: "单个SPAD每秒暗触发数；每门期望=DCR×SPAD数×门宽秒。"
+other_noise_cps_per_spad:
+  label: "其他单SPAD随机噪声"
+  unit: "cps"
+  description: "额外均匀、独立随机触发率，不可用来替代有时间相关性的afterpulse或串扰。"
+spad_dead_time_ns:
+  label: "SPAD死时间（预留）"
+  unit: "ns"
+  description: "事件模式为每次雪崩后的非延长型恢复时间，跨周期保留；analytic_reference理想参考忽略此参数。"
+spad_jitter_fwhm_ps:
+  label: "SPAD时间抖动FWHM"
+  unit: "ps"
+  description: "高斯时间抖动的半高全宽；除以2sqrt(2ln2)得到标准差。"
+pulse_fwhm_ps:
+  label: "激光脉宽 FWHM"
+  unit: "ps"
+  description: "高斯为半高全宽，矩形为全持续时间；改变脉宽保持单脉冲能量不变，峰值功率随之变化。"
+other_jitter_fwhm_ps:
+  label: "其他电子抖动 FWHM"
+  unit: "ps"
+  description: "独立高斯随机抖动；不包含固定标定偏移，也不再次包含TDC量化。"
+tdc_bin_ps:
+  label: "TDC 时间bin宽"
+  unit: "ps"
+  description: "每个直方图格子的时间宽；距离格宽=cΔt/2。门末尾不足一格时按实际宽度截断。"
+gate_start_ns:
+  label: "接收门起点"
+  unit: "ns"
+  description: "相对发射参考时刻的记录门起点；free_running模式门外事件会使SPAD进入死时间，gated模式门外不产生雪崩。"
+gate_width_ns:
+  label: "接收门宽"
+  unit: "ns"
+  description: "有效采集时段长度；目标波形超出门的能量直接丢失，不归一化补回。"
+calibration_delay_ns:
+  label: "固定标定延迟"
+  unit: "ns"
+  description: "加到生成回波时间上，估计距离时减去同一值；本版代表已知且理想的标定，不是残余误差。"
+laser_shots:
+  label: "单次测距累计脉冲数"
+  unit: "发"
+  description: "一张直方图累积的激光脉冲数，不是光子数。默认100为探索值，未绑定转镜扫描约束。"
+monte_carlo_trials:
+  label: "重复测距实验次数"
+  unit: "次"
+  description: "在同一工况下重复生成直方图并测距，用于估计统计指标；0表示不计算统计，返回空值。"
+rng_seed:
+  label: "随机种子"
+  unit: "整数"
+  description: "同参数、同算法配置、同运行依赖时可复现抽样；更改种子获得另一组随机样本。"
+line_channels:
+  label: "串扰模型通道数"
+  unit: "个"
+  description: "用于独立串扰矩阵分析；当前未创建对应多通道测距直方图。"
+nearest_neighbor_crosstalk:
+  label: "最近邻直接串扰系数"
+  unit: "1"
+  description: "源通道每次雪崩诱发相邻通道雪崩的平均系数，必须满足分支矩阵谱半径<1；不静默缩放。"
+crosstalk_decay_channels:
+  label: "串扰空间衰减尺度"
+  unit: "channel"
+  description: "非相邻耦合按 exp(-(距离-1)/尺度) 衰减；不描述时间延迟、恢复或方向性。"
+solar_enabled:
+  label: "启用太阳光"
+  unit: "bool"
+  description: "启用目标面标准太阳照明。关闭后太阳计数为0，保留lux设置以便恢复。"
+solar_illuminance_lux:
+  label: "目标面太阳照度"
+  unit: "lux"
+  description: "固定ASTM G173-03 AM1.5G谱形，按CIE V(λ)和683lm/W归一化。不是任意光源lux到近红外的通用换算。"
+solar_reflectivity:
+  label: "太阳背景目标灰反射率"
+  unit: "1"
+  description: "将目标面太阳谱辐照度乘此灰朗伯反射率/π变成接收方向谱辐亮度。独立于激光反射率便于区分假设；未做目标反射谱。"
+other_light_enabled:
+  label: "启用其他环境光"
+  unit: "bool"
+  description: "独立于太阳光的附加光谱背景开关。"
+other_light_mode:
+  label: "其他环境光输入模式"
+  unit: "枚举"
+  description: "spectrum使用离散谱辐亮度，constant使用原background_spectral_radiance常量。"
+other_light_scale:
+  label: "其他环境光倍率"
+  unit: "1"
+  description: "整体缩放其他环境光光谱；不进行lux转换。"
+other_light_interpolation:
+  label: "其他环境光插值"
+  unit: "枚举"
+  description: "pchip保形插值或linear；样本范围外0。"
+other_light_spectrum:
+  label: "其他环境光采样点"
+  unit: "W/(m²·sr·nm)"
+  description: "接收方向的谱辐亮度数据，不再乘反射率；默认是人工构造示例，并非标准或实测光谱。"
+pde_mode:
+  label: "PDE模式"
+  unit: "枚举"
+  description: "spectrum用光谱曲线；constant用标量pde。感光区概率，不含FF。"
+pde_interpolation:
+  label: "PDE插值"
+  unit: "枚举"
+  description: "pchip或linear，支持域外0。"
+pde_spectrum:
+  label: "PDE光谱采样点"
+  unit: "1"
+  description: "默认曲线为人工构造的硅SPAD趋势示例，不对应芯片；每点0–1。信号用激光波长值，背景逐波长积分。"
+readout_mode:
+  label: "读出架构模式"
+  unit: "枚举"
+  description: "模型族见readout-modes.yaml，不宣称对应具体芯片。analytic_reference为旧理想参考。"
+detector_operation:
+  label: "探测器门控方式"
+  unit: "枚举"
+  description: "gated：门外不产生雪崩；free_running：整周期背景可触发SPAD并延续死时间。两者仅门内触发TDC。"
+tdc_dead_time_ns:
+  label: "TDC死时间"
+  unit: "ns"
+  description: "非延长型；被TDC丢弃的雪崩仍已造成SPAD死时间。跨周期保留。"
+tdc_count:
+  label: "共享TDC个数"
+  unit: "个"
+  description: "仅shared_multitdc模式生效；独立模式隐含每SPAD一个TDC，其余共享模式固定一个。"
+tdc_max_hits_per_cycle:
+  label: "每TDC每周期最大记录数"
+  unit: "个"
+  description: "多次记录模式和符合模式使用此容量；single-hit模式容量固定1。"
+or_pulse_width_ns:
+  label: "OR脉冲宽度"
+  unit: "ns"
+  description: "共享OR模式中重叠输出脉冲合成一个连续高电平，只有上升沿触发TDC；不影响独立模式。"
+coincidence_window_ns:
+  label: "符合时间窗"
+  unit: "ns"
+  description: "固定窗从门起点分段，在窗末输出；滑动窗在不同SPAD活跃数上穿阈值时输出。"
+coincidence_threshold:
+  label: "符合阈值"
+  unit: "个SPAD"
+  description: "要求窗口内不同SPAD达到该数，不把同一SPAD重复雪崩充作多个独立像素。"

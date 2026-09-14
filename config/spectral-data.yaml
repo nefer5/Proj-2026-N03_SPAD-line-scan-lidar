@@ -1,0 +1,13 @@
+solar:
+  name: ASTM G173-03 AM1.5 Global Tilt (37 deg)
+  path: data/reference/astmg173.zip
+  member: ASTMG173.csv
+  skiprows: 2
+  sha256: de6ed831cd7426d9a7147d5c0a48b1e67a483cb7f8ecd6d3ae846848154a5657
+  source: https://www.nlr.gov/grid/solar-resource/spectra-am1.5
+photopic:
+  name: CIE 2019 photopic V(lambda), 360-830 nm
+  path: data/reference/CIE_sle_photopic.csv
+  skiprows: 0
+  sha256: ee5d5d17922ae645d4af52cacf6a50bdb9385749f9d2181ca312eb2b08febac2
+  source: https://doi.org/10.25039/CIE.DS.dktna2s3

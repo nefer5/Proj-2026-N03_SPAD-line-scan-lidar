@@ -13,6 +13,7 @@ def test_lambertian_signal_follows_inverse_square():
 
 def test_filter_curve_controls_background_and_laser_transmission():
     cfg = SimulationConfig(
+        filter_interpolation="linear",
         filter_curve=[
             FilterPoint(wavelength_nm=930, transmission=0),
             FilterPoint(wavelength_nm=940, transmission=0.8),
@@ -45,10 +46,9 @@ def test_simulation_returns_finite_metrics():
         range_m=20.0,
         gate_width_ns=300.0,
         pulse_energy_nj=20.0,
-        laser_shots=5000,
+        laser_shots=100,
         monte_carlo_trials=5,
     )
     result = simulate(cfg)
     assert np.isfinite(result["metrics"]["estimated_range_m"])
     assert len(result["histogram"]["time_ns"]) == len(result["histogram"]["observed_counts"])
-

@@ -4,13 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "spad-line-lidar-model"
-version = "0.1.0"
+version = "0.1.4"
 description = "Physics-first MVP for a SPAD + VCSEL line-scanning dToF LiDAR"
 requires-python = ">=3.10"
 dependencies = [
   "fastapi>=0.110",
   "uvicorn>=0.29",
-  "numpy>=1.26",
+  "numpy>=2.0",
+  "PyYAML>=6.0",
   "scipy>=1.11",
 ]
 
@@ -20,4 +21,3 @@ where = ["src"]
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
-

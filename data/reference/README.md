@@ -1,0 +1,8 @@
+# Reference spectra and provenance
+
+- `astmg173.zip` is the unmodified official NLR download of ASTM G173-03 reference tables, generated with SMARTS 2.9.2. The model uses the Global Tilt column (37-degree plane), in W/(m² nm), 280–4000 nm. It does not claim to implement a newer edition of ASTM G173.
+- Source: https://www.nlr.gov/grid/solar-resource/spectra-am1.5 ; download: https://www.nlr.gov/media/docs/libraries/grid/zip/astmg173.zip?sfvrsn=1ef05e45_5 . Credit: U.S. Department of Energy / National Laboratory of the Rockies / Alliance for Energy Innovation. The entire source disclaimer and data-use notice is bundled without modification as `NLR-disclaimer.html` and applies to this data copy. No endorsement of this simulator is implied.
+- `CIE_sle_photopic.csv` is the unmodified CIE photopic luminous efficiency V(lambda), 1nm steps, 360–830nm. Source: https://files.cie.co.at/CIE_sle_photopic.csv . CIE 2019, DOI https://doi.org/10.25039/CIE.DS.dktna2s3 . License: Creative Commons Attribution-ShareAlike 4.0 International, https://creativecommons.org/licenses/by-sa/4.0/ . Original metadata including checksums is bundled as `CIE_sle_photopic.csv_metadata.json`. This dataset remains under that license; no data modifications were made.
+- Verified SHA256 and model selections are in `config/spectral-data.yaml`. Reference data are loaded locally; runtime does not request these websites. Licenses above apply to the referenced datasets, not a claim of ownership by this project.
+
+The other-light and PDE examples in `examples/` are synthetic illustrative datasets authored for this project, not standards, measurements, or chip specifications. Default values are maintained only in `config/defaults.yaml`.

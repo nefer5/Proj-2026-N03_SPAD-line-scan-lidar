@@ -3,17 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SPAD 线扫 LiDAR 快速评估</title>
+  <title>A · 单角通道 LiDAR 评估</title>
   <link rel="stylesheet" href="/static/styles.css">
+  <link rel="stylesheet" href="/static/vendor/katex/katex.min.css">
 </head>
 <body>
   <header>
     <div>
-      <p class="eyebrow">SPAD · VCSEL LINE ARRAY · ROTATING MIRROR</p>
-      <h1>一维线扫 dToF LiDAR 快速评估</h1>
-      <p class="lede">V0.1 · 光子预算、首光子直方图、测距统计与通道串扰</p>
+      <p class="eyebrow">A · SINGLE ANGULAR CHANNEL · SPAD DTOF</p>
+      <h1>单角通道 LiDAR 建模评估</h1>
+      <p class="lede">当前：A 单通道信号链 · 规划：B 全光斑光学映射 → C 扫描机制</p>
     </div>
-    <div class="status"><span></span> Physics-first MVP</div>
+    <nav class="toolbar"><a id="modeLink" href="/debug">专家调试版 →</a><div class="status"><span></span> A / V0.1.4</div></nav>
   </header>
 
   <main>
@@ -29,7 +30,15 @@
           <label>距离 (m)<input data-key="range_m" type="number" step="1"></label>
           <label>反射率<input data-key="target_reflectivity" type="number" step="0.01"></label>
           <label>波长 (nm)<input data-key="wavelength_nm" type="number" step="1"></label>
-          <label>当前角通道脉冲能量 (nJ)<input data-key="pulse_energy_nj" type="number" step="0.1"></label>
+          <label>角通道脉冲能量·Tx前 (nJ)<input data-key="pulse_energy_nj" type="number" step="0.1"></label>
+          <label>时间脉冲形状<select data-key="pulse_shape"><option value="gaussian">高斯</option><option value="rectangular">矩形</option></select></label>
+          <label>重复频率 PRF (Hz)<input data-key="laser_prf_hz" type="number" step="any"></label>
+          <div class="wide derived-box" aria-live="polite">
+            <div>峰值功率（Tx前） <strong id="peakPower">—</strong> W</div>
+            <div>平均功率（Tx前） <strong id="averagePower">—</strong> W</div>
+            <div>累计时长 <strong id="acquisitionTime">—</strong> ms</div>
+            <small id="derivedStatus">等待参数计算</small>
+          </div>
           <label>Tx 效率<input data-key="tx_efficiency" type="number" step="0.01"></label>
           <label>Tx/Rx overlap<input data-key="overlap_factor" type="number" step="0.01"></label>
           <label>单程大气透过率<input data-key="atmospheric_one_way_transmission" type="number" step="0.01"></label>
@@ -40,22 +49,69 @@
       <details open>
         <summary>Rx 与环境光</summary>
         <div class="field-grid">
-          <label>接收口径 (mm)<input data-key="rx_aperture_mm" type="number" step="1"></label>
+          <label class="wide">接收入瞳形状<select data-key="rx_aperture_shape"><option value="circle">圆形</option><option value="ellipse">椭圆</option><option value="rectangle">矩形</option></select></label>
+          <label data-aperture="circle">直径 (mm)<input data-key="rx_aperture_mm" type="number" step="any"></label>
+          <label data-aperture="other"><span id="apertureWidthLabel">水平全轴长 (mm)</span><input data-key="rx_aperture_width_mm" type="number" step="any"></label>
+          <label data-aperture="other"><span id="apertureHeightLabel">垂直全轴长 (mm)</span><input data-key="rx_aperture_height_mm" type="number" step="any"></label>
+          <div class="wide derived-box">有效入瞳面积 <strong id="apertureArea">—</strong> mm²</div>
           <label>Rx 效率<input data-key="rx_efficiency" type="number" step="0.01"></label>
           <label>通道 IFOV-H (mrad)<input data-key="channel_ifov_h_mrad" type="number" step="0.01"></label>
           <label>通道 IFOV-V (mrad)<input data-key="channel_ifov_v_mrad" type="number" step="0.01"></label>
           <label>滤光片宽度 (nm)<input data-key="filter_bandwidth_nm" type="number" step="0.1"></label>
           <label>滤光片峰值透过率<input data-key="filter_peak_transmission" type="number" step="0.01"></label>
-          <label class="wide">场景光谱辐亮度 (W/m²/sr/nm)<input data-key="background_spectral_radiance" type="number" step="0.001"></label>
           <label class="wide file">滤光片曲线 CSV（可选）<input id="filterFile" type="file" accept=".csv,text/csv"><small id="filterStatus">未加载，使用矩形滤光片</small></label>
+          <label class="wide">离散采样点插值方式<select data-key="filter_interpolation"><option value="pchip">PCHIP · 保形三次插值</option><option value="linear">线性插值</option></select></label>
+          <details class="wide" id="filterEditor">
+            <summary>手动输入 / 编辑滤光片采样点</summary>
+            <label>每行：波长(nm), 透过率(0–1)<textarea id="filterPoints" rows="7" spellcheck="false" placeholder="每行两列，用逗号、空格或Tab分隔；至少两点"></textarea></label>
+            <p class="editor-note">波长严格递增，不可重复。可粘贴CSV内容，表头可选；文件导入后也可在此修改。</p>
+            <button id="applyFilterPoints">应用采样点</button>
+            <small id="filterDraftStatus" aria-live="polite">未编辑</small>
+          </details>
+          <button id="clearFilter" class="wide" disabled>清除曲线，恢复参数化滤光片</button>
         </div>
       </details>
 
       <details open>
-        <summary>SPAD、TDC 与采集</summary>
+        <summary>太阳光 · 标准光谱</summary>
         <div class="field-grid">
+          <label><input data-key="solar_enabled" type="checkbox">启用太阳光</label>
+          <label>目标面太阳照度 (lux)<input data-key="solar_illuminance_lux" type="number" step="any"></label>
+          <label>太阳背景灰反射率<input data-key="solar_reflectivity" type="number" step="any"></label>
+          <div class="wide derived-box" id="solarSummary">等待计算</div>
+          <p class="wide editor-note">ASTM G173-03 AM1.5G固定谱形；按目标反射后进入Rx。lux缩放不是任意光源通用换算。</p>
+        </div>
+      </details>
+      <details open>
+        <summary>其他环境光 · 示例可替换</summary>
+        <div class="field-grid">
+          <label><input data-key="other_light_enabled" type="checkbox">启用其他环境光</label>
+          <label>强度倍率<input data-key="other_light_scale" type="number" step="any"></label>
+          <label>输入方式<select data-key="other_light_mode"><option value="spectrum">光谱采样点</option><option value="constant">常量谱辐亮度</option></select></label>
+          <label>插值<select data-key="other_light_interpolation"><option value="pchip">PCHIP</option><option value="linear">线性</option></select></label>
+          <label class="wide">常量模式辐亮度 (W/m²/sr/nm)<input data-key="background_spectral_radiance" type="number" step="any"></label>
+          <label class="wide">导入光谱CSV<input id="otherSpectrumFile" type="file" accept=".csv"></label>
+          <details class="wide"><summary>手动编辑其他光源采样点</summary><p class="editor-note">每行：wavelength_nm,radiance；单位W/(m²·sr·nm)，不做lux换算。默认是人工构造示例。</p><textarea id="otherSpectrumPoints" rows="7"></textarea><button id="applyOtherSpectrum">应用其他光谱</button><small id="otherSpectrumStatus"></small></details>
+        </div>
+      </details>
+      <details open>
+        <summary>SPAD、PDE 与读出</summary>
+        <div class="field-grid">
+          <label class="wide">读出架构<select id="readoutMode" data-key="readout_mode"></select></label>
+          <p class="wide editor-note" id="readoutDescription"></p>
+          <label>SPAD工作方式<select data-key="detector_operation"><option value="gated">仅门内工作</option><option value="free_running">持续工作，门内记录</option></select></label>
+          <label>TDC死时间 (ns)<input data-key="tdc_dead_time_ns" type="number" step="any"></label>
+          <label>共享多TDC数量<input data-key="tdc_count" type="number" step="1"></label>
+          <label>每TDC每周期记录上限<input data-key="tdc_max_hits_per_cycle" type="number" step="1"></label>
+          <label>OR输出脉宽 (ns)<input data-key="or_pulse_width_ns" type="number" step="any"></label>
+          <label>符合窗 (ns)<input data-key="coincidence_window_ns" type="number" step="any"></label>
+          <label>符合阈值（不同SPAD数）<input data-key="coincidence_threshold" type="number" step="1"></label>
           <label>每读出通道 SPAD 数<input data-key="spads_per_channel" type="number" step="1"></label>
-          <label>PDE<input data-key="pde" type="number" step="0.01"></label>
+          <label>PDE方式<select data-key="pde_mode"><option value="spectrum">光谱曲线</option><option value="constant">常量PDE</option></select></label>
+          <label>常量模式PDE<input data-key="pde" type="number" step="0.01"></label>
+          <label>PDE插值<select data-key="pde_interpolation"><option value="pchip">PCHIP</option><option value="linear">线性</option></select></label>
+          <label class="wide">导入PDE光谱CSV<input id="pdeSpectrumFile" type="file" accept=".csv"></label>
+          <details class="wide"><summary>手动编辑PDE采样点</summary><p class="editor-note">每行：wavelength_nm,pde，概率0–1。感光区PDE，不含FF。默认是人工示例，不代表具体芯片。</p><textarea id="pdeSpectrumPoints" rows="7"></textarea><button id="applyPdeSpectrum">应用PDE光谱</button><small id="pdeSpectrumStatus"></small></details>
           <label>Fill factor<input data-key="fill_factor" type="number" step="0.01"></label>
           <label>DCR / SPAD (cps)<input data-key="dcr_cps_per_spad" type="number" step="100"></label>
           <label>其他噪声 / SPAD (cps)<input data-key="other_noise_cps_per_spad" type="number" step="100"></label>
@@ -64,60 +120,93 @@
           <label>TDC bin (ps)<input data-key="tdc_bin_ps" type="number" step="10"></label>
           <label>门起点 (ns)<input data-key="gate_start_ns" type="number" step="1"></label>
           <label>门宽 (ns)<input data-key="gate_width_ns" type="number" step="10"></label>
-          <label>累计发数<input data-key="laser_shots" type="number" step="1000"></label>
+          <label>累计脉冲数<input data-key="laser_shots" type="number" step="1"></label>
+          <label>标定延迟 (ns)<input data-key="calibration_delay_ns" type="number" step="any"></label>
+          <label>SPAD死时间 (ns)<input data-key="spad_dead_time_ns" type="number" step="any"></label>
           <label>重复统计次数<input data-key="monte_carlo_trials" type="number" step="10"></label>
-        </div>
-      </details>
-
-      <details>
-        <summary>通道串扰</summary>
-        <div class="field-grid">
-          <label>线读出通道数<input data-key="line_channels" type="number" step="1"></label>
-          <label>最近邻直接串扰<input data-key="nearest_neighbor_crosstalk" type="number" step="0.001"></label>
-          <label>空间衰减尺度 (channel)<input data-key="crosstalk_decay_channels" type="number" step="0.1"></label>
           <label>随机种子<input data-key="rng_seed" type="number" step="1"></label>
         </div>
       </details>
 
+      <details class="debug-only hidden">
+        <summary>历史附加诊断：独立串扰矩阵（不属于A信号链）</summary>
+        <div class="field-grid">
+          <label>线读出通道数<input data-key="line_channels" type="number" step="1"></label>
+          <label>最近邻直接串扰<input data-key="nearest_neighbor_crosstalk" type="number" step="0.001"></label>
+          <label>空间衰减尺度 (channel)<input data-key="crosstalk_decay_channels" type="number" step="0.1"></label>
+        </div>
+      </details>
+
       <div class="toolbar footer-tools">
-        <button id="saveConfig">导出配置 JSON</button>
+        <button id="saveConfig">导出配置 YAML</button>
+        <label class="import-config">导入 YAML / JSON<input id="configFile" type="file" accept=".yaml,.yml,.json"></label>
         <button id="saveHistogram" disabled>导出直方图 CSV</button>
       </div>
     </aside>
 
     <section class="results">
       <div id="errorBox" class="error hidden"></div>
+      <p id="resultStatus" class="result-status" aria-live="polite"></p>
+      <article class="panel chart-card"><h2>当前角通道时间脉冲</h2><p>Tx 光学前的功率波形；面积对应单脉冲能量，PRF 决定时间平均功率。</p><canvas id="pulseChart" height="210"></canvas></article>
+      <article class="panel chart-card">
+        <h2>滤光片光谱曲线</h2>
+        <p id="filterSummary" aria-live="polite">等待计算；本图与光子预算共用滤光片曲线。</p>
+        <canvas id="filterChart" height="250"></canvas>
+        <p>蓝色散点：原始采样点；青色线：插值曲线；橙色标记：激光波长及透过率。区间外为0。插值通过原始点，不进行噪声平滑；修改后直方图需重新运行。</p>
+      </article>
+      <article class="panel chart-card"><h2>太阳光标准谱 · 目标面辐照度</h2><p>固定AM1.5G谱形经lux缩放；当前只显示硅SPAD关注波段，lux归一化使用完整可见光谱。</p><canvas id="solarChart" height="250"></canvas></article>
+      <article class="panel chart-card"><h2>接收方向背景谱 · 太阳反射 + 其他环境光</h2><p>纵轴W/(m²·sr·nm)；其他光的散点为用户输入乘强度倍率。目标太阳灰反射率单独设置。</p><canvas id="environmentChart" height="270"></canvas></article>
+      <article class="panel chart-card"><h2>SPAD PDE光谱 · 感光区概率</h2><p id="pdeSummary">示例曲线不对应具体芯片，尚未包含FF。</p><canvas id="pdeChart" height="250"></canvas></article>
       <div class="metric-grid">
+        <article><span>太阳背景 / gate</span><strong id="mSolar">—</strong><small>期望雪崩候选数</small></article>
+        <article><span>其他环境光 / gate</span><strong id="mOtherLight">—</strong><small>期望雪崩候选数</small></article>
         <article><span>估计距离</span><strong id="mRange">—</strong><small>m</small></article>
         <article><span>重复精度 1σ</span><strong id="mPrecision">—</strong><small>cm</small></article>
         <article><span>测距偏差</span><strong id="mBias">—</strong><small>cm</small></article>
         <article><span>成功率</span><strong id="mSuccess">—</strong><small>%</small></article>
         <article><span>信号探测数 / pulse</span><strong id="mSignal">—</strong><small>期望值</small></article>
         <article><span>背景+暗计数 / gate</span><strong id="mNoise">—</strong><small>期望值</small></article>
-        <article><span>观测峰值 SNR</span><strong id="mSnr">—</strong><small>快速指标</small></article>
-        <article><span>Pile-up 损失</span><strong id="mPileup">—</strong><small>%</small></article>
+        <article><span>观测峰值评分</span><strong id="mSnr">—</strong><small>非标定检测 SNR</small></article>
+        <article><span>总采集损失估计</span><strong id="mPileup">—</strong><small>%（含读出损失）</small></article>
       </div>
 
       <article class="panel chart-card">
-        <div class="chart-title"><div><h2>TCSPC 直方图</h2><p>观测、期望与纯噪声；下图自动聚焦目标峰</p></div></div>
+        <div class="chart-title"><div><h2>TCSPC 直方图</h2><p>蓝色柱：实际观测计数；青色线：统计期望；橙色线：纯噪声期望。下图按真实目标位置聚焦（仅展示，估计器仍全门搜索）。</p></div></div>
+        <p id="readoutSummary"></p>
         <canvas id="histFull" height="260"></canvas>
         <canvas id="histZoom" height="260"></canvas>
       </article>
 
       <div class="split">
         <article class="panel chart-card">
-          <h2>距离扫描</h2>
-          <p>累计信号计数与 shot-noise SNR</p>
+          <h2>距离扫描 · 理想预算</h2>
+          <p>未计 pile-up / 门截断的累计信号与 shot-noise SNR</p>
           <canvas id="rangeChart" height="330"></canvas>
         </article>
-        <article class="panel chart-card">
-          <h2>串扰级联矩阵</h2>
+        <article class="panel chart-card debug-only hidden">
+          <h2>历史附加诊断 · 独立串扰矩阵</h2>
           <p>源通道 → 受扰通道的总诱发雪崩期望</p>
           <canvas id="xtalkChart" height="330"></canvas>
           <p id="xtalkSummary" class="note">—</p>
         </article>
       </div>
 
+      <section id="debugPanel" class="hidden">
+        <article class="panel chart-card"><h2>事件读出与光谱积分审计</h2><pre id="readoutAudit"></pre><pre id="spectralAudit"></pre><p>逐bin的存活/首事件概率列为理想参考；事件模式实际损失与触发记录见上方审计。</p></article>
+        <article class="panel chart-card">
+          <h2>专家调试 · 本次计算追踪</h2>
+          <p>与评估页使用相同计算核心。展开各阶段查看公式、代入参数和中间结果；逐 bin 数据与重复试验均来自本次随机抽样。</p>
+          <button id="saveDebug" disabled>导出完整调试报告 JSON</button>
+          <pre id="provenance"></pre>
+          <div id="debugSteps"></div>
+        </article>
+        <article class="panel chart-card"><h2>逐 bin 审核</h2>
+          <div class="toolbar"><button id="binsPrevious">上一页</button><span id="binsPage"></span><button id="binsNext">下一页</button></div>
+          <div id="debugBins" class="table-scroll"></div>
+        </article>
+        <article class="panel chart-card"><h2>参数含义与本次取值</h2><div id="parameterTable" class="table-scroll"></div></article>
+        <article class="panel chart-card"><h2>算法配置与重复试验</h2><pre id="algorithmTrace"></pre><div id="trialTable" class="table-scroll"></div></article>
+      </section>
       <article class="panel assumptions">
         <h2>当前模型假设</h2>
         <ul id="assumptionList"><li>运行仿真后显示。</li></ul>
@@ -126,7 +215,7 @@
     </section>
   </main>
 
+  <script src="/static/vendor/katex/katex.min.js"></script>
   <script src="/static/app.js"></script>
 </body>
 </html>
-

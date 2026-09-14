@@ -1,0 +1,83 @@
+# 唯一的工况默认值来源。数值含义见 parameter-help.yaml。
+# pulse_energy_nj 是当前角通道在 Tx 光学之前的能量。
+schema_version: 1
+simulation:
+  range_m: 50.0
+  target_reflectivity: 0.10
+  wavelength_nm: 940.0
+  pulse_energy_nj: 5.0
+  pulse_shape: gaussian
+  laser_prf_hz: 1000000.0
+  tx_efficiency: 0.80
+  overlap_factor: 1.0
+  atmospheric_one_way_transmission: 0.95
+  rx_aperture_shape: circle
+  rx_aperture_mm: 20.0
+  rx_aperture_width_mm: 20.0
+  rx_aperture_height_mm: 10.0
+  rx_efficiency: 0.50
+  channel_ifov_h_mrad: 0.20
+  channel_ifov_v_mrad: 0.20
+  filter_bandwidth_nm: 10.0
+  filter_peak_transmission: 0.80
+  filter_curve: null
+  filter_interpolation: pchip
+  background_spectral_radiance: 0.020
+  solar_enabled: true
+  solar_illuminance_lux: 50000.0
+  solar_reflectivity: 0.10
+  other_light_enabled: true
+  other_light_mode: spectrum
+  other_light_scale: 1.0
+  other_light_interpolation: pchip
+  other_light_spectrum:
+    - {wavelength_nm: 350, radiance: 0.0}
+    - {wavelength_nm: 450, radiance: 0.0005}
+    - {wavelength_nm: 550, radiance: 0.0010}
+    - {wavelength_nm: 650, radiance: 0.0018}
+    - {wavelength_nm: 750, radiance: 0.0025}
+    - {wavelength_nm: 850, radiance: 0.0035}
+    - {wavelength_nm: 940, radiance: 0.0040}
+    - {wavelength_nm: 1050, radiance: 0.0030}
+    - {wavelength_nm: 1200, radiance: 0.0}
+  spads_per_channel: 16
+  pde: 0.15
+  pde_mode: spectrum
+  pde_interpolation: pchip
+  pde_spectrum:
+    - {wavelength_nm: 350, pde: 0.0}
+    - {wavelength_nm: 400, pde: 0.08}
+    - {wavelength_nm: 450, pde: 0.25}
+    - {wavelength_nm: 550, pde: 0.45}
+    - {wavelength_nm: 650, pde: 0.42}
+    - {wavelength_nm: 750, pde: 0.33}
+    - {wavelength_nm: 850, pde: 0.23}
+    - {wavelength_nm: 905, pde: 0.18}
+    - {wavelength_nm: 940, pde: 0.15}
+    - {wavelength_nm: 1000, pde: 0.08}
+    - {wavelength_nm: 1100, pde: 0.0}
+  fill_factor: 0.20
+  dcr_cps_per_spad: 1000.0
+  other_noise_cps_per_spad: 0.0
+  spad_dead_time_ns: 20.0
+  readout_mode: independent_first
+  detector_operation: gated
+  tdc_dead_time_ns: 10.0
+  tdc_count: 4
+  tdc_max_hits_per_cycle: 8
+  or_pulse_width_ns: 1.0
+  coincidence_window_ns: 2.0
+  coincidence_threshold: 2
+  spad_jitter_fwhm_ps: 150.0
+  pulse_fwhm_ps: 700.0
+  other_jitter_fwhm_ps: 80.0
+  tdc_bin_ps: 100.0
+  gate_start_ns: 0.0
+  gate_width_ns: 700.0
+  calibration_delay_ns: 0.0
+  laser_shots: 100
+  monte_carlo_trials: 80
+  rng_seed: 7
+  line_channels: 16
+  nearest_neighbor_crosstalk: 0.005
+  crosstalk_decay_channels: 0.8

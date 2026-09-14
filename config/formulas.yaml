@@ -1,0 +1,7 @@
+power: 'P_{\mathrm{avg}}=Ef_{\mathrm{PRF}},\qquad P_{\mathrm{peak}}=\frac{E}{w k},\quad k_{\mathrm{Gauss}}=\sqrt{\frac{\pi}{4\ln 2}}'
+signal: 'E_r=E\eta_{\mathrm{Tx}}\rho\frac{A}{\pi R^2}\eta_{\mathrm{Rx}}T_f(\lambda_0)O T_{\mathrm{atm}}^2'
+spectral: '\begin{aligned}\mu_s&=\frac{E_r\lambda_0}{hc}\mathrm{PDE}(\lambda_0)FF\\\mu_b&=A\Omega\eta_{\mathrm{Rx}}T_{\mathrm{gate}}FF\int [L_{\mathrm{sun}}(\lambda)+L_{\mathrm{other}}(\lambda)]T_f(\lambda)\mathrm{PDE}(\lambda)\frac{10^{-9}\lambda_{\mathrm{nm}}}{hc}\,d\lambda\end{aligned}'
+reference: 'g_k=F(t_{k+1})-F(t_k),\qquad p_k=e^{-\sum_{j<k}\mu_j}(1-e^{-\mu_k})'
+estimate: '\widehat R=\frac{c}{2}\left[\frac{\sum_{k\in W}t_k\max(H_k-b,0)}{\sum_{k\in W}\max(H_k-b,0)}-t_{\mathrm{cal}}\right]'
+statistics: '\mathrm{bias}=\mathrm{mean}(\widehat R-R),\quad \sigma_R=\mathrm{std}_{\mathrm{sample}}(\widehat R),\quad P_{\mathrm{success}}=\frac{N_{|\widehat R-R|\le\epsilon}}{N_{\mathrm{trial}}}'
+crosstalk: 'C_{\mathrm{total}}=(I-C)^{-1}-I,\qquad \rho(C)<1'

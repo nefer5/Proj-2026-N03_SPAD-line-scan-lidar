@@ -1,0 +1,4 @@
+# Reference datasets are checksum-pinned. Preserve original line endings/bytes.
+data/reference/** -text -whitespace
+# Vendored upstream files retain their original formatting.
+web/vendor/** -whitespace
