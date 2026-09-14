@@ -78,7 +78,14 @@ class SimulationConfig(BaseModel):
     other_light_scale: float = Field(ge=0)
 
     # SPAD and readout.
-    spads_per_channel: int = Field(ge=1)
+    H_binning: int = Field(ge=1, strict=True)
+    V_binning: int = Field(ge=1, strict=True)
+
+    @property
+    def spads_per_channel(self):
+        """Derived channel size; never an independently configurable value."""
+        return self.H_binning * self.V_binning
+
     fill_factor: float = Field(gt=0.0, le=1.0)
     dcr_cps_per_spad: float = Field(ge=0.0)
     other_noise_cps_per_spad: float = Field(ge=0.0)
@@ -119,7 +126,9 @@ class SimulationConfig(BaseModel):
             raise ValueError('tdc_count exceeds resource limit')
         if self.readout_mode.startswith('coincidence') and self.coincidence_threshold > self.spads_per_channel:
             raise ValueError('Coincidence threshold exceeds SPAD count')
-        for field in ('spads_per_channel', 'laser_shots', 'monte_carlo_trials', 'line_channels'):
+        if self.spads_per_channel > algorithms.max_spads_per_channel:
+            raise ValueError('H_binning × V_binning exceeds max_spads_per_channel resource limit')
+        for field in ('laser_shots', 'monte_carlo_trials', 'line_channels'):
             if getattr(self, field) > getattr(algorithms, 'max_' + field):
                 raise ValueError(f'{field} exceeds configured resource limit')
         if bins > algorithms.max_histogram_bins:

@@ -62,10 +62,14 @@ channel_ifov_v_mrad:
   label: "通道垂直 IFOV"
   unit: "mrad"
   description: "通道垂直全视场角；不能与整个线阵或水平扫描视场混用。"
-spads_per_channel:
-  label: "每通道 SPAD 数"
+H_binning:
+  label: "水平空间binning数量"
   unit: "个"
-  description: "总信号与光学背景均匀分配给这些SPAD；暗计数按数量增长，首光子机会数=Nshots×Nspad。"
+  description: "每角通道沿水平H方向聚合的SPAD数量，正整数；与V_binning相乘派生总SPAD数。A版仍均匀分配信号，不根据H/V自动修改通道IFOV。"
+V_binning:
+  label: "垂直空间binning数量"
+  unit: "个"
+  description: "每角通道沿垂直V方向聚合的SPAD数量，正整数。H×V统一影响暗计数、均匀事件分配及独立TDC数量；实际PSF和像素间距留待B版。"
 fill_factor:
   label: "填充因子 FF"
   unit: "1"

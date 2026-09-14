@@ -15,7 +15,7 @@ from .curves import CurveSpec
 ROOT = Path(__file__).resolve().parents[2]
 WEB = ROOT / "web"
 
-app = FastAPI(title="SPAD Line-Scanning LiDAR Model", version="0.1.6")
+app = FastAPI(title="SPAD Line-Scanning LiDAR Model", version="0.1.7")
 app.mount("/static", StaticFiles(directory=WEB), name="static")
 
 

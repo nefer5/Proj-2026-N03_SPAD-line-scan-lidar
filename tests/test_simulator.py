@@ -27,7 +27,7 @@ def test_filter_curve_controls_background_and_laser_transmission():
 
 
 def test_expected_histogram_peak_is_at_tof():
-    cfg = SimulationConfig(range_m=30.0, gate_width_ns=400.0, pulse_fwhm_ps=700, pulse_energy_nj=0.5, monte_carlo_trials=0)
+    cfg = SimulationConfig(range_m=30.0, gate_width_ns=400.0, tdc_bin_ps=100, pulse_fwhm_ps=700, pulse_energy_nj=0.5, monte_carlo_trials=0)
     t, hist, noise, _ = expected_histogram(cfg)
     peak_t = t[int(np.argmax(hist - noise))]
     expected_t = 2.0 * cfg.range_m / 299_792_458.0 * 1e9

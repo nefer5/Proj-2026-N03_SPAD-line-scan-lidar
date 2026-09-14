@@ -22,7 +22,8 @@ simulation:
   solar_reflectivity: 0.1
   other_light_enabled: true
   other_light_scale: 1
-  spads_per_channel: 16
+  H_binning: 4
+  V_binning: 4
   fill_factor: 0.2
   dcr_cps_per_spad: 1000
   other_noise_cps_per_spad: 0
@@ -54,8 +55,8 @@ simulation:
       basic:
         shape: rectangle
         amplitude: 0.8
-        min_nm: 865
-        max_nm: 945
+        min_nm: 855
+        max_nm: 955
         center_nm: 905
         width_nm: 10
         flat_width_nm: 8
@@ -104,7 +105,7 @@ simulation:
         amplitude: 0.15
         min_nm: 350
         max_nm: 1200
-        center_nm: 905
+        center_nm: 700
         width_nm: 400
         flat_width_nm: 200
         edge_width_nm: 100
@@ -141,7 +142,7 @@ simulation:
         amplitude: 1
         min_nm: 280
         max_nm: 4000
-        center_nm: 905
+        center_nm: 550
         width_nm: 500
         flat_width_nm: 300
         edge_width_nm: 150

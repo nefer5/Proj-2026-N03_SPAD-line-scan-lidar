@@ -7,6 +7,7 @@ from .configuration import read_yaml
 def build_photon_flow(cfg,budget,spectral,gate_fraction):
     b=budget
     values={
+        "H_binning":cfg.H_binning,"V_binning":cfg.V_binning,"spad_count":cfg.spads_per_channel,
         "aperture_m2":b.aperture_area_m2,"omega_sr":b.channel_solid_angle_sr,
         "aperture_shape":cfg.rx_aperture_shape,
         "aperture_dimensions_m":("d="+str(cfg.rx_aperture_mm*1e-3) if cfg.rx_aperture_shape=='circle' else "W="+str(cfg.rx_aperture_width_mm*1e-3)+", H="+str(cfg.rx_aperture_height_mm*1e-3)),

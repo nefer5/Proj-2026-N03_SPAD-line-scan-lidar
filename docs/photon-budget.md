@@ -16,6 +16,22 @@
 
 ## 共同几何与单位
 
+### 空间binning与每通道SPAD数
+
+H、V分别记录聚合方向数量，乘积是计算核心唯一使用的总SPAD数。A版不根据H/V自动改变通道IFOV或总光学通量。
+
+$$
+N_{\mathrm{SPAD}}=H_{\mathrm{binning}}\times V_{\mathrm{binning}}
+$$
+
+**符号与单位：** H_binning/V_binning分别为水平/垂直聚合的SPAD数；乘积是每角通道总数N_SPAD，不能再独立编辑。A版只用总数均匀分配信号和光学背景，暗计数按总数增长；不自动改变通道IFOV，尚未模拟像素间距、PSF或空间非均匀照明。
+
+| 中间量 | 单位 | Python结果字段 |
+|---|---|---|
+| 水平聚合数量 | SPAD | `H_binning` |
+| 垂直聚合数量 | SPAD | `V_binning` |
+| 派生的每通道总数 | SPAD/channel | `spad_count` |
+
 ### 共同几何与单位
 
 先把尺寸、角度和时间换到所需单位。面积进入信号和背景；通道IFOV在A模型中决定背景收集立体角。信号能量已按角通道分配，不再额外乘IFOV。

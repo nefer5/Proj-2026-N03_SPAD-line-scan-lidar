@@ -14,7 +14,7 @@
       <h1>单角通道 LiDAR 建模评估</h1>
       <p class="lede">当前：A 单通道信号链 · 规划：B 全光斑光学映射 → C 扫描机制</p>
     </div>
-    <nav class="toolbar"><a href="#photonBudgetPanel">光子计算公式与逻辑 ↓</a><a id="modeLink" href="/debug">专家调试版 →</a><div class="status"><span></span> A / V0.1.6</div></nav>
+    <nav class="toolbar"><a href="#photonBudgetPanel">光子计算公式与逻辑 ↓</a><a id="modeLink" href="/debug">专家调试版 →</a><div class="status"><span></span> A / V0.1.7</div></nav>
   </header>
 
   <main>
@@ -92,7 +92,9 @@
           <label>OR输出脉宽 (ns)<input data-key="or_pulse_width_ns" type="number" step="any"></label>
           <label>符合窗 (ns)<input data-key="coincidence_window_ns" type="number" step="any"></label>
           <label>符合阈值（不同SPAD数）<input data-key="coincidence_threshold" type="number" step="1"></label>
-          <label>每读出通道 SPAD 数<input data-key="spads_per_channel" type="number" step="1"></label>
+          <label>水平 H_binning<input data-key="H_binning" type="number" min="1" step="1"></label>
+          <label>垂直 V_binning<input data-key="V_binning" type="number" min="1" step="1"></label>
+          <div class="wide derived-box"><div class="formula" id="binningFormula"></div><p class="formula-note" id="binningNote"></p><strong id="binningTotal">等待计算</strong></div>
           <div class="wide curve-editor" id="curve-pde"></div>
           <label>Fill factor<input data-key="fill_factor" type="number" step="0.01"></label>
           <label>DCR / SPAD (cps)<input data-key="dcr_cps_per_spad" type="number" step="100"></label>

@@ -98,6 +98,7 @@ def derived_quantities(cfg, algorithms=None):
         "tof_ns": 2 * cfg.range_m / C * 1e9 + cfg.calibration_delay_ns,
         "irf_sigma_ns": timing_sigma_ns(cfg),
         "range_bin_m": C * cfg.tdc_bin_ps * 1e-12 / 2,
+        "binning": {"H_binning":cfg.H_binning,"V_binning":cfg.V_binning,"spads_per_channel":cfg.spads_per_channel},
         "pulse": {"time_ps": time_ps.tolist(), "power_w": (shape * peak_w).tolist()},
         "filter": filter_profile(cfg, a),
         "spectra": spectral,
@@ -349,7 +350,7 @@ def simulate(cfg: SimulationConfig, debug=False) -> dict:
     fingerprint = sha256(json.dumps(config_snapshot, sort_keys=True).encode()).hexdigest()
     result = {
         "configuration": config_snapshot,
-        "provenance": {"model_version": "0.1.6", "simulation_scope": "A_single_angular_channel", "utc": datetime.now(timezone.utc).isoformat(),
+        "provenance": {"model_version": "0.1.7", "simulation_scope": "A_single_angular_channel", "utc": datetime.now(timezone.utc).isoformat(),
                        "sha256": fingerprint, "defaults_source": "config/defaults.yaml"},
         "derived": derived,
         "readout": readout,
@@ -396,7 +397,7 @@ def simulate(cfg: SimulationConfig, debug=False) -> dict:
             "steps": [
                 {"title": "1. 脉冲能量与功率（Tx 前）",
                  "formula_id": "power",
-                 "values": {k:v for k,v in derived.items() if k not in ("pulse", "filter", "spectra", "photon_flow")}},
+                 "values": {k:v for k,v in derived.items() if k not in ("pulse", "filter", "spectra", "photon_flow", "binning")}},
                 {"title": "2. 接收孔径与信号能量",
                  "formula_id": "signal",
                  "values": {"area_m2": b.aperture_area_m2, "geometric_collection": b.geometric_collection,

@@ -21,3 +21,4 @@ budget_background_rx: "j代表当前来源sun或other；Lj为该来源的谱辐�
 budget_background_sensor: "同一波段B上，ηRx和Tf分别描述接收光学及滤光片。P_sensor为探测面光功率（W）；N_sensor为每门到达探测面的光子数，尚未乘PDE和FF。Tgate须以s代入。"
 budget_background_candidate: "PDE(λ)在积分内逐波长参与计算；FF在积分外乘一次。μj是当前背景来源的每门期望雪崩候选数，Nj,ideal是累计Nshots发的候选总数。实际输出还会受到SPAD恢复、OR/符合逻辑和TDC限制。"
 budget_readout: "μsun/μother分别为太阳和其他环境光候选数；μDCR和μelectronic为器件暗计数及其他电子随机噪声（它们不乘PDE/FF）。N_SPAD为物理SPAD数。Hk为实际观测直方图第k个bin计数，Nrecorded为混合记录总数；不同来源会竞争，不能按线性比例拆分最终记录。"
+binning: "H_binning/V_binning分别为水平/垂直聚合的SPAD数；乘积是每角通道总数N_SPAD，不能再独立编辑。A版只用总数均匀分配信号和光学背景，暗计数按总数增长；不自动改变通道IFOV，尚未模拟像素间距、PSF或空间非均匀照明。"

@@ -57,10 +57,9 @@ def test_generated_document_matches_shared_definitions():
     assert render()==(root/'docs/photon-budget.md').read_text(encoding='utf-8')
 
 
-def test_nominal_wavelengths_are_905_without_collapsing_sample_axes():
+def test_laser_and_filter_are_905_without_forcing_other_spectral_centers():
     cfg=default_values()
     assert cfg['wavelength_nm']==905
-    for spec in cfg['spectral_inputs'].values():
-        assert spec['basic']['center_nm']==905
+    assert cfg['spectral_inputs']['filter']['basic']['center_nm']==905
     points=cfg['spectral_inputs']['pde']['manual_points']
     assert len(set(p['wavelength_nm'] for p in points))==len(points)>2

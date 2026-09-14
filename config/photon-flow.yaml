@@ -7,6 +7,19 @@ conventions:
   - "最终直方图是回波、太阳、其他光和器件噪声共同竞争后的混合记录，不按各来源的候选比例线性拆分。"
   - "数据随有效输入实时更新；实际观测直方图仍需点击运行。专家调试采用该次仿真的参数快照。"
 common:
+  - title: "空间binning与每通道SPAD数"
+    formula_id: binning
+    logic: "H、V分别记录聚合方向数量，乘积是计算核心唯一使用的总SPAD数。A版不根据H/V自动改变通道IFOV或总光学通量。"
+    values:
+      - key: H_binning
+        label: "水平聚合数量"
+        unit: "SPAD"
+      - key: V_binning
+        label: "垂直聚合数量"
+        unit: "SPAD"
+      - key: spad_count
+        label: "派生的每通道总数"
+        unit: "SPAD/channel"
   - title: "共同几何与单位"
     formula_id: budget_geometry
     logic: "先把尺寸、角度和时间换到所需单位。面积进入信号和背景；通道IFOV在A模型中决定背景收集立体角。信号能量已按角通道分配，不再额外乘IFOV。"

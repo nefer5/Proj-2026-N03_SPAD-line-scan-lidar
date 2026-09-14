@@ -23,7 +23,7 @@ function collectConfig() {
   const cfg = { ...defaults };
   inputEls().forEach(el => {
     const key = el.dataset.key;
-    const isInteger = ["spads_per_channel", "laser_shots", "monte_carlo_trials", "rng_seed", "line_channels"].includes(key);
+    const isInteger = ["H_binning", "V_binning", "laser_shots", "monte_carlo_trials", "rng_seed", "line_channels"].includes(key);
     if(el.type==='checkbox')cfg[key]=el.checked;
     else if (el.tagName === 'SELECT') {
       if (!el.value || !Array.from(el.options).some(option=>option.value===el.value)) throw new Error(`参数 ${key} 需要选择有效选项，请刷新页面后重试。`);
@@ -214,6 +214,7 @@ function apertureFields() {
 
 function renderDerived(d) {
   latestDerived=d;
+  $('binningTotal').textContent=d.binning.H_binning+' × '+d.binning.V_binning+' = '+d.binning.spads_per_channel+' 个SPAD / 通道';
   if(!isDebug) {
     const same=lastResult?.derived.photon_flow.input_sha256===d.photon_flow.input_sha256;
     renderPhotonFlow($('photonBudgetPanel'),d.photon_flow,{recorded:same?lastResult.metrics.recorded_counts:null});
@@ -235,10 +236,10 @@ function renderDerived(d) {
     " · 激光处透过率 "+fmt(filter.laser_transmission*100,2)+"% · 加权带宽 ∫T dλ = "+fmt(filter.weighted_bandwidth_nm,3)+" nm";
   $("filterSummary").classList.toggle("warning",filter.laser_transmission===0);
   const s=d.spectra,c=s.curves;
-  $('solarSummary').textContent=fmt(s.solar_lux,0)+' lux → '+fmt(s.solar_irradiance_w_m2,3)+' W/m²；所选谱形归一化前 '+fmt(s.solar_reference_lux,0)+' lux';
+  $('solarSummary').textContent='当前生效：'+s.standard+'；'+fmt(s.solar_lux,0)+' lux → '+fmt(s.solar_irradiance_w_m2,3)+' W/m²；基准 '+fmt(s.solar_reference_lux,0)+' lux。'+(s.input_modes.solar==='basic'?'基础类型按当前特征量生效，不自动对齐激光波长。':'备用基础中心不参与当前谱的计算。');
   drawLines($('solarChart'),c.wavelength_nm,[{name:'太阳辐照度 W/m²/nm',y:c.solar_irradiance,color:colors.orange}],{xLabel:'波长 (nm)',scatter:{x:c.solar_original_x,y:c.solar_original_y}});
   drawLines($('environmentChart'),c.wavelength_nm,[{name:'太阳反射',y:c.solar_radiance,color:colors.orange},{name:'其他光',y:c.other_radiance,color:colors.blue},{name:'合计',y:c.total_radiance,color:colors.cyan}],{xLabel:'波长 (nm)',yDigits:3,ymax:Math.max(...c.total_radiance,Number.EPSILON)*1.12,scatter:{x:c.other_original_x,y:c.other_original_y}});
-  $('pdeSummary').textContent='激光处感光区PDE：'+fmt(s.pde_at_laser*100,2)+'%；再乘FF用于探测。样例不是芯片规格。';
+  $('pdeSummary').textContent='当前生效：'+curveEditors.catalog.modes[s.input_modes.pde]+'；'+fmt(d.filter.laser_wavelength_nm,1)+' nm处感光区PDE：'+fmt(s.pde_at_laser*100,2)+'%；再乘FF。基础中心只用于矩形/高斯/cosine平顶，不自动对齐激光；默认样例非芯片规格。';
   drawLines($('pdeChart'),c.wavelength_nm,[{name:'PDE',y:c.pde,color:colors.cyan}],{xLabel:'波长 (nm)',ymin:0,ymax:1.05,scatter:{x:c.pde_original_x,y:c.pde_original_y},marker:{x:filter.laser_wavelength_nm,y:s.pde_at_laser,label:'激光 '+fmt(filter.laser_wavelength_nm,1)+' nm'}});
 }
 
@@ -253,6 +254,7 @@ async function updateDerived() {
     if(ticket===derivedSequence) {
       latestDerived=null;
       ["peakPower","averagePower","acquisitionTime","apertureArea"].forEach(id=>$(id).textContent="—");
+      $('binningTotal').textContent='参数无效，尚未计算通道SPAD数量';
       $("derivedStatus").textContent="参数待修正："+error.message;
       $("filterSummary").textContent="当前参数无效，图中仍为上次有效曲线。";
       if(!isDebug)markPhotonFlowStale($('photonBudgetPanel'));
@@ -380,6 +382,8 @@ window.addEventListener("resize",()=>{
     if(!d.ok || !c.ok)throw new Error("无法读取YAML配置："+await (!d.ok?d:c).text());
     defaults=await d.json();const catalog=await c.json();help=catalog.parameters;readoutModes=catalog.readout_modes;
     curveEditors=new CurveEditors(catalog.curve_inputs,changed,async(kind,spec)=>await (await request('/api/curve/validate?kind='+kind,spec)).json());
+    try{katex.render(catalog.curve_inputs.formulas.binning,$('binningFormula'),{displayMode:true,throwOnError:true});}catch(e){$('binningFormula').textContent='公式渲染失败：'+e.message;}
+    $('binningNote').textContent=catalog.curve_inputs.formula_notes.binning;
     $('readoutMode').replaceChildren(...Object.entries(readoutModes).map(([key,meta])=>{const option=document.createElement('option');option.value=key;option.textContent=meta.label;return option;}));
     let initial=defaults;
     const saved=sessionStorage.getItem("lidar-config");

@@ -1,10 +1,18 @@
 """Migration of pre-unified YAML/JSON inputs; new exports contain no old keys."""
 from copy import deepcopy
 from .curves import merge_config
+from pydantic import TypeAdapter, PositiveInt
 
 
 def migrate(values, defaults):
     values=deepcopy(values)
+    if 'spads_per_channel' in values:
+        if 'H_binning' in values or 'V_binning' in values:
+            raise ValueError('Do not mix spads_per_channel with H_binning/V_binning')
+        count=TypeAdapter(PositiveInt).validate_python(values.pop('spads_per_channel'), strict=True)
+        # A legacy total cannot determine the original 2D shape; use one row.
+        values['H_binning']=count
+        values['V_binning']=1
     groups={
         "filter":("filter_curve","filter_interpolation","filter_bandwidth_nm","filter_peak_transmission"),
         "other":("other_light_spectrum","other_light_interpolation","other_light_mode","background_spectral_radiance"),
