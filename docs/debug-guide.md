@@ -1,5 +1,7 @@
 # V0.1.1 专家调试与参数配置手册
 
+当前噪声实现统一见 [噪声计算说明](noise-model.md)，A版优化建议见 [项目审视](a-review.md)。本文保留早期解析模型推导，实际事件模式以readout-modes.md为准。
+
 更新：A / V0.1.4 已加入 [光谱背景/PDE](spectral-background.md) 和 [事件读出模式](readout-modes.md)。下文首光子解析分布仍作为analytic_reference的推导；事件模式不复位有限死时间，也不使用该解析分布生成实际直方图。constant背景/PDE仅是新光谱模型的特殊情况。调试公式已集中在config/formulas.yaml并由本地KaTeX渲染。
 
 本手册适用于A单角通道V0.1.3。后续阶段按 [A/B/C路线](roadmap.md) 执行。derived.filter 包含与预算共用的插值曲线、原始采样点、激光标记与加权带宽；清除曲线恢复参数化矩形滤光片。曲线区间外为0，采样点不随激光波长平移，参数化矩形滤光片则以激光波长为中心。
@@ -9,14 +11,14 @@
 - 评估页：本机服务根路径（开发版为 http://127.0.0.1:8001/）。
 - 专家调试页：同服务的 /debug（http://127.0.0.1:8001/debug）。
 - 两个页面共用 SimulationConfig、simulate()；调试版只多返回中间量，不改变随机种子、分布或算法。
-- Tx 角分布/Rx PSF 数据库、二维阵列 binning、转镜轨迹仍属于 V0.2。当前 PRF 不会自动推导角点驻留或空间扫描。
-- 自由运行死时间、afterpulse、共享 TDC、coincidence 仍属于后续读出模型。spad_dead_time_ns 保留兼容并明确标为未生效。
+- Tx角分布/Rx PSF数据库和真实二维映射属于B；转镜轨迹属于C。A已有H/V binning数量，但没有空间PSF。当前PRF不会自动推导角点驻留或空间扫描。
+- 事件模式已实现自由运行死时间、共享TDC和coincidence；afterpulse未实现。spad_dead_time_ns在事件模式生效，只有analytic_reference忽略有限死时间。
 
 ## 配置的唯一来源
 
 | 文件 | 责任 |
 |---|---|
-| config/defaults.yaml | 工况默认值，包括器件、光学、时间、随机种子；初始累计发数100仅为探索参数 |
+| config/defaults.yaml | 工况默认值，包括器件、光学、时间、随机种子；累计发数未绑定扫描约束 |
 | config/algorithms.yaml | 平滑核、质心窗口、成功容差、扫参范围、展示波形采样与资源限额 |
 | config/parameter-help.yaml | 每个参数的名称、单位、物理意义、生效条件 |
 | src/spad_lidar/models.py | 字段类型、物理范围、枚举、跨字段校验，不保存工况默认数值 |

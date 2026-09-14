@@ -44,6 +44,8 @@ main { max-width: 1600px; margin: 0 auto; padding: 24px 32px 50px; display: grid
 .panel { background: rgba(18,25,35,.94); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 18px 50px rgba(0,0,0,.15); }
 .controls { padding: 16px; align-self: start; position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow: auto; }
 .toolbar { display: flex; gap: 8px; }
+.section-actions { margin-top:8px; }
+.section-actions button { flex:1; font-size:12px; padding:7px 10px; }
 button { background: var(--panel-2); color: var(--text); border: 1px solid #314257; border-radius: 7px; padding: 9px 13px; cursor: pointer; font-weight: 600; }
 button:hover { border-color: var(--cyan); }
 button.primary { flex: 1; color: #061414; background: var(--cyan); border-color: var(--cyan); }
@@ -100,6 +102,12 @@ a { color:var(--cyan); }
 .import-config input { display:block; max-width:175px; margin-top:5px; }
 .result-status { color:var(--orange); font-size:12px; margin-bottom:12px; }
 .table-scroll { overflow:auto; max-height:600px; margin-top:12px; }
+.histogram-methods { margin:12px 0 18px; }
+.histogram-methods .table-wrap { overflow-x:auto; }
+.histogram-methods table { min-width:570px; table-layout:fixed; line-height:1.6; }
+.histogram-methods th:first-child { width:110px; }
+.histogram-methods th:nth-child(2) { width:52%; }
+.histogram-methods th { position:static; }
 table { border-collapse:collapse; font-size:12px; width:100%; }
 td, th { border-bottom:1px solid var(--line); padding:9px; text-align:left; vertical-align:top; }
 th { position:sticky; top:0; background:var(--panel-2); }

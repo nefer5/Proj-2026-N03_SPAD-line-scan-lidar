@@ -9,7 +9,7 @@ from spad_lidar.configuration import read_yaml
 def config(mode,**kwargs):
     parameters=dict(readout_mode=mode,range_m=20,laser_shots=2,
                     laser_prf_hz=1000000,gate_start_ns=0,gate_width_ns=700,
-                    tdc_bin_ps=100,monte_carlo_trials=0)
+                    tdc_bin_ps=100,monte_carlo_trials=0,spad_dead_time_ns=20)
     parameters.update(kwargs)
     return SimulationConfig(**parameters)
 

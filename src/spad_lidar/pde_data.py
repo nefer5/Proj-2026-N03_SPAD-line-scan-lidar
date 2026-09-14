@@ -13,6 +13,7 @@ def pde_provenance(cfg):
         if fingerprint!=metadata['points_sha256']:
             continue
         keys=('title','url','pdf_url','excess_bias_v','wavelength_range_nm','extraction',
-              'reported_peak','reported_nir','uncertainty_note','definition_note','fill_factor_note','domain_note')
+              'reported_peak','reported_nir','uncertainty_note','definition_note','fill_factor_note','domain_note',
+              'digitized_range_nm','extrapolation')
         return {'id':identifier,'matched_by':'point_values_sha256','points_sha256':fingerprint,**{k:metadata[k] for k in keys}}
     return None

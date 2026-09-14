@@ -8,9 +8,18 @@ van_sieleghem_2022_fig7_3p5v:
   figure: 7
   excess_bias_v: 3.5
   csv_path: examples/pde-van-sieleghem-2022-3p5v.csv
-  points_sha256: 1becdb7760c7d4a7beef36fa204251d5481c5da4eac78289d790cf97fd7cf623
-  extraction: PDF vector curve vertices, not the authors' raw measurement table
-  wavelength_range_nm: [460, 960]
+  points_sha256: 27901235ba2c344fcdf0cf3b82b984ff931ee198702c94f545535282f2421e8d
+  digitized_points_sha256: 1becdb7760c7d4a7beef36fa204251d5481c5da4eac78289d790cf97fd7cf623
+  extraction: '460–960nm为图中矢量点数字化（非作者原始表格）；980、1000nm为末两点线性外插估计，非实测。'
+  wavelength_range_nm: [460, 1000]
+  digitized_range_nm: [460, 960]
+  total_points: 28
+  extrapolation:
+    method: last_two_points_linear
+    anchor_wavelengths_nm: [940, 960]
+    estimated_wavelengths_nm: [980, 1000]
+    pde_digits: 4
+    note: '使用940–960nm末端斜率，980nm=12.22%、1000nm=8.35%；仅为工程估计，未验证外插误差，不应用论文测量误差作为外插置信度。'
   points: 26
   reported_peak: {wavelength_nm: 660, pde: 0.66}
   reported_nir: {wavelength_nm: 905, pde: 0.27}
@@ -25,4 +34,4 @@ van_sieleghem_2022_fig7_3p5v:
   uncertainty_note: '绘图点经矢量坐标反算并四舍五入。小数位仅为插值存储，不表示测量精度；论文的<5%相对测量误差与提取/插值误差是不同来源。905nm不是图中原始标记，使用插值约27.4%，不强行改成正文的约27%。'
   definition_note: '原文报告器件PDE（EQE与雪崩触发概率的乘积），包含器件自身光学收集特性。不能把小倍增区面积再当作探测面积折减。'
   fill_factor_note: '本工具仍按用户配置额外乘FF。FF<1相当于对已报告器件PDE施加额外系统折减，不是论文原始PDE口径。按用户要求默认FF=0.92；未同步改动DCR、抖动或死时间。若要近似复现论文PDE，应另设FF=1并明确比较口径。'
-  domain_note: '图7采样仅覆盖460–960nm，范围外的0是当前模型边界假设，不是文献证明响应为0。'
+  domain_note: '图7采样仅覆盖460–960nm，960–1000nm由外插点补齐；460–1000nm外的0是当前模型边界假设，不是文献证明响应为0。'

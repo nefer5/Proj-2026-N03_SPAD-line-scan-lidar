@@ -121,7 +121,7 @@ $$
 \mu_s=N_{\mathrm{sensor}}\mathrm{PDE}(\lambda_0)FF,\quad \mu_{s,\mathrm{gate}}=\mu_sG,\quad N_{s,\mathrm{ideal}}=N_{\mathrm{shots}}\mu_{s,\mathrm{gate}}
 $$
 
-**符号与单位：** PDE(λ0)为感光区探测概率，FF为填充因子；μs为完整回波每发候选数，尚未经过死时间/读出限制。G为时间响应落在门内的份额（理想IRF参考，含抖动）；Nshots为累计脉冲数。μs,gate与Ns,ideal是门内理想参考，不是实际记录数。
+**符号与单位：** PDE(λ0)为输入谱探测概率，FF为独立面积/系统折减，输入若已含整像素收集效率应避免重复计入；μs为完整回波每发候选数，尚未经过死时间/读出限制。G为时间响应落在门内的份额（理想IRF参考，含抖动）；Nshots为累计脉冲数。μs,gate与Ns,ideal是门内理想参考，不是实际记录数。
 
 | 中间量 | 单位 | Python结果字段 |
 |---|---|---|

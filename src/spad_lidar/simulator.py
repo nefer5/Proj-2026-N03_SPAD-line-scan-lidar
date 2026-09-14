@@ -216,6 +216,19 @@ def _first_photon_probabilities(mu):
     return np.exp(-before) * (-np.expm1(-mu))
 
 
+def _signal_pdf(cfg, time_ns):
+    """Analytic signal IRF density, in 1/ns; no random draws or readout losses."""
+    x=np.asarray(time_ns)-(2*cfg.range_m/C*1e9+cfg.calibration_delay_ns)
+    if cfg.pulse_shape=='gaussian':
+        sigma=timing_sigma_ns(cfg)
+        return np.exp(-0.5*(x/sigma)**2)/(sqrt(2*pi)*sigma)
+    width=cfg.pulse_fwhm_ps*1e-3
+    jitter=np.hypot(cfg.spad_jitter_fwhm_ps,cfg.other_jitter_fwhm_ps)/FWHM_TO_SIGMA*1e-3
+    if jitter==0:
+        return (np.abs(x)<=width/2).astype(float)/width
+    return (ndtr((x+width/2)/jitter)-ndtr((x-width/2)/jitter))/width
+
+
 def _histogram_components(cfg, range_m=None):
     budget = photon_budget(cfg, range_m)
     edges, centers = _time_axis(cfg)
@@ -240,6 +253,51 @@ def _histogram_components(cfg, range_m=None):
 def expected_histogram(cfg, range_m=None):
     x = _histogram_components(cfg, range_m)
     return x["time"], x["expected"], x["expected_noise"], x["budget"]
+
+
+def _preview_edges(edges, algorithms):
+    """Subdivide every actual bin, including a shortened last bin, exactly."""
+    factor=min(algorithms.histogram_preview_subdivisions,
+               algorithms.max_histogram_preview_bins//(len(edges)-1))
+    if factor<2:
+        raise ValueError('max_histogram_preview_bins must allow at least two subdivisions per histogram bin')
+    fractions=np.arange(factor)/factor
+    fine=(edges[:-1,None]+np.diff(edges)[:,None]*fractions).ravel()
+    return np.r_[fine,edges[-1]],factor
+
+
+def signal_ground_truth(cfg, budget, edges, algorithms):
+    fine_edges,factor=_preview_edges(edges,algorithms)
+    amplitude=cfg.laser_shots*budget.signal_detected_per_pulse
+    shape=_signal_shape(cfg,edges)
+    tof=2*cfg.range_m/C*1e9+cfg.calibration_delay_ns
+    extent=algorithms.ground_truth_extent_sigma*timing_sigma_ns(cfg)
+    local=np.linspace(max(edges[0],tof-extent),min(edges[-1],tof+extent),algorithms.ground_truth_plot_points)
+    # Include pulse discontinuities at adjacent floating-point positions, so an
+    # unjittered rectangular waveform is not rendered with sloping shoulders.
+    features=np.array([tof-cfg.pulse_fwhm_ps*1e-3/2,tof,tof+cfg.pulse_fwhm_ps*1e-3/2])
+    grid=np.unique(np.r_[(fine_edges[:-1]+fine_edges[1:])/2,local,edges[0],edges[-1],
+                         features,np.nextafter(features,-np.inf),np.nextafter(features,np.inf)])
+    grid=grid[(grid>=edges[0]) & (grid<=edges[-1])]
+    density=amplitude*_signal_pdf(cfg,grid)
+    return {
+        'basis':'pure_signal_analytic_before_readout',
+        'reference_plane':'after_PDE_FF_before_SPAD_dead_time_and_readout',
+        'counts':(amplitude*shape).tolist(),
+        'sensor_incident_counts':(cfg.laser_shots*budget.signal_sensor_incident_photons_per_pulse*shape).tolist(),
+        'in_gate_total':float(amplitude*shape.sum()),
+        'full_signal_total':float(amplitude),
+        'high_resolution':{
+            'time_ns':grid.tolist(),
+            'counts_per_ns':density.tolist(),
+            'counts_per_nominal_bin':(density*cfg.tdc_bin_ps*1e-3).tolist(),
+            'edges_ns':fine_edges.tolist(),
+            'integrated_counts':(amplitude*_signal_shape(cfg,fine_edges)).tolist(),
+            'nominal_bin_width_ns':cfg.tdc_bin_ps*1e-3,
+            'subdivisions':factor,
+        },
+        'note':'青色为纯信号解析ground truth：PDE/FF后的理想候选计数，含已配置脉宽和抖动分布的解析展宽；不含背景、暗计数、随机抽样、死时间、首事件竞争或读出容量损失。散点为当前bin积分；虚线为解析计数密度×标称bin宽，不必穿过积分散点。与24次均值和测距重复次数均无关。',
+    }
 
 
 def _estimate_range(cfg, time_ns, hist, algorithms=None, with_trace=False):
@@ -277,6 +335,28 @@ def _sample_histogram(rng, expected, opportunities):
     p = np.r_[p, max(0.0, 1-float(p.sum()))]
     p /= p.sum()
     return rng.multinomial(opportunities, p)[:-1].astype(float)
+
+
+def histogram_sample_range(trials):
+    """Per-bin empirical extrema of the distance-statistics acquisitions."""
+    count=len(trials)
+    lower=upper=None
+    if count:
+        lower=np.array(trials[0],dtype=float,copy=True)
+        upper=lower.copy()
+        for histogram in trials[1:]:
+            np.minimum(lower,histogram,out=lower)
+            np.maximum(upper,histogram,out=upper)
+    return {
+        'method':'sample_min_max',
+        'trial_count':count,
+        'available':bool(count),
+        'lower_counts':lower.tolist() if count else None,
+        'upper_counts':upper.tolist() if count else None,
+        'includes_first_observation':bool(count),
+        'source':'distance_statistics_trial_histograms',
+        'note':'误差棒为测距统计MC中每个bin的样本最小值—最大值，使用全部重复采集（包括测距失败的采集）；不是均值置信区间，也不是理论保证上下限。蓝柱是这批采集的第1次观测，不取均值。重复0次不显示，1次上下限与蓝柱重合。',
+    }
 
 
 def crosstalk_model(cfg):
@@ -321,14 +401,17 @@ def simulate(cfg: SimulationConfig, debug=False) -> dict:
     derived = derived_quantities(cfg, a)
     rng = np.random.default_rng(cfg.rng_seed)
     opportunities = cfg.laser_shots * cfg.spads_per_channel
+    ground_truth=signal_ground_truth(cfg,b,x['edges'],a)
     if cfg.readout_mode == 'analytic_reference':
         observed = _sample_histogram(rng, x["expected"], opportunities)
-        trials = [_sample_histogram(rng, x['expected'], opportunities) for _ in range(cfg.monte_carlo_trials)]
+        trials = ([observed.copy()]+[_sample_histogram(rng, x['expected'], opportunities)
+                                    for _ in range(cfg.monte_carlo_trials-1)]) if cfg.monte_carlo_trials else []
         readout = {'mode':cfg.readout_mode,'engine':'analytic_multinomial','note':'Ideal reset each cycle; finite dead times and limits not used.'}
     else:
         observed, x['expected'], x['expected_noise'], trials, readout = event_acquisition(cfg,b,a,x['edges'])
     estimate, score, estimator = _estimate_range(cfg, x["time"], observed, a, with_trace=True)
     estimates = [_estimate_range(cfg, x['time'], h, a)[0] for h in trials]
+    sample_range=histogram_sample_range(trials)
     valid = np.array([r for r in estimates if r is not None])
     errors = valid-cfg.range_m
     successes = sum(r is not None and abs(r-cfg.range_m) <= a.success_tolerance_m for r in estimates)
@@ -350,7 +433,7 @@ def simulate(cfg: SimulationConfig, debug=False) -> dict:
     fingerprint = sha256(json.dumps(config_snapshot, sort_keys=True).encode()).hexdigest()
     result = {
         "configuration": config_snapshot,
-        "provenance": {"model_version": "0.1.8", "simulation_scope": "A_single_angular_channel", "utc": datetime.now(timezone.utc).isoformat(),
+        "provenance": {"model_version": "0.2.0", "simulation_scope": "A_single_angular_channel", "utc": datetime.now(timezone.utc).isoformat(),
                        "sha256": fingerprint, "defaults_source": "config/defaults.yaml"},
         "derived": derived,
         "readout": readout,
@@ -359,7 +442,7 @@ def simulate(cfg: SimulationConfig, debug=False) -> dict:
             "正入射大朗伯面、小接收立体角；通道信号均匀分配到所选 SPAD，无真实二维 PSF。",
             "读出模式："+read_yaml('readout-modes.yaml')[cfg.readout_mode]['description'],
             "太阳光按标准谱形由lux归一化后经灰朗伯面反射；其他环境光与PDE按谱线联合积分，时间上均匀。",
-            "事件模式使用非延长型SPAD/TDC死时间；显示曲线为多次MC均值。解析参考才使用首光子多项分布。",
+            "青色ground truth为纯信号解析参考，不含读出损失；观测含噪声和读出限制，事件模式橙色噪声线为MC均值。",
             "串扰矩阵独立分析，未耦合到直方图；尚未包含afterpulse、雪崩串扰、扫描运动与系统漂移。",
             "距离扫描曲线是无 pile-up 的理想预算；峰值评分不是虚警率标定后的检测 SNR。",
             "成功率=误差在所配置容差内的次数/请求重复次数；精度和偏差仅统计能输出距离的重复。",
@@ -378,6 +461,9 @@ def simulate(cfg: SimulationConfig, debug=False) -> dict:
             "trials_completed": cfg.monte_carlo_trials, "valid_trials": len(valid),
         },
         "histogram": {
+            "sample_range":sample_range,
+            "ground_truth":ground_truth,
+            "expected_counts_note":"含信号和噪声、经过所选读出的均值，仅用于诊断；不是青色ground truth。",
             "time_ns": x["time"].tolist(), "edges_ns": x["edges"].tolist(),
             "expected_counts": x["expected"].tolist(), "expected_noise_counts": x["expected_noise"].tolist(),
             "observed_counts": observed.tolist(),

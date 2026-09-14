@@ -77,19 +77,19 @@ fill_factor:
 dcr_cps_per_spad:
   label: "单SPAD暗计数率"
   unit: "cps"
-  description: "单个SPAD每秒暗触发数；每门期望=DCR×SPAD数×门宽秒。"
+  description: "单个SPAD每秒暗触发候选数；每门期望=DCR×SPAD数×门宽秒，不乘PDE/FF。默认按用户确认的Sony相关参考（60°C条件）；当前不会按温度自动换算。见docs/sony-reference.md。"
 other_noise_cps_per_spad:
   label: "其他单SPAD随机噪声"
   unit: "cps"
   description: "额外均匀、独立随机触发率，不可用来替代有时间相关性的afterpulse或串扰。"
 spad_dead_time_ns:
-  label: "SPAD死时间（预留）"
+  label: "SPAD死时间"
   unit: "ns"
   description: "事件模式为每次雪崩后的非延长型恢复时间，跨周期保留；analytic_reference理想参考忽略此参数。"
 spad_jitter_fwhm_ps:
   label: "SPAD时间抖动FWHM"
   unit: "ps"
-  description: "高斯时间抖动的半高全宽；除以2sqrt(2ln2)得到标准差。"
+  description: "高斯时间抖动的半高全宽；除以2sqrt(2ln2)得到标准差。默认按用户确认的Sony相关参考（室温、Vex=3V）；FW10%未作为独立输入。见docs/sony-reference.md。"
 pulse_fwhm_ps:
   label: "激光脉宽 FWHM"
   unit: "ps"
@@ -117,11 +117,11 @@ calibration_delay_ns:
 laser_shots:
   label: "单次测距累计脉冲数"
   unit: "发"
-  description: "一张直方图累积的激光脉冲数，不是光子数。默认100为探索值，未绑定转镜扫描约束。"
+  description: "一张直方图累积的激光脉冲数，不是光子数。当前数值由工况配置决定，未绑定转镜扫描约束。"
 monte_carlo_trials:
-  label: "重复测距实验次数"
+  label: "测距统计重复次数"
   unit: "次"
-  description: "在同一工况下重复生成直方图并测距，用于估计统计指标；0表示不计算统计，返回空值。"
+  description: "测距统计MC总次数，大于0时包含首次蓝柱，再补足其余独立采集；用于偏差、精度、成功率和逐bin样本最小–最大误差棒，不平均蓝柱。与青色GT无关。橙色均值另用readout_expected_trials。0次不计算统计/误差棒；1次上下限与蓝柱重合。"
 rng_seed:
   label: "随机种子"
   unit: "整数"

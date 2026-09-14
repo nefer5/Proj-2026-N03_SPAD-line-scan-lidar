@@ -14,7 +14,7 @@
       <h1>单角通道 LiDAR 建模评估</h1>
       <p class="lede">当前：A 单通道信号链 · 规划：B 全光斑光学映射 → C 扫描机制</p>
     </div>
-    <nav class="toolbar"><a href="#photonBudgetPanel">光子计算公式与逻辑 ↓</a><a id="modeLink" href="/debug">专家调试版 →</a><div class="status"><span></span> A / V0.1.8</div></nav>
+    <nav class="toolbar"><a href="#photonBudgetPanel">光子计算公式与逻辑 ↓</a><a id="modeLink" href="/debug">专家调试版 →</a><div class="status"><span></span> A / V0.2</div></nav>
   </header>
 
   <main>
@@ -22,6 +22,10 @@
       <div class="toolbar">
         <button id="runButton" class="primary">运行仿真</button>
         <button id="resetButton">恢复默认</button>
+      </div>
+      <div class="toolbar section-actions" aria-label="参数分组展开控制">
+        <button id="collapseParameters" type="button">全部折叠</button>
+        <button id="expandParameters" type="button">全部展开</button>
       </div>
 
       <details open>
@@ -107,7 +111,7 @@
           <label>累计脉冲数<input data-key="laser_shots" type="number" step="1"></label>
           <label>标定延迟 (ns)<input data-key="calibration_delay_ns" type="number" step="any"></label>
           <label>SPAD死时间 (ns)<input data-key="spad_dead_time_ns" type="number" step="any"></label>
-          <label>重复统计次数<input data-key="monte_carlo_trials" type="number" step="10"></label>
+          <label>测距统计重复次数<input data-key="monte_carlo_trials" type="number" step="10"></label>
           <label>随机种子<input data-key="rng_seed" type="number" step="1"></label>
         </div>
       </details>
@@ -156,8 +160,14 @@
       </div>
 
       <article class="panel chart-card">
-        <div class="chart-title"><div><h2>TCSPC 直方图</h2><p>蓝色柱：实际观测计数；青色线：统计期望；橙色线：纯噪声期望。下图按真实目标位置聚焦（仅展示，估计器仍全门搜索）。</p></div></div>
+        <div class="chart-title"><div><h2>TCSPC 直方图</h2><p>蓝柱：一次含噪观测；青色散点/虚线：纯信号解析ground truth（PDE/FF后、读出损失前），分别为当前bin积分/连续计数密度×标称bin宽；橙线：纯噪声期望。局部图按真实目标位置聚焦，估计器仍全门搜索。</p></div></div>
         <p id="readoutSummary"></p>
+        <p id="histogramSamplingNote" class="formula-note"></p>
+        <p id="histogramErrorNote" class="formula-note"></p>
+        <details class="histogram-methods" open>
+          <summary>各数据的计算方式与统计次数</summary>
+          <div class="table-wrap"><table><thead><tr><th>数据</th><th>生成与计算方式</th><th>累计 / 平均</th></tr></thead><tbody id="histogramMethods"></tbody></table></div>
+        </details>
         <canvas id="histFull" height="260"></canvas>
         <canvas id="histZoom" height="260"></canvas>
       </article>

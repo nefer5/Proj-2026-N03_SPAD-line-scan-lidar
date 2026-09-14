@@ -73,12 +73,12 @@ function drawLines(canvas, x, series, opts={}) {
   const pw=w-pad.l-pad.r, ph=h-pad.t-pad.b;
   const i0=opts.i0 ?? 0, i1=opts.i1 ?? x.length;
   const xx=x.slice(i0,i1);
-  const sliced=series.map(s => ({...s, y:s.y.slice(i0,i1)}));
+  const sliced=series.map(s => ({...s, x:s.x||xx, y:s.x?s.y:s.y.slice(i0,i1),lower:s.lower?.slice(i0,i1)}));
   const dx = opts.binWidth || 0;
   const xmin=opts.edges ? opts.edges[i0] : Math.min(...xx)-dx/2;
   const xmax=opts.edges ? opts.edges[i1] : Math.max(...xx)+dx/2;
   let ymin=opts.ymin ?? 0;
-  let ymax=opts.ymax ?? sliced.reduce((m,s)=>s.y.reduce((v,y)=>Number.isFinite(y)?Math.max(v,y):v,m),1)*1.08;
+  let ymax=opts.ymax ?? sliced.reduce((m,s)=>s.y.reduce((v,y,i)=>Number.isFinite(y)&&s.x[i]>=xmin&&s.x[i]<=xmax?Math.max(v,y):v,m),1)*1.08;
   const sx=v=>pad.l+(v-xmin)/(xmax-xmin||1)*pw;
   const sy=v=>pad.t+ph-(v-ymin)/(ymax-ymin||1)*ph;
   ctx.clearRect(0,0,w,h);
@@ -98,22 +98,46 @@ function drawLines(canvas, x, series, opts={}) {
       }
       ctx.restore(); ctx.globalAlpha=1; return;
     }
-    ctx.beginPath(); ctx.strokeStyle=s.color; ctx.lineWidth=s.width||1.5; ctx.globalAlpha=s.alpha||1;
-    for(let i=0;i<xx.length;i++){ const px=sx(xx[i]),py=sy(s.y[i]); if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py); }
-    ctx.stroke(); ctx.globalAlpha=1;
+    ctx.save();ctx.beginPath();ctx.rect(pad.l,pad.t,pw,ph);ctx.clip();
+    ctx.strokeStyle=s.color;ctx.fillStyle=s.color;ctx.lineWidth=s.width||1.5;ctx.globalAlpha=s.alpha||1;
+    if(s.errorBars){
+      ctx.lineWidth=1.2;
+      s.x.forEach((v,i)=>{
+        if(v<xmin||v>xmax)return;
+        const cap=Math.min(4,Math.max(0.3,(sx(v+(opts.binWidth||1))-sx(v))*0.28));
+        const px=sx(v),lo=sy(s.lower[i]),hi=sy(s.y[i]);
+        ctx.beginPath();ctx.moveTo(px,lo);ctx.lineTo(px,hi);
+        ctx.moveTo(px-cap,lo);ctx.lineTo(px+cap,lo);ctx.moveTo(px-cap,hi);ctx.lineTo(px+cap,hi);ctx.stroke();
+      });
+    }else if(s.points){
+      s.x.forEach((v,i)=>{if(v<xmin||v>xmax)return;ctx.beginPath();ctx.arc(sx(v),sy(s.y[i]),3.5,0,2*Math.PI);ctx.fill();});
+    }else{
+      ctx.setLineDash(s.dash||[]);ctx.beginPath();
+      for(let i=0;i<s.x.length;i++){const px=sx(s.x[i]),py=sy(s.y[i]);if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);}
+      ctx.stroke();
+    }
+    ctx.restore();
   });
   ctx.fillStyle=colors.muted; ctx.textAlign="center"; ctx.fillText(opts.xLabel||"",pad.l+pw/2,h-4);ctx.textAlign="left";
   let lx=pad.l+6;
-  sliced.forEach(s=>{ctx.fillStyle=s.color;ctx.fillRect(lx,pad.t+3,13,2);ctx.fillStyle=colors.muted;ctx.fillText(s.name,lx+18,pad.t+7);lx+=ctx.measureText(s.name).width+48;});
-  if(opts.scatter && opts.scatter.x.length) {
+  sliced.forEach(s=>{
+    ctx.save();ctx.fillStyle=s.color;ctx.strokeStyle=s.color;
+    if(s.errorBars){ctx.beginPath();ctx.moveTo(lx+6,pad.t);ctx.lineTo(lx+6,pad.t+8);ctx.moveTo(lx+2,pad.t);ctx.lineTo(lx+10,pad.t);ctx.moveTo(lx+2,pad.t+8);ctx.lineTo(lx+10,pad.t+8);ctx.stroke();}
+    else if(s.points){ctx.beginPath();ctx.arc(lx+6,pad.t+4,3,0,2*Math.PI);ctx.fill();}
+    else{ctx.setLineDash(s.dash||[]);ctx.beginPath();ctx.moveTo(lx,pad.t+4);ctx.lineTo(lx+13,pad.t+4);ctx.stroke();}
+    ctx.restore();ctx.fillStyle=colors.muted;ctx.fillText(s.name,lx+18,pad.t+7);lx+=ctx.measureText(s.name).width+34;
+  });
+  const scatterGroups=opts.scatterGroups || (opts.scatter ? [opts.scatter] : []);
+  scatterGroups.filter(group=>group.x.length).forEach(group=>{
+    const color=group.color||colors.blue, label=group.name||'原始采样点';
     ctx.save();ctx.beginPath();ctx.rect(pad.l,pad.t,pw,ph);ctx.clip();
-    opts.scatter.x.forEach((v,i)=>{
-      ctx.beginPath();ctx.arc(sx(v),sy(opts.scatter.y[i]),5,0,2*Math.PI);
-      ctx.fillStyle=colors.blue;ctx.fill();ctx.strokeStyle="#eef6ff";ctx.lineWidth=1;ctx.stroke();
+    group.x.forEach((v,i)=>{
+      ctx.beginPath();ctx.arc(sx(v),sy(group.y[i]),5,0,2*Math.PI);
+      ctx.fillStyle=color;ctx.fill();ctx.strokeStyle="#eef6ff";ctx.lineWidth=1;ctx.stroke();
     });
-    ctx.restore();ctx.fillStyle=colors.blue;ctx.beginPath();ctx.arc(lx+6,pad.t+4,4,0,2*Math.PI);ctx.fill();
-    ctx.fillStyle=colors.muted;ctx.fillText("原始采样点",lx+18,pad.t+7);
-  }
+    ctx.restore();ctx.fillStyle=color;ctx.beginPath();ctx.arc(lx+6,pad.t+4,4,0,2*Math.PI);ctx.fill();
+    ctx.fillStyle=colors.muted;ctx.fillText(label,lx+18,pad.t+7);lx+=ctx.measureText(label).width+48;
+  });
   if (opts.marker) {
     const px=sx(opts.marker.x),py=sy(opts.marker.y);
     ctx.save();ctx.strokeStyle=colors.orange;ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(px,pad.t+20);ctx.lineTo(px,pad.t+ph);ctx.stroke();ctx.setLineDash([]);
@@ -154,11 +178,28 @@ function render(result) {
   $('mSolar').textContent=fmt(b.solar_detected_per_gate,5);
   $('mOtherLight').textContent=fmt(b.other_light_detected_per_gate,5);
   $('readoutSummary').textContent=(readoutModes[result.readout.mode]?.label||result.readout.mode)+' · '+
-    (result.readout.engine==='event_monte_carlo'?'事件MC；曲线为 '+result.readout.expected_trials+' 次独立实验均值，非解析期望。':'理想首光子解析参考。');
+    (result.readout.engine==='event_monte_carlo'?'蓝柱为一次采集（不平均）；橙色纯噪声及内部读出均值诊断各用 '+result.readout.expected_trials+' 次MC平均。':'蓝柱为一次首事件抽样；橙色为解析纯噪声期望。')+
+    ' 测距统计共 '+result.configuration.simulation.monte_carlo_trials+' 次（大于0时含首次蓝柱），用于偏差/精度/成功率及逐bin误差棒；青色为解析真值，不参与MC平均。';
   $("mRange").textContent=fmt(m.estimated_range_m,3);$("mPrecision").textContent=fmt(m.precision_cm_1sigma,2);$("mBias").textContent=fmt(m.bias_cm,2);$("mSuccess").textContent=fmt(m.success_rate == null ? null : m.success_rate*100,1);
   $("mSignal").textContent=fmt(b.signal_detected_per_pulse,4);$("mNoise").textContent=fmt(b.background_detected_per_gate+b.dark_detected_per_gate+b.other_detected_per_gate,4);$("mSnr").textContent=fmt(m.observed_peak_snr,2);$("mPileup").textContent=fmt(m.pileup_loss_fraction*100,2);
   const h=result.histogram;
-  const lines=[{name:"观测柱状",y:h.observed_counts,color:colors.blue,bars:true},{name:"期望",y:h.expected_counts,color:colors.cyan,width:2},{name:"纯噪声",y:h.expected_noise_counts,color:colors.orange,width:1.2}];
+  const truth=h.ground_truth,fine=truth.high_resolution;
+  const lines=[{name:"观测柱状",y:h.observed_counts,color:colors.blue,bars:true},{name:"纯信号解析GT",x:fine.time_ns,y:fine.counts_per_nominal_bin,color:colors.cyan,width:1.5,dash:[6,4]},{name:"GT bin积分",y:truth.counts,color:colors.cyan,points:true},{name:"纯噪声",y:h.expected_noise_counts,color:colors.orange,width:1.2}];
+  const bounds=h.sample_range;
+  if(bounds.available)lines.push({name:'MC最小–最大',y:bounds.upper_counts,lower:bounds.lower_counts,errorBars:true,color:'#c2d7ff',alpha:0.85});
+  $('histogramErrorNote').textContent=(bounds.available?'误差棒：'+bounds.trial_count+'次测距统计MC的逐bin最小–最大范围。':'测距统计重复次数为0，未绘制误差棒。')+bounds.note;
+  $('histogramSamplingNote').textContent=truth.note+' 门内GT合计：'+fmt(truth.in_gate_total,6)+' events；预算参考面为PDE/FF之后，非原始入射光子数。';
+  const shots=result.configuration.simulation.laser_shots, repetitions=result.configuration.simulation.monte_carlo_trials;
+  const eventMode=result.readout.engine==='event_monte_carlo', meanRuns=result.readout.expected_trials;
+  const methods=[
+    ['蓝色观测柱',eventMode?'信号及各噪声候选做泊松抽样，经SPAD恢复、当前读出逻辑及TDC限制，将成功时间戳按当前bin计数。':'按含信号和噪声的解析首事件概率做一次多项分布抽样，得到当前bin整数计数。',shots+'发累加成一张图；仅展示一次采集，不平均。'],
+    ['青色GT散点','纯信号时间响应在每个bin左右边界之间解析积分，再乘每发理想信号候选数及累计发数。PDE/FF已计入，不含任何背景或读出损失。',shots+'发的解析计数；不做MC平均或测距重复抽样。'],
+    ['青色GT虚线','直接高密度采样解析信号计数密度，再乘当前标称bin宽用于柱高比较；不是对散点拟合，也不是MC均值。保留设定脉宽与抖动分布的解析展宽。','确定性曲线；面积除以标称bin宽得到门内GT总计数，散点是bin积分，曲线不必穿过散点。'],
+    ['橙色纯噪声线',eventMode?'关闭激光但保留同步采集时序，以及太阳、其他光、DCR、其他电子噪声和当前读出机制；独立生成噪声直方图，逐bin相加再除以实验次数。':'关闭激光后计算纯噪声的解析首事件概率，乘SPAD数及采集门数。',eventMode?meanRuns+'张图求均值，每张统计'+shots+'个接收门；不是'+(meanRuns*shots)+'个门直接相加。':'解析期望，不做MC平均。'],
+    ['浅蓝误差棒','复用测距统计的全部MC直方图，按每个bin取最小、最大计数；不额外模拟，不筛除测距失败样本。样本范围不是置信区间。',repetitions+'次，含首次蓝柱；0次不画，1次上下限与蓝柱重合。'],
+    ['测距统计（非图形平均）','大于0时以蓝柱为第1次，补足其余独立含噪采集。每张估计一次距离，汇总偏差、精度与成功率；同批数据也计算误差棒。',repetitions+'次，每次累计'+shots+'发；不平均蓝柱，也不决定青色GT或橙线。'],
+  ];
+  $('histogramMethods').replaceChildren(...methods.map(cells=>{const row=document.createElement('tr');cells.forEach(value=>{const cell=document.createElement('td');cell.textContent=value;row.append(cell);});return row;}));
   drawLines($("histFull"),h.time_ns,lines,{xLabel:"时间 (ns)",edges:h.edges_ns,binWidth:result.configuration.simulation.tdc_bin_ps/1000});
   const cfg=result.configuration.simulation;
   const peak=h.time_ns.reduce((best,v,i)=>Math.abs(v-result.derived.tof_ns)<Math.abs(h.time_ns[best]-result.derived.tof_ns)?i:best,0);
@@ -243,11 +284,14 @@ function renderDerived(d) {
   const source=$('pdeSource');source.replaceChildren();
   if(s.pde_source){
     const link=document.createElement('a');link.href=s.pde_source.url;link.textContent=s.pde_source.title;link.target='_blank';link.rel='noopener noreferrer';source.append(link);
-    source.append(document.createTextNode(' · 图中矢量点数字化，非作者原始表格。覆盖 '+s.pde_source.wavelength_range_nm.join('–')+' nm；905 nm为插值值，原文报告约27%。'+s.pde_source.fill_factor_note));
+    source.append(document.createTextNode(' · '+s.pde_source.extraction+' 当前覆盖 '+s.pde_source.wavelength_range_nm.join('–')+' nm。'+s.pde_source.extrapolation.note+' '+s.pde_source.fill_factor_note));
     const outside=d.filter.laser_wavelength_nm<s.pde_source.wavelength_range_nm[0]||d.filter.laser_wavelength_nm>s.pde_source.wavelength_range_nm[1];
-    if(outside)source.append(document.createTextNode(' 当前激光波长超出文献曲线覆盖；所显示0来自模型边界假设。'));
+    if(outside)source.append(document.createTextNode(' 当前激光波长超出数据覆盖范围；所显示0来自模型边界假设。'));
   }else source.textContent='当前曲线未匹配已登记文献数据。请确认输入PDE是否已含器件收集效率；FF仍为独立乘数。';
-  drawLines($('pdeChart'),c.wavelength_nm,[{name:'PDE',y:c.pde,color:colors.cyan}],{xLabel:'波长 (nm)',ymin:0,ymax:1.05,scatter:{x:c.pde_original_x,y:c.pde_original_y},marker:{x:filter.laser_wavelength_nm,y:s.pde_at_laser,label:'激光 '+fmt(filter.laser_wavelength_nm,1)+' nm'}});
+  const estimates=new Set(s.pde_source?.extrapolation.estimated_wavelengths_nm||[]);
+  const pdeGroups=[{name:s.pde_source?'论文图提取点':'输入采样点',color:colors.blue,x:[],y:[]},{name:'外插估计点',color:colors.orange,x:[],y:[]}];
+  c.pde_original_x.forEach((x,i)=>{const group=pdeGroups[estimates.has(x)?1:0];group.x.push(x);group.y.push(c.pde_original_y[i]);});
+  drawLines($('pdeChart'),c.wavelength_nm,[{name:'PDE',y:c.pde,color:colors.cyan}],{xLabel:'波长 (nm)',ymin:0,ymax:1.05,scatterGroups:pdeGroups,marker:{x:filter.laser_wavelength_nm,y:s.pde_at_laser,label:'激光 '+fmt(filter.laser_wavelength_nm,1)+' nm'}});
 }
 
 async function updateDerived() {
@@ -356,6 +400,11 @@ $("configFile").addEventListener("change",async e=>{
 });
 inputEls().forEach(el=>el.addEventListener(el.tagName === "SELECT" || el.type==='checkbox' ? "change" : "input",changed));
 $("runButton").addEventListener("click",run);
+function setParameterSections(open) {
+  document.querySelectorAll('.controls details').forEach(section=>{section.open=open;});
+}
+$("collapseParameters").addEventListener("click",()=>setParameterSections(false));
+$("expandParameters").addEventListener("click",()=>setParameterSections(true));
 $("resetButton").addEventListener("click",async()=>{
   try {
     const response=await fetch("/api/defaults",{cache:"no-store"});if(!response.ok)throw new Error(await response.text());
@@ -370,8 +419,8 @@ $("saveConfig").addEventListener("click",async()=>{try{
 $("saveHistogram").addEventListener("click",()=>{
   if(!lastResult)return;
   const h=lastResult.histogram;
-  let text="time_ns,observed_counts,expected_counts,expected_noise_counts\n";
-  for(let i=0;i<h.time_ns.length;i++)text+=[h.time_ns[i],h.observed_counts[i],h.expected_counts[i],h.expected_noise_counts[i]].join(",")+"\n";
+  let text="time_ns,observed_counts,readout_expected_counts,expected_noise_counts,signal_gt_counts,sensor_incident_signal_gt_counts,mc_min_counts,mc_max_counts,mc_trials\n";
+  for(let i=0;i<h.time_ns.length;i++)text+=[h.time_ns[i],h.observed_counts[i],h.expected_counts[i],h.expected_noise_counts[i],h.ground_truth.counts[i],h.ground_truth.sensor_incident_counts[i],h.sample_range.lower_counts?.[i]??'',h.sample_range.upper_counts?.[i]??'',h.sample_range.trial_count].join(",")+"\n";
   download("spad_lidar_histogram.csv",text,"text/csv");
 });
 $("saveDebug").addEventListener("click",()=>download("spad_debug_report.json",JSON.stringify(lastResult,null,2),"application/json"));

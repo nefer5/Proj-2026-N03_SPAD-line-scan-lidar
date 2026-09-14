@@ -1,20 +1,20 @@
 # 工况默认值唯一来源；CSV和手动模式分别保存采样点。
 schema_version: 1
 simulation:
-  range_m: 50
+  range_m: 100
   target_reflectivity: 0.1
   wavelength_nm: 905
-  pulse_energy_nj: 5
+  pulse_energy_nj: 12
   pulse_shape: gaussian
-  laser_prf_hz: 1000000
+  laser_prf_hz: 100000
   tx_efficiency: 0.8
   overlap_factor: 1
   atmospheric_one_way_transmission: 0.95
-  rx_aperture_shape: circle
+  rx_aperture_shape: rectangle
   rx_aperture_mm: 20
-  rx_aperture_width_mm: 20
-  rx_aperture_height_mm: 10
-  rx_efficiency: 0.5
+  rx_aperture_width_mm: 40
+  rx_aperture_height_mm: 20
+  rx_efficiency: 0.8
   channel_ifov_h_mrad: 0.2
   channel_ifov_v_mrad: 0.2
   solar_enabled: true
@@ -25,26 +25,27 @@ simulation:
   H_binning: 4
   V_binning: 4
   fill_factor: 0.92
-  dcr_cps_per_spad: 1000
+  # 用户确认的Sony/IMX459相关工程参考；条件与未映射项见docs/sony-reference.md。
+  dcr_cps_per_spad: 2007
   other_noise_cps_per_spad: 0
-  spad_dead_time_ns: 20
-  readout_mode: independent_first
+  spad_dead_time_ns: 6
+  readout_mode: independent_multi
   detector_operation: gated
-  tdc_dead_time_ns: 10
+  tdc_dead_time_ns: 0  # 暂不研究TDC忙碌限制；理想读出假设，非器件实测值。
   tdc_count: 4
-  tdc_max_hits_per_cycle: 8
+  tdc_max_hits_per_cycle: 1000
   or_pulse_width_ns: 1
   coincidence_window_ns: 2
   coincidence_threshold: 2
-  spad_jitter_fwhm_ps: 150
-  pulse_fwhm_ps: 700
+  spad_jitter_fwhm_ps: 173
+  pulse_fwhm_ps: 2000
   other_jitter_fwhm_ps: 80
-  tdc_bin_ps: 100
+  tdc_bin_ps: 1000  # 时间量化间隔，不是SPAD抖动或TDC死时间。
   gate_start_ns: 0
-  gate_width_ns: 700
+  gate_width_ns: 2048
   calibration_delay_ns: 0
-  laser_shots: 100
-  monte_carlo_trials: 80
+  laser_shots: 1
+  monte_carlo_trials: 40
   rng_seed: 7
   line_channels: 16
   nearest_neighbor_crosstalk: 0.005
@@ -91,8 +92,10 @@ simulation:
         value: 0.0025
       - wavelength_nm: 850
         value: 0.0035
-      - wavelength_nm: 940
+      - wavelength_nm: 905
         value: 0.004
+      - wavelength_nm: 940
+        value: 0.0035
       - wavelength_nm: 1050
         value: 0.003
       - wavelength_nm: 1200
@@ -163,6 +166,10 @@ simulation:
         value: 0.1996
       - wavelength_nm: 960
         value: 0.1609
+      - wavelength_nm: 980
+        value: 0.1222
+      - wavelength_nm: 1000
+        value: 0.0835
       manual_points:
       - wavelength_nm: 350
         value: 0

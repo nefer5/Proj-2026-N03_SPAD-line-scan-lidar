@@ -1,5 +1,13 @@
 # SPAD + VCSEL + 转镜一维线扫 LiDAR 建模器
 
+**当前阶段基线：V0.2（0.2.0），仍属于A单角通道模型。** 包含纯信号解析GT、首次观测与MC范围误差棒、参数批量展开/折叠，以及当前用户工况。默认独立多次记录、累计1发、SPAD死时间6ns、TDC死时间0、每周期记录上限1000。以下旧版本记录保留为历史，不再将V0.2等同于B全光斑模型。
+
+直方图青色散点/虚线为纯信号解析ground truth，不含背景和读出损失；蓝柱为一次实际含噪观测，橙线为纯噪声期望。参考面、积分方式及24/40次的区别见 [直方图显示说明](docs/histogram-display.md)。
+
+当前噪声计算见 [统一噪声说明](docs/noise-model.md)，默认器件参数的工程参考见 [Sony参考说明](docs/sony-reference.md)，A版后续建议见 [项目审视](docs/a-review.md)。公开论文的本地副本与来源索引放在 `data/reference/papers/`。
+
+PDE波段扩展：默认CSV保留460–960nm的26个论文图提取点，追加980nm（12.22%）、1000nm（8.35%）两个末端线性外插估计点。界面区分提取点与估计点；方法与边界见 [文献PDE说明](docs/pde-literature.md)。
+
 **V0.1.8：文献PDE默认CSV。** 采用Van Sieleghem等2022年图7的3.5V过压曲线，26个矢量提取点覆盖460–960nm；905nm处PCHIP约27.41%。FF按用户要求默认0.92，额外相乘后约25.22%，与论文原始PDE区分显示。提取方法、来源和边界见 [文献PDE说明](docs/pde-literature.md)。
 
 **V0.1.7：H/V空间binning。** 以H_binning、V_binning替代可编辑总SPAD数，默认4×4，乘积统一供核心使用；旧总数配置迁移为一行。滤光片范围为855–955nm，当前默认峰值透过率0.95、矩形通带10nm，加权带宽9.5nm。PDE/太阳备用中心保持独立，界面显示当前生效模式和激光处PDE。说明见 [空间binning与参数联动](docs/binning.md)。
@@ -26,7 +34,7 @@ V0.1.2 修复静态资源缓存导致下拉框字符串被旧脚本转为null的
 
 V0.1.1 新增 YAML 配置、专家调试页 `/debug`、脉冲功率联动、圆形/椭圆/矩形入瞳和柱状观测直方图。参数默认值唯一来源为 `config/defaults.yaml`；点击网页“恢复默认”重新读取。算法策略见 `config/algorithms.yaml`，参数说明见 `config/parameter-help.yaml`，项目铁律见 [AGENTS.md](AGENTS.md)。
 
-详细公式和调试说明见 [专家调试手册](docs/debug-guide.md)。调试页共用评估页核心，可导出完整中间量 JSON。旧 `examples/config.json` 为20000发的历史示例，不是默认值源。PRF暂不关联扫描轨迹，Tx/Rx数据库仍计划在V0.2实现。
+详细公式和调试说明见 [专家调试手册](docs/debug-guide.md)。调试页共用评估页核心，可导出完整中间量 JSON。旧 `examples/config.json` 为20000发的历史示例，不是默认值源。PRF暂不关联扫描轨迹，Tx/Rx数据库属于后续B阶段，发布版本待定。
 
 - 网页输入和修改核心参数；
 - 标准扩展朗伯目标光子预算；

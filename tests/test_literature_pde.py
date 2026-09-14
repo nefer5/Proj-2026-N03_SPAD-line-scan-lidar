@@ -20,8 +20,8 @@ def test_default_csv_matches_reference_file():
         rows = [(float(row['wavelength_nm']), float(row['pde'])) for row in csv.DictReader(stream)]
     assert spec.mode == 'csv'
     assert [(p.wavelength_nm, p.value) for p in spec.csv_points] == rows
-    assert len(rows) == 26
-    assert [rows[0][0], rows[-1][0]] == [460, 960]
+    assert len(rows) == 28
+    assert [rows[0][0], rows[-1][0]] == [460, 1000]
     assert len(spec.manual_points) == 11
     assert pde_provenance(SimulationConfig())['id'] == DATASET
 
@@ -57,4 +57,31 @@ def test_vector_extraction_reproduces_csv_when_local_source_available():
     pytest.importorskip('fitz')
     extract = runpy.run_path(str(ROOT / 'scripts/extract-paper-pde.py'))['extract']
     metadata = read_yaml('pde-datasets.yaml')[DATASET]
-    assert extract(source, metadata) == (ROOT / metadata['csv_path']).read_text(encoding='utf-8')
+    csv_lines = (ROOT / metadata['csv_path']).read_text(encoding='utf-8').splitlines()
+    assert extract(source, metadata) == '\n'.join(csv_lines[:metadata['points'] + 1]) + '\n'
+
+
+def test_extrapolated_points_follow_recorded_tail_slope():
+    from hashlib import sha256
+    import json
+    import numpy as np
+    from spad_lidar.curves import Curve
+
+    cfg = SimulationConfig()
+    spec = cfg.spectral_inputs.pde
+    points = {p.wavelength_nm: p.value for p in spec.csv_points}
+    metadata = read_yaml('pde-datasets.yaml')[DATASET]
+    extrapolation = metadata['extrapolation']
+    left, right = extrapolation['anchor_wavelengths_nm']
+    slope = (points[right] - points[left]) / (right - left)
+    assert slope < 0
+    for wavelength in extrapolation['estimated_wavelengths_nm']:
+        assert points[wavelength] == round(points[right] + (wavelength-right)*slope, extrapolation['pde_digits'])
+    original = [(float(p.wavelength_nm), float(p.value)) for p in spec.csv_points[:metadata['points']]]
+    assert sha256(json.dumps(original, separators=(',', ':')).encode()).hexdigest() == metadata['digitized_points_sha256']
+    curve = Curve(spec)
+    values = curve(np.linspace(right, 1000, 81))
+    assert np.all(np.diff(values) <= 0)
+    assert np.all((values >= 0) & (values <= 1))
+    assert float(curve(np.array(1000.0))) == pytest.approx(0.0835)
+    assert float(curve(np.array(1001.0))) == 0

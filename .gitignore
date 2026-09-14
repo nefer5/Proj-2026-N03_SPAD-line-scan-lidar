@@ -7,3 +7,6 @@ build/
 artifacts/*.tgz
 # Downloaded papers / source renders are local references, not redistributable assets.
 data/local-sources/
+# Downloaded full-text papers stay local; track the reference index instead.
+data/reference/papers/*.pdf
+data/reference/papers/*.part

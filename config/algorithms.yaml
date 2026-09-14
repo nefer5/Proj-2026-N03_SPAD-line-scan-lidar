@@ -24,6 +24,10 @@ spectral_plot_min_nm: 350.0
 spectral_plot_max_nm: 1200.0
 spectral_plot_samples: 851
 readout_expected_trials: 24
+histogram_preview_subdivisions: 16
+max_histogram_preview_bins: 400000
+ground_truth_plot_points: 801
+ground_truth_extent_sigma: 8
 readout_warmup_cycles: 8
 readout_trace_events: 200
 max_readout_events_per_run: 200000

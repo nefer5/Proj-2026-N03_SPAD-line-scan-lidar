@@ -118,7 +118,7 @@ def event_acquisition(cfg,budget,algorithms,edges):
     ratio=period/cfg.gate_width_ns if cfg.detector_operation=="free_running" else 1
     work=(cfg.laser_shots+algorithms.readout_warmup_cycles)*(budget.signal_detected_per_pulse+
           (budget.background_detected_per_gate+budget.dark_detected_per_gate+budget.other_detected_per_gate)*ratio)
-    runs=1+cfg.monte_carlo_trials+2*algorithms.readout_expected_trials
+    runs=1+max(cfg.monte_carlo_trials-1,0)+2*algorithms.readout_expected_trials
     if (cfg.laser_shots+algorithms.readout_warmup_cycles)*runs>algorithms.max_readout_cycles:
         raise ValueError('Cycle work exceeds configured limit; reduce pulse count or repetitions')
     if work*runs>algorithms.max_readout_expected_work:
@@ -128,12 +128,14 @@ def event_acquisition(cfg,budget,algorithms,edges):
     observed,stats,trace=event_histogram(cfg,budget,observation_rng,algorithms,edges,trace=True)
     expected=np.zeros_like(observed);noise=np.zeros_like(observed)
     for _ in range(algorithms.readout_expected_trials):
-        expected+=event_histogram(cfg,budget,mean_rng,algorithms,edges)[0]
+        sample=event_histogram(cfg,budget,mean_rng,algorithms,edges)
+        expected+=sample[0]
         noise+=event_histogram(cfg,budget,noise_rng,algorithms,edges,signal=False)[0]
-    trial_histograms=[event_histogram(cfg,budget,trial_rng,algorithms,edges)[0] for _ in range(cfg.monte_carlo_trials)]
+    trial_histograms=([observed.copy()]+[event_histogram(cfg,budget,trial_rng,algorithms,edges)[0]
+                       for _ in range(cfg.monte_carlo_trials-1)]) if cfg.monte_carlo_trials else []
     return observed,expected/algorithms.readout_expected_trials,noise/algorithms.readout_expected_trials,trial_histograms,{
         "mode":cfg.readout_mode,"engine":"event_monte_carlo",
         "expected_trials":algorithms.readout_expected_trials,"warmup_cycles":algorithms.readout_warmup_cycles,
         "losses":stats,"trace":trace,"trace_truncated":stats["logic_triggers"]>len(trace),
-        "note":"MC mean is not an exact expectation. Nonparalyzable dead times; gate controls TDC input; free_running allows out-of-gate SPAD avalanches. Coincidence counts distinct cells. No afterpulse or avalanche crosstalk yet."
+        "note":"MC mean is not an exact expectation. Nonparalyzable dead times; gate controls TDC input; free_running allows out-of-gate SPAD avalanches. Coincidence counts distinct cells. No afterpulse or avalanche crosstalk yet.",
     }
