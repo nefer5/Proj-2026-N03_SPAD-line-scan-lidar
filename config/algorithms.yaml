@@ -29,3 +29,5 @@ readout_trace_events: 200
 max_readout_events_per_run: 200000
 max_readout_expected_work: 2000000
 max_readout_cycles: 200000
+basic_gaussian_extent_fwhm: 6.0
+basic_quadrature_segments: 32

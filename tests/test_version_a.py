@@ -17,7 +17,7 @@ def test_html_uses_content_hash_for_js_and_css_and_all_routes_are_uncached():
         response = client.get(route)
         assert response.status_code == 200
         assert response.headers["cache-control"] == "no-store"
-        for name in ("app.js", "styles.css"):
+        for name in ("app.js", "curve-editor.js", "styles.css"):
             digest = sha256((api.WEB/name).read_bytes()).hexdigest()
             assert f"/static/{name}?v={digest}" in response.text
             asset = client.get(f"/static/{name}?v={digest}")
@@ -26,7 +26,7 @@ def test_html_uses_content_hash_for_js_and_css_and_all_routes_are_uncached():
 
 
 def test_file_change_changes_asset_url_without_manual_version_bump(tmp_path, monkeypatch):
-    for name in ("index.html", "app.js", "styles.css", "vendor/katex/katex.min.js", "vendor/katex/katex.min.css"):
+    for name in ("index.html", "app.js", "curve-editor.js", "styles.css", "vendor/katex/katex.min.js", "vendor/katex/katex.min.css"):
         (tmp_path/name).parent.mkdir(parents=True,exist_ok=True)
         (tmp_path/name).write_bytes((api.WEB/name).read_bytes())
     monkeypatch.setattr(api, "WEB", tmp_path)

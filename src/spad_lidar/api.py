@@ -10,11 +10,12 @@ import yaml
 from .models import SimulationConfig
 from .simulator import simulate, derived_quantities
 from .configuration import parse_yaml, read_yaml, Algorithms, ConfigurationError
+from .curves import CurveSpec
 
 ROOT = Path(__file__).resolve().parents[2]
 WEB = ROOT / "web"
 
-app = FastAPI(title="SPAD Line-Scanning LiDAR Model", version="0.1.4")
+app = FastAPI(title="SPAD Line-Scanning LiDAR Model", version="0.1.5")
 app.mount("/static", StaticFiles(directory=WEB), name="static")
 
 
@@ -41,7 +42,7 @@ def index():
     html = (WEB / "index.html").read_text(encoding="utf-8")
     # Content-addressed URLs bypass already cached unversioned JS/CSS as well.
     # Recompute on every navigation so editable source requires no release step.
-    for name in ("app.js", "styles.css", "vendor/katex/katex.min.js", "vendor/katex/katex.min.css"):
+    for name in ("app.js", "curve-editor.js", "styles.css", "vendor/katex/katex.min.js", "vendor/katex/katex.min.css"):
         digest = sha256((WEB / name).read_bytes()).hexdigest()
         html = html.replace(f'/static/{name}"', f'/static/{name}?v={digest}"')
     return HTMLResponse(html)
@@ -55,13 +56,28 @@ def defaults():
 @app.get("/api/catalog")
 def catalog():
     return {"parameters": read_yaml("parameter-help.yaml"),
+            "curve_inputs":{**read_yaml("curve-inputs.yaml"), "formulas":read_yaml("formulas.yaml")},
             "readout_modes":read_yaml("readout-modes.yaml"),
             "algorithms": Algorithms.load().model_dump()}
 
 
 @app.post("/api/derived")
 def derived(config: SimulationConfig):
-    return derived_quantities(config)
+    try:
+        return derived_quantities(config)
+    except ValueError as exc:
+        raise HTTPException(422,detail=str(exc)) from exc
+
+
+@app.post('/api/curve/validate')
+def validate_curve(curve: CurveSpec, kind: str):
+    if kind not in ('filter','other','pde','solar'):
+        raise HTTPException(422,detail='Unknown spectral kind')
+    if kind!='solar' and curve.mode=='standard':
+        raise HTTPException(422,detail='Standard mode is only available for solar')
+    if kind in ('filter','pde') and (curve.basic.amplitude>1 or any(p.value>1 for p in curve.csv_points+curve.manual_points)):
+        raise HTTPException(422,detail='透过率和PDE必须在0–1之间')
+    return curve.model_dump()
 
 
 @app.post("/api/simulate")

@@ -1,17 +1,11 @@
 let defaults = {};
-let filterCurve = null;
-let filterDraftDirty = false;
-let filterEditRevision = 0;
+let curveEditors = null;
 let lastResult = null;
 let help = {};
 let debugPage = 0;
 let latestDerived = null;
 let derivedSequence = 0;
 let readoutModes = {};
-const spectralEditors = {
-  other:{field:'other_light_spectrum',column:'radiance',points:[],dirty:false},
-  pde:{field:'pde_spectrum',column:'pde',points:[],dirty:false}
-};
 const isDebug = location.pathname === "/debug";
 
 const $ = (id) => document.getElementById(id);
@@ -22,16 +16,10 @@ function fillForm(config) {
   inputEls().forEach(el => { if (config[el.dataset.key] !== undefined) {
     if(el.type==='checkbox')el.checked=config[el.dataset.key];else el.value=config[el.dataset.key];
   }});
-  for(const [kind,editor] of Object.entries(spectralEditors)) {
-    editor.points=config[editor.field];editor.dirty=false;
-    $(kind+'SpectrumPoints').value=editor.points.map(p=>p.wavelength_nm+','+p[editor.column]).join('\n');
-    $(kind+'SpectrumStatus').textContent='已加载 '+editor.points.length+' 个点；默认数据仅为示例。';
-  }
+  curveEditors.fill(config.spectral_inputs);
 }
 
-function collectConfig(allowFilterDraft = false) {
-  if(filterDraftDirty && !allowFilterDraft) throw new Error("滤光片采样点有未应用的编辑，请先点击“应用采样点”，或清除曲线。");
-  if(!allowFilterDraft && Object.values(spectralEditors).some(editor=>editor.dirty))throw new Error('环境光或PDE光谱有未应用编辑，请先应用采样点。');
+function collectConfig() {
   const cfg = { ...defaults };
   inputEls().forEach(el => {
     const key = el.dataset.key;
@@ -45,8 +33,7 @@ function collectConfig(allowFilterDraft = false) {
       if (el.value.trim() === '' || !Number.isFinite(cfg[key]) || (isInteger && !Number.isInteger(cfg[key]))) throw new Error(`参数 ${key} 需要有效${isInteger ? '整数' : '数值'}`);
     }
   });
-  cfg.filter_curve = filterCurve;
-  for(const editor of Object.values(spectralEditors))cfg[editor.field]=editor.points;
+  cfg.spectral_inputs = curveEditors.values();
   return cfg;
 }
 
@@ -221,9 +208,7 @@ function apertureFields() {
   $('readoutDescription').textContent=readoutModes[selected]?.description||'';
   const uses={tdc_count:selected==='shared_multitdc',coincidence_window_ns:selected.startsWith('coincidence'),coincidence_threshold:selected.startsWith('coincidence'),or_pulse_width_ns:selected.startsWith('shared'),tdc_max_hits_per_cycle:!selected.endsWith('first')&&selected!=='analytic_reference',spad_dead_time_ns:selected!=='analytic_reference',tdc_dead_time_ns:selected!=='analytic_reference',detector_operation:selected!=='analytic_reference'};
   for(const [key,active] of Object.entries(uses)) {const el=document.querySelector('[data-key='+key+']');el.disabled=!active;el.closest('label').classList.toggle('inactive',!active);}
-  for(const [key,active] of [['pde',document.querySelector('[data-key=pde_mode]').value==='constant'],['background_spectral_radiance',document.querySelector('[data-key=other_light_mode]').value==='constant']]){
-    const el=document.querySelector('[data-key='+key+']');el.disabled=!active;el.closest('label').classList.toggle('inactive',!active);
-  }
+
 }
 
 function renderDerived(d) {
@@ -235,20 +220,18 @@ function renderDerived(d) {
   $("derivedStatus").textContent="Tx后：峰值 "+fmt(d.tx_output_peak_power_w,4)+" W；平均 "+fmt(d.tx_output_average_power_w,6)+" W；周期 "+fmt(d.repetition_period_ns,2)+" ns";
   drawLines($("pulseChart"),d.pulse.time_ps,[{name:"时间功率 (W)",y:d.pulse.power_w,color:colors.cyan}],{xLabel:"相对脉冲中心 (ps)"});
   const filter=d.filter;
-  const method=filter.interpolation==="pchip"?"PCHIP插值":filter.interpolation==="linear"?"线性插值":"参数化矩形";
+  const method=filter.input_mode==="basic"?curveEditors.catalog.shapes[filter.basic_shape].label:(filter.interpolation==="pchip"?"PCHIP插值":"线性插值");
   drawLines($("filterChart"),filter.wavelength_nm,[{name:method,y:filter.transmission,color:colors.cyan}],{
     xLabel:"波长 (nm)",ymin:0,ymax:1.05,
     scatter:{x:filter.original_wavelength_nm,y:filter.original_transmission},
     marker:{x:filter.laser_wavelength_nm,y:filter.laser_transmission,label:"激光 "+fmt(filter.laser_wavelength_nm,1)+" nm"}
   });
-  $("filterSummary").textContent=(filter.source==="csv_curve"?filter.original_wavelength_nm.length+"个原始点 · "+method:"参数化矩形滤光片（无原始采样点）")+
+  $("filterSummary").textContent=(filter.source==="csv_curve"?filter.original_wavelength_nm.length+"个原始点 · "+method:method+"基础波形（无采样点）")+
     " · 激光处透过率 "+fmt(filter.laser_transmission*100,2)+"% · 加权带宽 ∫T dλ = "+fmt(filter.weighted_bandwidth_nm,3)+" nm";
   $("filterSummary").classList.toggle("warning",filter.laser_transmission===0);
-  $("filterStatus").textContent=filter.source==="csv_curve"?"采样点已生效，覆盖矩形滤光片参数":"使用参数化矩形滤光片";
-  $("clearFilter").disabled=filter.source!=="csv_curve" && !filterDraftDirty;
   const s=d.spectra,c=s.curves;
-  $('solarSummary').textContent=fmt(s.solar_lux,0)+' lux → '+fmt(s.solar_irradiance_w_m2,3)+' W/m²；标准谱基准 '+fmt(s.solar_reference_lux,0)+' lux';
-  drawLines($('solarChart'),c.wavelength_nm,[{name:'太阳辐照度 W/m²/nm',y:c.solar_irradiance,color:colors.orange}],{xLabel:'波长 (nm)'});
+  $('solarSummary').textContent=fmt(s.solar_lux,0)+' lux → '+fmt(s.solar_irradiance_w_m2,3)+' W/m²；所选谱形归一化前 '+fmt(s.solar_reference_lux,0)+' lux';
+  drawLines($('solarChart'),c.wavelength_nm,[{name:'太阳辐照度 W/m²/nm',y:c.solar_irradiance,color:colors.orange}],{xLabel:'波长 (nm)',scatter:{x:c.solar_original_x,y:c.solar_original_y}});
   drawLines($('environmentChart'),c.wavelength_nm,[{name:'太阳反射',y:c.solar_radiance,color:colors.orange},{name:'其他光',y:c.other_radiance,color:colors.blue},{name:'合计',y:c.total_radiance,color:colors.cyan}],{xLabel:'波长 (nm)',yDigits:3,ymax:Math.max(...c.total_radiance,Number.EPSILON)*1.12,scatter:{x:c.other_original_x,y:c.other_original_y}});
   $('pdeSummary').textContent='激光处感光区PDE：'+fmt(s.pde_at_laser*100,2)+'%；再乘FF用于探测。样例不是芯片规格。';
   drawLines($('pdeChart'),c.wavelength_nm,[{name:'PDE',y:c.pde,color:colors.cyan}],{xLabel:'波长 (nm)',ymin:0,ymax:1.05,scatter:{x:c.pde_original_x,y:c.pde_original_y},marker:{x:filter.laser_wavelength_nm,y:s.pde_at_laser,label:'激光 '+fmt(filter.laser_wavelength_nm,1)+' nm'}});
@@ -258,8 +241,9 @@ async function updateDerived() {
   const ticket=++derivedSequence;
   apertureFields();
   try {
-    const d=await (await request("/api/derived",collectConfig())).json();
-    if(ticket===derivedSequence) renderDerived(d);
+    const cfg=collectConfig();
+    const d=await (await request("/api/derived",cfg)).json();
+    if(ticket===derivedSequence) {curveEditors.confirmBasic(cfg.spectral_inputs);renderDerived(d);}
   } catch(error) {
     if(ticket===derivedSequence) {
       latestDerived=null;
@@ -346,84 +330,20 @@ function changed() {
   changed.timer=setTimeout(updateDerived,200);
 }
 
-function parseFilterPoints(text) {
-  const rows=text.replace(/^\uFEFF/,"").trim().split(/\r?\n/).filter(row=>row.trim());
-  if(rows[0]?.trim().split(/[,\s]+/).join(",")==="wavelength_nm,transmission") rows.shift();
-  if(rows.length<2) throw new Error("请提供至少两个滤光片采样点。");
-  return rows.map((row,i)=>{
-    const cells=row.includes(",")?row.split(",").map(cell=>cell.trim()):row.trim().split(/\s+/);
-    if(cells.length!==2 || cells.some(cell=>cell==="" || !Number.isFinite(Number(cell)))) throw new Error(`采样点第${i+1}行必须为波长、透过率两列有效数字。`);
-    return {wavelength_nm:Number(cells[0]),transmission:Number(cells[1])};
-  });
-}
-
-function syncFilterEditor() {
-  ++filterEditRevision;
-  $("filterPoints").value=filterCurve?filterCurve.map(p=>p.wavelength_nm+","+p.transmission).join("\n"):"";
-  filterDraftDirty=false;
-  $("filterDraftStatus").textContent=filterCurve?filterCurve.length+"个点已应用":"无离散采样点，使用参数化矩形滤光片";
-}
-
-async function applyFilterText(text) {
-  const revision=filterEditRevision;
-  const curve=parseFilterPoints(text);
-  const cfg=collectConfig(true);cfg.filter_curve=curve;
-  await request("/api/derived",cfg); // Reject bad ranges or duplicate wavelengths before replacing data.
-  if(revision!==filterEditRevision) throw new Error("验证期间采样点又有编辑，请重新应用最新采样点。");
-  filterCurve=curve;syncFilterEditor();$("errorBox").classList.add("hidden");changed();
-}
-
-$("filterFile").addEventListener("change",async e=>{
-  try {const file=e.target.files[0];if(file)await applyFilterText(await file.text());}
-  catch(error){showError(error);}
-});
-$("filterPoints").addEventListener("input",()=>{
-  ++filterEditRevision;
-  filterDraftDirty=true;$("clearFilter").disabled=false;
-  $("filterDraftStatus").textContent="有未应用的修改；点击应用采样点后才参与计算。";
-  $("resultStatus").textContent="滤光片采样点正在编辑，图表仍对应上次已应用数据。";
-});
-$("applyFilterPoints").addEventListener("click",async()=>{
-  try {await applyFilterText($("filterPoints").value);$("filterFile").value="";}
-  catch(error){showError(error);}
-});
-$("clearFilter").addEventListener("click",()=>{
-  filterCurve=null;$("filterFile").value="";syncFilterEditor();changed();
-});
 $("configFile").addEventListener("change",async e=>{
   try {
     const file=e.target.files[0];if(!file)return;
     const cfg=await (await request("/api/config/import",await file.text(),true)).json();
-    defaults=cfg;filterCurve=cfg.filter_curve;fillForm(cfg);syncFilterEditor();
-    $("filterStatus").textContent=filterCurve?"配置中已加载 "+filterCurve.length+" 个滤光片点":"使用矩形滤光片";
+    defaults=cfg;fillForm(cfg);
     changed();await run();
   }catch(error){showError(error);}
 });
-for(const [kind,editor] of Object.entries(spectralEditors)) {
-  $(kind+'SpectrumPoints').addEventListener('input',()=>{editor.dirty=true;$(kind+'SpectrumStatus').textContent='有未应用编辑';});
-  const applyText=async text=>{
-    const normalized=text.trim().replace(/^wavelength_nm\s*[,\t ]\s*(radiance|pde)\s*\r?\n/,'wavelength_nm,transmission\n');
-    const points=parseFilterPoints(normalized).map(p=>({wavelength_nm:p.wavelength_nm,[editor.column]:p.transmission}));
-    const cfg=collectConfig(true);cfg[editor.field]=points;
-    const modeKey=kind==='other'?'other_light_mode':'pde_mode';cfg[modeKey]='spectrum';
-    await request('/api/derived',cfg);
-    editor.points=points;editor.dirty=false;
-    document.querySelector('[data-key='+modeKey+']').value='spectrum';
-    $(kind+'SpectrumPoints').value=points.map(p=>p.wavelength_nm+','+p[editor.column]).join('\n');
-    $(kind+'SpectrumStatus').textContent='已应用 '+points.length+' 个点';$('errorBox').classList.add('hidden');changed();
-  };
-  $(kind==='other'?'applyOtherSpectrum':'applyPdeSpectrum').addEventListener('click',async()=>{try{await applyText($(kind+'SpectrumPoints').value);}catch(e){showError(e);}});
-  $(kind+'SpectrumFile').addEventListener('change',async e=>{try{if(e.target.files[0])await applyText(await e.target.files[0].text());}catch(err){showError(err);}});
-}
 inputEls().forEach(el=>el.addEventListener(el.tagName === "SELECT" || el.type==='checkbox' ? "change" : "input",changed));
 $("runButton").addEventListener("click",run);
 $("resetButton").addEventListener("click",async()=>{
   try {
     const response=await fetch("/api/defaults",{cache:"no-store"});if(!response.ok)throw new Error(await response.text());
-    defaults=await response.json();filterCurve=defaults.filter_curve;
-    syncFilterEditor();
-    $("filterFile").value="";$("configFile").value="";
-    $("filterStatus").textContent=filterCurve?"YAML默认曲线已加载":"使用矩形滤光片";
+    defaults=await response.json();$("configFile").value="";
     fillForm(defaults);changed();await run();
   }catch(error){showError(error);}
 });
@@ -452,12 +372,13 @@ window.addEventListener("resize",()=>{
     const [d,c]=await Promise.all([fetch("/api/defaults",{cache:"no-store"}),fetch("/api/catalog",{cache:"no-store"})]);
     if(!d.ok || !c.ok)throw new Error("无法读取YAML配置："+await (!d.ok?d:c).text());
     defaults=await d.json();const catalog=await c.json();help=catalog.parameters;readoutModes=catalog.readout_modes;
+    curveEditors=new CurveEditors(catalog.curve_inputs,changed,async(kind,spec)=>await (await request('/api/curve/validate?kind='+kind,spec)).json());
     $('readoutMode').replaceChildren(...Object.entries(readoutModes).map(([key,meta])=>{const option=document.createElement('option');option.value=key;option.textContent=meta.label;return option;}));
     let initial=defaults;
     const saved=sessionStorage.getItem("lidar-config");
     sessionStorage.removeItem("lidar-config");
     if(saved) initial=await (await request("/api/config/import",saved,true)).json();
-    filterCurve=initial.filter_curve;fillForm(initial);syncFilterEditor();apertureFields();
+    fillForm(initial);apertureFields();
     inputEls().forEach(el=>{const meta=help[el.dataset.key];if(meta)el.closest("label").title=meta.description;});
     if(isDebug) {
       $("debugPanel").classList.remove("hidden");

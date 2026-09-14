@@ -6,25 +6,13 @@ import io
 import zipfile
 
 import numpy as np
-from scipy.interpolate import PchipInterpolator
+from .curves import Curve
 
 from .constants import C, H, K_PHOTOPIC
 from .configuration import read_yaml, Algorithms, ConfigurationError
 from .filters import FilterResponse
 
 ROOT = Path(__file__).resolve().parents[2]
-
-
-class SampledSpectrum:
-    def __init__(self, points, value_key, method):
-        self.x = np.array([p.wavelength_nm for p in points])
-        self.y = np.array([getattr(p, value_key) for p in points])
-        self.poly = PchipInterpolator(self.x, self.y, extrapolate=False) if method == "pchip" else None
-
-    def __call__(self, x):
-        x = np.asarray(x)
-        values = self.poly(x) if self.poly is not None else np.interp(x, self.x, self.y)
-        return np.where((x >= self.x[0]) & (x <= self.x[-1]), values, 0.0)
 
 
 @lru_cache(maxsize=1)
@@ -64,25 +52,40 @@ def solar_normalization(order):
 def spectral_components(cfg, algorithms=None, plot=False):
     a = algorithms or Algorithms.load()
     solar, _, manifest = reference_data()
-    reference_lux, reference_w_m2 = solar_normalization(a.spectral_quadrature_order)
-    scale = cfg.solar_illuminance_lux/reference_lux if cfg.solar_enabled else 0.0
-    other = SampledSpectrum(cfg.other_light_spectrum,"radiance",cfg.other_light_interpolation)
-    pde = SampledSpectrum(cfg.pde_spectrum,"pde",cfg.pde_interpolation)
+    solar_custom = None if cfg.spectral_inputs.solar.mode=="standard" else Curve(cfg.spectral_inputs.solar)
+    other = Curve(cfg.spectral_inputs.other)
+    pde = Curve(cfg.spectral_inputs.pde)
     filt = FilterResponse(cfg)
+    if solar_custom is None:
+        reference_lux, reference_w_m2 = solar_normalization(a.spectral_quadrature_order)
+        solar_knots=solar[:,0]
+    else:
+        solar_knots=solar_custom.knots(a)
+        _, photopic, _ = reference_data()
+        k=np.unique(np.r_[solar_knots,photopic[:,0]])
+        xx,ww=quadrature(k,a.spectral_quadrature_order)
+        values=solar_custom(xx)
+        vision=np.interp(xx,photopic[:,0],photopic[:,1],left=0,right=0)
+        reference_lux=float(K_PHOTOPIC*np.dot(ww,values*vision))
+        reference_w_m2=solar_custom.integral_nm()
+    if cfg.solar_enabled and cfg.solar_illuminance_lux>0 and reference_lux<=0:
+        raise ValueError("Selected solar shape has no visible photopic energy; cannot normalize positive lux")
+    scale=cfg.solar_illuminance_lux/reference_lux if cfg.solar_enabled and reference_lux>0 else 0.0
 
     def solar_e(x):
-        return scale*np.interp(x,solar[:,0],solar[:,2],left=0,right=0)
+        values=solar_custom(x) if solar_custom is not None else np.interp(x,solar[:,0],solar[:,2],left=0,right=0)
+        return scale*values
 
     def other_l(x):
-        values = other(x) if cfg.other_light_mode == "spectrum" else np.full_like(x,cfg.background_spectral_radiance,dtype=float)
-        return values*cfg.other_light_scale if cfg.other_light_enabled else np.zeros_like(x)
+        return other(x)*cfg.other_light_scale if cfg.other_light_enabled else np.zeros_like(x)
 
     def pde_at(x):
-        return pde(x) if cfg.pde_mode == "spectrum" else np.full_like(x,cfg.pde,dtype=float)
+        return pde(x)
 
-    # Split at every knot: Gauss order 6 integrates products of piecewise cubic
-    # spectra, filter, PDE and wavelength (polynomial degree <=10) exactly.
-    knots = np.unique(np.r_[filt.wavelength, solar[:,0], other.x, pde.x])
+    # Split at every interpolation knot and basic-waveform feature. Polynomial
+    # products are integrated exactly by order 6; Gaussian/cosine shapes receive
+    # local refinement from Curve.knots, independently of plot sampling density.
+    knots = np.unique(np.r_[filt.knots(a), solar_knots, other.knots(a), pde.knots(a)])
     knots = knots[(knots>=filt.wavelength[0]) & (knots<=filt.wavelength[-1])]
     x,w = quadrature(knots,a.spectral_quadrature_order)
     sun_l = solar_e(x)*cfg.solar_reflectivity/np.pi
@@ -99,10 +102,11 @@ def spectral_components(cfg, algorithms=None, plot=False):
         "other_filtered_radiance_w_m2_sr": float(np.dot(w,ambient_l*t)),
         "solar_detectable_photons_s_m2_sr": float(np.dot(w,sun_l*detector_weight)),
         "other_detectable_photons_s_m2_sr": float(np.dot(w,ambient_l*detector_weight)),
-        "standard": manifest["solar"]["name"],
+        "standard": manifest["solar"]["name"] if solar_custom is None else "Custom solar spectral shape",
+        "input_modes": {key:getattr(cfg.spectral_inputs,key).mode for key in ("filter","solar","other","pde")},
         "source_checksums": {k:manifest[k]["sha256"] for k in ("solar","photopic")},
         "notes": [
-            "太阳lux表示目标面照度，以固定AM1.5G谱形缩放；不是任意光源lux到近红外的通用换算。",
+            "太阳lux表示目标面照度，按所选标准/自定义谱形归一化。自定义幅值仅影响归一化前参考量，不独立决定归一化后强度。",
             "太阳背景为灰朗伯面反射：太阳谱辐照度乘solar_reflectivity/π。不是太阳直视模型。",
             "其他环境光输入为接收方向谱辐亮度，不再乘反射率；示例不是实测光源。",
             "PDE为感光区探测概率，未包含fill factor；示例曲线不是器件规格。输入已含FF时将FF设为1。",
@@ -110,20 +114,22 @@ def spectral_components(cfg, algorithms=None, plot=False):
         ],
     }
     if plot:
-        lower=min(a.spectral_plot_min_nm,other.x[0],pde.x[0],cfg.wavelength_nm)
-        upper=max(a.spectral_plot_max_nm,other.x[-1],pde.x[-1],cfg.wavelength_nm)
+        lower=min(a.spectral_plot_min_nm,other.x[0],pde.x[0],cfg.wavelength_nm,solar_custom.x[0] if solar_custom is not None else a.spectral_plot_min_nm)
+        upper=max(a.spectral_plot_max_nm,other.x[-1],pde.x[-1],cfg.wavelength_nm,solar_custom.x[-1] if solar_custom is not None else a.spectral_plot_max_nm)
         dense=np.linspace(lower,upper,a.spectral_plot_samples)
-        grid=np.unique(np.r_[dense,solar[(solar[:,0]>=lower)&(solar[:,0]<=upper),0],other.x,pde.x,cfg.wavelength_nm])
+        grid=np.unique(np.r_[dense,solar_knots[(solar_knots>=lower)&(solar_knots<=upper)],other.plot_knots(a),pde.plot_knots(a),solar_custom.plot_knots(a) if solar_custom else [],cfg.wavelength_nm])
         sun_scene=solar_e(grid)*cfg.solar_reflectivity/np.pi
         other_scene=other_l(grid)
         result["curves"] = {
             "wavelength_nm": grid.tolist(), "solar_irradiance": solar_e(grid).tolist(),
+            "solar_original_x": solar_custom.x.tolist() if solar_custom and solar_custom.has_samples else [],
+            "solar_original_y": (solar_custom.y*scale).tolist() if solar_custom and solar_custom.has_samples else [],
             "solar_radiance": sun_scene.tolist(), "other_radiance": other_scene.tolist(),
             "total_radiance": (sun_scene+other_scene).tolist(), "pde": pde_at(grid).tolist(),
-            "other_original_x": other.x.tolist() if cfg.other_light_mode=="spectrum" else [],
-            "other_original_y": (other.y*cfg.other_light_scale*cfg.other_light_enabled).tolist() if cfg.other_light_mode=="spectrum" else [],
-            "pde_original_x": pde.x.tolist() if cfg.pde_mode=="spectrum" else [],
-            "pde_original_y": pde.y.tolist() if cfg.pde_mode=="spectrum" else [],
+            "other_original_x": other.x.tolist() if other.has_samples else [],
+            "other_original_y": (other.y*cfg.other_light_scale*cfg.other_light_enabled).tolist() if other.has_samples else [],
+            "pde_original_x": pde.x.tolist() if pde.has_samples else [],
+            "pde_original_y": pde.y.tolist() if pde.has_samples else [],
         }
         result["integration"] = {
             "wavelength_nm":x.tolist(),"weights_nm":w.tolist(),

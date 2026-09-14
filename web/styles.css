@@ -113,3 +113,7 @@ textarea { display:block; width:100%; margin-top:6px; padding:9px; box-sizing:bo
 .inactive { opacity:.45; }
 .formula { overflow-x:auto; padding:10px 0; font-size:14px; }
 input[type=checkbox] { accent-color:var(--cyan); }
+.curve-editor { border:1px solid var(--line); border-radius:8px; padding:12px; min-width:0; }
+.curve-editor > div, .curve-editor > label { margin-top:10px; display:block; }
+.curve-editor input[type=file] { max-width:100%; font-size:11px; }
+.csv-preview { max-height:160px; overflow:auto; }

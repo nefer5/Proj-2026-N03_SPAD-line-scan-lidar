@@ -82,6 +82,8 @@ class Algorithms(BaseModel):
     max_readout_events_per_run: int = Field(gt=0)
     max_readout_expected_work: int = Field(gt=0)
     max_readout_cycles: int = Field(gt=0)
+    basic_gaussian_extent_fwhm: float = Field(ge=4, le=12)
+    basic_quadrature_segments: int = Field(ge=16, le=256)
 
     @classmethod
     def load(cls):

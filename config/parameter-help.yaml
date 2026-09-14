@@ -62,34 +62,10 @@ channel_ifov_v_mrad:
   label: "通道垂直 IFOV"
   unit: "mrad"
   description: "通道垂直全视场角；不能与整个线阵或水平扫描视场混用。"
-filter_bandwidth_nm:
-  label: "矩形滤光片宽度"
-  unit: "nm"
-  description: "没有导入曲线时使用；背景加权带宽=宽度×透过率。导入曲线后忽略。"
-filter_peak_transmission:
-  label: "矩形滤光片透过率"
-  unit: "1"
-  description: "无曲线时用于信号透过率及背景积分；有曲线时由曲线覆盖。"
-filter_curve:
-  label: "滤光片原始采样点"
-  unit: "nm,1"
-  description: "手动或CSV导入的离散点，两列 wavelength_nm/transmission，波长严格递增且透过率0–1。区间内按所选方式插值，区间外为0。原始点保持不变，背景积分使用插值曲线而非仅对采样点梯形积分。"
-filter_interpolation:
-  label: "滤光片插值方法"
-  unit: "枚举"
-  description: "pchip：保形分段三次Hermite插值，通过所有原始点，区间内不产生过冲；linear：分段线性。两者均为插值而非噪声平滑/参数拟合。无采样点时维持参数化矩形滤光片，此选项暂不作用。"
-background_spectral_radiance:
-  label: "场景谱辐亮度"
-  unit: "W/(m²·sr·nm)"
-  description: "仅其他环境光constant模式使用；为接收方向平坦谱辐亮度，不是lux或太阳辐照度。"
 spads_per_channel:
   label: "每通道 SPAD 数"
   unit: "个"
   description: "总信号与光学背景均匀分配给这些SPAD；暗计数按数量增长，首光子机会数=Nshots×Nspad。"
-pde:
-  label: "感光区探测概率"
-  unit: "1"
-  description: "本实现以感光区概率使用，再乘fill factor；若数据手册PDE已含填充因子，则FF设1避免重复折减。"
 fill_factor:
   label: "填充因子 FF"
   unit: "1"
@@ -174,34 +150,10 @@ other_light_enabled:
   label: "启用其他环境光"
   unit: "bool"
   description: "独立于太阳光的附加光谱背景开关。"
-other_light_mode:
-  label: "其他环境光输入模式"
-  unit: "枚举"
-  description: "spectrum使用离散谱辐亮度，constant使用原background_spectral_radiance常量。"
 other_light_scale:
   label: "其他环境光倍率"
   unit: "1"
   description: "整体缩放其他环境光光谱；不进行lux转换。"
-other_light_interpolation:
-  label: "其他环境光插值"
-  unit: "枚举"
-  description: "pchip保形插值或linear；样本范围外0。"
-other_light_spectrum:
-  label: "其他环境光采样点"
-  unit: "W/(m²·sr·nm)"
-  description: "接收方向的谱辐亮度数据，不再乘反射率；默认是人工构造示例，并非标准或实测光谱。"
-pde_mode:
-  label: "PDE模式"
-  unit: "枚举"
-  description: "spectrum用光谱曲线；constant用标量pde。感光区概率，不含FF。"
-pde_interpolation:
-  label: "PDE插值"
-  unit: "枚举"
-  description: "pchip或linear，支持域外0。"
-pde_spectrum:
-  label: "PDE光谱采样点"
-  unit: "1"
-  description: "默认曲线为人工构造的硅SPAD趋势示例，不对应芯片；每点0–1。信号用激光波长值，背景逐波长积分。"
 readout_mode:
   label: "读出架构模式"
   unit: "枚举"
@@ -234,3 +186,7 @@ coincidence_threshold:
   label: "符合阈值"
   unit: "个SPAD"
   description: "要求窗口内不同SPAD达到该数，不把同一SPAD重复雪崩充作多个独立像素。"
+spectral_inputs:
+  label: "统一光谱输入"
+  unit: "分组配置"
+  description: "filter/other/pde/solar各自先选择basic、csv或manual模式；solar额外支持standard。基础特征量、CSV采样点和手动采样点独立保存，只使用当前模式；详细单位和特征量定义见curve-inputs.yaml。"

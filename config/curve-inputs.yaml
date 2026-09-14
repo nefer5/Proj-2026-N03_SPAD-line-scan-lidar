@@ -1,0 +1,23 @@
+modes:
+  basic: 基础类型
+  csv: CSV文件导入
+  manual: 手动输入
+  standard: 标准太阳谱
+groups:
+  filter: {label: 滤光片透过率, unit: '0–1', column: transmission}
+  other: {label: 其他环境光谱, unit: 'W/(m²·sr·nm)', column: radiance}
+  pde: {label: SPAD PDE光谱, unit: '0–1（不含FF）', column: pde}
+  solar: {label: 太阳光谱形状, unit: '相对谱值，强度按lux归一化', column: irradiance}
+shapes:
+  constant: {label: 常量, fields: [amplitude, min_nm, max_nm]}
+  rectangle: {label: 矩形, fields: [amplitude, min_nm, max_nm, center_nm, width_nm]}
+  gaussian: {label: 高斯, fields: [amplitude, min_nm, max_nm, center_nm, width_nm]}
+  cosine_flat: {label: cosine平顶, fields: [amplitude, min_nm, max_nm, center_nm, flat_width_nm, edge_width_nm]}
+fields:
+  amplitude: {label: 幅值, unit: 依谱类型, description: '未经过lux归一化的峰值/常量值；滤光片和PDE必须0–1。'}
+  min_nm: {label: 有效波段起点, unit: nm, description: '基础波形只在该波段内有效，区间外为0；也可截断波形尾部。'}
+  max_nm: {label: 有效波段终点, unit: nm, description: '必须大于起点；所有基础波形均在这两个边界截断。'}
+  center_nm: {label: 中心波长, unit: nm, description: '独立于激光波长，不会随激光波长自动平移。'}
+  width_nm: {label: 宽度, unit: nm, description: '矩形为全宽；高斯为半高全宽FWHM。'}
+  flat_width_nm: {label: 平顶全宽, unit: nm, description: '中心平坦区域的完整宽度。'}
+  edge_width_nm: {label: 单侧余弦过渡宽度, unit: nm, description: '每一侧从幅值降至0的过渡宽度；总支撑宽度=平顶全宽+2×此值。'}

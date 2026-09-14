@@ -101,11 +101,13 @@ def filter_profile(cfg, algorithms=None):
     padding = (upper-lower)*a.filter_plot_padding_fraction
     enbw, transmission = response.integral_nm(), response.evaluate(cfg.wavelength_nm)
     # Always include the original knots as well as a dense plotting grid.
-    plot_wl = np.unique(np.r_[np.linspace(wl[0], wl[-1], a.filter_plot_samples), wl])
+    plot_wl = np.unique(np.r_[np.linspace(wl[0], wl[-1], a.filter_plot_samples), response.plot_knots(a)])
     plot_tr = response.evaluate(plot_wl)
     return {
-        "source": "csv_curve" if cfg.filter_curve is not None else "rectangular_filter",
-        "interpolation": response.method,
+        "source": "csv_curve" if response.has_samples else "basic_filter",
+        "input_mode": cfg.spectral_inputs.filter.mode,
+        "basic_shape": cfg.spectral_inputs.filter.basic.shape,
+        "interpolation": "rectangular" if response.method=="rectangle" else response.method,
         "original_wavelength_nm": wl.tolist() if response.has_samples else [],
         "original_transmission": tr.tolist() if response.has_samples else [],
         "wavelength_nm": [max(0.0, lower-padding), float(wl[0]), *plot_wl.tolist(), float(wl[-1]), upper+padding],
@@ -320,7 +322,7 @@ def simulate(cfg: SimulationConfig, debug=False) -> dict:
     fingerprint = sha256(json.dumps(config_snapshot, sort_keys=True).encode()).hexdigest()
     result = {
         "configuration": config_snapshot,
-        "provenance": {"model_version": "0.1.4", "simulation_scope": "A_single_angular_channel", "utc": datetime.now(timezone.utc).isoformat(),
+        "provenance": {"model_version": "0.1.5", "simulation_scope": "A_single_angular_channel", "utc": datetime.now(timezone.utc).isoformat(),
                        "sha256": fingerprint, "defaults_source": "config/defaults.yaml"},
         "derived": derived,
         "readout": readout,
