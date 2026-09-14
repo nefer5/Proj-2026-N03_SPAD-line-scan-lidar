@@ -14,7 +14,7 @@
       <h1>单角通道 LiDAR 建模评估</h1>
       <p class="lede">当前：A 单通道信号链 · 规划：B 全光斑光学映射 → C 扫描机制</p>
     </div>
-    <nav class="toolbar"><a href="#photonBudgetPanel">光子计算公式与逻辑 ↓</a><a id="modeLink" href="/debug">专家调试版 →</a><div class="status"><span></span> A / V0.2</div></nav>
+    <nav class="toolbar"><a href="#photonBudgetPanel">光子计算公式与逻辑 ↓</a><a id="modeLink" href="/debug">专家调试版 →</a><div class="status"><span></span> A / V0.2.1</div></nav>
   </header>
 
   <main>
@@ -116,6 +116,14 @@
         </div>
       </details>
 
+      <details open>
+        <summary>检测判定</summary>
+        <div class="field-grid">
+          <label>启用检测门限<input data-key="detection_enabled" type="checkbox"></label>
+          <label>目标PFA（每次全门采集）<input data-key="detection_target_pfa" type="number" min="0" max="1" step="0.01"></label>
+        </div>
+        <p class="formula-note">无目标校准次数、评估次数及置信水平在algorithms.yaml中配置。关闭门限仅作旧版对照。</p>
+      </details>
       <details class="debug-only hidden">
         <summary>历史附加诊断：独立串扰矩阵（不属于A信号链）</summary>
         <div class="field-grid">
@@ -172,7 +180,26 @@
         <canvas id="histZoom" height="260"></canvas>
       </article>
 
+      <article class="panel chart-card">
+        <h2>检测判定与概率评估</h2>
+        <p id="detectionStatus" aria-live="polite">等待仿真</p>
+        <div class="table-scroll"><table><thead><tr><th>指标</th><th>估计</th><th>置信区间 / 样本数</th></tr></thead><tbody id="detectionMetrics"></tbody></table></div>
+        <p class="formula-note">Pd定义为通过门限且距离命中真值容差；PFA是无目标时整张直方图出现任意有效距离的概率，不是每bin概率。少量样本中零虚警不代表真实PFA=0。</p>
+        <details><summary>检测校准与独立评估审计</summary><pre id="detectionAudit"></pre></details>
+      </article>
       <article id="photonBudgetPanel" class="panel chart-card"></article>
+      <article class="panel chart-card" id="performancePanel">
+        <h2>性能扫参 · 当前读出引擎</h2>
+        <p>每个工况独立校准检测门限，使用相同SPAD/TDC机制评估Pd、PFA及测距误差。非扫描驻留模型。</p>
+        <div class="toolbar sweep-controls">
+          <label>扫参轴<select id="performanceAxis"><option value="range_m">距离 (m)</option><option value="solar_illuminance_lux">太阳照度 (lux)</option><option value="laser_shots">累计脉冲数</option></select></label>
+          <label>工况值（逗号分隔）<input id="performanceValues" type="text"></label>
+          <button id="runPerformance">运行性能扫参</button><button id="savePerformance" disabled>导出结果JSON</button>
+        </div>
+        <p id="performanceStatus" aria-live="polite">尚未运行</p>
+        <canvas id="performanceChart" height="280"></canvas>
+        <div class="table-scroll"><table><thead><tr><th>工况</th><th>Pd及区间</th><th>PFA及区间</th><th>失败率</th><th>偏差 cm</th><th>精度 cm</th><th>有效/总次数</th><th>理想信号候选</th><th>平均混合记录</th></tr></thead><tbody id="performanceRows"></tbody></table></div>
+      </article>
 
       <div class="split">
         <article class="panel chart-card">

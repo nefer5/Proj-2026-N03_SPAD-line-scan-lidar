@@ -2,6 +2,8 @@
 
 当前噪声实现统一见 [噪声计算说明](noise-model.md)，A版优化建议见 [项目审视](a-review.md)。本文保留早期解析模型推导，实际事件模式以readout-modes.md为准。
 
+V0.2.1新增 [检测门限与概率评估](detection-performance.md)：默认指标仅接受通过门限的距离。`debug.estimator.distance_m`为原始寻峰值，`accepted_distance_m`为判定后的值；完整门限/样本评分在顶层`detection`中，避免把原始峰当成已检出。
+
 更新：A / V0.1.4 已加入 [光谱背景/PDE](spectral-background.md) 和 [事件读出模式](readout-modes.md)。下文首光子解析分布仍作为analytic_reference的推导；事件模式不复位有限死时间，也不使用该解析分布生成实际直方图。constant背景/PDE仅是新光谱模型的特殊情况。调试公式已集中在config/formulas.yaml并由本地KaTeX渲染。
 
 本手册适用于A单角通道V0.1.3。后续阶段按 [A/B/C路线](roadmap.md) 执行。derived.filter 包含与预算共用的插值曲线、原始采样点、激光标记与加权带宽；清除曲线恢复参数化矩形滤光片。曲线区间外为0，采样点不随激光波长平移，参数化矩形滤光片则以激光波长为中心。

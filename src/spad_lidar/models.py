@@ -109,6 +109,8 @@ class SimulationConfig(BaseModel):
     calibration_delay_ns: float
     laser_shots: int = Field(ge=1)
     monte_carlo_trials: int = Field(ge=0)
+    detection_enabled: bool
+    detection_target_pfa: float = Field(gt=0,lt=1)
     rng_seed: int = Field(ge=0)
 
     # Simple line-channel crosstalk abstraction.
@@ -120,6 +122,8 @@ class SimulationConfig(BaseModel):
     def validate_histogram_size(self):
         bins = self.gate_width_ns * 1000.0 / self.tdc_bin_ps
         algorithms = Algorithms.load()
+        if self.detection_enabled and self.detection_target_pfa < 1/(algorithms.detector_calibration_trials+1):
+            raise ValueError('Target PFA requires more detector_calibration_trials; need at least ceil(1/PFA)-1 calibration samples')
         if self.readout_mode not in read_yaml('readout-modes.yaml'):
             raise ValueError('Unknown readout_mode')
         if self.tdc_count > algorithms.max_spads_per_channel:

@@ -126,6 +126,14 @@ rng_seed:
   label: "随机种子"
   unit: "整数"
   description: "同参数、同算法配置、同运行依赖时可复现抽样；更改种子获得另一组随机样本。"
+detection_enabled:
+  label: "启用检测门限"
+  unit: "bool"
+  description: "用独立无目标样本校准全门峰值评分门限。未过门限返回未检出；关闭仅供旧版对照，不计算Pd/PFA。青色GT和原始计数不受门限影响。"
+detection_target_pfa:
+  label: "目标虚警概率 PFA"
+  unit: "1"
+  description: "每次完整采集、全接收门内至少一次虚警的目标概率，不是每bin概率。实际PFA用另一批无目标样本评估并给置信区间。校准样本不足时拒绝配置，不假称达到极低虚警率。"
 line_channels:
   label: "串扰模型通道数"
   unit: "个"

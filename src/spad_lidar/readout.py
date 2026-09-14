@@ -113,15 +113,22 @@ def event_histogram(cfg,budget,rng,algorithms,edges,signal=True,trace=False):
     return hist,stats,log
 
 
-def event_acquisition(cfg,budget,algorithms,edges):
+def readout_work_estimate(cfg,budget,algorithms):
     period=1e9/cfg.laser_prf_hz
     ratio=period/cfg.gate_width_ns if cfg.detector_operation=="free_running" else 1
-    work=(cfg.laser_shots+algorithms.readout_warmup_cycles)*(budget.signal_detected_per_pulse+
-          (budget.background_detected_per_gate+budget.dark_detected_per_gate+budget.other_detected_per_gate)*ratio)
-    runs=1+max(cfg.monte_carlo_trials-1,0)+2*algorithms.readout_expected_trials
-    if (cfg.laser_shots+algorithms.readout_warmup_cycles)*runs>algorithms.max_readout_cycles:
+    noise=(budget.background_detected_per_gate+budget.dark_detected_per_gate+budget.other_detected_per_gate)*ratio
+    signal_runs=1+max(cfg.monte_carlo_trials-1,0)+algorithms.readout_expected_trials
+    noise_runs=algorithms.readout_expected_trials+(algorithms.detector_calibration_trials+algorithms.detector_null_trials if cfg.detection_enabled else 0)
+    cycles=cfg.laser_shots+algorithms.readout_warmup_cycles
+    return {'runs':signal_runs+noise_runs,'cycles':cycles*(signal_runs+noise_runs),
+            'events':cycles*((budget.signal_detected_per_pulse+noise)*signal_runs+noise*noise_runs)}
+
+
+def event_acquisition(cfg,budget,algorithms,edges):
+    workload=readout_work_estimate(cfg,budget,algorithms)
+    if workload['cycles']>algorithms.max_readout_cycles:
         raise ValueError('Cycle work exceeds configured limit; reduce pulse count or repetitions')
-    if work*runs>algorithms.max_readout_expected_work:
+    if workload['events']>algorithms.max_readout_expected_work:
         raise ValueError("Event simulation work exceeds configured limit; reduce repetitions/flux or use analytic_reference")
     seeds=np.random.SeedSequence(cfg.rng_seed).spawn(4)
     observation_rng,trial_rng,mean_rng,noise_rng=[np.random.default_rng(s) for s in seeds]

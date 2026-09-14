@@ -45,6 +45,9 @@ main { max-width: 1600px; margin: 0 auto; padding: 24px 32px 50px; display: grid
 .controls { padding: 16px; align-self: start; position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow: auto; }
 .toolbar { display: flex; gap: 8px; }
 .section-actions { margin-top:8px; }
+.sweep-controls { flex-wrap:wrap; align-items:end; margin:12px 0; }
+.sweep-controls input { display:block; min-width:240px; background:var(--bg); color:var(--text); border:1px solid var(--line); padding:8px; }
+#performanceRows td { white-space:nowrap; }
 .section-actions button { flex:1; font-size:12px; padding:7px 10px; }
 button { background: var(--panel-2); color: var(--text); border: 1px solid #314257; border-radius: 7px; padding: 9px 13px; cursor: pointer; font-weight: 600; }
 button:hover { border-color: var(--cyan); }

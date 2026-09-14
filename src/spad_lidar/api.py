@@ -5,17 +5,20 @@ from fastapi import FastAPI, Body, HTTPException
 from fastapi.responses import HTMLResponse, Response, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import ValidationError
+from pydantic import BaseModel, ConfigDict
+from typing import Literal
 import yaml
 
 from .models import SimulationConfig
 from .simulator import simulate, derived_quantities
 from .configuration import parse_yaml, read_yaml, Algorithms, ConfigurationError
 from .curves import CurveSpec
+from .performance import performance_sweep
 
 ROOT = Path(__file__).resolve().parents[2]
 WEB = ROOT / "web"
 
-app = FastAPI(title="SPAD Line-Scanning LiDAR Model", version="0.2.0")
+app = FastAPI(title="SPAD Line-Scanning LiDAR Model", version="0.2.1")
 app.mount("/static", StaticFiles(directory=WEB), name="static")
 
 
@@ -86,6 +89,21 @@ def run_simulation(config: SimulationConfig, debug: bool = False):
         return simulate(config, debug=debug)
     except ValueError as exc:
         raise HTTPException(422, detail=str(exc)) from exc
+
+
+class PerformanceSweepRequest(BaseModel):
+    model_config=ConfigDict(extra='forbid',allow_inf_nan=False)
+    configuration: SimulationConfig
+    axis: Literal['range_m','solar_illuminance_lux','laser_shots']
+    values: list[float]
+
+
+@app.post('/api/performance-sweep')
+def run_performance_sweep(request: PerformanceSweepRequest):
+    try:
+        return performance_sweep(request.configuration,request.axis,request.values)
+    except ValueError as exc:
+        raise HTTPException(422,detail=str(exc)) from exc
 
 
 @app.post("/api/config/import")

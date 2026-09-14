@@ -24,6 +24,16 @@ spectral_plot_min_nm: 350.0
 spectral_plot_max_nm: 1200.0
 spectral_plot_samples: 851
 readout_expected_trials: 24
+detector_calibration_trials: 99
+detector_null_trials: 100
+probability_confidence_level: 0.95
+max_detection_bin_work: 100000000
+max_performance_sweep_points: 16
+max_performance_sweep_work: 20000000
+max_performance_sweep_bin_work: 200000000
+performance_sweep_range_values: [25, 50, 75, 100, 125, 150]
+performance_sweep_lux_values: [0, 10000, 25000, 50000, 75000, 100000]
+performance_sweep_shot_values: [1, 2, 4, 8, 16]
 histogram_preview_subdivisions: 16
 max_histogram_preview_bins: 400000
 ground_truth_plot_points: 801

@@ -15,7 +15,8 @@ from .configuration import Algorithms, read_yaml
 from .models import SimulationConfig
 from .filters import FilterResponse
 from .spectra import spectral_components
-from .readout import event_acquisition
+from .readout import event_acquisition, event_histogram
+from .detection import evaluate_detection
 from .photon_flow import build_photon_flow
 
 
@@ -402,6 +403,8 @@ def simulate(cfg: SimulationConfig, debug=False) -> dict:
     rng = np.random.default_rng(cfg.rng_seed)
     opportunities = cfg.laser_shots * cfg.spads_per_channel
     ground_truth=signal_ground_truth(cfg,b,x['edges'],a)
+    if cfg.detection_enabled and len(x['time'])*(a.detector_calibration_trials+a.detector_null_trials+cfg.monte_carlo_trials+1)>a.max_detection_bin_work:
+        raise ValueError('Detection histogram work exceeds max_detection_bin_work; reduce bins or repetitions')
     if cfg.readout_mode == 'analytic_reference':
         observed = _sample_histogram(rng, x["expected"], opportunities)
         trials = ([observed.copy()]+[_sample_histogram(rng, x['expected'], opportunities)
@@ -411,6 +414,18 @@ def simulate(cfg: SimulationConfig, debug=False) -> dict:
         observed, x['expected'], x['expected_noise'], trials, readout = event_acquisition(cfg,b,a,x['edges'])
     estimate, score, estimator = _estimate_range(cfg, x["time"], observed, a, with_trace=True)
     estimates = [_estimate_range(cfg, x['time'], h, a)[0] for h in trials]
+    raw_estimate=estimate
+    raw_estimates=list(estimates)
+    detection={'enabled':False,'note':'Legacy unthresholded peak search; no calibrated Pd/PFA.'}
+    if cfg.detection_enabled:
+        noise_sampler=(lambda generator:_sample_histogram(generator,x['expected_noise'],opportunities)) if cfg.readout_mode=='analytic_reference' else (lambda generator:event_histogram(cfg,b,generator,a,x['edges'],signal=False)[0])
+        detection=evaluate_detection(cfg,a,observed,trials,noise_sampler,
+                                     lambda hist:_estimate_range(cfg,x['time'],hist,a),b.signal_detected_per_pulse>0)
+        estimate=detection['observed']['distance_m']
+        estimates=detection['accepted_trial_estimates_m']
+    estimator['distance_is_raw_before_threshold']=True
+    estimator['accepted_distance_m']=estimate
+    estimator['detection_enabled']=cfg.detection_enabled
     sample_range=histogram_sample_range(trials)
     valid = np.array([r for r in estimates if r is not None])
     errors = valid-cfg.range_m
@@ -433,10 +448,11 @@ def simulate(cfg: SimulationConfig, debug=False) -> dict:
     fingerprint = sha256(json.dumps(config_snapshot, sort_keys=True).encode()).hexdigest()
     result = {
         "configuration": config_snapshot,
-        "provenance": {"model_version": "0.2.0", "simulation_scope": "A_single_angular_channel", "utc": datetime.now(timezone.utc).isoformat(),
+        "provenance": {"model_version": "0.2.1", "simulation_scope": "A_single_angular_channel", "utc": datetime.now(timezone.utc).isoformat(),
                        "sha256": fingerprint, "defaults_source": "config/defaults.yaml"},
         "derived": derived,
         "readout": readout,
+        "detection":detection,
         "assumptions": [
             "输入脉冲能量是当前角通道在 Tx 光学之前的能量；显示功率也以此为参考面。",
             "正入射大朗伯面、小接收立体角；通道信号均匀分配到所选 SPAD，无真实二维 PSF。",
@@ -449,6 +465,8 @@ def simulate(cfg: SimulationConfig, debug=False) -> dict:
         ],
         "budget": asdict(b),
         "metrics": {
+            "raw_estimated_range_m":raw_estimate,
+            "detection_status":('detected' if estimate is not None else 'not_detected') if cfg.detection_enabled else 'threshold_disabled',
             "estimated_range_m": estimate,
             "bias_cm": float(errors.mean()*100) if len(valid) else None,
             "precision_cm_1sigma": float(valid.std(ddof=1)*100) if len(valid)>1 else None,
@@ -522,6 +540,7 @@ def simulate(cfg: SimulationConfig, debug=False) -> dict:
             },
             "estimator": estimator,
             "trial_estimates_m": estimates,
+            "raw_trial_estimates_m":raw_estimates,
             "trial_errors_m": [r-cfg.range_m if r is not None else None for r in estimates],
         }
     return result

@@ -77,6 +77,16 @@ class Algorithms(BaseModel):
     spectral_plot_max_nm: float = Field(gt=0)
     spectral_plot_samples: int = Field(ge=2, le=10000)
     readout_expected_trials: int = Field(ge=1, le=1000)
+    detector_calibration_trials: int = Field(ge=1, le=10000)
+    detector_null_trials: int = Field(ge=1, le=10000)
+    probability_confidence_level: float = Field(gt=0, lt=1)
+    max_detection_bin_work: int = Field(ge=1)
+    max_performance_sweep_points: int = Field(ge=1, le=100)
+    max_performance_sweep_work: int = Field(ge=1)
+    max_performance_sweep_bin_work: int = Field(ge=1)
+    performance_sweep_range_values: list[float]
+    performance_sweep_lux_values: list[float]
+    performance_sweep_shot_values: list[int]
     histogram_preview_subdivisions: int = Field(ge=2, le=128)
     max_histogram_preview_bins: int = Field(ge=2, le=1000000)
     ground_truth_plot_points: int = Field(ge=101, le=10000)

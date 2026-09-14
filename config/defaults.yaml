@@ -46,6 +46,8 @@ simulation:
   calibration_delay_ns: 0
   laser_shots: 1
   monte_carlo_trials: 40
+  detection_enabled: true
+  detection_target_pfa: 0.05
   rng_seed: 7
   line_channels: 16
   nearest_neighbor_crosstalk: 0.005

@@ -6,6 +6,9 @@ let debugPage = 0;
 let latestDerived = null;
 let derivedSequence = 0;
 let readoutModes = {};
+let algorithmConfig = {};
+let lastPerformance = null;
+let performanceInputSnapshot = null;
 const isDebug = location.pathname === "/debug";
 
 const $ = (id) => document.getElementById(id);
@@ -103,14 +106,14 @@ function drawLines(canvas, x, series, opts={}) {
     if(s.errorBars){
       ctx.lineWidth=1.2;
       s.x.forEach((v,i)=>{
-        if(v<xmin||v>xmax)return;
+        if(v<xmin||v>xmax||!Number.isFinite(s.y[i])||!Number.isFinite(s.lower[i]))return;
         const cap=Math.min(4,Math.max(0.3,(sx(v+(opts.binWidth||1))-sx(v))*0.28));
         const px=sx(v),lo=sy(s.lower[i]),hi=sy(s.y[i]);
         ctx.beginPath();ctx.moveTo(px,lo);ctx.lineTo(px,hi);
         ctx.moveTo(px-cap,lo);ctx.lineTo(px+cap,lo);ctx.moveTo(px-cap,hi);ctx.lineTo(px+cap,hi);ctx.stroke();
       });
     }else if(s.points){
-      s.x.forEach((v,i)=>{if(v<xmin||v>xmax)return;ctx.beginPath();ctx.arc(sx(v),sy(s.y[i]),3.5,0,2*Math.PI);ctx.fill();});
+      s.x.forEach((v,i)=>{if(v<xmin||v>xmax||!Number.isFinite(s.y[i]))return;ctx.beginPath();ctx.arc(sx(v),sy(s.y[i]),3.5,0,2*Math.PI);ctx.fill();});
     }else{
       ctx.setLineDash(s.dash||[]);ctx.beginPath();
       for(let i=0;i<s.x.length;i++){const px=sx(s.x[i]),py=sy(s.y[i]);if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);}
@@ -172,6 +175,58 @@ function drawHeatmap(canvas, matrix) {
   const step=Math.max(1,Math.ceil(n/8));for(let i=0;i<n;i+=step){ctx.fillText(String(i),pad.l+i*cw,pad.t+side+15);ctx.fillText(String(i),pad.l-25,pad.t+(i+.7)*cw);}
 }
 
+function addTextRows(target, rows) {
+  target.replaceChildren(...rows.map(values=>{const row=document.createElement('tr');values.forEach(value=>{const cell=document.createElement('td');cell.textContent=value;row.append(cell);});return row;}));
+}
+
+function probabilityText(value) {
+  if(!value||value.estimate==null)return '—（无样本/无信号）';
+  return fmt(value.estimate*100,1)+'% ['+fmt(value.ci_lower*100,1)+', '+fmt(value.ci_upper*100,1)+']%';
+}
+
+function renderDetection(result) {
+  const d=result.detection;
+  if(!d.enabled){$('detectionStatus').textContent='检测门限关闭：距离仅为原始寻峰结果，未评估Pd/PFA。';$('detectionMetrics').replaceChildren();$('detectionAudit').textContent=d.note;return;}
+  $('detectionStatus').textContent=(d.observed.detected?'已检出':'未检出')+'；评分 '+fmt(d.observed.score,4)+'，门限 '+fmt(d.threshold,4)+'（严格大于才接受）；原始寻峰 '+fmt(d.observed.raw_distance_m,3)+' m。全门 '+d.search_gate_ns.join('–')+' ns。';
+  const rows=[['Pd：检测且命中真值容差',d.pd],['PFA：无目标全门虚警',d.pfa],['有信号工况触发比例（不限距离）',d.trigger_rate]].map(([label,v])=>[label,probabilityText(v),v?fmt(v.confidence*100,0)+'%精确二项区间；'+v.successes+'/'+v.trials:'无信号预算，不报告Pd']);
+  rows.push(['校准与验证分离','目标PFA '+fmt(d.target_pfa*100,2)+'%',d.calibration.trials+'次校准；另'+d.null_evaluation.trials+'次无目标验证']);
+  rows.push(['PFA目标核对',d.pfa_upper_within_target?'验证区间上限不超过目标':'尚不能确认达到目标','目标值不是保证值；需要同时查看独立验证区间。']);
+  addTextRows($('detectionMetrics'),rows);
+  $('detectionAudit').textContent=JSON.stringify(d,null,2);
+}
+
+function renderPerformance(result) {
+  const p=result.points,x=p.map(v=>v.value);
+  const series=[{name:'Pd（命中容差）',y:p.map(v=>v.pd?.estimate??NaN),color:colors.cyan,points:true},
+                {name:'PFA',y:p.map(v=>v.pfa.estimate),color:colors.orange,points:true},
+                {name:'Pd置信区间',y:p.map(v=>v.pd?.ci_upper??NaN),lower:p.map(v=>v.pd?.ci_lower??NaN),color:colors.cyan,errorBars:true},
+                {name:'PFA置信区间',y:p.map(v=>v.pfa.ci_upper),lower:p.map(v=>v.pfa.ci_lower),color:colors.orange,errorBars:true}];
+  drawLines($('performanceChart'),x,series,{xLabel:result.axis_label,ymin:0,ymax:1.05,yDigits:2});
+  addTextRows($('performanceRows'),p.map(v=>[fmt(v.value,2),probabilityText(v.pd),probabilityText(v.pfa),fmt(v.failure_rate*100,1)+'%',fmt(v.bias_cm,2),fmt(v.precision_cm_1sigma,2),v.accepted_trials+'/'+v.trials,fmt(v.ideal_signal_candidates,2),fmt(v.mean_recorded_counts,2)]));
+}
+
+function setSweepDefaults() {
+  const keys={range_m:'performance_sweep_range_values',solar_illuminance_lux:'performance_sweep_lux_values',laser_shots:'performance_sweep_shot_values'};
+  $('performanceValues').value=algorithmConfig[keys[$('performanceAxis').value]].join(', ');
+}
+
+async function runPerformance() {
+  $('runPerformance').disabled=true;
+  try {
+    const cfg=collectConfig(),axis=$('performanceAxis').value;
+    const tokens=$('performanceValues').value.split(/[,，\s]+/).filter(Boolean);
+    if(!tokens.length||tokens.some(v=>!Number.isFinite(Number(v))))throw new Error('请输入有效工况值');
+    const values=tokens.map(Number);
+    $('performanceStatus').textContent='正在按当前读出模式计算 '+values.length+' 个工况…';
+    const result=await (await request('/api/performance-sweep',{configuration:cfg,axis,values})).json();
+    lastPerformance=result;performanceInputSnapshot=JSON.stringify(cfg);renderPerformance(result);
+    const stale=JSON.stringify(collectConfig())!==performanceInputSnapshot||axis!==$('performanceAxis').value||tokens.join(',')!==$('performanceValues').value.split(/[,，\s]+/).filter(Boolean).join(',');
+    $('performanceStatus').textContent=(stale?'参数已变化；以下是提交时的配置结果。':'计算完成。')+' 每个点均含当前读出限制；区间为逐点区间，精度仅统计已接受距离，请同时看失败率。';
+    $('savePerformance').disabled=false;
+  }catch(error){$('performanceStatus').textContent='扫参未完成：'+error.message;}
+  finally{$('runPerformance').disabled=false;}
+}
+
 function render(result) {
   lastResult=result;
   const m=result.metrics,b=result.budget;
@@ -183,6 +238,8 @@ function render(result) {
   $("mRange").textContent=fmt(m.estimated_range_m,3);$("mPrecision").textContent=fmt(m.precision_cm_1sigma,2);$("mBias").textContent=fmt(m.bias_cm,2);$("mSuccess").textContent=fmt(m.success_rate == null ? null : m.success_rate*100,1);
   $("mSignal").textContent=fmt(b.signal_detected_per_pulse,4);$("mNoise").textContent=fmt(b.background_detected_per_gate+b.dark_detected_per_gate+b.other_detected_per_gate,4);$("mSnr").textContent=fmt(m.observed_peak_snr,2);$("mPileup").textContent=fmt(m.pileup_loss_fraction*100,2);
   const h=result.histogram;
+  renderDetection(result);
+  if(m.detection_status==='not_detected')$('mRange').textContent='未检出';
   const truth=h.ground_truth,fine=truth.high_resolution;
   const lines=[{name:"观测柱状",y:h.observed_counts,color:colors.blue,bars:true},{name:"纯信号解析GT",x:fine.time_ns,y:fine.counts_per_nominal_bin,color:colors.cyan,width:1.5,dash:[6,4]},{name:"GT bin积分",y:truth.counts,color:colors.cyan,points:true},{name:"纯噪声",y:h.expected_noise_counts,color:colors.orange,width:1.2}];
   const bounds=h.sample_range;
@@ -383,6 +440,7 @@ function download(name,text,type) {
 }
 
 function changed() {
+  if(lastPerformance)$('performanceStatus').textContent='参数已修改：上次扫参结果已过期，请重新运行。';
   apertureFields();
   ++derivedSequence; // Invalidate any request from the previous configuration immediately.
   if(lastResult) $("resultStatus").textContent="参数已修改：功率联动更新；直方图仍为上次结果，请点击运行仿真。";
@@ -400,6 +458,10 @@ $("configFile").addEventListener("change",async e=>{
 });
 inputEls().forEach(el=>el.addEventListener(el.tagName === "SELECT" || el.type==='checkbox' ? "change" : "input",changed));
 $("runButton").addEventListener("click",run);
+$('runPerformance').addEventListener('click',runPerformance);
+$('performanceAxis').addEventListener('change',()=>{setSweepDefaults();$('performanceStatus').textContent='扫参轴已改变，请运行新工况。';});
+$('performanceValues').addEventListener('input',()=>{$('performanceStatus').textContent='扫参工况已改变，请重新运行。';});
+$('savePerformance').addEventListener('click',()=>{if(lastPerformance)download('spad_performance_sweep.json',JSON.stringify(lastPerformance,null,2),'application/json');});
 function setParameterSections(open) {
   document.querySelectorAll('.controls details').forEach(section=>{section.open=open;});
 }
@@ -428,6 +490,7 @@ $("binsPrevious").addEventListener("click",()=>{debugPage--;renderBins();});
 $("binsNext").addEventListener("click",()=>{debugPage++;renderBins();});
 $("modeLink").addEventListener("click",()=>{try{sessionStorage.setItem("lidar-config",JSON.stringify(collectConfig()));}catch{}});
 window.addEventListener("resize",()=>{
+  if(lastPerformance)renderPerformance(lastPerformance);
   if(lastResult)render(lastResult);
   if(latestDerived)renderDerived(latestDerived);
 });
@@ -436,7 +499,7 @@ window.addEventListener("resize",()=>{
   try {
     const [d,c]=await Promise.all([fetch("/api/defaults",{cache:"no-store"}),fetch("/api/catalog",{cache:"no-store"})]);
     if(!d.ok || !c.ok)throw new Error("无法读取YAML配置："+await (!d.ok?d:c).text());
-    defaults=await d.json();const catalog=await c.json();help=catalog.parameters;readoutModes=catalog.readout_modes;
+    defaults=await d.json();const catalog=await c.json();help=catalog.parameters;readoutModes=catalog.readout_modes;algorithmConfig=catalog.algorithms;setSweepDefaults();
     curveEditors=new CurveEditors(catalog.curve_inputs,changed,async(kind,spec)=>await (await request('/api/curve/validate?kind='+kind,spec)).json());
     try{katex.render(catalog.curve_inputs.formulas.binning,$('binningFormula'),{displayMode:true,throwOnError:true});}catch(e){$('binningFormula').textContent='公式渲染失败：'+e.message;}
     $('binningNote').textContent=catalog.curve_inputs.formula_notes.binning;
