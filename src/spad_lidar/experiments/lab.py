@@ -10,6 +10,7 @@ from ..spad.source import sample_candidates
 from ..spad.device import apply_jitter
 from ..timing import periodic_program
 from ..processing.records import histogram_records
+from .. import __version__
 
 
 def lab_illumination(cfg):
@@ -79,7 +80,7 @@ def run_lab(cfg, a, progress, cancelled):
 def stamp_result(scope, cfg, a, result):
     snapshot = {'experiment': cfg.model_dump(), 'algorithms': a.model_dump()}
     result['configuration'] = snapshot
-    result['provenance'] = {'scope': scope, 'model_version': '0.3.0-dev', 'utc': datetime.now(timezone.utc).isoformat(),
+    result['provenance'] = {'scope': scope, 'model_version': __version__, 'utc': datetime.now(timezone.utc).isoformat(),
                             'configuration_sha256': sha256(json.dumps(snapshot, sort_keys=True, allow_nan=False).encode()).hexdigest(),
                             'rng_seed': cfg.rng_seed, 'sampling_protocol': 'per-cycle-per-pixel-v1',
                             'limitations': ['No afterpulse or avalanche crosstalk.', 'Finite warmup, step recovery.',

@@ -1,0 +1,18 @@
+globalThis.latestErrors=[];page.on('pageerror',e=>globalThis.latestErrors.push(e.message));
+await page.reload({waitUntil:'networkidle'});
+await page.getByText('实验时序',{exact:true}).click();
+await expect(page.locator('[data-path="timing.laser_shots"]')).toHaveValue('10000');
+const acceptedPromise=page.waitForResponse(r=>r.url().endsWith('/api/jobs')&&r.request().method()==='POST');
+await page.getByRole('button',{name:'提交仿真',exact:true}).click();
+const accepted=await (await acceptedPromise).json();
+const row=page.locator('.job').filter({hasText:accepted.id.slice(0,8)});
+await row.getByRole('button',{name:'取消',exact:true}).click();
+await expect(row).toContainText('cancelled',{timeout:40000});
+await expect(page.locator('#resultStatus')).toContainText('没有新的完整结果');
+await page.getByRole('button',{name:'恢复默认',exact:true}).click();
+await page.getByRole('button',{name:'提交仿真',exact:true}).click();
+await expect(page.locator('#resultStatus')).toContainText('B_full_spot_static',{timeout:30000});
+await page.locator('#plotStart').fill('650');await page.locator('#plotEnd').fill('685');await page.getByRole('button',{name:'缩放图形',exact:true}).click();
+await expect(page.locator('#error')).toBeHidden();
+await page.evaluate(()=>window.scrollTo(0,0));
+return {cancelledJob:accepted.id,errors:globalThis.latestErrors,metrics:await page.locator('#metrics').innerText(),screenshot:await page.screenshot({fullPage:false})};

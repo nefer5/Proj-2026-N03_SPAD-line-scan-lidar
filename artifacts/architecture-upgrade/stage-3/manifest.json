@@ -1,0 +1,21 @@
+{
+  "utc": "2026-09-23T18:29:39.396559+00:00",
+  "files": {
+    "data\\synthetic\\spatial-example.json": {
+      "sha256": "bda958c00fff916ba82131a75ddd1d5a63ef3457a104e1f9f2d9545e27a23642",
+      "bytes": 780758
+    },
+    "artifacts\\architecture-upgrade\\stage-3\\default-result.json": {
+      "sha256": "f962a5d47db3be8b37beac674c7d90fb62bc6704690d233c43bcd7152a9e2095",
+      "bytes": 1728713
+    },
+    "artifacts\\architecture-upgrade\\stage-3\\default-config.json": {
+      "sha256": "110dab1815f04bf72c9bb0d1008eb4cf34078a88d1cb218612415019ddbb3df6",
+      "bytes": 8521
+    },
+    "artifacts\\architecture-upgrade\\stage-3\\validation-cases.json": {
+      "sha256": "2d7db34435d3c8f915b98b323f4a07ef6290c45c5ab4763e7bd17951ac31d076",
+      "bytes": 100924
+    }
+  }
+}

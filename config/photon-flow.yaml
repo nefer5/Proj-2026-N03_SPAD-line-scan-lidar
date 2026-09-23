@@ -304,3 +304,49 @@ readout:
       - key: readout_mode
         label: "读出模式"
         unit: "mode"
+spatial:
+  title: 'B 全光斑：入瞳、探测面、候选雪崩与混合记录'
+  intro: 'Tx全光斑按角度单元分配，Rx效率与PSF将能量映射到真实像素；光子预算由Python计算。构造光学样例不代表实测器件或实际光学系统。'
+  steps:
+    - title: '回波：角度能量经过Rx映射到像素'
+      formula_id: spatial_signal
+      logic: '先计算各角度单元入瞳能量，再分别乘Rx效率、滤光片及PSF像素份额。入射信号光子仍未乘PDE/FF。'
+      values:
+        - {key: tx_input_j, label: 全光斑Tx前能量, unit: J/pulse}
+        - {key: tx_angular_truncation_j, label: Tx角范围外能量, unit: J/pulse}
+        - {key: signal_rx_incident_photons_per_pulse, label: 回波入瞳光子, unit: photons/pulse}
+        - {key: signal_sensor_incident_photons_per_pulse, label: 回波探测面光子, unit: photons/pulse}
+    - title: '太阳：按明确波段积分并映射到像素'
+      formula_id: spatial_background
+      logic: '太阳光谱沿用标准谱或选定输入模式及lux归一化；背景角域由当前Tx角单元网格覆盖范围明确限定，不乘Tx能量权重。'
+      values:
+        - {key: solar_rx_incident_photons_per_gate, label: 太阳入瞳光子（限定积分波段）, unit: photons/gate}
+        - {key: solar_after_rx_photons_per_gate, label: 太阳Rx效率后光子, unit: photons/gate}
+        - {key: solar_after_filter_fullplane_photons_per_gate, label: 太阳滤光后无限像面光子, unit: photons/gate}
+        - {key: solar_sensor_incident_photons_per_gate, label: 太阳探测面光子, unit: photons/gate}
+    - title: '其他环境光：独立输入谱的空间积分'
+      formula_id: spatial_background
+      logic: '其他光输入已经是接收方向谱辐亮度；不再额外乘目标反射率。背景原始光子数同样限定当前积分波段。'
+      values:
+        - {key: other_rx_incident_photons_per_gate, label: 其他光入瞳光子（限定积分波段）, unit: photons/gate}
+        - {key: other_after_rx_photons_per_gate, label: 其他光Rx效率后光子, unit: photons/gate}
+        - {key: other_after_filter_fullplane_photons_per_gate, label: 其他光滤光后无限像面光子, unit: photons/gate}
+        - {key: other_sensor_incident_photons_per_gate, label: 其他光探测面光子, unit: photons/gate}
+    - title: '器件转换与最终混合记录'
+      formula_id: spatial_candidates
+      logic: 'PDE/FF转换后再由共用SPAD及读出核心处理DCR、恢复和竞争。最终记录是所有来源混合的结果，不能按候选比例线性拆分。'
+      values:
+        - {key: signal_candidate_avalanches_per_pulse, label: 回波候选雪崩期望, unit: candidates/pulse}
+        - {key: solar_candidate_avalanches_per_gate, label: 太阳候选雪崩期望, unit: candidates/gate}
+        - {key: other_candidate_avalanches_per_gate, label: 其他光候选雪崩期望, unit: candidates/gate}
+        - {key: final_mixed_records, label: 本次采集最终混合记录, unit: records/acquisition}
+    - title: '接收能量守恒与边缘损失'
+      formula_id: spatial_energy_balance
+      logic: '不通过PSF重新归一化补偿感光面外能量。守恒残差保留浮点误差，所有损耗参考面分别列出。'
+      values:
+        - {key: rx_pupil_signal_j, label: 入瞳信号能量, unit: J/pulse}
+        - {key: sensor_signal_j, label: 探测面信号能量, unit: J/pulse}
+        - {key: rx_loss_j, label: Rx效率损失, unit: J/pulse}
+        - {key: filter_loss_j, label: 滤光损失, unit: J/pulse}
+        - {key: psf_edge_loss_j, label: PSF感光面边缘损失, unit: J/pulse}
+        - {key: energy_balance_residual_j, label: 能量平衡残差, unit: J/pulse}

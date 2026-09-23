@@ -2,6 +2,8 @@
 import numpy as np
 from ..constants import C, FWHM_TO_SIGMA
 from .a_router import route_events
+from ..spad.device import apply_jitter
+from ..numerics.temporal import sample_pulse_offsets
 
 def event_histogram(cfg,budget,rng,algorithms,edges,signal=True,trace=False):
     period=1e9/cfg.laser_prf_hz
@@ -17,16 +19,15 @@ def event_histogram(cfg,budget,rng,algorithms,edges,signal=True,trace=False):
         raw_count+=ns+nb
         if raw_count>algorithms.max_readout_events_per_run:
             raise ValueError("Event count exceeds configured limit; reduce flux, pulses or gate duration")
-        laser=(rng.normal(0,cfg.pulse_fwhm_ps/FWHM_TO_SIGMA,ns) if cfg.pulse_shape=="gaussian"
-               else rng.uniform(-cfg.pulse_fwhm_ps/2,cfg.pulse_fwhm_ps/2,ns))*1e-3
-        sig=tof+laser+rng.normal(0,cfg.spad_jitter_fwhm_ps/FWHM_TO_SIGMA*1e-3,ns)
+        laser=sample_pulse_offsets(rng,cfg.pulse_shape,cfg.pulse_fwhm_ps,ns)
+        sig=apply_jitter(rng,tof+laser,cfg.spad_jitter_fwhm_ps)
         start=0 if cfg.detector_operation=="free_running" else cfg.gate_start_ns
         noise=start+rng.uniform(0,duration,nb)
         all_times.extend(np.r_[sig,noise]+cycle*period)
         all_pixels.extend(rng.integers(0,cfg.spads_per_channel,ns+nb))
     timestamps,stats,log=route_events(cfg,all_times,all_pixels,algorithms.readout_trace_events if trace else 0)
     # Electronics timing noise is applied only to recorded timestamps, not SPAD recovery.
-    timestamps=timestamps+rng.normal(0,cfg.other_jitter_fwhm_ps/FWHM_TO_SIGMA*1e-3,len(timestamps))
+    timestamps=apply_jitter(rng,timestamps,cfg.other_jitter_fwhm_ps)
     hist=np.histogram(timestamps,bins=edges)[0].astype(float)
     stats["timestamp_outside_gate_losses"]=stats["recorded"]-int(hist.sum())
     return hist,stats,log

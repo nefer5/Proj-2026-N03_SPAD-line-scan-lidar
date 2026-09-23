@@ -22,3 +22,7 @@ budget_background_sensor: "同一波段B上，ηRx和Tf分别描述接收光学�
 budget_background_candidate: "PDE(λ)在积分内逐波长参与计算；FF在积分外乘一次。μj是当前背景来源的每门期望雪崩候选数，Nj,ideal是累计Nshots发的候选总数。实际输出还会受到SPAD恢复、OR/符合逻辑和TDC限制。"
 budget_readout: "μsun/μother分别为太阳和其他环境光候选数；μDCR和μelectronic为器件暗计数及其他电子随机噪声（它们不乘PDE/FF）。N_SPAD为物理SPAD数。Hk为实际观测直方图第k个bin计数，Nrecorded为混合记录总数；不同来源会竞争，不能按线性比例拆分最终记录。"
 binning: "H_binning/V_binning分别为水平/垂直聚合的SPAD数；乘积是每角通道总数N_SPAD，不能再独立编辑。A版只用总数均匀分配信号和光学背景，暗计数按总数增长；不自动改变通道IFOV，尚未模拟像素间距、PSF或空间非均匀照明。"
+spatial_signal: 'a为角度单元，i为物理像素；入瞳能量E单位J，η为入瞳到无限像面的收光效率，Tf为滤光透过率，p为完整像素截获无限PSF的能量份额。p按像素积分，边缘截断后不再归一化。λ使用m，输出为每完整脉冲、PDE/FF前的光子数。'
+spatial_background: 'b分别表示太阳或其他环境光；L为W/(m²·sr·m)谱辐亮度，ΔΩ为sr，门宽为s。显示/输入可用每nm谱密度，Python积分采用相配的nm权重与波长到m换算。积分波段B明确记录；输出为完整像素、PDE/FF前的每门光子数。'
+spatial_candidates: 'N为探测面光子谱密度；PDE与FF由器件模块应用一次，得到死时间与读出之前的候选雪崩期望。离散光谱实现使用已包含积分权重的单元光子数。DCR及其他电子候选另行加入。'
+spatial_energy_balance: '所有项单位J、按完整单脉冲计算。Rx损耗、滤光损耗、感光面边缘截断分别审计；Tx角范围外损耗位于此等式之前单独记录。'

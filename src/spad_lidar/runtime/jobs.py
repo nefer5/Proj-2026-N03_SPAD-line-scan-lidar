@@ -7,6 +7,7 @@ import json
 import multiprocessing
 import sqlite3
 import traceback
+import os
 
 from ..configuration import Algorithms, frozen_yaml, yaml_snapshot
 from ..models import SimulationConfig
@@ -20,24 +21,55 @@ def connect(root):
     return db
 
 
-def update(root, job_id, **fields):
+def process_alive(pid):
+    if not pid:
+        return False
+    if pid == os.getpid():
+        return True
+    if os.name == 'nt':
+        import ctypes
+        from ctypes import wintypes
+        kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+        kernel.OpenProcess.argtypes = (wintypes.DWORD, wintypes.BOOL, wintypes.DWORD)
+        kernel.OpenProcess.restype = wintypes.HANDLE
+        kernel.GetExitCodeProcess.argtypes = (wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD))
+        kernel.CloseHandle.argtypes = (wintypes.HANDLE,)
+        handle = kernel.OpenProcess(0x1000, False, pid)  # PROCESS_QUERY_LIMITED_INFORMATION
+        if not handle:
+            return ctypes.get_last_error() == 5  # Access denied is not proof of termination.
+        try:
+            code = wintypes.DWORD()
+            return not kernel.GetExitCodeProcess(handle, ctypes.byref(code)) or code.value == 259  # STILL_ACTIVE
+        finally:
+            kernel.CloseHandle(handle)
+    try:
+        os.kill(pid, 0)  # POSIX-only existence check; never use this on Windows.
+        return True
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+
+
+def update(root, job_id, preserve_interrupted=False, **fields):
     with connect(root) as db:
-        db.execute('UPDATE jobs SET '+','.join(k+'=?' for k in fields)+' WHERE id=?', [*fields.values(), job_id])
+        suffix=" AND status!='interrupted'" if preserve_interrupted else ''
+        db.execute('UPDATE jobs SET '+','.join(k+'=?' for k in fields)+' WHERE id=?'+suffix, [*fields.values(), job_id])
 
 
 def worker(root, job_id, kind, config, algorithms, snapshot):
     def cancelled():
         with connect(root) as db:
-            row = db.execute('SELECT cancel_requested FROM jobs WHERE id=?', (job_id,)).fetchone()
-        return bool(row['cancel_requested'])
+            row = db.execute('SELECT cancel_requested,status FROM jobs WHERE id=?', (job_id,)).fetchone()
+        return bool(row['cancel_requested']) or row['status']=='interrupted'
 
     def progress(done, total, message):
-        update(root, job_id, completed=done, total=total, message=message)
+        update(root, job_id, preserve_interrupted=True, completed=done, total=total, message=message)
 
     try:
         if cancelled():
             raise InterruptedError('Cancelled while queued')
-        update(root, job_id, status='running', message='准备计算')
+        update(root, job_id, preserve_interrupted=True, status='running', message='准备计算')
         with frozen_yaml(snapshot):
             a = Algorithms.model_validate(algorithms)
             if kind == 'a':
@@ -55,12 +87,12 @@ def worker(root, job_id, kind, config, algorithms, snapshot):
                 raise InterruptedError('Cancellation requested; completed metrics are withheld')
         path = Path(root)/job_id/'result.json'
         path.write_text(json.dumps(result, ensure_ascii=False, allow_nan=False), encoding='utf-8')
-        update(root, job_id, status='completed', completed=1, total=1, message='计算完成', result_path=str(path))
+        update(root, job_id, preserve_interrupted=True, status='completed', completed=1, total=1, message='计算完成', result_path=str(path))
     except InterruptedError as exc:
-        update(root, job_id, status='cancelled', message=str(exc))
+        update(root, job_id, preserve_interrupted=True, status='cancelled', message=str(exc))
     except Exception as exc:
         (Path(root)/job_id/'error.txt').write_text(traceback.format_exc(), encoding='utf-8')
-        update(root, job_id, status='failed', message=f'{type(exc).__name__}: {exc}')
+        update(root, job_id, preserve_interrupted=True, status='failed', message=f'{type(exc).__name__}: {exc}')
 
 
 class JobManager:
@@ -69,12 +101,18 @@ class JobManager:
         self.root.mkdir(parents=True, exist_ok=True)
         self.lock = Lock()
         self.pool = None
+        self.worker_count = None
         with connect(self.root) as db:
             db.execute('''CREATE TABLE IF NOT EXISTS jobs (
                 id TEXT PRIMARY KEY, kind TEXT NOT NULL, created TEXT NOT NULL, status TEXT NOT NULL,
                 completed INTEGER NOT NULL, total INTEGER NOT NULL, message TEXT NOT NULL,
                 cancel_requested INTEGER NOT NULL, result_path TEXT)''')
-            db.execute("UPDATE jobs SET status='interrupted',message='服务重启；配置快照已保留，可重新提交' WHERE status IN ('queued','running')")
+            columns={row[1] for row in db.execute('PRAGMA table_info(jobs)')}
+            if 'owner_pid' not in columns:
+                db.execute('ALTER TABLE jobs ADD COLUMN owner_pid INTEGER')
+            for row in db.execute("SELECT id,owner_pid FROM jobs WHERE status IN ('queued','running')").fetchall():
+                if not process_alive(row['owner_pid']):
+                    db.execute("UPDATE jobs SET status='interrupted',message='原执行服务已停止；配置快照已保留，可重新提交' WHERE id=?", (row['id'],))
 
     def submit(self, kind, overrides):
         if kind not in ('a', 'spad', 'system'):
@@ -88,20 +126,26 @@ class JobManager:
                 count = db.execute("SELECT COUNT(*) FROM jobs WHERE status IN ('queued','running')").fetchone()[0]
                 if count >= a.max_pending_jobs:
                     raise ValueError('Task queue is full; cancel a task or wait')
+                if self.pool is not None and self.worker_count is not None and self.worker_count != a.max_job_workers:
+                    if count:
+                        raise ValueError('Worker limit changed; wait for active jobs before applying the new limit')
+                    self.pool.shutdown(wait=False)
+                    self.pool = None
                 job_id = uuid4().hex
                 directory = self.root/job_id
                 directory.mkdir()
                 payload = {'kind': kind, 'experiment': cfg.model_dump(), 'algorithms': a.model_dump(), 'yaml': snapshot}
                 (directory/'request.json').write_text(json.dumps(payload, ensure_ascii=False, allow_nan=False), encoding='utf-8')
-                db.execute('INSERT INTO jobs VALUES (?,?,?,?,?,?,?,?,?)',
-                           (job_id, kind, datetime.now(timezone.utc).isoformat(), 'queued', 0, 1, '等待执行', 0, None))
+                db.execute('INSERT INTO jobs (id,kind,created,status,completed,total,message,cancel_requested,result_path,owner_pid) VALUES (?,?,?,?,?,?,?,?,?,?)',
+                           (job_id, kind, datetime.now(timezone.utc).isoformat(), 'queued', 0, 1, '等待执行', 0, None, os.getpid()))
             if self.pool is None:
                 self.pool = ProcessPoolExecutor(max_workers=a.max_job_workers, mp_context=multiprocessing.get_context('spawn'))
+                self.worker_count = a.max_job_workers
             future = self.pool.submit(worker, str(self.root), job_id, kind, cfg.model_dump(), a.model_dump(), snapshot)
             def on_done(f):
                 error = f.exception()
                 if error:
-                    update(self.root, job_id, status='failed', message=f'Worker failed: {error}')
+                    update(self.root, job_id, preserve_interrupted=True, status='failed', message=f'Worker failed: {error}')
             future.add_done_callback(on_done)
         return self.get(job_id)
 

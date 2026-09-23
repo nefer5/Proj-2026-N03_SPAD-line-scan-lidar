@@ -63,3 +63,16 @@ def test_persistent_jobs_cancel_and_snapshot(tmp_path,monkeypatch):
     assert replay.status_code==200
     assert sum(map(sum,replay.json()['counts']))==len(m.result(completed)['records'])
     assert client.post(f'/api/jobs/{completed}/replay',json={'bin_ps':original/2}).status_code==422
+
+
+def test_opening_another_server_does_not_interrupt_a_live_owner(tmp_path):
+    class Future:
+        def add_done_callback(self,callback): pass
+    class Pool:
+        def submit(self,*args): return Future()
+    m=JobManager(tmp_path);m.pool=Pool();job=m.submit('spad',{})
+    assert JobManager(tmp_path).get(job['id'])['status']=='queued'
+    update(tmp_path,job['id'],owner_pid=0)
+    assert JobManager(tmp_path).get(job['id'])['status']=='interrupted'
+    update(tmp_path,job['id'],preserve_interrupted=True,status='completed')
+    assert m.get(job['id'])['status']=='interrupted'

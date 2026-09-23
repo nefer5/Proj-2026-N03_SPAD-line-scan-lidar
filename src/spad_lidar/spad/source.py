@@ -3,6 +3,7 @@ import numpy as np
 from ..constants import FWHM_TO_SIGMA
 from ..contracts import CandidateEvents
 from .device import effective_pde, apply_jitter
+from ..numerics.temporal import sample_pulse_offsets
 
 
 def sample_candidates(illumination, device, pde_curve, program, rng, event_limit):
@@ -28,9 +29,7 @@ def sample_candidates(illumination, device, pde_curve, program, rng, event_limit
             raise ValueError('Actual candidate count exceeds event resource limit')
         for pixel in range(len(signal)):
             n = int(ns[pixel])
-            offsets = (rng.normal(0, illumination.pulse_fwhm_ps/FWHM_TO_SIGMA, n)
-                       if illumination.pulse_shape == 'gaussian' else
-                       rng.uniform(-illumination.pulse_fwhm_ps/2, illumination.pulse_fwhm_ps/2, n))*1e-3
+            offsets = sample_pulse_offsets(rng, illumination.pulse_shape, illumination.pulse_fwhm_ps, n)
             times = apply_jitter(rng, w.start_ns+illumination.pulse_delay_ns+offsets, device.spad_jitter_fwhm_ps)
             noise = start+rng.uniform(0, duration, int(nb[pixel]))
             all_times.extend(np.r_[times, noise])

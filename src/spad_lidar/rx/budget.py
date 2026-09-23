@@ -7,6 +7,8 @@ from ..models import SimulationConfig
 from ..filters import FilterResponse
 from ..spectra import spectral_components
 from ..spad.device.response import effective_pde
+from ..tx import transmit
+from ..scene import lambertian_return
 
 
 @dataclass(frozen=True)
@@ -65,10 +67,8 @@ def photon_budget(cfg: SimulationConfig, range_m=None, spectral=None) -> Budget:
     # Input reference plane is BEFORE Tx optics, for this angular channel.
     energy = cfg.pulse_energy_nj * 1e-9
     geometry = area / (pi * r**2)
-    tx_output=energy*cfg.tx_efficiency
-    target_incident=tx_output*cfg.atmospheric_one_way_transmission
-    target_reflected=target_incident*cfg.target_reflectivity
-    rx_incident=target_reflected*geometry*cfg.atmospheric_one_way_transmission*cfg.overlap_factor
+    tx_output=transmit(energy,cfg.tx_efficiency)
+    target_incident,target_reflected,rx_incident,geometry=lambertian_return(tx_output,cfg.atmospheric_one_way_transmission,cfg.target_reflectivity,area,r,cfg.overlap_factor)
     received=rx_incident*cfg.rx_efficiency*transmission
     spectral = spectral if spectral is not None else spectral_components(cfg)
     effective_pdp = effective_pde(spectral["pde_at_laser"], cfg.fill_factor)

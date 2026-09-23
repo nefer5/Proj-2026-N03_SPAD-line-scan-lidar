@@ -228,3 +228,95 @@ experiments:
     label: 像素相对权重（JSON数组）
     unit: 相对值
     description: 仅weights模式生效；长度等于H_binning乘V_binning、按行展开；后端按权重总和归一化，不表示丢失能量。
+  illumination.wavelength_nm:
+    label: 入射光波长
+    unit: nm
+    description: SPAD直接照明的单色波长；不要求存在激光。实际生效。
+  illumination.pulse_fwhm_ps:
+    label: 入射脉冲宽度
+    unit: ps
+    description: 探测面入射波形的FWHM；在器件抖动之前定义。实际生效。
+  timing.laser_shots:
+    label: 采集周期数
+    unit: 周期
+    description: 运行中实际采集的周期数，另有算法配置的预热周期；无扫描驻留推断。实际生效。
+  optics.tx_model:
+    label: Tx角分布模型
+    unit: 枚举
+    description: gaussian高斯角分布；uniform有限角域均匀分布；dataset使用导入的Tx角单元份额。仅当前模型生效。
+  optics.rx_model:
+    label: Rx像面映射模型
+    unit: 枚举
+    description: gaussian_psf构造高斯PSF；uniform_pixel显式均匀参考；dataset使用效率及PSF数据库。仅当前模型生效。
+  optics.dataset:
+    label: 光学数据库（JSON）
+    unit: 版本化数据
+    description: 仅Tx或Rx选择dataset时使用；包含明确角度/波长/像素轴、能量参考面和来源；数据不自动归一化。
+  optics.channels_h:
+    label: 水平读出通道数
+    unit: 通道
+    description: 与H_binning共同定义阵列水平像素数；每个像素只属于一个固定矩形组。实际生效。
+  optics.channels_v:
+    label: 垂直读出通道数
+    unit: 通道
+    description: 与V_binning共同定义阵列垂直像素数；不由数量猜测IFOV。实际生效。
+  optics.pixel_pitch_um:
+    label: 像素节距
+    unit: μm
+    description: 构造Rx模型中的完整像素节距；导入Rx时使用数据库像素边界，本项不生效。FF由SPAD计算。
+  optics.focal_length_mm:
+    label: 接收有效焦距
+    unit: mm
+    description: 仅构造高斯PSF时使用，以f*tan(angle)映射质心；不是完整光线追迹。
+  optics.tx_fwhm_h_mrad:
+    label: Tx水平角FWHM
+    unit: mrad
+    description: 仅gaussian Tx生效。角域外高斯尾部明确记录为损失，不重新归一化。
+  optics.tx_fwhm_v_mrad:
+    label: Tx垂直角FWHM
+    unit: mrad
+    description: 仅gaussian Tx生效。角分布为H/V可分离的二维高斯。
+  optics.tx_center_h_mrad:
+    label: Tx水平角中心
+    unit: mrad
+    description: 仅gaussian Tx生效；光学H方向远场角，非机械转镜角。
+  optics.tx_center_v_mrad:
+    label: Tx垂直角中心
+    unit: mrad
+    description: 仅gaussian Tx生效；光学V方向远场角，非机械转镜角。
+  optics.psf_sigma_um:
+    label: PSF高斯标准差
+    unit: μm
+    description: 仅gaussian_psf生效；是sigma而非FWHM，PSF按实际像素边界积分。
+  optics.rx_offset_x_um:
+    label: 像面水平偏移
+    unit: μm
+    description: 仅gaussian_psf生效；平移PSF质心，可研究边缘截断及通道间能量分配。
+  optics.rx_offset_y_um:
+    label: 像面垂直偏移
+    unit: μm
+    description: 仅gaussian_psf生效；移动质心而不补偿移出阵列的能量。
+  optics.total_pulse_energy_nj:
+    label: 全光斑脉冲能量 · Tx前
+    unit: nJ
+    description: 整个Tx光斑的单脉冲能量，不是A单角通道能量。先乘Tx效率，再按角度单元份额分配。实际生效。
+  optics.rx_efficiency:
+    label: 构造Rx收光效率
+    unit: '1'
+    description: 构造Rx中的入瞳到无限像面效率，滤光/PSF截断/PDE/FF均未包含。导入Rx时使用数据表，本项不生效。
+  optics.angle_h_min_mrad:
+    label: 构造角域 H min
+    unit: mrad
+    description: 生成Tx角单元及Rx插值轴时使用。导入部分使用相应数据库轴；背景积分覆盖实际Tx角网格域，假定域外无场景辐亮度贡献。
+  optics.angle_h_max_mrad:
+    label: 构造角域 H max
+    unit: mrad
+    description: 生成Tx角单元及Rx插值轴时使用。导入部分使用相应数据库轴；背景积分覆盖实际Tx角网格域，假定域外无场景辐亮度贡献。
+  optics.angle_v_min_mrad:
+    label: 构造角域 V min
+    unit: mrad
+    description: 生成Tx角单元及Rx插值轴时使用。导入部分使用相应数据库轴；背景积分覆盖实际Tx角网格域，假定域外无场景辐亮度贡献。
+  optics.angle_v_max_mrad:
+    label: 构造角域 V max
+    unit: mrad
+    description: 生成Tx角单元及Rx插值轴时使用。导入部分使用相应数据库轴；背景积分覆盖实际Tx角网格域，假定域外无场景辐亮度贡献。

@@ -17,7 +17,7 @@ WEB = Path(__file__).resolve().parents[3]/'web'
 
 def lab_page(kind):
     html = (WEB/'labs.html').read_text(encoding='utf-8').replace('__KIND__', kind)
-    for name in ('styles.css', 'shared/labs.css', 'shared/labs.js', 'curve-editor.js',
+    for name in ('styles.css', 'shared/labs.css', 'shared/labs.js', 'shared/spatial.js', 'curve-editor.js',
                  'vendor/katex/katex.min.js', 'vendor/katex/katex.min.css'):
         digest = sha256((WEB/name).read_bytes()).hexdigest()
         html = html.replace(f'/static/{name}"', f'/static/{name}?v={digest}"')
@@ -27,6 +27,31 @@ def lab_page(kind):
 @router.get('/spad')
 def spad_page():
     return lab_page('spad')
+
+
+@router.get('/system')
+def system_page():
+    return lab_page('system')
+
+
+@router.post('/api/experiments/system/optical-data')
+def export_optical_data(config: dict):
+    try:
+        from ..experiments.spatial import optical_dataset
+        a=Algorithms.load()
+        cfg=SimulationConfig.for_experiment('system',config,a)
+        return optical_dataset(cfg,a).model_dump()
+    except (ValueError,KeyError) as exc:
+        raise HTTPException(422,str(exc)) from exc
+
+
+@router.post('/api/optics/validate')
+def validate_optical_data(document: str = Body(media_type='text/plain')):
+    try:
+        from ..adapters.optical_data import validate_dataset
+        return validate_dataset(parse_yaml(document),Algorithms.load()).model_dump()
+    except (ValueError,KeyError) as exc:
+        raise HTTPException(422,str(exc)) from exc
 
 
 @router.get('/api/experiments/{kind}')

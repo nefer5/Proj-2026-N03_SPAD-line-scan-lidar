@@ -60,6 +60,24 @@ def test_device_gate_and_readout_gate_are_distinct():
     assert s.readout.records==[]
 
 
+def test_device_and_readout_can_be_injected_independently():
+    from spad_lidar.spad.device import DeviceState
+    from spad_lidar.spad.readout import ReadoutEngine
+    class AlwaysReadyDevice(DeviceState):
+        def avalanche(self,t,pixel,dead_time_ns):
+            return True
+    cfg=SimulationConfig.for_experiment('spad',{'readout':{'readout_mode':'independent_multi','tdc_dead_time_ns':0}})
+    program=periodic_program(100,0,100,0,1,1)
+    engine=AlwaysReadyDevice(cfg.device.spads_per_channel)
+    s=AcquisitionSession(cfg.device,cfg.readout,np.zeros(cfg.device.spads_per_channel,dtype=int),program,10,
+                         device_engine=engine,readout_factory=ReadoutEngine)
+    s.advance(CandidateEvents([10,11],[0,0]),100)
+    assert s.device is engine
+    assert s.stats['recorded']==2
+    with pytest.raises(ValueError,match='checkpoint adapter'):
+        s.checkpoint()
+
+
 def test_standalone_config_rejects_system_fields_and_bad_defaults():
     with pytest.raises(ValueError):
         SimulationConfig.for_experiment('spad', {'range_m': 100})

@@ -306,6 +306,97 @@ $$
 | 每门总噪声候选数 | events/gate | `noise_gate` |
 | 读出模式 | mode | `readout_mode` |
 
+## B 全光斑：入瞳、探测面、候选雪崩与混合记录
+
+Tx全光斑按角度单元分配，Rx效率与PSF将能量映射到真实像素；光子预算由Python计算。构造光学样例不代表实测器件或实际光学系统。
+
+### 回波：角度能量经过Rx映射到像素
+
+先计算各角度单元入瞳能量，再分别乘Rx效率、滤光片及PSF像素份额。入射信号光子仍未乘PDE/FF。
+
+$$
+N_{i,\mathrm{sensor}}^{s}=\frac{1}{hc/\lambda_0}\sum_a E_{a,\mathrm{pupil}}\,\eta_{a}(\lambda_0)\,T_f(\lambda_0)\,p_{ai}(\lambda_0)
+$$
+
+**符号与单位：** a为角度单元，i为物理像素；入瞳能量E单位J，η为入瞳到无限像面的收光效率，Tf为滤光透过率，p为完整像素截获无限PSF的能量份额。p按像素积分，边缘截断后不再归一化。λ使用m，输出为每完整脉冲、PDE/FF前的光子数。
+
+| 中间量 | 单位 | Python结果字段 |
+|---|---|---|
+| 全光斑Tx前能量 | J/pulse | `tx_input_j` |
+| Tx角范围外能量 | J/pulse | `tx_angular_truncation_j` |
+| 回波入瞳光子 | photons/pulse | `signal_rx_incident_photons_per_pulse` |
+| 回波探测面光子 | photons/pulse | `signal_sensor_incident_photons_per_pulse` |
+
+### 太阳：按明确波段积分并映射到像素
+
+太阳光谱沿用标准谱或选定输入模式及lux归一化；背景角域由当前Tx角单元网格覆盖范围明确限定，不乘Tx能量权重。
+
+$$
+N_{i,\mathrm{sensor}}^{b}=T_{\mathrm{gate}}A_r\int_{\mathcal B}\sum_a L_{a,\lambda}^{b}\,\Delta\Omega_a\,\eta_a(\lambda)\,T_f(\lambda)\,p_{ai}(\lambda)\frac{\lambda}{hc}\,\mathrm{d}\lambda
+$$
+
+**符号与单位：** b分别表示太阳或其他环境光；L为W/(m²·sr·m)谱辐亮度，ΔΩ为sr，门宽为s。显示/输入可用每nm谱密度，Python积分采用相配的nm权重与波长到m换算。积分波段B明确记录；输出为完整像素、PDE/FF前的每门光子数。
+
+| 中间量 | 单位 | Python结果字段 |
+|---|---|---|
+| 太阳入瞳光子（限定积分波段） | photons/gate | `solar_rx_incident_photons_per_gate` |
+| 太阳Rx效率后光子 | photons/gate | `solar_after_rx_photons_per_gate` |
+| 太阳滤光后无限像面光子 | photons/gate | `solar_after_filter_fullplane_photons_per_gate` |
+| 太阳探测面光子 | photons/gate | `solar_sensor_incident_photons_per_gate` |
+
+### 其他环境光：独立输入谱的空间积分
+
+其他光输入已经是接收方向谱辐亮度；不再额外乘目标反射率。背景原始光子数同样限定当前积分波段。
+
+$$
+N_{i,\mathrm{sensor}}^{b}=T_{\mathrm{gate}}A_r\int_{\mathcal B}\sum_a L_{a,\lambda}^{b}\,\Delta\Omega_a\,\eta_a(\lambda)\,T_f(\lambda)\,p_{ai}(\lambda)\frac{\lambda}{hc}\,\mathrm{d}\lambda
+$$
+
+**符号与单位：** b分别表示太阳或其他环境光；L为W/(m²·sr·m)谱辐亮度，ΔΩ为sr，门宽为s。显示/输入可用每nm谱密度，Python积分采用相配的nm权重与波长到m换算。积分波段B明确记录；输出为完整像素、PDE/FF前的每门光子数。
+
+| 中间量 | 单位 | Python结果字段 |
+|---|---|---|
+| 其他光入瞳光子（限定积分波段） | photons/gate | `other_rx_incident_photons_per_gate` |
+| 其他光Rx效率后光子 | photons/gate | `other_after_rx_photons_per_gate` |
+| 其他光滤光后无限像面光子 | photons/gate | `other_after_filter_fullplane_photons_per_gate` |
+| 其他光探测面光子 | photons/gate | `other_sensor_incident_photons_per_gate` |
+
+### 器件转换与最终混合记录
+
+PDE/FF转换后再由共用SPAD及读出核心处理DCR、恢复和竞争。最终记录是所有来源混合的结果，不能按候选比例线性拆分。
+
+$$
+\mu_i=\int_{\mathcal B}N_{i,\lambda}\,\mathrm{PDE}(\lambda)\,FF\,\mathrm{d}\lambda
+$$
+
+**符号与单位：** N为探测面光子谱密度；PDE与FF由器件模块应用一次，得到死时间与读出之前的候选雪崩期望。离散光谱实现使用已包含积分权重的单元光子数。DCR及其他电子候选另行加入。
+
+| 中间量 | 单位 | Python结果字段 |
+|---|---|---|
+| 回波候选雪崩期望 | candidates/pulse | `signal_candidate_avalanches_per_pulse` |
+| 太阳候选雪崩期望 | candidates/gate | `solar_candidate_avalanches_per_gate` |
+| 其他光候选雪崩期望 | candidates/gate | `other_candidate_avalanches_per_gate` |
+| 本次采集最终混合记录 | records/acquisition | `final_mixed_records` |
+
+### 接收能量守恒与边缘损失
+
+不通过PSF重新归一化补偿感光面外能量。守恒残差保留浮点误差，所有损耗参考面分别列出。
+
+$$
+E_{\mathrm{pupil}}=E_{\mathrm{sensor}}+E_{\mathrm{Rx\,loss}}+E_{\mathrm{filter\,loss}}+E_{\mathrm{edge\,loss}}
+$$
+
+**符号与单位：** 所有项单位J、按完整单脉冲计算。Rx损耗、滤光损耗、感光面边缘截断分别审计；Tx角范围外损耗位于此等式之前单独记录。
+
+| 中间量 | 单位 | Python结果字段 |
+|---|---|---|
+| 入瞳信号能量 | J/pulse | `rx_pupil_signal_j` |
+| 探测面信号能量 | J/pulse | `sensor_signal_j` |
+| Rx效率损失 | J/pulse | `rx_loss_j` |
+| 滤光损失 | J/pulse | `filter_loss_j` |
+| PSF感光面边缘损失 | J/pulse | `psf_edge_loss_j` |
+| 能量平衡残差 | J/pulse | `energy_balance_residual_j` |
+
 ## 对照代码与模型边界
 
 - simulator.py / photon_budget：分阶段回波能量、入瞳光子、探测面光子与各来源候选数。

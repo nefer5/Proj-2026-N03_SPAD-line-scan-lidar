@@ -16,6 +16,7 @@ from .legacy_diagnostics import crosstalk_model, _range_sweep
 from ..spad.analytical import _sample_histogram
 from ..processing.ranging import _estimate_range
 from ..processing.statistics import histogram_sample_range
+from .. import __version__
 
 
 def simulate(cfg: SimulationConfig, debug=False) -> dict:
@@ -71,7 +72,7 @@ def simulate(cfg: SimulationConfig, debug=False) -> dict:
     fingerprint = sha256(json.dumps(config_snapshot, sort_keys=True).encode()).hexdigest()
     result = {
         "configuration": config_snapshot,
-        "provenance": {"model_version": "0.2.1", "simulation_scope": "A_single_angular_channel", "utc": datetime.now(timezone.utc).isoformat(),
+        "provenance": {"model_version": "0.2.1", "software_version": __version__, "simulation_scope": "A_single_angular_channel", "utc": datetime.now(timezone.utc).isoformat(),
                        "sha256": fingerprint, "defaults_source": "config/defaults.yaml"},
         "derived": derived,
         "readout": readout,

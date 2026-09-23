@@ -4,7 +4,7 @@ from math import pi, sqrt
 from ..constants import C, H, FWHM_TO_SIGMA
 from scipy.signal import convolve
 from ..configuration import Algorithms
-from ..experiments.a_signal import timing_sigma_ns
+from ..numerics.temporal import timing_sigma_ns
 
 
 def _estimate_range(cfg, time_ns, hist, algorithms=None, with_trace=False):

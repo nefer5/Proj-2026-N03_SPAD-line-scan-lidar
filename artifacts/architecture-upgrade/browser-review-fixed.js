@@ -1,0 +1,12 @@
+await page.reload({waitUntil:'networkidle'});
+await expect(page.locator('#resultStatus')).toContainText('B_full_spot_static');
+await page.getByText('回波：角度能量经过Rx映射到像素',{exact:true}).click();
+await page.getByText('接收能量守恒与边缘损失',{exact:true}).click();
+const mobile=await page.evaluate(()=>({viewport:innerWidth,scrollWidth:document.documentElement.scrollWidth}));
+assert(mobile.scrollWidth<=mobile.viewport,'Page has horizontal overflow on mobile');
+await page.setViewportSize({width:1440,height:1050});
+await page.getByText('接收能量守恒与边缘损失',{exact:true}).scrollIntoViewIfNeeded();
+await expect(page.locator('.katex-error')).toHaveCount(0);
+const screenshot=await page.screenshot({fullPage:false});
+await page.evaluate(()=>window.scrollTo(0,0));
+return {reviewUrl:page.url(),mobile,katexCount:await page.locator('#opticalResults .katex').count(),screenshot};

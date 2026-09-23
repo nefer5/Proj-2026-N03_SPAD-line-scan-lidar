@@ -104,6 +104,12 @@ def resolve_experiment(kind, overrides, algorithms=None):
     pixels = cfg.device.spads_per_channel
     if kind == 'system':
         pixels *= cfg.optics.channels_h * cfg.optics.channels_v
+        if cfg.optics.tx_model=='dataset' or cfg.optics.rx_model=='dataset':
+            from ..adapters.optical_data import validate_dataset
+            data=validate_dataset(cfg.optics.dataset,a)
+            if cfg.optics.rx_model=='dataset' and (len(data.rx.x_edges_um)!=cfg.optics.channels_h*cfg.device.H_binning+1 or
+                                                 len(data.rx.y_edges_um)!=cfg.optics.channels_v*cfg.device.V_binning+1):
+                raise ValueError('Dataset pixel geometry does not match the selected array')
     if pixels > a.max_lab_pixels or cfg.device.spads_per_channel > a.max_spads_per_channel:
         raise ValueError('Physical pixel count exceeds configured resource limit')
     if cfg.timing.laser_shots > a.max_laser_shots or cfg.timing.laser_shots+a.readout_warmup_cycles > a.max_readout_cycles:
@@ -112,4 +118,9 @@ def resolve_experiment(kind, overrides, algorithms=None):
         raise ValueError('Histogram exceeds configured resource limit')
     if cfg.readout.tdc_count > a.max_spads_per_channel:
         raise ValueError('TDC count exceeds configured resource limit')
+    channels=pixels//cfg.device.spads_per_channel
+    if channels*np.ceil(cfg.timing.gate_width_ns*1000/cfg.readout.tdc_bin_ps)>a.max_lab_histogram_cells:
+        raise ValueError('Combined channel histograms exceed max_lab_histogram_cells')
+    if pixels*(cfg.timing.laser_shots+a.readout_warmup_cycles)>a.max_detector_sampling_work:
+        raise ValueError('Pixel-cycle sampling work exceeds max_detector_sampling_work')
     return cfg

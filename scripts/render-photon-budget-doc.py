@@ -2,13 +2,14 @@
 import argparse
 from pathlib import Path
 import sys
-import yaml
 
 ROOT=Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(ROOT/'src'))
+from spad_lidar.configuration import read_yaml
 
 
 def render():
-    load=lambda name:yaml.safe_load((ROOT/"config"/name).read_text(encoding="utf-8"))
+    load=read_yaml
     definition=load("photon-flow.yaml")
     formulas=load("formulas.yaml")
     notes=load("formula-notes.yaml")
@@ -32,6 +33,8 @@ def render():
     for chain in definition["chains"]:
         lines.extend(["## "+chain["title"],""]);steps(chain["steps"])
     lines.extend(["## 候选输入到实际读出",""]);steps(definition["readout"])
+    lines.extend(["## "+definition["spatial"]["title"],"",definition["spatial"]["intro"],""])
+    steps(definition["spatial"]["steps"])
     lines.extend(["## 对照代码与模型边界","",
                   "- simulator.py / photon_budget：分阶段回波能量、入瞳光子、探测面光子与各来源候选数。",
                   "- spectra.py / spectral_components：太阳lux归一化、反射、其他光倍率、同波段分层光谱积分。",

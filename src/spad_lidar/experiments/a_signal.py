@@ -7,12 +7,7 @@ from ..rx.budget import photon_budget
 from ..spad.analytical import _first_photon_probabilities
 
 
-def timing_sigma_ns(cfg):
-    laser_sigma = cfg.pulse_fwhm_ps / (
-        FWHM_TO_SIGMA if cfg.pulse_shape == "gaussian" else sqrt(12)
-    )
-    return sqrt(laser_sigma**2 + (cfg.spad_jitter_fwhm_ps / FWHM_TO_SIGMA)**2
-                + (cfg.other_jitter_fwhm_ps / FWHM_TO_SIGMA)**2) * 1e-3
+from ..numerics.temporal import timing_sigma_ns
 
 
 def _time_axis(cfg):

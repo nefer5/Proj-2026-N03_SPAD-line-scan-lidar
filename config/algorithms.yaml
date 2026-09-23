@@ -53,3 +53,9 @@ acquisition_block_cycles: 16
 max_pending_jobs: 8
 max_job_workers: 1
 job_poll_ms: 600
+max_spatial_angle_mrad: 100
+energy_conservation_rtol: 1.0e-10
+spatial_wavelength_chunk_size: 32
+max_spatial_integration_work: 100000000
+max_lab_histogram_cells: 2000000
+max_detector_sampling_work: 2000000

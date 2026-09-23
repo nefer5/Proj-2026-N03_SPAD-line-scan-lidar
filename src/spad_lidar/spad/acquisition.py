@@ -9,7 +9,7 @@ from .readout import ReadoutEngine
 
 
 class AcquisitionSession:
-    def __init__(self, device, readout, pixel_groups, program, trace_limit):
+    def __init__(self, device, readout, pixel_groups, program, trace_limit, *, device_engine=None, readout_factory=None):
         groups = np.asarray(pixel_groups)
         if groups.ndim != 1 or not len(groups) or np.any(groups < 0) or np.any(groups != np.floor(groups)):
             raise ValueError('Readout topology must contain nonnegative integer group IDs')
@@ -23,10 +23,13 @@ class AcquisitionSession:
             raise ValueError('Coincidence threshold exceeds group size')
         self.device_config = device
         self.program = program
-        self.device = DeviceState(len(groups))
+        self.device = DeviceState(len(groups)) if device_engine is None else device_engine
+        if np.shape(self.device.ready_ns) != (len(groups),):
+            raise ValueError('Device backend state must match physical pixel topology')
         self.stats = {k: 0 for k in ('potential_events', 'spad_dead_losses', 'outside_gate_avalanches',
                                     'avalanches', 'logic_triggers', 'tdc_dead_losses', 'capacity_losses', 'recorded')}
-        self.readout = ReadoutEngine(readout, groups, self.stats, trace_limit)
+        factory = ReadoutEngine if readout_factory is None else readout_factory
+        self.readout = factory(readout, groups, self.stats, trace_limit)
         self.watermark_ns = program.windows[0].start_ns
 
     def advance(self, events, until_ns):
@@ -64,6 +67,8 @@ class AcquisitionSession:
 
     def checkpoint(self):
         """Portable JSON state; None represents a resource that has never fired."""
+        if type(self.device) is not DeviceState or type(self.readout) is not ReadoutEngine:
+            raise ValueError('Custom device/readout backends require their own checkpoint adapter')
         finite = lambda values: [None if v == -np.inf else float(v) for v in values]
         r = self.readout
         return {'schema_version': 1, 'device_config': self.device_config.model_dump(),

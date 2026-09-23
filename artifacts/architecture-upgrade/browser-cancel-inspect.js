@@ -1,0 +1,1 @@
+return {jobs:await page.locator('#jobs').innerText(),status:await page.locator('#resultStatus').innerText(),errors:await page.locator('#error').innerText(),buttons:await page.locator('#jobs button').evaluateAll(nodes=>nodes.map(n=>({text:n.textContent,disabled:n.disabled,rect:{x:n.getBoundingClientRect().x,y:n.getBoundingClientRect().y}})))};

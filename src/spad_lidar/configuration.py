@@ -122,12 +122,18 @@ class Algorithms(BaseModel):
     basic_quadrature_segments: int = Field(ge=16, le=256)
     max_lab_pixels: int = Field(gt=0)
     max_optical_cells: int = Field(gt=0)
-    spatial_angle_samples_h: int = Field(ge=1)
-    spatial_angle_samples_v: int = Field(ge=1)
+    spatial_angle_samples_h: int = Field(ge=2)
+    spatial_angle_samples_v: int = Field(ge=2)
     acquisition_block_cycles: int = Field(ge=1)
     max_pending_jobs: int = Field(ge=1)
     max_job_workers: int = Field(ge=1)
     job_poll_ms: int = Field(ge=100)
+    max_spatial_angle_mrad: float = Field(gt=0)
+    energy_conservation_rtol: float = Field(gt=0, lt=1)
+    spatial_wavelength_chunk_size: int = Field(ge=1)
+    max_spatial_integration_work: int = Field(gt=0)
+    max_lab_histogram_cells: int = Field(gt=0)
+    max_detector_sampling_work: int = Field(gt=0)
 
     @classmethod
     def load(cls):
