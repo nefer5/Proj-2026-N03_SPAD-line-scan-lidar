@@ -32,6 +32,12 @@ def run_illumination(cfg, a, light, pixel_groups, progress, cancelled):
     streams = np.random.SeedSequence(cfg.rng_seed).spawn(2)
     candidates, source_audit = sample_candidates(light, cfg.device, Curve(cfg.spectral_inputs.pde), program,
                                                  np.random.default_rng(streams[0]), a.max_readout_events_per_run)
+    return acquire_candidates(cfg,a,candidates,source_audit,pixel_groups,program,streams[1],progress,cancelled)
+
+
+def acquire_candidates(cfg,a,candidates,source_audit,pixel_groups,program,electronic_seed,progress,cancelled):
+    """Shared state evolution, electronics response and quantized recording for B/C."""
+    timing=cfg.timing
     if cancelled():
         raise InterruptedError('Cancelled before event acquisition')
     session = AcquisitionSession(cfg.device, cfg.readout, pixel_groups, program, a.readout_trace_events)
@@ -46,15 +52,17 @@ def run_illumination(cfg, a, light, pixel_groups, progress, cancelled):
         progress(end_index, len(windows), '采集事件')
         if cancelled():
             raise InterruptedError('Cancelled; incomplete acquisition is not reported as a complete result')
+    by_cycle={w.cycle:w for w in program.windows}
     records = session.readout.records
-    jittered = apply_jitter(np.random.default_rng(streams[1]), np.array([r['phase_ns'] for r in records]), cfg.readout.other_jitter_fwhm_ps)
+    jittered = apply_jitter(np.random.default_rng(electronic_seed), np.array([r['phase_ns'] for r in records]), cfg.readout.other_jitter_fwhm_ps)
     bin_width_ns = cfg.readout.tdc_bin_ps*1e-3
     measured = []
     for r, phase in zip(records, jittered):
-        if timing.gate_start_ns <= phase < timing.gate_start_ns+timing.gate_width_ns:
+        effective_close=min(timing.gate_start_ns+timing.gate_width_ns,program.windows[-1].end_ns-by_cycle[r['cycle']].start_ns)
+        if timing.gate_start_ns <= phase < effective_close:
             code = int(np.floor((phase-timing.gate_start_ns)/bin_width_ns))
             left = timing.gate_start_ns+code*bin_width_ns
-            right = min(left+bin_width_ns, timing.gate_start_ns+timing.gate_width_ns)
+            right = min(left+bin_width_ns, effective_close)
             measured.append({'cycle': r['cycle'], 'channel': r['channel'], 'tdc': r['tdc'], 'tdc_code': code,
                              'phase_ns': (left+right)/2, 'interval_start_ns': left, 'interval_end_ns': right})
     histogram = histogram_records(measured, timing.gate_start_ns, timing.gate_width_ns, cfg.readout.tdc_bin_ps,

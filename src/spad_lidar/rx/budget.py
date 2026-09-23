@@ -66,7 +66,6 @@ def photon_budget(cfg: SimulationConfig, range_m=None, spectral=None) -> Budget:
     enbw, transmission = _filter_properties(cfg)
     # Input reference plane is BEFORE Tx optics, for this angular channel.
     energy = cfg.pulse_energy_nj * 1e-9
-    geometry = area / (pi * r**2)
     tx_output=transmit(energy,cfg.tx_efficiency)
     target_incident,target_reflected,rx_incident,geometry=lambertian_return(tx_output,cfg.atmospheric_one_way_transmission,cfg.target_reflectivity,area,r,cfg.overlap_factor)
     received=rx_incident*cfg.rx_efficiency*transmission

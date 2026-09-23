@@ -1,14 +1,15 @@
 # SPAD + VCSEL + 转镜一维线扫 LiDAR 建模器
 
-**模块化研究版 0.3.0.dev0：前两阶段已自动验收；B 空间光学等待人工验收。**
+**模块化研究版 0.4.0.dev0：独立SPAD、B空间光学、C逐脉冲扫描均已实现并自检，等待整体验收。**
 
 - `/spad`：独立 SPAD 研究台，直接设定探测面照明，无需目标或系统光学参数。
 - `/system`：B 全光斑研究台，Tx角分布、Rx效率/PSF、二维像素与各通道采集共用同一SPAD核心。
+- `/system/scan`：C 扫描采集；逐发/回波姿态、回扫、实际角bin发数、同步误差、径向运动、距离线图和XYZ点云。B参数可一键转入C。
 - `/`、`/debug`：保留 A 单角通道评估与调试入口。
 - 后台任务支持进度、取消、刷新后找回结果及完整导出；记录可重放分箱。
-- 默认 B 光学数据明确标注为**构造样例**，可以导出并替换为符合契约的外部数据。C 扫描尚未实现。
+- 默认 B 光学与C扫描/场景参数明确属于**构造研究工况**；可替换为实际数据。C距离和点云仍是未经检测门限判定的原始估计。
 
-设计见 [架构说明](docs/architecture.md)，数据格式与人工验收路径见 [B 空间光学](docs/spatial-optics.md)。源码、结果、测试和页面快照位于 `artifacts/architecture-upgrade/`。普通刷新即可获取内容指纹更新后的页面资源。
+设计见 [架构说明](docs/architecture.md)，B见 [空间光学](docs/spatial-optics.md)，C见 [扫描机制](docs/scanning.md)。包含C的完整源码、数组、CSV、测试和页面快照位于 `artifacts/scan-upgrade/`；前期快照保留在 `artifacts/architecture-upgrade/`。普通刷新即可获取内容指纹更新后的页面资源。
 
 下面保留 A 阶段的历史版本记录；当前模型状态以 [路标](docs/roadmap.md) 为准。
 

@@ -397,6 +397,146 @@ $$
 | PSF感光面边缘损失 | J/pulse | `psf_edge_loss_j` |
 | 能量平衡残差 | J/pulse | `energy_balance_residual_j` |
 
+## C 逐脉冲扫描：时序、实际发数与光子审计
+
+扫描只组装逐发光学输入和控制时序；所有脉冲共享同一SPAD/读出状态。下列总量按完整测量帧的参考时隙统计，不代表检测成功率。
+
+### 扫描与发射时序
+
+PRF生成名义触发时隙；帧预算决定时隙数。激光偏移/抖动改变实际发射时刻，机械角经倍率映射为光学角。
+
+$$
+t_k=kT_{\mathrm{PRF}}+\delta t+\epsilon_k,\qquad \theta_{\mathrm{opt}}(t)=g\,\theta_{\mathrm{mech}}(t)+\theta_0
+$$
+
+**符号与单位：** T_PRF为名义触发周期；δt为激光固定时序偏移，εk为保存seed的高斯时间扰动。公式中的时间采用s，界面和事件时钟以ns保存并在物理计算入口换算。g为机械到光学角倍率；配置角度为mrad。实际发射、控制参考和编码器读数分别保存。
+
+| 中间量 | 单位 | Python结果字段 |
+|---|---|---|
+| 总测量帧时长 | ns | `duration_ns` |
+| 名义触发时隙 | slots | `scheduled_slots` |
+| 实际启用发射的测量参考时隙 | pulses | `emitted_reference_slots` |
+| 测量参考时隙Tx前能量合计 | J | `reference_tx_input_energy_j` |
+| 测量参考时隙Tx角域外能量 | J | `reference_tx_angular_truncation_j` |
+
+### 有限测量时间窗内的Tx功率
+
+脉冲中心计数与实际时间积分分别记录。高斯/矩形波形在帧边界可能只有部分能量落入时间窗；这里积分时间波形，不补回边界能量。
+
+$$
+\bar P_{\mathrm{Tx}}=\frac{1}{T_{\mathrm{obs}}}\sum_k E_{k,\mathrm{Tx}}\int_0^{T_{\mathrm{obs}}}s_k(t-t_k)\,\mathrm{d}t
+$$
+
+**符号与单位：** tk为真实脉冲中心，sk为积分归一化的发射时间波形(1/s)，Ek,Tx为Tx后完整脉冲能量(J)。所有时间在公式中采用s。求和覆盖本次有限预热与测量计划中启用的源脉冲；只积分观察时间窗内的部分。中心落在窗内的发数乘完整能量另列，不等同有限时间窗积分功率。
+
+| 中间量 | 单位 | Python结果字段 |
+|---|---|---|
+| 中心位于测量窗内的完整脉冲计账能量 | J | `center_accounted_tx_output_energy_j` |
+| 测量时间窗内积分Tx后能量 | J | `actual_tx_output_energy_j` |
+| 测量时间窗内积分Tx后平均功率 | W | `actual_tx_average_power_w` |
+
+### 角bin累计数
+
+编码器分配发数用于测量结果重建；真实有效发数是独立真值诊断。回扫、域外脉冲和空bin不补齐。
+
+$$
+N_{f,b}=\sum_k \mathbf{1}\{k\text{ is eligible},\ t_k\in F_f,\ \theta_k\in B_b\}
+$$
+
+**符号与单位：** F为半开时间帧，B为半开角bin。分别使用真实发射时间/角度和可观测编码器/参考时钟计算真实有效发数与分配发数，二者不可混用。静止、非匀速及边界情形均采用离散求和，不用驻留近似填补。
+
+| 中间量 | 单位 | Python结果字段 |
+|---|---|---|
+| 分配到角bin的发数 | pulses | `assigned_pulses` |
+| 真实有效角bin发数 | pulses | `true_useful_pulses` |
+
+### 回波：逐发Rx指向与光子求和
+
+每发在实际发射角照射场景，在各回波到达中心计算Rx指向与PSF。反射距离允许随全局H角和径向运动变化。
+
+$$
+t_{\mathrm{return},ka}=t_k+2R_{ka}/c,\qquad \theta_{\mathrm{Rx},ka}=\theta_{\mathrm{Tx}}(t_k)+\alpha_a-\theta_{\mathrm{Rx\,axis}}(t_{\mathrm{return},ka})
+$$
+
+**符号与单位：** a为Tx局部角单元，αa为其局部光学角；Rka为目标反射位置距离。公式中的t_k和t_return以s计，代码显式换算为ns；Rx指向在每个角单元回波中心到达时求值。该式不把电子标定延迟当成光程；有限脉宽内的扫描位移暂未展开。
+
+| 中间量 | 单位 | Python结果字段 |
+|---|---|---|
+| 测量发射的目标入射能量 | J | `target_incident_j` |
+| 测量发射的目标反射能量 | J | `target_reflected_j` |
+| 信号入瞳光子总数 | photons/acquisition | `signal_pupil_photons_total` |
+| 信号探测面光子总数 | photons/acquisition | `signal_sensor_photons_total` |
+| 信号候选雪崩期望总数 | candidates/acquisition | `signal_candidates_total` |
+
+### 构造场景：角向距离与径向运动
+
+逐角单元计算真实反射距离，再确定回波时刻和Rx姿态。真值距离仅用于生成光子与误差审计，不交给距离估计器寻峰。
+
+$$
+R_{ka}=\frac{R_0+g_R\theta_{ka}+v t_k}{1-v/c}
+$$
+
+**符号与单位：** R为反射位置的径向距离(m)，R0为t=0、全局H=0处的距离；gR为m/rad梯度，θ为全局H角(rad)，v为径向速度(m/s)，tk为实际发射时刻(s)。分母来自恒速目标与出射光的截获关系。该构造模型不包含遮挡、横向运动、目标法线变化或多普勒谱移。
+
+| 中间量 | 单位 | Python结果字段 |
+|---|---|---|
+| 测量发射的最小反射距离 | m | `reflection_range_min_m` |
+| 测量发射的最大反射距离 | m | `reflection_range_max_m` |
+
+### 太阳：记录门实际曝光
+
+背景按接收机局部角域与明确波段积分。发射关闭不会自动关闭SPAD/TDC周期门。
+
+$$
+N_{\mathrm{sensor}}^{b}=\left(\sum_k T_{\mathrm{gate},k}\right)\dot N_{\mathrm{sensor}}^{b}
+$$
+
+**符号与单位：** 背景在接收机局部角域内假定均匀平稳。每个有效记录门的实际长度相加，包含回扫期间仍运行的周期门；最后截断门按真实时长计。原始光子积分波段明确列出。free_running门外背景也参与器件状态，其候选量另见采样审计。
+
+| 中间量 | 单位 | Python结果字段 |
+|---|---|---|
+| 所有记录门实际时长之和 | s | `gate_exposure_s` |
+| 太阳入瞳光子（限定波段） | photons/acquisition | `solar_rx_incident_photons_total` |
+| 太阳探测面光子 | photons/acquisition | `solar_sensor_incident_photons_total` |
+| 太阳门内候选雪崩期望 | candidates/acquisition | `solar_candidate_avalanches_total` |
+
+### 其他环境光：独立积分
+
+只使用当前环境光谱输入模式。原始光子数限定显示波段；不随Tx能量份额缩放。
+
+$$
+N_{\mathrm{sensor}}^{b}=\left(\sum_k T_{\mathrm{gate},k}\right)\dot N_{\mathrm{sensor}}^{b}
+$$
+
+**符号与单位：** 背景在接收机局部角域内假定均匀平稳。每个有效记录门的实际长度相加，包含回扫期间仍运行的周期门；最后截断门按真实时长计。原始光子积分波段明确列出。free_running门外背景也参与器件状态，其候选量另见采样审计。
+
+| 中间量 | 单位 | Python结果字段 |
+|---|---|---|
+| 其他光入瞳光子（限定波段） | photons/acquisition | `other_rx_incident_photons_total` |
+| 其他光探测面光子 | photons/acquisition | `other_sensor_incident_photons_total` |
+| 其他光门内候选雪崩期望 | candidates/acquisition | `other_candidate_avalanches_total` |
+
+### 整次接收能量与最终混合记录
+
+能量等式对测量参考时隙中启用发射的脉冲求和。最终记录包含源间竞争；角bin重建可以进一步排除回扫或域外记录。
+
+$$
+E_{\mathrm{pupil}}=E_{\mathrm{sensor}}+E_{\mathrm{Rx\,loss}}+E_{\mathrm{filter\,loss}}+E_{\mathrm{edge\,loss}}
+$$
+
+**符号与单位：** 所有项单位J、按完整单脉冲计算。Rx损耗、滤光损耗、感光面边缘截断分别审计；Tx角范围外损耗位于此等式之前单独记录。
+
+| 中间量 | 单位 | Python结果字段 |
+|---|---|---|
+| 入瞳信号能量合计 | J | `pupil_energy_j` |
+| 探测面信号能量合计 | J | `sensor_energy_j` |
+| Rx损耗合计 | J | `rx_loss_j` |
+| 滤光损耗合计 | J | `filter_loss_j` |
+| 阵列外损耗合计 | J | `edge_loss_j` |
+| 能量平衡残差 | J | `energy_balance_residual_j` |
+| 全采集混合记录 | records | `final_mixed_records` |
+| 进入角bin重建的记录 | records | `angle_assigned_records` |
+
 ## 对照代码与模型边界
 
 - simulator.py / photon_budget：分阶段回波能量、入瞳光子、探测面光子与各来源候选数。

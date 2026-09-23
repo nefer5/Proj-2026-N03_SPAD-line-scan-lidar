@@ -28,9 +28,9 @@ class AcquisitionProgram:
         for i, w in enumerate(self.windows):
             if not np.all(np.isfinite([w.start_ns, w.end_ns, w.gate_open_ns, w.gate_close_ns, w.detector_gate_open_ns, w.detector_gate_close_ns])):
                 raise ValueError('Program times must be finite')
-            if not w.start_ns <= w.gate_open_ns < w.gate_close_ns <= w.end_ns:
+            if not w.start_ns < w.end_ns or not w.start_ns <= w.gate_open_ns <= w.gate_close_ns <= w.end_ns:
                 raise ValueError('Invalid acquisition interval or gate')
-            if not w.start_ns <= w.detector_gate_open_ns < w.detector_gate_close_ns <= w.end_ns:
+            if not w.start_ns <= w.detector_gate_open_ns <= w.detector_gate_close_ns <= w.end_ns:
                 raise ValueError('Invalid detector gate')
             if w.cycle in seen or (i and self.windows[i-1].end_ns > w.start_ns):
                 raise ValueError('Program intervals overlap or cycle identifiers repeat')

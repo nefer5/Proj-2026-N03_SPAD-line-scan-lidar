@@ -1,0 +1,15 @@
+globalThis.acceptErrors=[];page.on('pageerror',e=>globalThis.acceptErrors.push(e.message));
+await page.goto('http://127.0.0.1:8015/system/scan?job=6e967f52731a4d69969371c4075a57e5',{waitUntil:'networkidle'});
+await expect(page.locator('#formStatus')).toContainText('参数快照');
+await page.locator('#scanReplayBin').fill('2000');await page.getByRole('button',{name:'重放扫描重建',exact:true}).click();
+await expect(page.locator('#scanViewStatus')).toContainText('未重新采样');
+await page.getByRole('button',{name:'导出 XYZ 点云 CSV',exact:true}).click();
+const response=await context.request.get('http://127.0.0.1:8015/api/jobs/6e967f52731a4d69969371c4075a57e5/point-cloud.csv?bin_ps=2000');
+assert.equal(response.status(),200);assert(response.headers()['content-disposition'].includes('attachment'));
+const rows=(await response.text()).trim().split(/\r?\n/);assert(rows[0].endsWith('processing_bin_ps'));assert(rows[1].endsWith(',2000.0')||rows[1].endsWith(',2000'));
+await page.setViewportSize({width:390,height:844});const mobile=await page.evaluate(()=>({width:innerWidth,scrollWidth:document.documentElement.scrollWidth}));assert(mobile.scrollWidth<=mobile.width);
+await page.setViewportSize({width:1440,height:1050});
+await page.reload({waitUntil:'networkidle'});await expect(page.locator('#resultStatus')).toContainText('C_pulse_resolved_scan');
+await expect(page.locator('[data-path="scan.trajectory"]')).toHaveValue('sawtooth');await expect(page.locator('#error')).toBeHidden();await expect(page.locator('.katex-error')).toHaveCount(0);
+await page.locator('#scanPanel').scrollIntoViewIfNeeded();
+return {reviewUrl:page.url(),errors:globalThis.acceptErrors,csvStatus:response.status(),csvPoints:rows.length-1,replayBinPs:rows[1].split(',').at(-1),mobile,katexCount:await page.locator('#opticalResults .katex').count(),screenshot:await page.screenshot({fullPage:false})};

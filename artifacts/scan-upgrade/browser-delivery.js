@@ -1,0 +1,16 @@
+await page.goto('http://127.0.0.1:8015/system/scan',{waitUntil:'networkidle'});
+await page.getByRole('button',{name:'恢复默认',exact:true}).click();await expect(page.getByRole('button',{name:'恢复默认',exact:true})).toBeEnabled();
+const submitted=page.waitForResponse(r=>r.url().endsWith('/api/jobs')&&r.request().method()==='POST');
+await page.getByRole('button',{name:'提交仿真',exact:true}).click();const job=await (await submitted).json();
+await expect(page.locator('#resultStatus')).toContainText('C_pulse_resolved_scan',{timeout:30000});
+const result=await (await context.request.get('http://127.0.0.1:8015/api/jobs/'+job.id+'/result')).json();
+assert(Math.abs(result.scan.frame_budget.actual_tx_average_power_w-.0007632)<1e-15);
+assert.equal(JSON.stringify(result.scan.assigned_pulses_per_frame_bin),JSON.stringify([Array(20).fill(4)]));
+await page.goto('http://127.0.0.1:8015/system/scan?job='+job.id,{waitUntil:'networkidle'});
+await expect(page.locator('#formStatus')).toContainText('参数快照');
+await page.getByText('有限测量时间窗内的Tx功率',{exact:true}).click();
+await page.getByText('有限测量时间窗内的Tx功率',{exact:true}).scrollIntoViewIfNeeded();
+await expect(page.locator('.katex-error')).toHaveCount(0);await expect(page.locator('#error')).toBeHidden();
+const screenshot=await page.screenshot({fullPage:false});
+await page.locator('#scanPanel').scrollIntoViewIfNeeded();
+return {job:job.id,reviewUrl:page.url(),summary:result.scan.summary,txAveragePowerW:result.scan.frame_budget.actual_tx_average_power_w,katexCount:await page.locator('#opticalResults .katex').count(),screenshot};

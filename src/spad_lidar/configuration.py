@@ -134,6 +134,16 @@ class Algorithms(BaseModel):
     max_spatial_integration_work: int = Field(gt=0)
     max_lab_histogram_cells: int = Field(gt=0)
     max_detector_sampling_work: int = Field(gt=0)
+    rx_angle_samples_h: int = Field(ge=2)
+    rx_angle_samples_v: int = Field(ge=2)
+    max_scan_frames: int = Field(ge=1)
+    max_scan_pulses: int = Field(ge=1)
+    max_scan_angle_bins: int = Field(ge=1)
+    max_scan_histogram_cells: int = Field(ge=1)
+    max_scan_projection_work: int = Field(ge=1)
+    max_scan_sampling_work: int = Field(ge=1)
+    scan_preview_table_rows: int = Field(ge=1,le=10000)
+    scan_angle_boundary_tolerance_mrad: float = Field(ge=0)
 
     @classmethod
     def load(cls):

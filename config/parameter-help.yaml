@@ -1,208 +1,207 @@
 range_m:
-  label: "目标距离"
-  unit: "m"
-  description: "正入射大朗伯平面的距离；回波中心为 2R/c 加标定延迟。"
+  label: 目标距离
+  unit: m
+  description: 正入射大朗伯平面的距离；回波中心为 2R/c 加标定延迟。
 target_reflectivity:
-  label: "目标反射率"
-  unit: "1"
-  description: "当前激光波长下的朗伯反射率。背景输入已经是场景辐亮度，不再重复乘反射率。"
+  label: 目标反射率
+  unit: '1'
+  description: 当前激光波长下的朗伯反射率。背景输入已经是场景辐亮度，不再重复乘反射率。
 wavelength_nm:
-  label: "激光波长"
-  unit: "nm"
-  description: "用于单光子能量 hc/λ 和滤光片激光波长处透过率；背景换算采用窄带近似。"
+  label: 激光波长
+  unit: nm
+  description: 用于单光子能量 hc/λ 和滤光片激光波长处透过率；背景换算采用窄带近似。
 pulse_energy_nj:
-  label: "角通道单脉冲能量（Tx前）"
-  unit: "nJ"
-  description: "分配给当前角通道、Tx光学之前的能量；不是整条线阵总能量，也不是峰值功率。"
+  label: 角通道单脉冲能量（Tx前）
+  unit: nJ
+  description: 分配给当前角通道、Tx光学之前的能量；不是整条线阵总能量，也不是峰值功率。
 pulse_shape:
-  label: "时间脉冲形状"
-  unit: "枚举"
-  description: "gaussian 为高斯，rectangular 为矩形；形状同时参与峰值功率和回波响应，不是空间角度分布。"
+  label: 时间脉冲形状
+  unit: 枚举
+  description: gaussian 为高斯，rectangular 为矩形；形状同时参与峰值功率和回波响应，不是空间角度分布。
 laser_prf_hz:
-  label: "激光重复频率 PRF"
-  unit: "Hz"
-  description: "每秒脉冲数；Pavg=E×PRF，累计时长=Nshots/PRF。当前不模拟扫描驻留；门结束必须不超过周期。"
+  label: 激光重复频率 PRF
+  unit: Hz
+  description: 每秒脉冲数；Pavg=E×PRF，累计时长=Nshots/PRF。当前不模拟扫描驻留；门结束必须不超过周期。
 tx_efficiency:
-  label: "Tx 光学效率"
-  unit: "1"
-  description: "输入参考面到出射端的能量透过率，乘一次；Tx后功率另行显示。"
+  label: Tx 光学效率
+  unit: '1'
+  description: 输入参考面到出射端的能量透过率，乘一次；Tx后功率另行显示。
 overlap_factor:
-  label: "Tx/Rx 重叠因子"
-  unit: "1"
-  description: "目标角通道的发射照明与接收视场有效重叠比例，仅作用于信号。"
+  label: Tx/Rx 重叠因子
+  unit: '1'
+  description: 目标角通道的发射照明与接收视场有效重叠比例，仅作用于信号。
 atmospheric_one_way_transmission:
-  label: "单程大气透过率"
-  unit: "1"
-  description: "信号使用该值平方；距离扫描暂保持该输入固定，不推导消光系数。"
+  label: 单程大气透过率
+  unit: '1'
+  description: 信号使用该值平方；距离扫描暂保持该输入固定，不推导消光系数。
 rx_aperture_shape:
-  label: "Rx 入瞳形状"
-  unit: "枚举"
-  description: "circle/ellipse/rectangle 对应圆形/椭圆/矩形，几何参数用于有效入瞳面积。"
+  label: Rx 入瞳形状
+  unit: 枚举
+  description: circle/ellipse/rectangle 对应圆形/椭圆/矩形，几何参数用于有效入瞳面积。
 rx_aperture_mm:
-  label: "圆形入瞳直径"
-  unit: "mm"
-  description: "只在圆形模式生效，是直径不是半径。"
+  label: 圆形入瞳直径
+  unit: mm
+  description: 只在圆形模式生效，是直径不是半径。
 rx_aperture_width_mm:
-  label: "入瞳水平全尺寸"
-  unit: "mm"
-  description: "椭圆为水平全轴长、矩形为宽；不是椭圆半轴。圆形模式忽略。"
+  label: 入瞳水平全尺寸
+  unit: mm
+  description: 椭圆为水平全轴长、矩形为宽；不是椭圆半轴。圆形模式忽略。
 rx_aperture_height_mm:
-  label: "入瞳垂直全尺寸"
-  unit: "mm"
-  description: "椭圆为垂直全轴长、矩形为高。圆形模式忽略。"
+  label: 入瞳垂直全尺寸
+  unit: mm
+  description: 椭圆为垂直全轴长、矩形为高。圆形模式忽略。
 rx_efficiency:
-  label: "Rx 光学效率"
-  unit: "1"
-  description: "入瞳至探测面光学透过率，不包含另设的滤光片、PDE、fill factor。"
+  label: Rx 光学效率
+  unit: '1'
+  description: 入瞳至探测面光学透过率，不包含另设的滤光片、PDE、fill factor。
 channel_ifov_h_mrad:
-  label: "通道水平 IFOV"
-  unit: "mrad"
-  description: "通道水平全视场角，小角近似 Ω=H×V（rad²），用于背景收集；与入瞳形状独立。"
+  label: 通道水平 IFOV
+  unit: mrad
+  description: 通道水平全视场角，小角近似 Ω=H×V（rad²），用于背景收集；与入瞳形状独立。
 channel_ifov_v_mrad:
-  label: "通道垂直 IFOV"
-  unit: "mrad"
-  description: "通道垂直全视场角；不能与整个线阵或水平扫描视场混用。"
+  label: 通道垂直 IFOV
+  unit: mrad
+  description: 通道垂直全视场角；不能与整个线阵或水平扫描视场混用。
 H_binning:
-  label: "水平空间binning数量"
-  unit: "个"
-  description: "每角通道沿水平H方向聚合的SPAD数量，正整数；与V_binning相乘派生总SPAD数。A版仍均匀分配信号，不根据H/V自动修改通道IFOV。"
+  label: 水平空间binning数量
+  unit: 个
+  description: 每角通道沿水平H方向聚合的SPAD数量，正整数；与V_binning相乘派生总SPAD数。A版仍均匀分配信号，不根据H/V自动修改通道IFOV。
 V_binning:
-  label: "垂直空间binning数量"
-  unit: "个"
-  description: "每角通道沿垂直V方向聚合的SPAD数量，正整数。H×V统一影响暗计数、均匀事件分配及独立TDC数量；实际PSF和像素间距留待B版。"
+  label: 垂直空间binning数量
+  unit: 个
+  description: 每角通道沿垂直V方向聚合的SPAD数量，正整数。H×V统一影响暗计数、均匀事件分配及独立TDC数量；实际PSF和像素间距留待B版。
 fill_factor:
-  label: "填充因子 FF"
-  unit: "1"
-  description: "与输入PDE相乘作用于信号和光学背景，不作用于器件DCR。输入若为光敏区PDE，FF表示光敏区面积占比；输入若为已包含器件收集特性的文献PDE，FF表示额外折减，避免重复计入。"
+  label: 填充因子 FF
+  unit: '1'
+  description: 与输入PDE相乘作用于信号和光学背景，不作用于器件DCR。输入若为光敏区PDE，FF表示光敏区面积占比；输入若为已包含器件收集特性的文献PDE，FF表示额外折减，避免重复计入。
 dcr_cps_per_spad:
-  label: "单SPAD暗计数率"
-  unit: "cps"
-  description: "单个SPAD每秒暗触发候选数；每门期望=DCR×SPAD数×门宽秒，不乘PDE/FF。默认按用户确认的Sony相关参考（60°C条件）；当前不会按温度自动换算。见docs/sony-reference.md。"
+  label: 单SPAD暗计数率
+  unit: cps
+  description: 单个SPAD每秒暗触发候选数；每门期望=DCR×SPAD数×门宽秒，不乘PDE/FF。默认按用户确认的Sony相关参考（60°C条件）；当前不会按温度自动换算。见docs/sony-reference.md。
 other_noise_cps_per_spad:
-  label: "其他单SPAD随机噪声"
-  unit: "cps"
-  description: "额外均匀、独立随机触发率，不可用来替代有时间相关性的afterpulse或串扰。"
+  label: 其他单SPAD随机噪声
+  unit: cps
+  description: 额外均匀、独立随机触发率，不可用来替代有时间相关性的afterpulse或串扰。
 spad_dead_time_ns:
-  label: "SPAD死时间"
-  unit: "ns"
-  description: "事件模式为每次雪崩后的非延长型恢复时间，跨周期保留；analytic_reference理想参考忽略此参数。"
+  label: SPAD死时间
+  unit: ns
+  description: 事件模式为每次雪崩后的非延长型恢复时间，跨周期保留；analytic_reference理想参考忽略此参数。
 spad_jitter_fwhm_ps:
-  label: "SPAD时间抖动FWHM"
-  unit: "ps"
-  description: "高斯时间抖动的半高全宽；除以2sqrt(2ln2)得到标准差。默认按用户确认的Sony相关参考（室温、Vex=3V）；FW10%未作为独立输入。见docs/sony-reference.md。"
+  label: SPAD时间抖动FWHM
+  unit: ps
+  description: 高斯时间抖动的半高全宽；除以2sqrt(2ln2)得到标准差。默认按用户确认的Sony相关参考（室温、Vex=3V）；FW10%未作为独立输入。见docs/sony-reference.md。
 pulse_fwhm_ps:
-  label: "激光脉宽 FWHM"
-  unit: "ps"
-  description: "高斯为半高全宽，矩形为全持续时间；改变脉宽保持单脉冲能量不变，峰值功率随之变化。"
+  label: 激光脉宽 FWHM
+  unit: ps
+  description: 高斯为半高全宽，矩形为全持续时间；改变脉宽保持单脉冲能量不变，峰值功率随之变化。
 other_jitter_fwhm_ps:
-  label: "其他电子抖动 FWHM"
-  unit: "ps"
-  description: "独立高斯随机抖动；不包含固定标定偏移，也不再次包含TDC量化。"
+  label: 其他电子抖动 FWHM
+  unit: ps
+  description: 独立高斯随机抖动；不包含固定标定偏移，也不再次包含TDC量化。
 tdc_bin_ps:
-  label: "TDC 时间bin宽"
-  unit: "ps"
-  description: "每个直方图格子的时间宽；距离格宽=cΔt/2。门末尾不足一格时按实际宽度截断。"
+  label: TDC 时间bin宽
+  unit: ps
+  description: 每个直方图格子的时间宽；距离格宽=cΔt/2。门末尾不足一格时按实际宽度截断。
 gate_start_ns:
-  label: "接收门起点"
-  unit: "ns"
-  description: "相对发射参考时刻的记录门起点；free_running模式门外事件会使SPAD进入死时间，gated模式门外不产生雪崩。"
+  label: 接收门起点
+  unit: ns
+  description: 相对发射参考时刻的记录门起点；free_running模式门外事件会使SPAD进入死时间，gated模式门外不产生雪崩。
 gate_width_ns:
-  label: "接收门宽"
-  unit: "ns"
-  description: "有效采集时段长度；目标波形超出门的能量直接丢失，不归一化补回。"
+  label: 接收门宽
+  unit: ns
+  description: 有效采集时段长度；目标波形超出门的能量直接丢失，不归一化补回。
 calibration_delay_ns:
-  label: "固定标定延迟"
-  unit: "ns"
-  description: "加到生成回波时间上，估计距离时减去同一值；本版代表已知且理想的标定，不是残余误差。"
+  label: 固定标定延迟
+  unit: ns
+  description: 加到生成回波时间上，估计距离时减去同一值；本版代表已知且理想的标定，不是残余误差。
 laser_shots:
-  label: "单次测距累计脉冲数"
-  unit: "发"
-  description: "一张直方图累积的激光脉冲数，不是光子数。当前数值由工况配置决定，未绑定转镜扫描约束。"
+  label: 单次测距累计脉冲数
+  unit: 发
+  description: 一张直方图累积的激光脉冲数，不是光子数。当前数值由工况配置决定，未绑定转镜扫描约束。
 monte_carlo_trials:
-  label: "测距统计重复次数"
-  unit: "次"
-  description: "测距统计MC总次数，大于0时包含首次蓝柱，再补足其余独立采集；用于偏差、精度、成功率和逐bin样本最小–最大误差棒，不平均蓝柱。与青色GT无关。橙色均值另用readout_expected_trials。0次不计算统计/误差棒；1次上下限与蓝柱重合。"
+  label: 测距统计重复次数
+  unit: 次
+  description: 测距统计MC总次数，大于0时包含首次蓝柱，再补足其余独立采集；用于偏差、精度、成功率和逐bin样本最小–最大误差棒，不平均蓝柱。与青色GT无关。橙色均值另用readout_expected_trials。0次不计算统计/误差棒；1次上下限与蓝柱重合。
 rng_seed:
-  label: "随机种子"
-  unit: "整数"
-  description: "同参数、同算法配置、同运行依赖时可复现抽样；更改种子获得另一组随机样本。"
+  label: 随机种子
+  unit: 整数
+  description: 同参数、同算法配置、同运行依赖时可复现抽样；更改种子获得另一组随机样本。
 detection_enabled:
-  label: "启用检测门限"
-  unit: "bool"
-  description: "用独立无目标样本校准全门峰值评分门限。未过门限返回未检出；关闭仅供旧版对照，不计算Pd/PFA。青色GT和原始计数不受门限影响。"
+  label: 启用检测门限
+  unit: bool
+  description: 用独立无目标样本校准全门峰值评分门限。未过门限返回未检出；关闭仅供旧版对照，不计算Pd/PFA。青色GT和原始计数不受门限影响。
 detection_target_pfa:
-  label: "目标虚警概率 PFA"
-  unit: "1"
-  description: "每次完整采集、全接收门内至少一次虚警的目标概率，不是每bin概率。实际PFA用另一批无目标样本评估并给置信区间。校准样本不足时拒绝配置，不假称达到极低虚警率。"
+  label: 目标虚警概率 PFA
+  unit: '1'
+  description: 每次完整采集、全接收门内至少一次虚警的目标概率，不是每bin概率。实际PFA用另一批无目标样本评估并给置信区间。校准样本不足时拒绝配置，不假称达到极低虚警率。
 line_channels:
-  label: "串扰模型通道数"
-  unit: "个"
-  description: "用于独立串扰矩阵分析；当前未创建对应多通道测距直方图。"
+  label: 串扰模型通道数
+  unit: 个
+  description: 用于独立串扰矩阵分析；当前未创建对应多通道测距直方图。
 nearest_neighbor_crosstalk:
-  label: "最近邻直接串扰系数"
-  unit: "1"
-  description: "源通道每次雪崩诱发相邻通道雪崩的平均系数，必须满足分支矩阵谱半径<1；不静默缩放。"
+  label: 最近邻直接串扰系数
+  unit: '1'
+  description: 源通道每次雪崩诱发相邻通道雪崩的平均系数，必须满足分支矩阵谱半径<1；不静默缩放。
 crosstalk_decay_channels:
-  label: "串扰空间衰减尺度"
-  unit: "channel"
-  description: "非相邻耦合按 exp(-(距离-1)/尺度) 衰减；不描述时间延迟、恢复或方向性。"
+  label: 串扰空间衰减尺度
+  unit: channel
+  description: 非相邻耦合按 exp(-(距离-1)/尺度) 衰减；不描述时间延迟、恢复或方向性。
 solar_enabled:
-  label: "启用太阳光"
-  unit: "bool"
-  description: "启用目标面标准太阳照明。关闭后太阳计数为0，保留lux设置以便恢复。"
+  label: 启用太阳光
+  unit: bool
+  description: 启用目标面标准太阳照明。关闭后太阳计数为0，保留lux设置以便恢复。
 solar_illuminance_lux:
-  label: "目标面太阳照度"
-  unit: "lux"
-  description: "固定ASTM G173-03 AM1.5G谱形，按CIE V(λ)和683lm/W归一化。不是任意光源lux到近红外的通用换算。"
+  label: 目标面太阳照度
+  unit: lux
+  description: 固定ASTM G173-03 AM1.5G谱形，按CIE V(λ)和683lm/W归一化。不是任意光源lux到近红外的通用换算。
 solar_reflectivity:
-  label: "太阳背景目标灰反射率"
-  unit: "1"
-  description: "将目标面太阳谱辐照度乘此灰朗伯反射率/π变成接收方向谱辐亮度。独立于激光反射率便于区分假设；未做目标反射谱。"
+  label: 太阳背景目标灰反射率
+  unit: '1'
+  description: 将目标面太阳谱辐照度乘此灰朗伯反射率/π变成接收方向谱辐亮度。独立于激光反射率便于区分假设；未做目标反射谱。
 other_light_enabled:
-  label: "启用其他环境光"
-  unit: "bool"
-  description: "独立于太阳光的附加光谱背景开关。"
+  label: 启用其他环境光
+  unit: bool
+  description: 独立于太阳光的附加光谱背景开关。
 other_light_scale:
-  label: "其他环境光倍率"
-  unit: "1"
-  description: "整体缩放其他环境光光谱；不进行lux转换。"
+  label: 其他环境光倍率
+  unit: '1'
+  description: 整体缩放其他环境光光谱；不进行lux转换。
 readout_mode:
-  label: "读出架构模式"
-  unit: "枚举"
-  description: "模型族见readout-modes.yaml，不宣称对应具体芯片。analytic_reference为旧理想参考。"
+  label: 读出架构模式
+  unit: 枚举
+  description: 模型族见readout-modes.yaml，不宣称对应具体芯片。analytic_reference为旧理想参考。
 detector_operation:
-  label: "探测器门控方式"
-  unit: "枚举"
-  description: "gated：门外不产生雪崩；free_running：整周期背景可触发SPAD并延续死时间。两者仅门内触发TDC。"
+  label: 探测器门控方式
+  unit: 枚举
+  description: gated：门外不产生雪崩；free_running：整周期背景可触发SPAD并延续死时间。两者仅门内触发TDC。
 tdc_dead_time_ns:
-  label: "TDC死时间"
-  unit: "ns"
-  description: "非延长型；被TDC丢弃的雪崩仍已造成SPAD死时间。跨周期保留。"
+  label: TDC死时间
+  unit: ns
+  description: 非延长型；被TDC丢弃的雪崩仍已造成SPAD死时间。跨周期保留。
 tdc_count:
-  label: "共享TDC个数"
-  unit: "个"
-  description: "仅shared_multitdc模式生效；独立模式隐含每SPAD一个TDC，其余共享模式固定一个。"
+  label: 共享TDC个数
+  unit: 个
+  description: 仅shared_multitdc模式生效；独立模式隐含每SPAD一个TDC，其余共享模式固定一个。
 tdc_max_hits_per_cycle:
-  label: "每TDC每周期最大记录数"
-  unit: "个"
-  description: "多次记录模式和符合模式使用此容量；single-hit模式容量固定1。"
+  label: 每TDC每周期最大记录数
+  unit: 个
+  description: 多次记录模式和符合模式使用此容量；single-hit模式容量固定1。
 or_pulse_width_ns:
-  label: "OR脉冲宽度"
-  unit: "ns"
-  description: "共享OR模式中重叠输出脉冲合成一个连续高电平，只有上升沿触发TDC；不影响独立模式。"
+  label: OR脉冲宽度
+  unit: ns
+  description: 共享OR模式中重叠输出脉冲合成一个连续高电平，只有上升沿触发TDC；不影响独立模式。
 coincidence_window_ns:
-  label: "符合时间窗"
-  unit: "ns"
-  description: "固定窗从门起点分段，在窗末输出；滑动窗在不同SPAD活跃数上穿阈值时输出。"
+  label: 符合时间窗
+  unit: ns
+  description: 固定窗从门起点分段，在窗末输出；滑动窗在不同SPAD活跃数上穿阈值时输出。
 coincidence_threshold:
-  label: "符合阈值"
-  unit: "个SPAD"
-  description: "要求窗口内不同SPAD达到该数，不把同一SPAD重复雪崩充作多个独立像素。"
+  label: 符合阈值
+  unit: 个SPAD
+  description: 要求窗口内不同SPAD达到该数，不把同一SPAD重复雪崩充作多个独立像素。
 spectral_inputs:
-  label: "统一光谱输入"
-  unit: "分组配置"
-  description: "filter/other/pde/solar各自先选择basic、csv或manual模式；solar额外支持standard。基础特征量、CSV采样点和手动采样点独立保存，只使用当前模式；详细单位和特征量定义见curve-inputs.yaml。"
-
+  label: 统一光谱输入
+  unit: 分组配置
+  description: filter/other/pde/solar各自先选择basic、csv或manual模式；solar额外支持standard。基础特征量、CSV采样点和手动采样点独立保存，只使用当前模式；详细单位和特征量定义见curve-inputs.yaml。
 experiments:
   timing.period_ns:
     label: 采集周期
@@ -305,18 +304,134 @@ experiments:
     unit: '1'
     description: 构造Rx中的入瞳到无限像面效率，滤光/PSF截断/PDE/FF均未包含。导入Rx时使用数据表，本项不生效。
   optics.angle_h_min_mrad:
-    label: 构造角域 H min
+    label: 构造Tx角域 H min
     unit: mrad
-    description: 生成Tx角单元及Rx插值轴时使用。导入部分使用相应数据库轴；背景积分覆盖实际Tx角网格域，假定域外无场景辐亮度贡献。
+    description: 仅构造Tx使用；Rx覆盖独立配置。背景角积分使用实际Tx网格定义的接收局部场景域，C假设该背景随接收机局部视场均匀平稳。
   optics.angle_h_max_mrad:
-    label: 构造角域 H max
+    label: 构造Tx角域 H max
     unit: mrad
-    description: 生成Tx角单元及Rx插值轴时使用。导入部分使用相应数据库轴；背景积分覆盖实际Tx角网格域，假定域外无场景辐亮度贡献。
+    description: 仅构造Tx使用；Rx覆盖独立配置。背景角积分使用实际Tx网格定义的接收局部场景域，C假设该背景随接收机局部视场均匀平稳。
   optics.angle_v_min_mrad:
-    label: 构造角域 V min
+    label: 构造Tx角域 V min
     unit: mrad
-    description: 生成Tx角单元及Rx插值轴时使用。导入部分使用相应数据库轴；背景积分覆盖实际Tx角网格域，假定域外无场景辐亮度贡献。
+    description: 仅构造Tx使用；Rx覆盖独立配置。背景角积分使用实际Tx网格定义的接收局部场景域，C假设该背景随接收机局部视场均匀平稳。
   optics.angle_v_max_mrad:
-    label: 构造角域 V max
+    label: 构造Tx角域 V max
     unit: mrad
-    description: 生成Tx角单元及Rx插值轴时使用。导入部分使用相应数据库轴；背景积分覆盖实际Tx角网格域，假定域外无场景辐亮度贡献。
+    description: 仅构造Tx使用；Rx覆盖独立配置。背景角积分使用实际Tx网格定义的接收局部场景域，C假设该背景随接收机局部视场均匀平稳。
+  scan.trajectory:
+    label: 扫描轨迹
+    unit: 枚举
+    description: static静止；sawtooth含有效前扫和回扫；triangle双向三角；sinusoidal双向正弦。由Python在每发及回波时刻求值。
+  scan.frame_rate_hz:
+    label: 扫描帧率
+    unit: Hz
+    description: 一帧对应一个机械周期；与帧数和触发周期共同决定实际时隙数。实际生效。
+  scan.frame_count:
+    label: 采集帧数
+    unit: 帧
+    description: 独立配置帧数；C不允许另外指定laser_shots。发数从帧预算和PRF生成。实际生效。
+  scan.active_fraction:
+    label: 锯齿前扫比例
+    unit: '1'
+    description: 仅sawtooth生效；其余部分为连续线性回扫。其他轨迹不使用本值。
+  scan.mechanical_start_mrad:
+    label: 机械起始角
+    unit: mrad
+    description: 镜面机械角；static使用此固定角。H向右，光学角由倍率和偏移显式转换。实际生效。
+  scan.mechanical_end_mrad:
+    label: 机械终止角
+    unit: mrad
+    description: 移动轨迹使用；必须大于起始角。static时不生效。
+  scan.optical_multiplier:
+    label: 机械→光学倍率
+    unit: '1'
+    description: 显式角映射倍率，允许反号但不得为0；不把机械角直接当光学角。实际生效。
+  scan.optical_offset_mrad:
+    label: 光学角零点偏移
+    unit: mrad
+    description: 作用于真实Tx和编码器角映射。实际生效。
+  scan.phase_offset_ns:
+    label: 实际转镜相位偏移
+    unit: ns
+    description: 真实转镜相对于控制计划的时间偏移；控制发射开关仍按无偏移计划。实际生效。
+  scan.laser_time_offset_ns:
+    label: 激光固定时序偏移
+    unit: ns
+    description: 相对名义触发时刻的实际发射偏移。接收参考时钟不随之平移。实际生效。
+  scan.laser_jitter_std_ns:
+    label: 激光发射时间抖动 σ
+    unit: ns
+    description: 独立随机流的高斯标准差；实际样本、seed保存。若发射脉冲顺序被打乱则报错。实际生效。
+  scan.encoder_latency_ns:
+    label: 编码器时标延迟
+    unit: ns
+    description: 正值取参考时刻之前的角度；负值表示离线时标错配到后续角样本。仅改变编码器角标签，不改变真实光子输入。实际生效。
+  scan.encoder_angle_offset_mrad:
+    label: 编码器角度偏差
+    unit: mrad
+    description: 加到报告光学角；不改变真实Tx/Rx状态。实际生效。
+  scan.rx_scan_scale:
+    label: Rx扫描跟随倍率
+    unit: '1'
+    description: Rx光学指向相对真实Tx轴光学角的倍率；1为共扫，0为固定Rx。Rx数据必须覆盖实际相对入射角。实际生效。
+  scan.rx_angle_offset_mrad:
+    label: Rx光学指向偏移
+    unit: mrad
+    description: 作用于回波时刻Rx指向，亦属于已知重建几何；不会移动Rx数据库像素本身。实际生效。
+  scan.emission_policy:
+    label: 发射调度
+    unit: 枚举
+    description: active_only仅控制计划有效段发射；continuous回扫也发射。关闭发射不复位SPAD/TDC或关闭周期门。
+  scan.reconstruct_flyback:
+    label: 将计划回扫加入重建
+    unit: 布尔
+    description: false只重建控制计划有效段，不能利用隐藏真值过滤误发；true也累积发射的回扫时隙。实际生效。
+  scan.angle_bin_min_mrad:
+    label: 扫描主轴角bin起点
+    unit: mrad
+    description: 对应报告的编码器光学角；与通道局部角度分开，区间左闭右开。实际生效。
+  scan.angle_bin_max_mrad:
+    label: 扫描主轴角bin终点
+    unit: mrad
+    description: 最后右边界同样不包含；超出范围单独统计，不静默裁剪。实际生效。
+  scan.angle_bin_width_mrad:
+    label: 扫描角bin宽度
+    unit: mrad
+    description: 末bin可以较短；实际离散发数按每发归属统计。实际生效。
+  scan.channel_direction_mode:
+    label: 通道角度标定
+    unit: 枚举
+    description: optical_centroid使用Rx效率×PSF×立体角的均匀场角质心；explicit使用显式通道H/V标定。只使用当前模式。
+  scan.channel_h_mrad:
+    label: 通道H角标定（JSON数组）
+    unit: mrad
+    description: 仅explicit生效；长度等于读出通道数，单位为Rx局部光学角，按通道行优先顺序。
+  scan.channel_v_mrad:
+    label: 通道V角标定（JSON数组）
+    unit: mrad
+    description: 仅explicit生效；长度等于读出通道数。自动标定中无响应通道不猜测角度。
+  scene_motion.range_gradient_m_per_rad:
+    label: 角向径向距离梯度
+    unit: m/rad
+    description: 构造场景的初始距离=基础距离+梯度×全局H光学角(rad)。不是三维平面相交模型；实际生效。
+  scene_motion.radial_velocity_m_s:
+    label: 目标径向速度
+    unit: m/s
+    description: 正值远离；采用恒定径向速度的光程截获关系，速度绝对值必须小于c。无横向运动或遮挡。实际生效。
+  optics.rx_angle_h_min_mrad:
+    label: 构造Rx覆盖 H min
+    unit: mrad
+    description: 仅构造Rx模型生效，与Tx角域独立；Rx使用此角域采样数据库，禁止超域外推。导入Rx时使用文件轴。
+  optics.rx_angle_h_max_mrad:
+    label: 构造Rx覆盖 H max
+    unit: mrad
+    description: 仅构造Rx模型生效，与Tx角域独立；Rx使用此角域采样数据库，禁止超域外推。导入Rx时使用文件轴。
+  optics.rx_angle_v_min_mrad:
+    label: 构造Rx覆盖 V min
+    unit: mrad
+    description: 仅构造Rx模型生效，与Tx角域独立；Rx使用此角域采样数据库，禁止超域外推。导入Rx时使用文件轴。
+  optics.rx_angle_v_max_mrad:
+    label: 构造Rx覆盖 V max
+    unit: mrad
+    description: 仅构造Rx模型生效，与Tx角域独立；Rx使用此角域采样数据库，禁止超域外推。导入Rx时使用文件轴。

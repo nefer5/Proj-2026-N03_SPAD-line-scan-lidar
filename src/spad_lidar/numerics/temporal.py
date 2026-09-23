@@ -1,5 +1,19 @@
 from math import sqrt
 from ..constants import FWHM_TO_SIGMA
+import numpy as np
+from scipy.special import ndtr
+
+
+def pulse_interval_fractions(centers_ns,lower_ns,upper_ns,shape,fwhm_ps):
+    """Fraction of emitted pulse energy inside a time interval, without detector jitter."""
+    centers=np.asarray(centers_ns,dtype=float)
+    width=fwhm_ps*1e-3
+    if shape=='gaussian':
+        sigma=width/FWHM_TO_SIGMA
+        return ndtr((upper_ns-centers)/sigma)-ndtr((lower_ns-centers)/sigma)
+    if shape=='rectangular':
+        return np.clip((upper_ns-centers)/width+.5,0,1)-np.clip((lower_ns-centers)/width+.5,0,1)
+    raise ValueError('Unsupported incident pulse distribution')
 
 
 def sample_pulse_offsets(rng, shape, fwhm_ps, count):

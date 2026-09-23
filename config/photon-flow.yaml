@@ -350,3 +350,71 @@ spatial:
         - {key: filter_loss_j, label: 滤光损失, unit: J/pulse}
         - {key: psf_edge_loss_j, label: PSF感光面边缘损失, unit: J/pulse}
         - {key: energy_balance_residual_j, label: 能量平衡残差, unit: J/pulse}
+scan:
+  title: 'C 逐脉冲扫描：时序、实际发数与光子审计'
+  intro: '扫描只组装逐发光学输入和控制时序；所有脉冲共享同一SPAD/读出状态。下列总量按完整测量帧的参考时隙统计，不代表检测成功率。'
+  steps:
+    - title: '扫描与发射时序'
+      formula_id: scan_pulse_schedule
+      logic: 'PRF生成名义触发时隙；帧预算决定时隙数。激光偏移/抖动改变实际发射时刻，机械角经倍率映射为光学角。'
+      values:
+        - {key: duration_ns, label: 总测量帧时长, unit: ns}
+        - {key: scheduled_slots, label: 名义触发时隙, unit: slots}
+        - {key: emitted_reference_slots, label: 实际启用发射的测量参考时隙, unit: pulses}
+        - {key: reference_tx_input_energy_j, label: 测量参考时隙Tx前能量合计, unit: J}
+        - {key: reference_tx_angular_truncation_j, label: 测量参考时隙Tx角域外能量, unit: J}
+    - title: '有限测量时间窗内的Tx功率'
+      formula_id: scan_tx_window_power
+      logic: '脉冲中心计数与实际时间积分分别记录。高斯/矩形波形在帧边界可能只有部分能量落入时间窗；这里积分时间波形，不补回边界能量。'
+      values:
+        - {key: center_accounted_tx_output_energy_j, label: 中心位于测量窗内的完整脉冲计账能量, unit: J}
+        - {key: actual_tx_output_energy_j, label: 测量时间窗内积分Tx后能量, unit: J}
+        - {key: actual_tx_average_power_w, label: 测量时间窗内积分Tx后平均功率, unit: W}
+    - title: '角bin累计数'
+      formula_id: scan_dwell_count
+      logic: '编码器分配发数用于测量结果重建；真实有效发数是独立真值诊断。回扫、域外脉冲和空bin不补齐。'
+      values:
+        - {key: assigned_pulses, label: 分配到角bin的发数, unit: pulses}
+        - {key: true_useful_pulses, label: 真实有效角bin发数, unit: pulses}
+    - title: '回波：逐发Rx指向与光子求和'
+      formula_id: scan_rx_return
+      logic: '每发在实际发射角照射场景，在各回波到达中心计算Rx指向与PSF。反射距离允许随全局H角和径向运动变化。'
+      values:
+        - {key: target_incident_j, label: 测量发射的目标入射能量, unit: J}
+        - {key: target_reflected_j, label: 测量发射的目标反射能量, unit: J}
+        - {key: signal_pupil_photons_total, label: 信号入瞳光子总数, unit: photons/acquisition}
+        - {key: signal_sensor_photons_total, label: 信号探测面光子总数, unit: photons/acquisition}
+        - {key: signal_candidates_total, label: 信号候选雪崩期望总数, unit: candidates/acquisition}
+    - title: '构造场景：角向距离与径向运动'
+      formula_id: scan_moving_range
+      logic: '逐角单元计算真实反射距离，再确定回波时刻和Rx姿态。真值距离仅用于生成光子与误差审计，不交给距离估计器寻峰。'
+      values:
+        - {key: reflection_range_min_m, label: 测量发射的最小反射距离, unit: m}
+        - {key: reflection_range_max_m, label: 测量发射的最大反射距离, unit: m}
+    - title: '太阳：记录门实际曝光'
+      formula_id: scan_background_total
+      logic: '背景按接收机局部角域与明确波段积分。发射关闭不会自动关闭SPAD/TDC周期门。'
+      values:
+        - {key: gate_exposure_s, label: 所有记录门实际时长之和, unit: s}
+        - {key: solar_rx_incident_photons_total, label: 太阳入瞳光子（限定波段）, unit: photons/acquisition}
+        - {key: solar_sensor_incident_photons_total, label: 太阳探测面光子, unit: photons/acquisition}
+        - {key: solar_candidate_avalanches_total, label: 太阳门内候选雪崩期望, unit: candidates/acquisition}
+    - title: '其他环境光：独立积分'
+      formula_id: scan_background_total
+      logic: '只使用当前环境光谱输入模式。原始光子数限定显示波段；不随Tx能量份额缩放。'
+      values:
+        - {key: other_rx_incident_photons_total, label: 其他光入瞳光子（限定波段）, unit: photons/acquisition}
+        - {key: other_sensor_incident_photons_total, label: 其他光探测面光子, unit: photons/acquisition}
+        - {key: other_candidate_avalanches_total, label: 其他光门内候选雪崩期望, unit: candidates/acquisition}
+    - title: '整次接收能量与最终混合记录'
+      formula_id: spatial_energy_balance
+      logic: '能量等式对测量参考时隙中启用发射的脉冲求和。最终记录包含源间竞争；角bin重建可以进一步排除回扫或域外记录。'
+      values:
+        - {key: pupil_energy_j, label: 入瞳信号能量合计, unit: J}
+        - {key: sensor_energy_j, label: 探测面信号能量合计, unit: J}
+        - {key: rx_loss_j, label: Rx损耗合计, unit: J}
+        - {key: filter_loss_j, label: 滤光损耗合计, unit: J}
+        - {key: edge_loss_j, label: 阵列外损耗合计, unit: J}
+        - {key: energy_balance_residual_j, label: 能量平衡残差, unit: J}
+        - {key: final_mixed_records, label: 全采集混合记录, unit: records}
+        - {key: angle_assigned_records, label: 进入角bin重建的记录, unit: records}

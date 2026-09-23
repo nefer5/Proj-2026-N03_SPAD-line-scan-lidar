@@ -1,0 +1,1 @@
+return {url:page.url(),status:await page.locator('#scanViewStatus').innerText(),error:await page.locator('#error').innerText(),button:await page.locator('#exportCloud').isEnabled(),jobs:await page.locator('#jobs').innerText()};

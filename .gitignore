@@ -14,3 +14,5 @@ data/reference/papers/*.part
 artifacts/runs/
 artifacts/architecture-upgrade/**/*.zip
 artifacts/architecture-upgrade/*server*.log
+artifacts/scan-upgrade/**/*.zip
+artifacts/scan-upgrade/*server*.log

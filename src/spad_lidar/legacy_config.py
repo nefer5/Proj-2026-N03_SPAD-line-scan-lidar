@@ -4,6 +4,20 @@ from .curves import merge_config
 from pydantic import TypeAdapter, PositiveInt
 
 
+def migrate_experiment_overrides(kind,values):
+    """Older complete B configs coupled Tx/Rx domains; preserve only that explicit legacy case."""
+    values=deepcopy(values)
+    if kind not in ('system','scan') or not isinstance(values.get('optics'),dict):
+        return values
+    optical=values['optics']
+    old=('angle_h_min_mrad','angle_h_max_mrad','angle_v_min_mrad','angle_v_max_mrad')
+    new=tuple('rx_'+k for k in old)
+    if all(k in optical for k in old) and not any(k in optical for k in new):
+        for source,target in zip(old,new):
+            optical[target]=optical[source]
+    return values
+
+
 def migrate(values, defaults):
     values=deepcopy(values)
     if 'spads_per_channel' in values:

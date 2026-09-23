@@ -13,6 +13,7 @@ from ..tx import angular_profile, transmit
 from ..scene import lambertian_return
 from ..rx.budget import aperture_area
 from ..rx.spatial import synthetic_receiver
+from ..rx.projection import project_return
 from ..adapters.optical_data import validate_dataset, RxTable
 from ..spectra import spectral_components
 from ..spad.device import effective_pde
@@ -39,6 +40,10 @@ class OpticalConfig(StrictConfig):
     angle_h_max_mrad: float
     angle_v_min_mrad: float
     angle_v_max_mrad: float
+    rx_angle_h_min_mrad: float
+    rx_angle_h_max_mrad: float
+    rx_angle_v_min_mrad: float
+    rx_angle_v_max_mrad: float
     total_pulse_energy_nj: float = Field(ge=0)
     range_m: float = Field(gt=0)
     target_reflectivity: float = Field(ge=0,le=1)
@@ -64,6 +69,8 @@ class OpticalConfig(StrictConfig):
     def valid(self):
         if self.angle_h_max_mrad<=self.angle_h_min_mrad or self.angle_v_max_mrad<=self.angle_v_min_mrad:
             raise ValueError('Angular domain edges must be increasing')
+        if self.rx_angle_h_max_mrad<=self.rx_angle_h_min_mrad or self.rx_angle_v_max_mrad<=self.rx_angle_v_min_mrad:
+            raise ValueError('Receiver angular coverage edges must increase')
         if (self.tx_model=='dataset' or self.rx_model=='dataset') and self.dataset is None:
             raise ValueError('Selected optical model requires an explicit dataset')
         return self
@@ -111,7 +118,7 @@ def optical_dataset(cfg,a):
     doc={'schema_version':1,'coordinate_convention':'optical_H_right_V_down__image_x_right_y_down',
          'label':'构造光学样例 / Gaussian or uniform reference' if synthetic else imported.label,
          'synthetic':synthetic,'provenance':{'generator':'spad-spatial-v1','tx_model':o.tx_model,'rx_model':o.rx_model,
-         'parameters':o.model_dump(exclude={'dataset'}),'algorithms':{k:getattr(a,k) for k in ('spatial_angle_samples_h','spatial_angle_samples_v')},
+         'parameters':o.model_dump(exclude={'dataset'}),'algorithms':{k:getattr(a,k) for k in ('spatial_angle_samples_h','spatial_angle_samples_v','rx_angle_samples_h','rx_angle_samples_v')},
          'imported':imported.provenance if imported else None,
          'imported_label':imported.label if imported else None},'tx':tx,'rx':rx}
     data=validate_dataset(doc,a)
@@ -142,13 +149,12 @@ def project_illumination(cfg,a,progress,cancelled):
     area=aperture_area(o)
     total_j=o.total_pulse_energy_nj*1e-9
     emitted=transmit(total_j,o.tx_efficiency)
-    target_incident,target_reflected,pupil,geometry=lambertian_return(emitted*fractions,o.atmospheric_one_way_transmission,
-        o.target_reflectivity,area,o.range_m,o.overlap_factor)
     filt=Curve(cfg.spectral_inputs.filter)
     filter_at=float(filt(o.wavelength_nm))
-    after_rx=pupil*eff
-    after_filter=after_rx*filter_at
-    pixel_j=after_filter@psf
+    projection=project_return(emitted*fractions,o.atmospheric_one_way_transmission,o.target_reflectivity,
+                              area,o.range_m,o.overlap_factor,eff,filter_at,psf)
+    target_incident,target_reflected,pupil,geometry=projection.target_incident,projection.target_reflected,projection.pupil,projection.geometry
+    after_rx,after_filter,pixel_j=projection.after_rx,projection.after_filter,projection.pixel_energy
     photon_j=H*C/(o.wavelength_nm*1e-9)
     signal_photons=pixel_j/photon_j
     proxy=SimpleNamespace(**o.model_dump(exclude={'dataset'}),spectral_inputs=cfg.spectral_inputs,fill_factor=cfg.device.fill_factor)

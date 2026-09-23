@@ -76,6 +76,11 @@ def experiment_defaults(kind):
     sections = read_yaml('defaults.yaml')['experiments']
     if kind not in sections:
         raise ValueError(f'Unknown experiment kind: {kind}')
+    if kind=='scan':
+        from ..scan.config import ScanTiming
+        result=experiment_defaults('system')
+        result['timing']={k:result['timing'][k] for k in ScanTiming.model_fields}
+        return merge_config(result,sections[kind])
     # Reuse named existing defaults, never copy numeric fallbacks into domain code.
     result = {
         'device': {k: base[k] for k in DeviceConfig.model_fields},
@@ -98,11 +103,15 @@ def resolve_experiment(kind, overrides, algorithms=None):
     if kind != 'spad':
         from .spatial import SystemConfig
         model = SystemConfig
+    if kind=='scan':
+        from .scanning import ScanConfig
+        model=ScanConfig
     defaults = experiment_defaults(kind)
     model.model_validate(defaults)  # Missing/unknown default keys fail even if user overrides could fill them.
-    cfg = model.model_validate(merge_config(defaults, overrides))
+    from ..legacy_config import migrate_experiment_overrides
+    cfg = model.model_validate(merge_config(defaults, migrate_experiment_overrides(kind,overrides)))
     pixels = cfg.device.spads_per_channel
-    if kind == 'system':
+    if kind in ('system','scan'):
         pixels *= cfg.optics.channels_h * cfg.optics.channels_v
         if cfg.optics.tx_model=='dataset' or cfg.optics.rx_model=='dataset':
             from ..adapters.optical_data import validate_dataset
@@ -112,7 +121,18 @@ def resolve_experiment(kind, overrides, algorithms=None):
                 raise ValueError('Dataset pixel geometry does not match the selected array')
     if pixels > a.max_lab_pixels or cfg.device.spads_per_channel > a.max_spads_per_channel:
         raise ValueError('Physical pixel count exceeds configured resource limit')
-    if cfg.timing.laser_shots > a.max_laser_shots or cfg.timing.laser_shots+a.readout_warmup_cycles > a.max_readout_cycles:
+    if kind=='scan':
+        from ..scan.schedule import scan_dimensions
+        from ..scan.trajectory import angle_bin_edges
+        _,_,shots=scan_dimensions(cfg,a)
+        edges=angle_bin_edges(cfg.scan,a.max_scan_angle_bins)
+        bins=int(np.ceil(cfg.timing.gate_width_ns*1000/cfg.readout.tdc_bin_ps))
+        channels=pixels//cfg.device.spads_per_channel
+        if cfg.scan.frame_count*(len(edges)-1)*channels*bins>a.max_scan_histogram_cells:
+            raise ValueError('Frame × angle × channel histograms exceed max_scan_histogram_cells')
+    else:
+        shots=cfg.timing.laser_shots
+    if shots > a.max_laser_shots or shots+a.readout_warmup_cycles > a.max_readout_cycles:
         raise ValueError('Acquisition cycles exceed configured resource limit')
     if np.ceil(cfg.timing.gate_width_ns*1000/cfg.readout.tdc_bin_ps) > a.max_histogram_bins:
         raise ValueError('Histogram exceeds configured resource limit')
@@ -121,6 +141,6 @@ def resolve_experiment(kind, overrides, algorithms=None):
     channels=pixels//cfg.device.spads_per_channel
     if channels*np.ceil(cfg.timing.gate_width_ns*1000/cfg.readout.tdc_bin_ps)>a.max_lab_histogram_cells:
         raise ValueError('Combined channel histograms exceed max_lab_histogram_cells')
-    if pixels*(cfg.timing.laser_shots+a.readout_warmup_cycles)>a.max_detector_sampling_work:
+    if pixels*(shots+a.readout_warmup_cycles)>a.max_detector_sampling_work:
         raise ValueError('Pixel-cycle sampling work exceeds max_detector_sampling_work')
     return cfg

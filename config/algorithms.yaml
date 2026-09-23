@@ -59,3 +59,13 @@ spatial_wavelength_chunk_size: 32
 max_spatial_integration_work: 100000000
 max_lab_histogram_cells: 2000000
 max_detector_sampling_work: 2000000
+rx_angle_samples_h: 17
+rx_angle_samples_v: 9
+max_scan_frames: 100
+max_scan_pulses: 10000
+max_scan_angle_bins: 256
+max_scan_histogram_cells: 4000000
+max_scan_projection_work: 20000000
+max_scan_sampling_work: 2000000
+scan_preview_table_rows: 50
+scan_angle_boundary_tolerance_mrad: 1.0e-12

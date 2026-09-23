@@ -5,13 +5,13 @@ from scipy.special import ndtr
 
 def synthetic_receiver(optics, device, wavelength_nm, algorithms):
     nx=optics.channels_h*device.H_binning; ny=optics.channels_v*device.V_binning
-    size=len(np.unique(wavelength_nm))*algorithms.spatial_angle_samples_h*algorithms.spatial_angle_samples_v*nx*ny
+    size=len(np.unique(wavelength_nm))*algorithms.rx_angle_samples_h*algorithms.rx_angle_samples_v*nx*ny
     if size>algorithms.max_optical_cells:
         raise ValueError('Synthetic PSF database exceeds max_optical_cells before allocation')
     x=(np.arange(nx+1)-nx/2)*optics.pixel_pitch_um
     y=(np.arange(ny+1)-ny/2)*optics.pixel_pitch_um
-    h=np.linspace(optics.angle_h_min_mrad,optics.angle_h_max_mrad,algorithms.spatial_angle_samples_h)
-    v=np.linspace(optics.angle_v_min_mrad,optics.angle_v_max_mrad,algorithms.spatial_angle_samples_v)
+    h=np.linspace(optics.rx_angle_h_min_mrad,optics.rx_angle_h_max_mrad,algorithms.rx_angle_samples_h)
+    v=np.linspace(optics.rx_angle_v_min_mrad,optics.rx_angle_v_max_mrad,algorithms.rx_angle_samples_v)
     wl=np.unique(wavelength_nm)
     psf=np.empty((len(wl),len(v),len(h),ny,nx))
     for iy,theta_v in enumerate(v):

@@ -243,6 +243,38 @@ experiments:
       angle_h_max_mrad: 6
       angle_v_min_mrad: -3
       angle_v_max_mrad: 3
+      rx_angle_h_min_mrad: -6
+      rx_angle_h_max_mrad: 6
+      rx_angle_v_min_mrad: -3
+      rx_angle_v_max_mrad: 3
       total_pulse_energy_nj: 12
       solar_enabled: false
       other_light_enabled: false
+  scan:
+    scan:
+      trajectory: sawtooth
+      frame_rate_hz: 1000
+      frame_count: 1
+      active_fraction: 0.8
+      mechanical_start_mrad: -10
+      mechanical_end_mrad: 10
+      optical_multiplier: 2
+      optical_offset_mrad: 0
+      phase_offset_ns: 0
+      laser_time_offset_ns: 0
+      laser_jitter_std_ns: 0
+      encoder_latency_ns: 0
+      encoder_angle_offset_mrad: 0
+      rx_scan_scale: 1
+      rx_angle_offset_mrad: 0
+      emission_policy: active_only
+      reconstruct_flyback: false
+      angle_bin_min_mrad: -20
+      angle_bin_max_mrad: 20
+      angle_bin_width_mrad: 2
+      channel_direction_mode: optical_centroid
+      channel_h_mrad: []
+      channel_v_mrad: []
+    scene_motion:
+      range_gradient_m_per_rad: 0
+      radial_velocity_m_s: 0

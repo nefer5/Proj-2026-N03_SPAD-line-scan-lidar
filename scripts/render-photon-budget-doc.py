@@ -35,6 +35,8 @@ def render():
     lines.extend(["## 候选输入到实际读出",""]);steps(definition["readout"])
     lines.extend(["## "+definition["spatial"]["title"],"",definition["spatial"]["intro"],""])
     steps(definition["spatial"]["steps"])
+    lines.extend(["## "+definition["scan"]["title"],"",definition["scan"]["intro"],""])
+    steps(definition["scan"]["steps"])
     lines.extend(["## 对照代码与模型边界","",
                   "- simulator.py / photon_budget：分阶段回波能量、入瞳光子、探测面光子与各来源候选数。",
                   "- spectra.py / spectral_components：太阳lux归一化、反射、其他光倍率、同波段分层光谱积分。",

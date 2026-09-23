@@ -5,21 +5,36 @@
 <link rel="stylesheet" href="/static/vendor/katex/katex.min.css"></head>
 <body data-lab="__KIND__">
 <header><div><p class="eyebrow">PHYSICS LAB / SHARED DETECTOR CORE</p><h1 id="title">SPAD 研究台</h1><p class="lede" id="subtitle">直接设定探测面入射光，研究器件与读出。</p><p id="sourceBanner" class="muted"></p></div>
-<nav class="toolbar"><a href="/spad">SPAD 研究</a><a href="/system">整机仿真</a><a href="/">A 单通道</a><a href="/debug">A 专家调试</a></nav></header>
+<nav class="toolbar"><a href="/spad">SPAD 研究</a><a href="/system">静态 B</a><a href="/system/scan">扫描 C</a><a href="/">A 单通道</a><a href="/debug">A 专家调试</a></nav></header>
 <main class="lab-layout"><aside class="panel controls">
 <div class="toolbar"><button class="primary" id="runLab">提交仿真</button><button id="resetLab">恢复默认</button></div>
+<div class="toolbar hidden" id="scanActions"><button id="previewScan">预览轨迹与发数</button></div>
+<div class="toolbar hidden" id="systemToScan"><button id="useSystemForScan">用当前B参数新建扫描配置</button></div>
 <div class="toolbar"><button id="exportConfig">导出配置</button><label class="file-button">导入配置<input id="importConfig" type="file" accept=".json,.yaml,.yml"></label></div>
 <p id="formStatus" role="status"></p><div id="fields"></div><div id="curves"></div>
 <div class="toolbar hidden" id="opticalFiles"><button id="exportOptics">导出当前光学数据</button><label class="file-button">导入光学数据<input id="importOptics" type="file" accept=".json,.yaml,.yml"></label></div>
 </aside><section class="lab-results">
 <div id="error" role="alert" class="lab-error hidden"></div>
 <section class="panel lab-card"><div class="card-heading"><h2>运行任务</h2><button id="refreshJobs">刷新任务</button></div><p class="muted">任务持续在后台运行。刷新页面后可继续查看。</p><div id="jobs"></div></section>
-<section class="panel lab-card" id="resultPanel"><div class="card-heading"><h2>采集结果</h2><button id="exportResult" disabled>导出完整结果</button></div>
+<section class="panel lab-card hidden" id="scanPanel">
+<div class="card-heading"><h2>C · 逐脉冲扫描</h2><span id="scanViewStatus" class="muted"></span></div>
+<div id="scanMetrics" class="metric-grid"></div>
+<p id="scanErrorSummary" class="muted"></p>
+<div class="toolbar scan-toolbar"><label>查看帧<select id="scanFrame"></select></label><button id="exportCloud" disabled>导出 XYZ 点云 CSV</button></div>
+<div class="chart-grid"><div><h3>逐触发时隙光学轴指向 · 时间连续</h3><canvas id="scanTrajectoryPlot"></canvas><p class="muted">青：真实Tx轴；橙：编码器角标签；灰：控制计划。关闭发射时仍显示镜面轨迹。</p></div><div><h3>每角 bin 的实际累计发数</h3><canvas id="scanDwellPlot"></canvas><p class="muted">青：真实有效发数；橙：编码器分配发数。空bin为0发，无距离时不补点。</p></div></div>
+<div class="chart-grid"><div><h3>距离线图 · 未经检测门限判定</h3><canvas id="scanRangePlot"></canvas></div><div><h3>点云 X–Z 投影 · XYZ 由 Python 重建</h3><canvas id="scanCloudPlot"></canvas></div></div>
+<div class="toolbar scan-toolbar"><label>角 bin<select id="scanAngle"></select></label><label>读出通道<select id="scanChannel"></select></label><label>重放分箱 (ps)<input id="scanReplayBin" type="number" step="any"></label><button id="scanReplay" disabled>重放扫描重建</button></div>
+<h3>所选帧 / 角 bin / 通道的记录直方图</h3><canvas id="scanBinPlot" class="scan-wide-plot"></canvas>
+<div class="toolbar scan-toolbar"><label>像面查看：参考时隙<input id="scanPulse" type="number" step="1"></label><button id="showScanPulse" disabled>查看该发光子图</button></div>
+<p id="scanNotes" class="muted"></p>
+<details><summary>逐脉冲时序与归属</summary><div class="toolbar"><button id="scanPrevious">上一页</button><button id="scanNext">下一页</button><span id="scanPageInfo" class="muted"></span></div><div id="scanTable" class="scan-table"></div></details>
+</section>
+<section class="panel lab-card" id="resultPanel"><div class="card-heading"><h2>采集结果</h2><button id="exportResult" disabled>导出原始完整结果</button></div>
 <p id="resultStatus" class="muted">提交实验后，查看光子分布、通道直方图和读出损失。</p><div id="metrics" class="metric-grid"></div>
 <div class="chart-grid"><div><h3>探测面入射光子 / 发 · PDE/FF 前</h3><canvas id="illuminationPlot"></canvas><p id="planeNote" class="muted"></p></div><div><h3>各通道记录直方图</h3><canvas id="histogramPlot"></canvas><div id="histogramLegend"></div><p id="histogramNote" class="muted"></p></div></div>
 <div class="toolbar"><label>显示起点 (ns)<input id="plotStart" type="number" step="any"></label><label>显示终点 (ns)<input id="plotEnd" type="number" step="any"></label><button id="zoomHistogram" disabled>缩放图形</button><button id="fullHistogram" disabled>显示全门</button></div>
 <div class="toolbar"><label>重放分箱宽度 (ps)<input id="replayBin" type="number" step="any"></label><button id="replay" disabled>使用同一份记录重放</button></div>
 <div id="opticalResults"></div><details><summary>专家审计：配置、统计口径与模型限制</summary><pre id="audit"></pre></details>
 </section></section></main>
-<script src="/static/vendor/katex/katex.min.js"></script><script src="/static/curve-editor.js"></script><script src="/static/shared/labs.js"></script><script src="/static/shared/spatial.js"></script>
+<script src="/static/vendor/katex/katex.min.js"></script><script src="/static/curve-editor.js"></script><script src="/static/shared/labs.js"></script><script src="/static/shared/spatial.js"></script><script src="/static/shared/scan.js"></script>
 </body></html>

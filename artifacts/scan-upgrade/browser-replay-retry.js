@@ -1,0 +1,13 @@
+await page.goto('http://127.0.0.1:8014/system/scan?job=2b6f527b70d64ba8ae655a25a2fad93e',{waitUntil:'networkidle'});
+await expect(page.locator('#resultStatus')).toContainText('C_pulse_resolved_scan');
+await page.locator('#scanReplayBin').fill('2000');
+await page.getByRole('button',{name:'重放扫描重建',exact:true}).click();
+await expect(page.locator('#scanViewStatus')).toContainText('未重新采样');
+await page.locator('#scanAngle').selectOption('10');await page.locator('#scanChannel').selectOption('2');
+await page.locator('#scanPulse').fill('85');await page.getByRole('button',{name:'查看该发光子图',exact:true}).click();
+await expect(page.locator('#planeNote')).toContainText('参考时隙 85');
+await page.setViewportSize({width:390,height:844});
+const mobile=await page.evaluate(()=>({width:innerWidth,scrollWidth:document.documentElement.scrollWidth}));
+assert(mobile.scrollWidth<=mobile.width);
+await page.setViewportSize({width:1440,height:1050});
+return {mobile,status:await page.locator('#scanViewStatus').innerText(),plane:await page.locator('#planeNote').innerText(),error:await page.locator('#error').innerText()};
