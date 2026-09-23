@@ -28,6 +28,12 @@ class PDEPoint(BaseModel):
 
 class SimulationConfig(BaseModel):
     model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+
+    @classmethod
+    def for_experiment(cls, kind, overrides, algorithms=None):
+        """Unified config entry without constructing irrelevant A optical fields."""
+        from .experiments.configuration import resolve_experiment
+        return resolve_experiment(kind, overrides, algorithms)
     pulse_shape: Literal["gaussian", "rectangular"]
     laser_prf_hz: float = Field(gt=0)
     rx_aperture_shape: Literal["circle", "ellipse", "rectangle"]

@@ -10,3 +10,7 @@ data/local-sources/
 # Downloaded full-text papers stay local; track the reference index instead.
 data/reference/papers/*.pdf
 data/reference/papers/*.part
+# Local reproducible execution records and archive snapshots remain on this machine.
+artifacts/runs/
+artifacts/architecture-upgrade/**/*.zip
+artifacts/architecture-upgrade/*server*.log

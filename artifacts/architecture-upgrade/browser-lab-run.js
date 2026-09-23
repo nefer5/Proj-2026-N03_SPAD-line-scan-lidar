@@ -1,0 +1,10 @@
+globalThis.labErrors=[];page.on('pageerror',e=>globalThis.labErrors.push(e.message));
+await page.reload({waitUntil:'networkidle'});
+await page.getByText('实验时序',{exact:true}).click();
+await page.locator('[data-path="timing.laser_shots"]').fill('100');
+await page.getByRole('button',{name:'提交仿真',exact:true}).click();
+await expect(page.locator('#resultStatus')).toContainText('SPAD_standalone',{timeout:30000});
+await page.locator('#replayBin').fill('2000');
+await page.getByRole('button',{name:'使用同一份记录重放'}).click();
+await expect(page.locator('#histogramNote')).toContainText('2000');
+return {errors:globalThis.labErrors,metrics:await page.locator('#metrics').innerText(),jobs:await page.locator('#jobs').innerText(),screenshot:await page.screenshot({fullPage:false})};

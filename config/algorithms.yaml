@@ -45,3 +45,11 @@ max_readout_expected_work: 2000000
 max_readout_cycles: 200000
 basic_gaussian_extent_fwhm: 6.0
 basic_quadrature_segments: 32
+max_lab_pixels: 4096
+max_optical_cells: 4000000
+spatial_angle_samples_h: 17
+spatial_angle_samples_v: 9
+acquisition_block_cycles: 16
+max_pending_jobs: 8
+max_job_workers: 1
+job_poll_ms: 600

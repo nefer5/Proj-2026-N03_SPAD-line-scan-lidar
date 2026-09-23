@@ -370,11 +370,27 @@ async function updateDerived() {
   }
 }
 
-async function run() {
+let activeAJob = null;
+async function waitAJob(id) {
+  activeAJob=id;localStorage.setItem('lidar-a-job',id);$('cancelAJob').disabled=false;
+  try {
+    for (;;) {
+      const response=await fetch('/api/jobs/'+id,{cache:'no-store'});
+      const job=await response.json();if(!response.ok)throw new Error(job.detail);
+      $('resultStatus').textContent='后台任务 '+id.slice(0,8)+' · '+job.status+' · '+job.message;
+      if(job.status==='completed') {const r=await fetch('/api/jobs/'+id+'/result',{cache:'no-store'});if(!r.ok)throw new Error(await r.text());return await r.json();}
+      if(['failed','cancelled','interrupted'].includes(job.status))throw new Error(job.message);
+      await new Promise(resolve=>setTimeout(resolve,algorithmConfig.job_poll_ms));
+    }
+  } finally {$('cancelAJob').disabled=true;}
+}
+$('cancelAJob').addEventListener('click',async()=>{try{if(activeAJob)await request('/api/jobs/'+activeAJob+'/cancel',{});}catch(error){showError(error);}});
+async function run(existingJob) {
   $("runButton").disabled=true; $("runButton").textContent="计算中…"; $("errorBox").classList.add("hidden");
   try {
     const cfg=collectConfig();
-    const result=await (await request("/api/simulate?debug="+isDebug,cfg)).json();
+    const job=typeof existingJob==='string'?{id:existingJob}:await (await request('/api/jobs',{kind:'a',config:cfg})).json();
+    const result=await waitAJob(job.id);
     debugPage=Math.floor(result.debug ? result.debug.estimator.peak_bin/100 : 0);
     render(result);
     if(JSON.stringify(collectConfig())===JSON.stringify(cfg)) {
@@ -517,6 +533,6 @@ window.addEventListener("resize",()=>{
       document.querySelectorAll(".debug-only").forEach(el=>el.classList.remove("hidden"));
     }
     document.body.dataset.mode=isDebug?"debug":"evaluation";
-    await updateDerived();await run();
+    await updateDerived();await run(localStorage.getItem('lidar-a-job'));
   }catch(error){showError(error);}
 })();

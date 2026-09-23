@@ -211,3 +211,13 @@ simulation:
       csv_points: []
       manual_points: []
       csv_name: ''
+
+# Domain experiment additions; shared device/readout/curve defaults reuse simulation above.
+experiments:
+  spad:
+    illumination:
+      signal_photons_per_pulse: 20
+      background_photons_per_second_per_pixel: 10000
+      pulse_delay_ns: 600
+      spatial_mode: uniform
+      pixel_weights: []

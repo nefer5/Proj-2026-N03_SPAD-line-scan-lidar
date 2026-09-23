@@ -22,7 +22,7 @@ client = TestClient(app)
 def test_yaml_is_complete_and_all_parameters_documented():
     defaults = configuration.default_values()
     assert set(defaults) == set(SimulationConfig.model_fields)
-    assert set(defaults) == set(configuration.read_yaml("parameter-help.yaml"))
+    assert set(defaults) == set(configuration.read_yaml("parameter-help.yaml")) - {'experiments'}
     assert all(field.is_required() for field in SimulationConfig.model_fields.values())
     assert SimulationConfig().model_dump() == defaults
 

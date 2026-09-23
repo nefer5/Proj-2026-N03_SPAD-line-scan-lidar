@@ -1,0 +1,14 @@
+await page.setViewportSize({width:1440,height:1000});
+await page.reload({waitUntil:'networkidle'});
+await expect(page.locator('[data-path="timing.laser_shots"]')).toHaveValue('100');
+await page.getByRole('button',{name:'查看结果',exact:true}).first().click();
+await expect(page.locator('#resultStatus')).toContainText('SPAD_standalone');
+await page.getByText('探测面直接照明',{exact:true}).click();
+await page.getByText('SPAD PDE光谱',{exact:true}).click();
+await page.locator('#pdeCurveMode').selectOption('basic');
+await page.locator('#pdeBasicShape').selectOption('constant');
+await page.locator('#pdeBasic_amplitude').fill('0.4');
+await page.getByRole('button',{name:'提交仿真',exact:true}).click();
+await expect(page.locator('#resultStatus')).toContainText('SPAD_standalone');
+await expect(page.locator('#error')).toBeHidden();
+return {result:await page.locator('#resultStatus').innerText(),errors:globalThis.labErrors,screenshot:await page.screenshot({fullPage:false})};

@@ -2,8 +2,25 @@
 from pathlib import Path
 import yaml
 from pydantic import BaseModel, ConfigDict, Field
+from contextvars import ContextVar
+from contextlib import contextmanager
+from copy import deepcopy
 
 CONFIG_DIR = Path(__file__).resolve().parents[2] / "config"
+_SNAPSHOT = ContextVar('configuration_snapshot', default=None)
+
+
+@contextmanager
+def frozen_yaml(snapshot):
+    token = _SNAPSHOT.set(snapshot)
+    try:
+        yield
+    finally:
+        _SNAPSHOT.reset(token)
+
+
+def yaml_snapshot():
+    return {path.name: read_yaml(path.name) for path in CONFIG_DIR.glob('*.yaml')}
 
 
 class ConfigurationError(RuntimeError):
@@ -35,6 +52,11 @@ def parse_yaml(text):
 
 
 def read_yaml(name):
+    snapshot = _SNAPSHOT.get()
+    if snapshot is not None:
+        if name not in snapshot:
+            raise ConfigurationError(f'Configuration snapshot lacks {name}')
+        return deepcopy(snapshot[name])
     try:
         return parse_yaml((CONFIG_DIR / name).read_text(encoding="utf-8"))
     except (OSError, ValueError, TypeError, yaml.YAMLError) as exc:
@@ -43,8 +65,8 @@ def read_yaml(name):
 
 def default_values():
     doc = read_yaml("defaults.yaml")
-    if set(doc) != {"schema_version", "simulation"} or doc["schema_version"] != 1:
-        raise ValueError("defaults.yaml requires schema_version: 1 and simulation")
+    if set(doc) != {"schema_version", "simulation", "experiments"} or doc["schema_version"] != 1:
+        raise ValueError("defaults.yaml requires schema_version: 1, simulation and experiments")
     if not isinstance(doc["simulation"], dict):
         raise ValueError("simulation must be a mapping")
     return doc["simulation"]
@@ -98,6 +120,14 @@ class Algorithms(BaseModel):
     max_readout_cycles: int = Field(gt=0)
     basic_gaussian_extent_fwhm: float = Field(ge=4, le=12)
     basic_quadrature_segments: int = Field(ge=16, le=256)
+    max_lab_pixels: int = Field(gt=0)
+    max_optical_cells: int = Field(gt=0)
+    spatial_angle_samples_h: int = Field(ge=1)
+    spatial_angle_samples_v: int = Field(ge=1)
+    acquisition_block_cycles: int = Field(ge=1)
+    max_pending_jobs: int = Field(ge=1)
+    max_job_workers: int = Field(ge=1)
+    job_poll_ms: int = Field(ge=100)
 
     @classmethod
     def load(cls):

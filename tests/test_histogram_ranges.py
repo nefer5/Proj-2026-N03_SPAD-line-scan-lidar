@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from spad_lidar.models import SimulationConfig
 from spad_lidar.simulator import histogram_sample_range, simulate
-from spad_lidar import simulator
+from spad_lidar.experiments import single_channel as simulator
 
 
 def test_sample_extrema_are_per_bin_without_filtering_or_averaging():

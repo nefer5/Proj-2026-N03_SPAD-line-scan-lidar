@@ -19,6 +19,8 @@ ROOT = Path(__file__).resolve().parents[2]
 WEB = ROOT / "web"
 
 app = FastAPI(title="SPAD Line-Scanning LiDAR Model", version="0.2.1")
+from .webapi.labs import router as labs_router
+app.include_router(labs_router)
 app.mount("/static", StaticFiles(directory=WEB), name="static")
 
 
@@ -41,6 +43,7 @@ async def invalid_configuration(request, exc):
 
 @app.get("/")
 @app.get("/debug")
+@app.get("/system")
 def index():
     html = (WEB / "index.html").read_text(encoding="utf-8")
     # Content-addressed URLs bypass already cached unversioned JS/CSS as well.

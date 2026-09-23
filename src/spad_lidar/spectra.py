@@ -12,6 +12,7 @@ from .constants import C, H, K_PHOTOPIC
 from .configuration import read_yaml, Algorithms, ConfigurationError
 from .filters import FilterResponse
 from .pde_data import pde_provenance
+from .spad.device.response import spectral_detection_weights, effective_pde
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -92,7 +93,7 @@ def spectral_components(cfg, algorithms=None, plot=False):
     sun_l = solar_e(x)*cfg.solar_reflectivity/np.pi
     ambient_l = other_l(x)
     t = filt.evaluate(x)
-    detector_weight = t*pde_at(x)*x*1e-9/(H*C)
+    detector_weight = spectral_detection_weights(t, pde_at(x), x)
     photon_factor=x*1e-9/(H*C)
     result = {
         "solar_lux": cfg.solar_illuminance_lux if cfg.solar_enabled else 0.0,
@@ -106,7 +107,7 @@ def spectral_components(cfg, algorithms=None, plot=False):
         "other_raw_radiance_at_laser_w_m2_sr_nm": float(other(np.array(cfg.wavelength_nm))),
         "other_radiance_at_laser_w_m2_sr_nm": float(other_l(np.array(cfg.wavelength_nm))),
         "pde_at_laser": float(pde_at(np.array(cfg.wavelength_nm))),
-        "effective_pde_at_laser": float(pde_at(np.array(cfg.wavelength_nm)))*cfg.fill_factor,
+        "effective_pde_at_laser": effective_pde(float(pde_at(np.array(cfg.wavelength_nm))), cfg.fill_factor),
         "pde_source": pde_provenance(cfg),
         "solar_filtered_radiance_w_m2_sr": float(np.dot(w,sun_l*t)),
         "other_filtered_radiance_w_m2_sr": float(np.dot(w,ambient_l*t)),

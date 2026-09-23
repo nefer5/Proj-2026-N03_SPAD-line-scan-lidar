@@ -202,3 +202,29 @@ spectral_inputs:
   label: "统一光谱输入"
   unit: "分组配置"
   description: "filter/other/pde/solar各自先选择basic、csv或manual模式；solar额外支持standard。基础特征量、CSV采样点和手动采样点独立保存，只使用当前模式；详细单位和特征量定义见curve-inputs.yaml。"
+
+experiments:
+  timing.period_ns:
+    label: 采集周期
+    unit: ns
+    description: 显式控制周期，必须覆盖采集门；直接照明实验不需要激光或目标参数。实际生效。
+  illumination.signal_photons_per_pulse:
+    label: 入射信号光子总数 / 发
+    unit: photons/pulse
+    description: 完整像素接收平面、PDE/FF之前的期望总光子数；按当前空间模式分配。实际生效。
+  illumination.background_photons_per_second_per_pixel:
+    label: 每像素背景光子率
+    unit: photons/s/pixel
+    description: 完整像素接收平面、当前单色波长下的背景光子率；free_running模式也在门外采样。实际生效。
+  illumination.pulse_delay_ns:
+    label: 入射脉冲中心时刻
+    unit: ns
+    description: 相对周期起点的光子到达中心；不从目标距离推导。门外尾部不重新归一化。实际生效。
+  illumination.spatial_mode:
+    label: 像素照明分配
+    unit: 枚举
+    description: uniform均匀照明；weights按显式相对权重分配总光子数。仅当前模式生效。
+  illumination.pixel_weights:
+    label: 像素相对权重（JSON数组）
+    unit: 相对值
+    description: 仅weights模式生效；长度等于H_binning乘V_binning、按行展开；后端按权重总和归一化，不表示丢失能量。

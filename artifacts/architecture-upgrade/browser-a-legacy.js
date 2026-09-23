@@ -1,0 +1,11 @@
+await page.goto('http://127.0.0.1:8012/system',{waitUntil:'networkidle'});
+await expect(page.locator('#runButton')).toBeEnabled({timeout:30000});
+await page.evaluate(()=>{sessionStorage.setItem('lidar-config',JSON.stringify({spads_per_channel:16,pulse_shape:'rectangular',monte_carlo_trials:2}));localStorage.removeItem('lidar-a-job');});
+await page.reload({waitUntil:'networkidle'});
+await expect(page.locator('[data-key="H_binning"]')).toHaveValue('16');
+await expect(page.locator('[data-key="V_binning"]')).toHaveValue('1');
+await expect(page.locator('[data-key="pulse_shape"]')).toHaveValue('rectangular');
+await expect(page.locator('#runButton')).toBeEnabled({timeout:30000});
+await expect(page.locator('#errorBox')).toBeHidden();
+await page.evaluate(()=>window.scrollTo(0,0));
+return {status:await page.locator('#resultStatus').innerText(),cacheMigration:'old scalar SPAD total -> 16x1; string enum retained',errors:globalThis.labErrors,screenshot:await page.screenshot({fullPage:false})};
