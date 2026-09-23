@@ -21,7 +21,7 @@
 - [模块化架构说明](../../docs/architecture.md)
 - [B 数据契约与人工验收步骤](../../docs/spatial-optics.md)
 - [构造光学数据](../../data/synthetic/spatial-example.json)
-- [当前B验收页面](http://127.0.0.1:8012/system?job=12daaa79d28943ec94c9405c253cf65f)
-- [独立SPAD页面](http://127.0.0.1:8012/spad)
+- [当前B验收页面](http://127.0.0.1:8013/system?job=12daaa79d28943ec94c9405c253cf65f)
+- [独立SPAD页面](http://127.0.0.1:8013/spad)
 
-网页链接需要本地服务运行。可用 `python run.py --port 8012` 启动；后台任务及结果保存在 `artifacts/runs/`。离线复查可直接查看本目录的完整结果、源码ZIP和PNG截图。
+网页链接需要本地服务运行。可用 `python run.py --port 8013` 启动；后台任务及结果保存在 `artifacts/runs/`。离线复查可直接查看本目录的完整结果、源码ZIP和PNG截图。
