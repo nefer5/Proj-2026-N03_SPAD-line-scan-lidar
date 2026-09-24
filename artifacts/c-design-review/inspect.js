@@ -1,0 +1,1 @@
+return {url:page.url(),ready:await page.locator('body').getAttribute('data-ready'),error:await page.locator('#loadError').textContent(),start:await page.locator('#windowStart').inputValue(),end:await page.locator('#windowEnd').inputValue(),draftBannerHidden:await page.locator('#draftBanner').isHidden(),dialogOpen:await page.locator('#dialog').getAttribute('open')};

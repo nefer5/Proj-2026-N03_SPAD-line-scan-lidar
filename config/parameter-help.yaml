@@ -594,11 +594,11 @@ experiments:
   spad.channels_h:
     label: 水平读出通道数
     unit: 通道
-    description: 与H_binning共同定义阵列水平像素数；每个像素只属于一个固定矩形组。实际生效。
+    description: 线扫架构中的H兼容路数，与H_binning共同定义阵列水平像素数；每个像素只属于一个固定矩形组。当前各H路均参与计算，单路显示不等于停用另一H路；未隐式合并。实际生效。
   spad.channels_v:
     label: 垂直读出通道数
     unit: 通道
-    description: 与V_binning共同定义阵列垂直像素数；不由数量猜测IFOV。实际生效。
+    description: 线扫架构中的V线数，与V_binning共同定义阵列垂直像素数。线阵各行按列并行采集；不由数量猜测IFOV或自动扩大光学覆盖。实际生效。
   spad.pixel_pitch_um:
     label: 像素节距
     unit: μm

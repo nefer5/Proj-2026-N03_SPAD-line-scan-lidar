@@ -1,0 +1,1 @@
+return await page.evaluate(()=>({url:location.href,ready:document.body.dataset.ready,viewport:innerWidth,client:document.documentElement.clientWidth,width:document.documentElement.scrollWidth,planning:!document.querySelector('#planningWorkspace').classList.contains('hidden'),error:document.querySelector('#loadError').textContent}));

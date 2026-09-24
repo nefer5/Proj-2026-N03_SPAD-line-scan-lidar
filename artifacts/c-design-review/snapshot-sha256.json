@@ -1,0 +1,16 @@
+{
+  "config/defaults.yaml": "7e47850902db99a604fa878431c17a168f844e54f822171bf31b309fb49582bd",
+  "config/parameter-help.yaml": "d10a1358798b9dd0cdc6abdfab47282913835e9938bd1cbc73d2b83e6c45e1ff",
+  "data/synthetic/spatial-example.json": "f2ce59e8d46cac9fc536072cf4f96a80d0774841712454f2b6197321e8dfab99",
+  "docs/spatial-optics.md": "d946c91bfbbb72dbd9c755e5639c9e30daebdd9b3525e9d78b54532ca965c11b",
+  "docs/c-exposure-workspace-design.md": "36b0c76128ecc1fb244918f594369183a377c005fff9407e0d34b87d038ea32c",
+  "tools/build_c_design_preview.py": "b98414acf47fbb126f7c79c0e249ff9e83803d9392b9f89e799265a68c03d08a",
+  "web/prototypes/c-exposure/index.template.html": "6d0d42768f9aa67a4703115a20512ebc2f50266145f07de9dfc7fcc508835bc4",
+  "web/prototypes/c-exposure/index.html": "8ec322b879f3d5941409adecdfde0bf29d11cb6b56f6850382335c9e089ade6e",
+  "web/prototypes/c-exposure/design.css": "0cbaa7a9d4645d5833d021bfbe720dd15c3e56c6d8819d36886fea73f8a217aa",
+  "web/prototypes/c-exposure/design.js": "2aebc9daf0ecc83dcf53a74cdba2670c326608dd12abb3ee4f48121dd4101a8f",
+  "web/prototypes/c-exposure/reference.json": "b2fd66062738c32bae21d9f59915144f8094a9c8b1eda3b824a21c48d2ee81a0",
+  "artifacts/c-design-review/01-concepts.png": "ac8adec48f050a7c1fef94f0b7ad4272a4db3cf0b24104c76a7cdbfec487334a",
+  "artifacts/c-design-review/02-two-column-timeline.png": "b6478066498232e37506b9d49fcb3eac10a5d24b7fbbad4fff24997867873179",
+  "artifacts/c-design-review/03-resource-planning.png": "6fd9d55e3e51f5b2a1bd2789333c37285690d0835f519aec5a8200d98dff2ed9"
+}

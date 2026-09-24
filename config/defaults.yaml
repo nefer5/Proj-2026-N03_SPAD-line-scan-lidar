@@ -246,8 +246,8 @@ experiments:
       rx_angle_v_min_mrad: -3
       rx_angle_v_max_mrad: 3
     spad:
-      channels_h: 3
-      channels_v: 2
+      channels_h: 2
+      channels_v: 16
       pixel_pitch_um: 20
   scan:
     scan:
