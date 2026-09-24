@@ -10,6 +10,7 @@ import webbrowser
 
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT / "src"))
+DEFAULT_PORT = 8016
 
 URL_OPENER = build_opener(ProxyHandler({}))
 
@@ -34,10 +35,11 @@ def open_when_ready(url):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Start the LiDAR modeling server")
+    parser = argparse.ArgumentParser(description="Start the LiDAR modeling server",
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("--reload", action="store_true", help="Reload when Python source changes")
     parser.add_argument("--open", action="store_true", dest="open_browser", help="Open the browser when ready")
-    parser.add_argument("--port", type=int, default=8000)
+    parser.add_argument("--port", type=int, default=DEFAULT_PORT, help="Local HTTP port")
     args = parser.parse_args()
     if not 1 <= args.port <= 65535:
         parser.error("port must be between 1 and 65535")

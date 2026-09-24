@@ -23,3 +23,4 @@ artifacts/ui-prototypes/**/*.log
 artifacts/b-platform/final/*-result.json
 artifacts/ui-prototypes/*/statistical-arrays.json
 artifacts/ui-prototypes/*/first-acquisition.json
+artifacts/launcher-check/
