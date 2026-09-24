@@ -1,0 +1,46 @@
+{
+  "utc": "2026-09-24T15:53:27.414248+00:00",
+  "source_commit": "aaa9249c8f9fb99075ecc921c7a8744c9fe7c525",
+  "tests": "225 passed",
+  "a_baseline": "8 modes exact fixture equality",
+  "b_job": "992d9913d272436bb78e1a15ae6dba3d",
+  "c_job": "8fadfae0b6844b1089fecdce9f07df25",
+  "files": {
+    "b-default-config.json": {
+      "sha256": "e42d5da38355b627e21221b389eaee7f0778a5d53128b912a07d96b6dfeee0f6",
+      "bytes": 8835
+    },
+    "b-default-result.json": {
+      "sha256": "4d2c79acbb15c24f06978d55a1d99eb05414a6ff4df19897376cd537b76b6cef",
+      "bytes": 12158261
+    },
+    "b-precise-window.png": {
+      "sha256": "645f66e694106f60f5c1d5e9604245b7885d70bcfaef22c7af098f5990093faf",
+      "bytes": 149930
+    },
+    "c-overview.png": {
+      "sha256": "0cd54f981ff2cf1337958178da671d33ea2944a04d2a383852b782235b0e991c",
+      "bytes": 182109
+    },
+    "c-range-cloud.png": {
+      "sha256": "1c74cd72fc6e8be2619a1a3cbc1a80397d2cd4875911ef71e7c499d0c97fd384",
+      "bytes": 135072
+    },
+    "c-two-frame-demo-config.json": {
+      "sha256": "7021d0b9a0d89fcb615815cb155b047fd840601201bac5d9c1c8303f23f34f88",
+      "bytes": 9707
+    },
+    "c-two-frame-demo-result.json": {
+      "sha256": "dfdae78f7e481ef619e57845afd570bc7ad3b4426bbe4d8bd7b0759520fb281c",
+      "bytes": 6435990
+    },
+    "c-two-frame-point-cloud.csv": {
+      "sha256": "4935609bc3765d08013c1f0289696fade4a0a90aa7ab467c225540beb9c35b71",
+      "bytes": 36325
+    },
+    "source.zip": {
+      "sha256": "230a79934676d428e35f5d404f60b0a703f63df74f7e7e0932c3dab3bbecc523",
+      "bytes": 17470480
+    }
+  }
+}
