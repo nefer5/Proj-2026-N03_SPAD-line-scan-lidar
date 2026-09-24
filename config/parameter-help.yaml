@@ -692,8 +692,8 @@ design_review:
     description: 系统需求输入，必须为正有限数；决定帧周期。当前预览只可下发现有Python参考预算，修改后等待统一计算，不回写正式扫描配置。
   system_targets.hfov_mrad:
     label: 高层水平视场
-    unit: mrad
-    description: 有效水平角覆盖全宽，必须为正有限数。固定列数时决定每列角格宽与扫描速度；固定角步距时通过所需列数影响列时间。不是机械转角，也不是通道IFOV。
+    unit: deg（界面）；mrad（内部）
+    description: 有效水平角覆盖全宽，界面以deg输入和显示，进入内部草案时显式换算为mrad，必须为正有限数。固定列数时决定每列角格宽与扫描速度；固定角步距时通过所需列数影响列时间。不是机械转角，也不是通道IFOV。
   system_targets.scan_time_utilization:
     label: 扫描时间利用率
     unit: 比例（UI显示%）

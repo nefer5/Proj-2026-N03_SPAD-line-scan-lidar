@@ -1,0 +1,5 @@
+from pathlib import Path
+p=Path('web/prototypes/c-exposure/index.template.html');s=p.read_text(encoding='utf8').replace('aria-label="高层 HFOV"><b>mrad</b>','aria-label="高层 HFOV"><b>deg</b>');p.write_text(s,encoding='utf8')
+p=Path('web/prototypes/c-exposure/design.js');s=p.read_text(encoding='utf8').replace('${fmt(p.h_fov_mrad)} mrad 水平扫描 FOV','${fmt(data.high_level.derived.hfov_deg,4)} deg 水平扫描 HFOV');p.write_text(s,encoding='utf8')
+p=Path('config/formula-notes.yaml');s=p.read_text(encoding='utf8').replace('界面可显示mrad。按等分上限下发时','HFOV界面以deg输入和显示，内部显式换算，角格/角偏移仍可用mrad。按等分上限下发时');p.write_text(s,encoding='utf8')
+p=Path('docs/c-exposure-workspace-design.md');s=p.read_text(encoding='utf8').replace('HFOV 40 mrad、扫描时间利用率','HFOV约2.291831 deg（内部40 mrad）、扫描时间利用率');s+='\nHFOV界面输入与系统资源页显示统一使用deg；内部沿用mrad字段并显式换算，导出草案同时记录输入的hfov_deg。更换单位不改变参考视场、40 μs列目标或其他物理参数。\n';p.write_text(s,encoding='utf8')

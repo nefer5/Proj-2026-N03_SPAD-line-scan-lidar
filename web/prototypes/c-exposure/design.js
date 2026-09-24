@@ -162,7 +162,7 @@ function renderPlanning(){
   const width=780,L=25,R=750,xx=t=>L+t/p.frame_period_ns*(R-L);let body=rect(L,34,xx(p.active_ns)-L,39,'#1e595b')+rect(xx(p.active_ns),34,R-xx(p.active_ns),39,'#564736')+txt((L+xx(p.active_ns))/2,59,`前扫 · ${p.column_count} 列`,'text-anchor="middle" class="hot"')+txt((R+xx(p.active_ns))/2,59,'回扫 · 不发射','text-anchor="middle" class="warm"');
   [0,p.active_ns,p.frame_period_ns].forEach(t=>{body+=txt(xx(t),96,`${fmt(t/1000)} μs`,'text-anchor="middle" font-size="11"');});
   $('frameBudget').innerHTML=svg(width,115,body,'单帧前扫和回扫时间预算');
-  $('columnBudget').innerHTML=`<div>${c.pulses.length} 次发射 / 列<small>触发周期 ${fmt(data.timing.trigger_period_ns/1000)} μs；每次门宽 ${fmt(data.timing.gate_width_ns/1000)} μs</small></div><div>${data.line_rows} 行并行 / H 路<small>${p.points_per_frame_one_H} 个点位置 / 帧 / H 路，非有效点数</small></div><div>${fmt(p.h_fov_mrad)} mrad 水平扫描 FOV<small>角格宽 ${fmt(p.angle_step_mrad)} mrad；V 角覆盖另由光学校准给出</small></div>`;
+  $('columnBudget').innerHTML=`<div>${c.pulses.length} 次发射 / 列<small>触发周期 ${fmt(data.timing.trigger_period_ns/1000)} μs；每次门宽 ${fmt(data.timing.gate_width_ns/1000)} μs</small></div><div>${data.line_rows} 行并行 / H 路<small>${p.points_per_frame_one_H} 个点位置 / 帧 / H 路，非有效点数</small></div><div>${fmt(data.high_level.derived.hfov_deg,4)} deg 水平扫描 HFOV<small>角格宽 ${fmt(p.angle_step_mrad)} mrad；V 角覆盖另由光学校准给出</small></div>`;
 }
 function renderPipeline(value){
   setActive('data-buffer',value);let b=txt(20,24,'依赖关系示意 · 未定义延迟，横向长度不代表耗时','font-size="11"');
