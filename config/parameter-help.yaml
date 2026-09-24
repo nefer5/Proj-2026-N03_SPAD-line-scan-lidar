@@ -683,3 +683,34 @@ experiments:
     label: 随机种子
     unit: 整数
     description: 同参数、同算法配置、同运行依赖时可复现抽样；更改种子获得另一组随机样本。
+
+# Design-review inputs have no SimulationConfig counterpart yet.
+design_review:
+  tx.pulse_plan:
+    label: 列内逐发计划
+    unit: 列表
+    description: 每列重复的时间/能量模板。仅供C前端审核；可导出设计草案，未驱动正式探测器或光学计算，不能直接导入SimulationConfig。
+  tx.pulse_plan.time_offset_ns:
+    label: slot内发射时间
+    unit: ns
+    description: 波形中心相对被采集列开始的时间。按当前参考列长校验半开区间，必须有限且严格递增；不自动排序或裁剪。仅绘制草案事件。
+  tx.pulse_plan.energy_nj:
+    label: 逐发能量
+    unit: nJ
+    description: Tx光学前的全光斑单发能量，非负有限值；零表示暗触发。波形暂继承Tx形状/宽度。草案能量不用于现有回波和角度参考计算。
+  transport.dsp_start_us:
+    label: DSP起点
+    unit: μs
+    description: 相对被处理列开始。审核预览约定整列在slot末锁存后开始DSP；与下一列采集可重叠。空白表示待定义；仅画输入区间，未求解队列。
+  transport.dsp_duration_us:
+    label: DSP整列耗时
+    unit: μs
+    description: 一整列数据的处理持续时间，非负且有限，不是逐行串行耗时。未定义并发度或启动间隔，不能据此断定吞吐可行。仅设计草案生效。
+  transport.mipi_start_us:
+    label: MIPI起点
+    unit: μs
+    description: 相对被处理列开始；用户指定MIPI位于DSP后向主机输出结果，起点不得早于同列DSP结束。预览不会自动推迟或仲裁冲突。
+  transport.mipi_duration_us:
+    label: MIPI搬运耗时
+    unit: μs
+    description: 一列结果在MIPI输出阶段占用的持续时间，非负且有限，空白不当作零。正式计算须明确数据格式、协议开销、净带宽和缓存规则；当前只画用户输入区间。

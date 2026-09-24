@@ -1,0 +1,15 @@
+const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('http://127.0.0.1:8016/static/prototypes/c-exposure/index.html?revision=02',{waitUntil:'networkidle'});await page.waitForFunction(()=>document.body.dataset.ready==='true');
+await page.getByRole('button',{name:'＋ 添加一发',exact:true}).click();await expect(page.locator('#pulsePlanStatus')).toContainText('未应用');
+await page.getByLabel('第5发时间 ns').fill('35000');await page.getByLabel('第5发能量 nJ').fill('6');await expect(page.locator('#pulsePlanStatus')).toContainText('5 发 / slot');
+await page.getByRole('button',{name:'恢复参考',exact:true}).click();assert.equal(await page.locator('#pulsePlanRows tr').count(),4);await expect(page.getByLabel('DSP 起点 / μs',{exact:true})).toHaveValue('');
+await page.getByText('展开全帧角速度、逐发角度与不同距离的像面位移',{exact:true}).click();assert((await page.locator('#speedPlot polyline').count())===2);
+await page.getByRole('button',{name:'全部展开',exact:true}).click();assert.equal(await page.locator('.parameter-group[open]').count(),9);
+await page.getByRole('button',{name:'全部折叠',exact:true}).click();assert.equal(await page.locator('.parameter-group[open]').count(),0);
+await page.getByRole('tab',{name:/时间资源与读出带宽/}).click();assert((await page.getByRole('button',{name:'双缓冲方案',exact:true}).getAttribute('class')).includes('active'));await expect(page.locator('#pipelineDiagram')).toContainText('MIPI → 主机');
+await page.setViewportSize({width:390,height:844});const planning=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));assert(planning.scroll<=planning.client);
+await page.getByRole('tab',{name:/曝光策略与跨列影响/}).click();const exposure=await page.evaluate(()=>({client:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));assert(exposure.scroll<=exposure.client);
+await page.reload({waitUntil:'networkidle'});await page.waitForFunction(()=>document.body.dataset.ready==='true');await expect(page.getByLabel('DSP 起点 / μs',{exact:true})).toHaveValue('');
+await page.setViewportSize({width:1536,height:1100});await page.getByText('直接编辑 JSON list',{exact:true}).click();await page.locator('.pulse-plan-panel').evaluate(el=>el.scrollIntoView({block:'start'}));
+const urls=await page.locator('script[src],link[rel="stylesheet"]').evaluateAll(els=>els.map(e=>e.src||e.href));assert(urls.every(u=>u.includes('?v=')));
+const r=await context.request.get('http://127.0.0.1:8016/api/experiments/scan');assert(r.ok());
+return {errors,planning,exposure,urls,api:r.status(),checks:'add/edit/reset, speed curves, nine grouped panels, selected double buffering, DSP-to-MIPI, mobile overflow, refresh, blank costs passed',screenshot:await page.screenshot({fullPage:false})};

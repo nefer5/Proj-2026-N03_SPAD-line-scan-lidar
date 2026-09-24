@@ -1,0 +1,1 @@
+return {ready:await page.locator('body').getAttribute('data-ready'),list:await page.locator('#pulsePlanStatus').textContent(),error:await page.locator('#loadError').textContent(),markers:await page.locator('#timeline title').allTextContents()};

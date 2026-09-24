@@ -1,0 +1,1 @@
+await page.goto('http://127.0.0.1:8016/static/prototypes/c-exposure/index.html?revision=02',{waitUntil:'networkidle'});await page.waitForFunction(()=>document.body.dataset.ready==='true');await page.locator('.motion-panel').evaluate(el=>el.scrollIntoView({block:'start'}));return {ready:true,emptyDSP:await page.locator('#dspStart').inputValue(),url:page.url()};

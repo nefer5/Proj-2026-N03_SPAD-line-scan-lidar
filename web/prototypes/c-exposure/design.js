@@ -26,7 +26,8 @@ function field(path,label,value,kind='number',choices=null){
 function renderParameters(){
   const c=data.configuration, definitions=[
     ['scan','扫描与列规划',true,[['scan.frame_rate_hz','帧率 / Hz',c.scan.frame_rate_hz],['scan.frame_count','帧数',c.scan.frame_count],['scan.angle_bin_min_mrad','角格 H 下界 / mrad',c.scan.angle_bin_min_mrad],['scan.angle_bin_max_mrad','角格 H 上界 / mrad',c.scan.angle_bin_max_mrad],['scan.angle_bin_width_mrad','角格宽度 / mrad',c.scan.angle_bin_width_mrad],['scan.active_fraction','前扫时间占比',c.scan.active_fraction]],'列 slot 由列级计划分配。参考工况恰好每角格一列；非均匀规划时二者可以不同。'],
-    ['acquisition','曝光与接收门',true,[['acquisition.period_ns','触发周期 / ns',c.acquisition.period_ns],['acquisition.gate_start_ns','门起点 / ns',c.acquisition.gate_start_ns],['acquisition.gate_width_ns','门宽 / ns',c.acquisition.gate_width_ns],['acquisition.rng_seed','随机种子',c.acquisition.rng_seed]],'门起点相对触发。多脉冲计划、多窄门和列边界规则将在审核后建模。'],
+    ['mirror','转镜与角度耦合',false,[['scan.mechanical_start_mrad','机械起始角 / mrad',c.scan.mechanical_start_mrad],['scan.mechanical_end_mrad','机械终止角 / mrad',c.scan.mechanical_end_mrad],['scan.optical_multiplier','机械 → 光学角倍率',c.scan.optical_multiplier],['scan.rx_scan_scale','Rx / Tx 扫描比例',c.scan.rx_scan_scale],['scan.rx_angle_offset_mrad','Rx 静态角偏移 / mrad',c.scan.rx_angle_offset_mrad],['scan.trajectory','运动轨迹',c.scan.trajectory,'select',[['sawtooth','锯齿往返'],['triangle','三角往返'],['sinusoidal','正弦摆扫'],['static','静止']]]],'机械角速度由角范围、帧率与轨迹确定，光学扫描速度另乘角倍率。连续转镜的 RPM / 棱面周期模型另行定义，不把帧率直接叫机械转速。'],
+    ['acquisition','曝光与接收门',true,[['acquisition.period_ns','触发周期 / ns',c.acquisition.period_ns],['acquisition.gate_start_ns','门起点 / ns',c.acquisition.gate_start_ns],['acquisition.gate_width_ns','门宽 / ns',c.acquisition.gate_width_ns],['acquisition.rng_seed','随机种子',c.acquisition.rng_seed]],'门起点相对触发。右侧逐发列表定义列内时间和单发能量；本栏周期值保留为均匀参考。'],
     ['tx','Tx 发射',false,[['tx.total_pulse_energy_nj','单发能量 / nJ',c.tx.total_pulse_energy_nj],['tx.pulse_fwhm_ps','脉宽 FWHM / ps',c.tx.pulse_fwhm_ps],['tx.wavelength_nm','波长 / nm',c.tx.wavelength_nm],['tx.pulse_shape','脉冲形状',c.tx.pulse_shape,'select',[['gaussian','Gaussian'],['rectangular','矩形']]]],'复用 B 的光斑与光谱输入。新的长尾参数尚未定义，不自动添加经验尾迹。'],
     ['rx','Rx 接收光学',false,[['rx.focal_length_h_mm','f_H / mm',c.rx.focal_length_h_mm],['rx.focal_length_v_mm','f_V / mm',c.rx.focal_length_v_mm],['rx.rx_offset_x_um','像面 x 偏移 / μm',c.rx.rx_offset_x_um],['rx.rx_offset_y_um','像面 y 偏移 / μm',c.rx.rx_offset_y_um]],'沿用 B 的倒置映射、PSF 和角域结构。Rx 在回波时刻的姿态与发射角标签分别处理。'],
     ['spad','SPAD 线阵',true,[['spad.channels_h','H 兼容维度',c.spad.channels_h],['spad.channels_v','V 线数',c.spad.channels_v],['spad.H_binning','每通道 H 合并数',c.spad.H_binning],['spad.V_binning','每通道 V 合并数',c.spad.V_binning]],'16 条线按列并行。H 选择仅切换显示，当前计算仍包含两路；是否启用/合并另行定义。'],
@@ -83,6 +84,7 @@ function selectColumn(ix){
   focusCycle=selectedColumn().pulses.at(-1).cycle;$('pulseSelect').value=focusCycle;
   renderConcepts();renderAssignment(document.querySelector('[data-assignment].active').dataset.assignment);setWindowPreset('columns');renderPlanning();
   selectTerm(document.querySelector('[data-term].active').dataset.term);
+  if(reviewReady)syncReviewSelection();
 }
 function setWindow(a,b){windowNs=[a,b];$('windowStart').value=Number(((a-selectedColumn().start_ns)/1000).toFixed(9));$('windowEnd').value=Number(((b-selectedColumn().start_ns)/1000).toFixed(9));$('windowError').textContent='';renderTimeline();}
 function setWindowPreset(mode){
@@ -91,34 +93,35 @@ function setWindowPreset(mode){
   if(mode==='frame')setWindow(0,data.frame_budget.frame_period_ns);
   if(mode==='columns')setWindow(selectedColumn().start_ns,nextColumn().end_ns);
   if(mode==='trigger'){const next=data.frame_rows.find(r=>r.cycle===p.cycle+1);setWindow(p.nominal_time_ns,next?next.gate_close_ns:p.slot_end_ns);}
-  if(mode==='echo')setWindow(p.emission_time_ns+data.waveforms.echo_phase_ns[0],p.emission_time_ns+data.waveforms.echo_phase_ns.at(-1));
+  if(mode==='echo'){const ret=referenceReturn(p.cycle);const center=ret.arrival_ns;setWindow(center+data.waveforms.echo_phase_ns[0]-data.timing.tof_ns,center+data.waveforms.echo_phase_ns.at(-1)-data.timing.tof_ns);}
 }
 function renderTimeline(){
-  const [a,b]=windowNs,W=930,H=466,L=152,R=900,x=t=>L+(t-a)/(b-a)*(R-L),base=selectedColumn().start_ns;
-  const lane=[51,97,143,189,235,281,327];
-  const names=['列采集 slot','触发周期','Tx 发射事件','回波中心参考','SPAD 器件门','TDC 记录门','内部器件状态'];
-  let body='<defs><clipPath id="timelineClip"><rect x="152" y="27" width="748" height="330"/></clipPath></defs>';
+  const [a,b]=windowNs,W=930,H=604,L=152,R=900,x=t=>L+(t-a)/(b-a)*(R-L),base=selectedColumn().start_ns;
+  const lane=[51,97,143,189,235,281,327,373,419,465];
+  const names=['列采集 slot','触发周期 · 基准','Tx 发射 · 基准','回波中心 · 基准','SPAD 门 · 基准','TDC 门 · 基准','内部器件状态','Tx 列表 · 草案','DSP · 草案','MIPI → 主机 · 草案'];
+  let body='<defs><clipPath id="timelineClip"><rect x="152" y="27" width="748" height="468"/></clipPath></defs>';
   names.forEach((n,i)=>{body+=txt(15,lane[i]+4,n,'font-size="11"')+line(L,lane[i]+21,R,lane[i]+21,'#213a4c');});
-  for(let i=0;i<=5;i++){const t=a+(b-a)*i/5;body+=line(x(t),28,x(t),350,'#1d3445')+txt(x(t),375,fmt((t-base)/1000,(b-a)<1000?6:3),'text-anchor="middle" class="mono" font-size="10"');}
-  body+=txt(R,395,`μs · 相对 S${columnIndex} 开始；绝对 ${fmt(a/1000,6)} — ${fmt(b/1000,6)} μs`,'text-anchor="end" font-size="10"');
+  for(let i=0;i<=5;i++){const t=a+(b-a)*i/5;body+=line(x(t),28,x(t),488,'#1d3445')+txt(x(t),513,fmt((t-base)/1000,(b-a)<1000?6:3),'text-anchor="middle" class="mono" font-size="10"');}
+  body+=txt(R,533,`μs · 相对 S${columnIndex} 开始；绝对 ${fmt(a/1000,6)} — ${fmt(b/1000,6)} μs`,'text-anchor="end" font-size="10"');
   let clipped='';
   data.columns.forEach(c=>{if(c.end_ns<a||c.start_ns>b)return;const xa=x(Math.max(c.start_ns,a)),xb=x(Math.min(c.end_ns,b));const on=c.index===columnIndex;clipped+=rect(xa,lane[0]-13,Math.max(0,xb-xa-1),26,on?'#215b59':c.index===columnIndex+1?'#655237':'#1b3543');if(xb-xa>32)clipped+=txt((xa+xb)/2,lane[0]+4,`S${c.index}`,'text-anchor="middle" font-size="11"');});
   data.frame_rows.forEach(p=>{
-    const t=p.nominal_time_ns,em=p.emission_time_ns,echo=em+data.timing.tof_ns;
+    const t=p.nominal_time_ns,em=p.emission_time_ns,echo=p.emitted?referenceReturn(p.cycle).arrival_ns:null;
     if(t>=a&&t<=b){clipped+=line(x(t),lane[1]-11,x(t),lane[1]+10,'#7999ab');if((b-a)/data.timing.trigger_period_ns<14)clipped+=txt(x(t)+4,lane[1]+3,`P${p.cycle}`,'font-size="9"');}
     if(p.emitted&&em>=a&&em<=b)clipped+=line(x(em),lane[2]-13,x(em),lane[2]+13,palette.cyan,`stroke-width="${p.cycle===focusCycle?3:1.5}"`);
     if(p.emitted&&echo>=a&&echo<=b)clipped+=`<path d="M${x(echo)},${lane[3]-8} l5,8 l-5,8 l-5,-8 Z" fill="${palette.amber}"/>`;
     if(p.gate_close_ns>a&&p.gate_open_ns<b){const xa=x(Math.max(a,p.gate_open_ns)),xb=x(Math.min(b,p.gate_close_ns));[4,5].forEach(j=>{clipped+=rect(xa,lane[j]-8,Math.max(1,xb-xa),16,j===4?'#36657a':'#365785');});}
   });
   clipped+=line(L,lane[6],R,lane[6],'#776c8c','stroke-dasharray="5 5"')+rect(L+8,lane[6]-11,440,22,'#0b1722')+txt(L+15,lane[6]+4,'暂无逐器件轨迹；不从量化 TDC 记录倒造雪崩时刻','font-size="11"');
+  clipped+=reviewTimelineLanes(x,a,b,lane);
   body+=`<g clip-path="url(#timelineClip)">${clipped}</g>`;
-  const navX=t=>L+t/data.frame_budget.frame_period_ns*(R-L),ny=419,ww=navX(b)-navX(a);
+  const navX=t=>L+t/data.frame_budget.frame_period_ns*(R-L),ny=557,ww=navX(b)-navX(a);
   body+=txt(15,ny+13,'全帧导航','font-size="11"')+rect(L,ny,R-L,19,'#162c3b')+rect(L,ny,data.planning_reference.active_ns/data.frame_budget.frame_period_ns*(R-L),19,'#224853');
-  body+=rect(navX(a),ny,Math.max(3,ww),19,'#bb895050','stroke="#e9b879" stroke-width="1.5"')+txt(L,455,'0 μs','font-size="9"')+txt(R,455,`${fmt(data.frame_budget.frame_period_ns/1000)} μs · 拖动定位 / 上方精确输入`,'text-anchor="end" font-size="9"');
+  body+=rect(navX(a),ny,Math.max(3,ww),19,'#bb895050','stroke="#e9b879" stroke-width="1.5"')+txt(L,593,'0 μs','font-size="9"')+txt(R,593,`${fmt(data.frame_budget.frame_period_ns/1000)} μs · 拖动定位 / 上方精确输入`,'text-anchor="end" font-size="9"');
   body+=`<rect id="navigatorHit" x="${L}" y="${ny}" width="${R-L}" height="19" fill="transparent" style="cursor:ew-resize" aria-label="拖动全帧观测窗口"/>`;
   $('timeline').innerHTML=svg(W,H,body,'两个列采集时隙的触发、发射、回波与门控时序');
   $('timelineScope').textContent=`S${columnIndex} + S${columnIndex+1} · 参考时序`;
-  $('timingHint').innerHTML=`当前触发间隔 <strong>${fmt(data.timing.trigger_period_ns/1000)} μs</strong>；脉宽 <strong>${fmt(data.timing.pulse_fwhm_ns)} ns</strong>；参考距离 ${fmt(data.timing.range_m)} m 的到达时延约 <strong>${fmt(data.timing.tof_ns)} ns</strong>。两种门在当前 gated 工况下重合。回扫不发射；数值图始终显示均匀基准。`;
+  $('timingHint').innerHTML=`基准触发间隔 <strong>${fmt(data.timing.trigger_period_ns/1000)} μs</strong>；脉宽 <strong>${fmt(data.timing.pulse_fwhm_ns)} ns</strong>；选中距离 ${fmt(referenceReturn(focusCycle).reflection_range_m)} m 的光学飞行时间约 <strong>${fmt(referenceReturn(focusCycle).flight_ns)} ns</strong>。上方参考门与回波未按 Tx 草案重算；下方三条草案泳道仅按输入定位。DSP / MIPI 的标签 Sₖ 表示被处理的数据列，可延续到下一 slot。`;
   const hit=$('navigatorHit'), diagram=hit.ownerSVGElement;
   const move=e=>{const r=diagram.getBoundingClientRect(),sx=(e.clientX-r.left)/r.width*W;const centre=(sx-L)/(R-L)*data.frame_budget.frame_period_ns,span=b-a;const start=Math.max(0,Math.min(data.frame_budget.frame_period_ns-span,centre-span/2));setWindow(start,start+span);};
   // Capture on the persistent container, since SVG nodes are replaced on redraw.
@@ -134,7 +137,7 @@ function plotCurve(id,xs,ys,color,xLabel,yLabel){
   ctx.textAlign='center';for(let i=0;i<=4;i++){const x=xmin+(xmax-xmin)*i/4;ctx.fillText(fmt(x,2),xp(x),b+16);}
   ctx.textAlign='left';ctx.fillText(yLabel,l,t-7);ctx.textAlign='right';ctx.fillText(xLabel,r,h-5);ctx.strokeStyle=color;ctx.lineWidth=1.8;ctx.beginPath();xs.forEach((v,i)=>i?ctx.lineTo(xp(v),yp(ys[i])):ctx.moveTo(xp(v),yp(ys[i])));ctx.stroke();
 }
-function drawWaves(){plotCurve('txWave',data.waveforms.tx_time_ns,data.waveforms.tx_power_w,palette.cyan,'相对脉冲中心 / ns','W');plotCurve('echoWave',data.waveforms.echo_phase_ns,data.waveforms.echo_relative,palette.amber,'相对发射 / ns','归一化');}
+function drawWaves(){const ret=referenceReturn(focusCycle),phase=data.waveforms.echo_phase_ns.map(t=>t-data.timing.tof_ns+ret.flight_ns+data.configuration.acquisition.calibration_delay_ns);plotCurve('txWave',data.waveforms.tx_time_ns,data.waveforms.tx_power_w,palette.cyan,'相对脉冲中心 / ns','W');plotCurve('echoWave',phase,data.waveforms.echo_relative,palette.amber,'相对发射 / ns（含标定延迟）','归一化');}
 function renderStrategy(value){strategy=value;setActive('data-strategy',value);$('strategyNote').textContent={uniform:'当前数值时序：列内均匀周期发射。对比策略应固定发数和单发能量，分别观察门控、器件忙碌与归档结果。',burst:'设计候选：脉冲集中到列内一段时间，可设置组间隔和组内间隔。卡片仅示意排列；下方数值时序仍是均匀参考，尚未执行突发仿真。',gates:'设计候选：保持发射不变，比较延迟开门、宽门与多窄门。需要区分 SPAD 器件门和 TDC 记录门；下方数值时序仍是当前 gated 参考。'}[value];}
 function renderCause(value){
   setActive('data-cause',value);let b=rect(125,19,298,32,'#194349')+rect(425,19,324,32,'#413d33')+txt(275,40,'列 slot Sₖ','text-anchor="middle" class="hot"')+txt(590,40,'列 slot Sₖ₊₁','text-anchor="middle" class="warm"')+line(424,19,424,192,'#8d7859','stroke-dasharray="4 4"');
@@ -163,12 +166,12 @@ function renderPlanning(){
 }
 function renderPipeline(value){
   setActive('data-buffer',value);let b=txt(20,24,'依赖关系示意 · 未定义延迟，横向长度不代表耗时','font-size="11"');
-  const boxes=[['整列采集',20],['整列锁存',181],['并行处理',342],['列缓冲',503],['链路输出',664]];
+  const boxes=[['整列采集',20],['整列锁存',181],['DSP 并行处理',342],[value==='single'?'单缓冲':'双缓冲 A / B',503],['MIPI → 主机',664]];
   boxes.forEach(([title,x],i)=>{b+=rect(x,48,129,44,i===3?'#574630':'#19424b')+txt(x+64,74,title,'text-anchor="middle"');if(i<4)b+=arrow(x+129,70,x+156,70);});
   if(value==='single'){b+=txt(30,125,'Sₖ 缓冲仍占用时，Sₖ₊₁ 是否等待 / 丢弃？必须定义资源释放条件。','font-size="12"')+line(570,95,570,141,'#bc9c6b','stroke-dasharray="4 4"')+txt(30,164,'单缓冲 ≠ 所有操作串行；读取与写入能否并行仍由硬件决定。','font-size="11"');}
   else{b+=rect(503,115,129,34,'#223d5a')+txt(567,136,'缓冲 B / 下一列','text-anchor="middle" font-size="11"')+line(469,95,469,132,'#7099b2')+arrow(469,132,499,132,'#7099b2')+txt(20,133,'采集 Sₖ₊₁ 与输出 Sₖ 可重叠','class="hot"')+txt(20,167,'双缓冲不能解决持续平均输入大于链路输出；仍要检查积压与期限。','font-size="11"');}
   $('pipelineDiagram').innerHTML=svg(815,191,b,'整列并行处理到读出链路的依赖关系');
-  $('pipelineNote').textContent=value==='single'?'先明确锁存、处理、读出各占用哪个资源，再分配时隙。不要直接把所有阶段时间相加，也不要把接收关门段全部当作空闲。':'候选双缓冲允许不同列在不同资源上重叠。真实时间流水线要等处理延迟、链路净速率、缓存容量和仲裁规则齐全后才能计算。';
+  $('pipelineNote').textContent=value==='single'?'先明确锁存、处理、读出各占用哪个资源，再分配时隙。不要直接把所有阶段时间相加，也不要把接收关门段全部当作空闲。':'本次选定双缓冲，允许不同列在不同资源上重叠。真实时间流水线要等处理延迟、链路净速率、缓存容量和仲裁规则齐全后才能计算。';
 }
 const formatFields={points:[['pointBytes','每回波结果 / byte'],['returnsPerRow','每行最多回波数']],histograms:[['countBits','每计数位宽 / bit'],['exportedBins','导出时间分箱数']],events:[['eventBytes','每条事件记录 / byte'],['eventBound','每列事件上限']]};
 function renderFormat(value){
@@ -190,9 +193,10 @@ async function init(){
   document.querySelectorAll('[data-term]').forEach(b=>b.onclick=()=>selectTerm(b.dataset.term));
   document.querySelectorAll('[data-assignment]').forEach(b=>b.onclick=()=>renderAssignment(b.dataset.assignment));
   $('hRoute').onchange=renderConcepts;$('columnSelect').onchange=e=>{selectColumn(Number(e.target.value));renderPlanning();};
-  $('pulseSelect').onchange=e=>{focusCycle=Number(e.target.value);renderTimeline();};
+  $('pulseSelect').onchange=e=>{focusCycle=Number(e.target.value);syncReviewSelection();renderTimeline();drawWaves();};
   $('rowSelect').onchange=e=>{document.querySelector('.state-inspector .pending').textContent=`V${e.target.value} · 待核心事件轨迹接入`;};
   selectColumn(Math.min(7,data.columns.length-2));
+  initReviewV2();
   ['frame','columns','trigger','echo'].forEach((mode,i)=>$(['viewFrame','viewColumns','viewTrigger','viewEcho'][i]).onclick=()=>setWindowPreset(mode));
   $('applyWindow').onclick=()=>{
     const start=$('windowStart').value,end=$('windowEnd').value,a=Number(start)*1000+selectedColumn().start_ns,b=Number(end)*1000+selectedColumn().start_ns;
@@ -203,14 +207,14 @@ async function init(){
   document.querySelectorAll('[data-strategy]').forEach(b=>b.onclick=()=>renderStrategy(b.dataset.strategy));renderStrategy('uniform');
   $('fixedEnergy').textContent=`${selectedColumn().pulses.length} 发 / 列 · 每发 ${fmt(data.configuration.tx.total_pulse_energy_nj)} nJ`;
   document.querySelectorAll('[data-cause]').forEach(b=>b.onclick=()=>renderCause(b.dataset.cause));renderCause('tail');
-  renderPlanning();document.querySelectorAll('[data-buffer]').forEach(b=>b.onclick=()=>renderPipeline(b.dataset.buffer));renderPipeline('single');
+  renderPlanning();document.querySelectorAll('[data-buffer]').forEach(b=>b.onclick=()=>renderPipeline(b.dataset.buffer));renderPipeline('double');
   document.querySelectorAll('[data-format]').forEach(b=>b.onclick=()=>renderFormat(b.dataset.format));renderFormat('points');
   $('collapse').onclick=()=>document.querySelectorAll('.parameter-group').forEach(d=>d.open=false);
   $('expand').onclick=()=>document.querySelectorAll('.parameter-group').forEach(d=>d.open=true);
   $('reset').onclick=()=>{draft={};renderParameters();renderFormat('points');renderStrategy('uniform');$('draftStatus').textContent='参考工况';$('draftBanner').classList.add('hidden');};
   $('workflow').onclick=()=>{$('dialogTitle').textContent='审核后的运行流程';$('dialogBody').innerHTML='<ol><li>选择研究问题，校验 Tx / Rx / 场景 / SPAD 公共参数。</li><li>生成列级曝光计划：分配列 slot、发射时刻、器件门和记录门。</li><li>执行连续时间仿真；保留跨脉冲、跨列、跨帧的器件状态。</li><li>按观测角标签重建，同仿真真值分开审计。</li><li>对照测距、损失原因与重复统计；检查列输出数据量和缓冲峰值。</li></ol><p>此按钮仅解释设计，当前没有提交计算任务。</p>';$('dialog').showModal();};
   $('closeDialog').onclick=()=>$('dialog').close();
-  $('exportDraft').onclick=()=>{const payload={kind:'c_workspace_design_draft',not_simulation_config:true,reference_provenance:data.provenance,reference_configuration:data.configuration,draft_inputs:draft,strategy,output_format:outputFormat,note:'待审核设计草案；未校验或执行新模型。'};const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='c-workspace-design-draft.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
+  $('exportDraft').onclick=()=>{const payload={kind:'c_workspace_design_draft',not_simulation_config:true,reference_provenance:data.provenance,reference_configuration:data.configuration,draft_inputs:draft,review:exportReviewDraft(),strategy,output_format:outputFormat,note:'待审核设计草案；未校验或执行新模型。'};const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='c-workspace-design-draft.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
   $('audit').innerHTML=`<p>参考生成时间：${esc(data.provenance.utc)}。来源：${esc(data.provenance.source)}。</p><p>参考配置已是 H×V=${data.h_routes}×${data.line_rows}，并非旧 3×2 探测结果重贴标签。此页未运行探测器随机仿真。默认太阳与环境光沿用公共工况；正式运行需单独核对资源限额。</p><p>待审核：列级 slot、两种研究入口、时序与门控层级、H 兼容路处理、输出格式与硬件约束。完整曲线、直方图通道筛选、彩色窗口和精确时间输入将沿用 B 的公共组件。</p><p>编辑左侧只改变设计草案，不更新图中参考数值，不回写配置，不提交任务。新尾迹 / 非均匀调度 / 内部事件 / 带宽队列未实现。</p><pre>${esc(JSON.stringify(data.configuration,null,2))}</pre>`;
   drawWaves();new ResizeObserver(drawWaves).observe($('txWave'));document.body.dataset.ready='true';
 }

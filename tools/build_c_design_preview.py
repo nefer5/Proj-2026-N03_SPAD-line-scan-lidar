@@ -15,12 +15,69 @@ from spad_lidar.models import SimulationConfig
 from spad_lidar.configuration import Algorithms
 from spad_lidar.scan.schedule import build_schedule
 from spad_lidar.scan.aggregation import count_pulses
+from spad_lidar.scan.trajectory import mirror_pose
+from spad_lidar.scene.scan_target import reflection_range
+from spad_lidar.rx.spatial import image_center
 from spad_lidar.reporting.a_view import laser_quantities
 from spad_lidar.experiments.a_signal import _signal_pdf,timing_sigma_ns
 from spad_lidar.constants import C
 from spad_lidar import __version__
 
 OUT=ROOT/'web/prototypes/c-exposure'
+
+
+def motion_reference(cfg, algorithms, columns, frame_period_ns):
+    """Audit existing scan geometry; no new transport or detector model.
+
+    Range comparisons vary only the base scene distance. The same scene-motion,
+    mirror-pose and inverted-image mapping functions used by C/B are reused.
+    Electronic calibration delay is intentionally excluded from mirror motion.
+    """
+    times=np.unique(np.r_[np.linspace(0,frame_period_ns,algorithms.pulse_preview_points),
+                          [p['emission_time_ns'] for c in columns for p in c['pulses']]])
+    mechanical,optical,velocity,_=mirror_pose(cfg.scan,times)
+    ranges=sorted(set(algorithms.performance_sweep_range_values+[cfg.scene.range_m]))
+    motions=[]
+    for column in columns:
+        shot_times=np.array([p['emission_time_ns'] for p in column['pulses']])
+        mech,tx,vel,_=mirror_pose(cfg.scan,shot_times)
+        _,boundary_angles,_,_=mirror_pose(cfg.scan,[column['start_ns'],column['end_ns']])
+        rows=[]
+        for i,pulse in enumerate(column['pulses']):
+            comparisons=[]
+            for base_range in ranges:
+                optical_cfg=SimpleNamespace(**{**cfg.optics.model_dump(),'range_m':base_range})
+                distance=float(reflection_range(optical_cfg,cfg.scene_motion,tx[i],shot_times[i]))
+                tof=2*distance/C*1e9
+                _,rx0,_,_=mirror_pose(cfg.scan,shot_times[i])
+                _,rx1,_,_=mirror_pose(cfg.scan,shot_times[i]+tof)
+                rx0=float(rx0)*cfg.scan.rx_scan_scale+cfg.scan.rx_angle_offset_mrad
+                rx1=float(rx1)*cfg.scan.rx_scan_scale+cfg.scan.rx_angle_offset_mrad
+                relative=float(tx[i])-rx1
+                x=float(image_center(cfg.optics,relative,0)[0])
+                x_at_emit=float(image_center(cfg.optics,float(tx[i])-rx0,0)[0])
+                comparisons.append({'base_range_m':base_range,'reflection_range_m':distance,
+                    'flight_ns':tof,'arrival_ns':float(shot_times[i]+tof),'rx_axis_at_emit_mrad':rx0,
+                    'rx_axis_at_return_mrad':rx1,'rx_motion_mrad':rx1-rx0,
+                    'relative_rx_h_mrad':relative,'image_x_um':x,'motion_image_shift_um':x-x_at_emit})
+            rows.append({'cycle':pulse['cycle'],'offset_ns':float(shot_times[i]-column['start_ns']),
+                'mechanical_mrad':float(mech[i]),'tx_mrad':float(tx[i]),
+                'mechanical_rad_s':float(vel[i]/cfg.scan.optical_multiplier*1e6),
+                'optical_rad_s':float(vel[i]*1e6),
+                'dt_previous_ns':None if i==0 else float(shot_times[i]-shot_times[i-1]),
+                'dtx_previous_mrad':None if i==0 else float(tx[i]-tx[i-1]),'returns':comparisons})
+        motions.append({'column_index':column['index'],'pulse_rows':rows,
+            'slot_travel_mrad':float(boundary_angles[1]-boundary_angles[0]),
+            'first_to_last_mrad':float(tx[-1]-tx[0])})
+    return {'source':'Existing mirror_pose + reflection_range + image_center, central Tx ray (local H=V=0)',
+        'range_sampling_source':'algorithms.performance_sweep_range_values plus scene.range_m',
+        'range_values_m':ranges,'time_ns':times.tolist(),'mechanical_mrad':mechanical.tolist(),
+        'tx_mrad':optical.tolist(),'mechanical_rad_s':(velocity/cfg.scan.optical_multiplier*1e6).tolist(),
+        'optical_rad_s':(velocity*1e6).tolist(),'columns':motions,
+        'limitations':['Central ray only; not a new PSF capture or detection simulation.',
+            'Current core evaluates Rx pose at echo centers; finite-pulse scan smear is not expanded.',
+            'Static optical mapping means unchanged PSF kernel, not unchanged energy captured by each channel.',
+            'Return angle excludes electronic calibration delay. Use exact pose differences across trajectory turns.']}
 
 
 def build():
@@ -54,10 +111,11 @@ def build():
         'provenance':{'utc':datetime.now(timezone.utc).isoformat(),'model_version':__version__,
                       'configuration_sha256':hashlib.sha256(json.dumps(cfg.model_dump(),sort_keys=True,separators=(',',':')).encode()).hexdigest(),
                       'algorithm_sha256':hashlib.sha256(json.dumps(a.model_dump(),sort_keys=True,separators=(',',':')).encode()).hexdigest(),
-                      'source':'SimulationConfig, build_schedule, count_pulses, laser_quantities, shared analytical IRF',
-                      'note':'Only the regular schedule and waveform reference are numeric. New strategies, long tails, internal states and bandwidth queues are not simulated.'},
+                      'source':'SimulationConfig, build_schedule, count_pulses, laser_quantities, shared analytical IRF, mirror_pose, reflection_range, image_center',
+                      'note':'Regular schedule, waveforms and motion/range geometry use existing Python functions. Edited pulse lists and DSP/MIPI intervals are UI drafts; new strategies, long tails, internal states and transport queues are not simulated.'},
         'configuration':cfg.model_dump(),'algorithm_configuration':a.model_dump(),
         'columns':columns,'frame_rows':rows,'frame_budget':budget,
+        'motion':motion_reference(cfg,a,columns,budget['frame_period_ns']),
         'assigned_counts':counts['assigned'][0].tolist(),'true_counts':counts['true_useful'][0].tolist(),
         'line_rows':lines,'h_routes':routes,'physical_shape':[lines*cfg.device.V_binning,routes*cfg.device.H_binning],
         'timing':{'trigger_period_ns':cfg.timing.period_ns,'gate_offset_ns':cfg.timing.gate_start_ns,
@@ -78,7 +136,7 @@ def build():
 
 def fingerprint():
     template=(OUT/'index.template.html').read_text(encoding='utf8')
-    for name in ('design.css','design.js','reference.json'):
+    for name in ('design.css','review-v2.js','design.js','reference.json'):
         digest=hashlib.sha256((OUT/name).read_bytes()).hexdigest()[:16]
         template=template.replace('{{'+name+'}}',name+'?v='+digest)
     (OUT/'index.html').write_text(template,encoding='utf8')

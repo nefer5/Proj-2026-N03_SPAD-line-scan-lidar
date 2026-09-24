@@ -1,0 +1,14 @@
+{
+  "config/parameter-help.yaml": "120867a52eca17a357739750ea9f6f286b64e38ceeb4b6c48480bb2f42ada69a",
+  "docs/c-exposure-workspace-design.md": "e8eb9d1ca5de5338e5363c79dc6b0325bbc3d38ce7cea7a93d840beace2f48c4",
+  "tools/build_c_design_preview.py": "f851c8596f76c39ece31a90f1a97d1e3face33f359c632e8e253a2e11847eace",
+  "web/prototypes/c-exposure/index.template.html": "94a4e33b588f5bb0b39e19de9f0bbf5ff64acc8ef0ffd53e8b7bcba76dd5c42b",
+  "web/prototypes/c-exposure/index.html": "675323bfc352845ee13baa3a0c552ce259fc42a05991c4dfd0d06d1b24a0599f",
+  "web/prototypes/c-exposure/design.css": "243f88a5384a78ab27dcdd3861e60bee765eddc148b4b918f5eea8ae8594327d",
+  "web/prototypes/c-exposure/design.js": "ae33995d0c7ef639f58c60d63363c26ccb07ad117de9d5c42732c3d9b9b28cb0",
+  "web/prototypes/c-exposure/review-v2.js": "aef6a3e1c24c590e917ca53d407e6d6ddd0432663f57d1faa66f9b5a533af376",
+  "web/prototypes/c-exposure/reference.json": "3f9f81e846082e7dc556f5b54bf86f2640fb5f8feb9355d6776d63c8916283f3",
+  "artifacts/c-design-review/v2/01-motion.png": "cb1dd0b95948cf0e9ba2a4e194518a5a8f3a9224bc24115461ad6d34a1e13f01",
+  "artifacts/c-design-review/v2/02-dsp-mipi.png": "d961e6283f2ce739a58c8864737c71ad93fc4ac2993fdda736eb9e966c7bce63",
+  "artifacts/c-design-review/v2/03-pulse-list.png": "fdcb270b4d3d6cac88cf52b1ec438d50da152142da8453ba6d3bd8fb419b7197"
+}

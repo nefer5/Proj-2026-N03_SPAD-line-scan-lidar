@@ -1,0 +1,18 @@
+const errors=[],posts=[];page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(r.method()==='POST')posts.push(r.url());});
+await page.setViewportSize({width:1536,height:1100});await page.goto('http://127.0.0.1:8016/static/prototypes/c-exposure/index.html',{waitUntil:'networkidle'});await page.waitForFunction(()=>document.body.dataset.ready==='true');
+await page.getByLabel('目标基准距离').selectOption('150');await expect(page.locator('#motionMetrics')).toContainText('0.05003 mrad');await expect(page.locator('#timingHint')).toContainText('150 m');
+await page.getByLabel('分析发射',{exact:true}).selectOption('28');await expect(page.locator('#motionMetrics')).toContainText('首发');assert.equal(await page.getByLabel('关注发射').inputValue(),'28');
+await page.getByLabel('目标基准距离').selectOption('100');await page.getByLabel('分析发射',{exact:true}).selectOption('31');
+await page.getByText('直接编辑 JSON list',{exact:true}).click();await page.getByLabel('逐发计划 JSON').fill(JSON.stringify([{time_offset_ns:5000,energy_nj:8},{time_offset_ns:12000,energy_nj:16},{time_offset_ns:34000,energy_nj:4}]));await page.getByRole('button',{name:'载入 JSON 草案',exact:true}).click();await expect(page.locator('#pulsePlanStatus')).toContainText('3 发 / slot');await expect(page.locator('#timeline')).toContainText('D1 · 12,000 ns · 16 nJ');
+await page.getByLabel('第2发时间 ns').fill('5000');await expect(page.locator('#pulsePlanStatus')).toContainText('严格递增');
+await page.getByLabel('起始点云列').selectOption('8');await expect(page.locator('#pulsePlanStatus')).toContainText('严格递增');
+await page.getByLabel('第2发时间 ns').fill('12000');await page.getByLabel('起始点云列').selectOption('7');
+await page.getByLabel('逐发计划 JSON').fill('[{"time_offset_ns":0,"energy_nj":2,"extra":1}]');await page.getByRole('button',{name:'载入 JSON 草案',exact:true}).click();await expect(page.locator('#pulsePlanStatus')).toContainText('只接受');
+await page.getByLabel('逐发计划 JSON').fill('[]');await page.getByRole('button',{name:'载入 JSON 草案',exact:true}).click();await expect(page.locator('#timeline')).toContainText('空列表');
+await page.getByRole('button',{name:'载入参考列表',exact:true}).click();await page.getByLabel('第1发能量 nJ').fill('0');await expect(page.locator('#timeline')).toContainText('暗触发');
+await page.getByRole('button',{name:'载入参考列表',exact:true}).click();
+await page.getByLabel('DSP 起点 / μs',{exact:true}).fill('40');await page.getByLabel('DSP 耗时 / μs',{exact:true}).fill('8');await page.getByLabel('MIPI 起点 / μs',{exact:true}).fill('45');await page.getByLabel('MIPI 搬运耗时 / μs',{exact:true}).fill('12');await page.getByRole('button',{name:'显示时间草案',exact:true}).click();await expect(page.locator('#transportStatus')).toContainText('不能早于');
+await page.getByLabel('MIPI 起点 / μs',{exact:true}).fill('48');await page.getByRole('button',{name:'显示时间草案',exact:true}).click();await expect(page.locator('#timeline')).toContainText('S6 · DSP');await expect(page.locator('#timeline')).toContainText('S7 · MIPI');
+await page.getByLabel('时序显示起点').fill('-5');await page.getByLabel('时序显示终点').fill('85');await page.getByRole('button',{name:'应用精确窗口',exact:true}).click();await expect(page.locator('#windowError')).toHaveText('');
+await page.locator('.transport-editor').evaluate(el=>el.open=false);await page.locator('.timing-panel').evaluate(el=>el.scrollIntoView({block:'start'}));
+assert.equal(errors.length,0);assert.equal(posts.length,0);return {errors,posts,checks:'range/pulse linkage, editable pulse list, repeated/unknown/empty/dark cases, invalid plan during column change, DSP dependency, previous-column pipeline, precise window passed',screenshot:await page.screenshot({fullPage:false})};
