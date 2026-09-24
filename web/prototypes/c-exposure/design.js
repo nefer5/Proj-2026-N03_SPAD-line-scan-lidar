@@ -37,7 +37,7 @@ function renderParameters(){
   ];
   $('parameters').innerHTML=definitions.map(([id,title,open,fields,note])=>`<details class="parameter-group" ${open?'open':''}><summary>${esc(title)}</summary><div class="parameter-body"><div class="form-grid">${fields.map(f=>field(...f)).join('')}</div><p class="field-note">${esc(note)}</p>${id==='spad'?`<div class="readonly-fact">当前参考：<b>${data.h_routes} × ${data.line_rows}</b> 读出通道<br>物理 SPAD 网格：${data.physical_shape[1]} × ${data.physical_shape[0]}。不会自动扩张光学覆盖。</div>`:''}</div></details>`).join('');
   definitions.forEach(d=>d[3].forEach(([path,,value])=>{document.querySelector(`[data-draft="${path}"]`).value=value;}));
-  $('parameters').oninput=e=>{if(e.target.dataset.draft)setDraft(e.target.dataset.draft,e.target.value);};
+  $('parameters').oninput=e=>{if(e.target.dataset.draft)setDraft(e.target.dataset.draft,e.target.value);};markUpstreamFields();
 }
 const terms={
   column:['列 slot Sₖ','<strong>列采集时隙 slot</strong>：对应一列点云。全部线阵行并行工作，列内可安排多次发射。列编号是采集计划的 ID，不由某次编码器读数直接决定。'],
@@ -197,6 +197,7 @@ async function init(){
   $('rowSelect').onchange=e=>{document.querySelector('.state-inspector .pending').textContent=`V${e.target.value} · 待核心事件轨迹接入`;};
   selectColumn(Math.min(7,data.columns.length-2));
   initReviewV2();
+  initHighLevel();
   ['frame','columns','trigger','echo'].forEach((mode,i)=>$(['viewFrame','viewColumns','viewTrigger','viewEcho'][i]).onclick=()=>setWindowPreset(mode));
   $('applyWindow').onclick=()=>{
     const start=$('windowStart').value,end=$('windowEnd').value,a=Number(start)*1000+selectedColumn().start_ns,b=Number(end)*1000+selectedColumn().start_ns;
@@ -214,7 +215,7 @@ async function init(){
   $('reset').onclick=()=>{draft={};renderParameters();renderFormat('points');renderStrategy('uniform');$('draftStatus').textContent='参考工况';$('draftBanner').classList.add('hidden');};
   $('workflow').onclick=()=>{$('dialogTitle').textContent='审核后的运行流程';$('dialogBody').innerHTML='<ol><li>选择研究问题，校验 Tx / Rx / 场景 / SPAD 公共参数。</li><li>生成列级曝光计划：分配列 slot、发射时刻、器件门和记录门。</li><li>执行连续时间仿真；保留跨脉冲、跨列、跨帧的器件状态。</li><li>按观测角标签重建，同仿真真值分开审计。</li><li>对照测距、损失原因与重复统计；检查列输出数据量和缓冲峰值。</li></ol><p>此按钮仅解释设计，当前没有提交计算任务。</p>';$('dialog').showModal();};
   $('closeDialog').onclick=()=>$('dialog').close();
-  $('exportDraft').onclick=()=>{const payload={kind:'c_workspace_design_draft',not_simulation_config:true,reference_provenance:data.provenance,reference_configuration:data.configuration,draft_inputs:draft,review:exportReviewDraft(),strategy,output_format:outputFormat,note:'待审核设计草案；未校验或执行新模型。'};const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='c-workspace-design-draft.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
+  $('exportDraft').onclick=()=>{const payload={kind:'c_workspace_design_draft',not_simulation_config:true,reference_provenance:data.provenance,reference_configuration:data.configuration,draft_inputs:draft,review:exportReviewDraft(),high_level:exportHighLevelDraft(),strategy,output_format:outputFormat,note:'待审核设计草案；未校验或执行新模型。'};const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='c-workspace-design-draft.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
   $('audit').innerHTML=`<p>参考生成时间：${esc(data.provenance.utc)}。来源：${esc(data.provenance.source)}。</p><p>参考配置已是 H×V=${data.h_routes}×${data.line_rows}，并非旧 3×2 探测结果重贴标签。此页未运行探测器随机仿真。默认太阳与环境光沿用公共工况；正式运行需单独核对资源限额。</p><p>待审核：列级 slot、两种研究入口、时序与门控层级、H 兼容路处理、输出格式与硬件约束。完整曲线、直方图通道筛选、彩色窗口和精确时间输入将沿用 B 的公共组件。</p><p>编辑左侧只改变设计草案，不更新图中参考数值，不回写配置，不提交任务。新尾迹 / 非均匀调度 / 内部事件 / 带宽队列未实现。</p><pre>${esc(JSON.stringify(data.configuration,null,2))}</pre>`;
   drawWaves();new ResizeObserver(drawWaves).observe($('txWave'));document.body.dataset.ready='true';
 }

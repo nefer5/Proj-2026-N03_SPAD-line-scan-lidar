@@ -686,6 +686,30 @@ experiments:
 
 # Design-review inputs have no SimulationConfig counterpart yet.
 design_review:
+  system_targets.frame_rate_hz:
+    label: 高层目标帧率
+    unit: Hz
+    description: 系统需求输入，必须为正有限数；决定帧周期。当前预览只可下发现有Python参考预算，修改后等待统一计算，不回写正式扫描配置。
+  system_targets.hfov_mrad:
+    label: 高层水平视场
+    unit: mrad
+    description: 有效水平角覆盖全宽，必须为正有限数。固定列数时决定每列角格宽与扫描速度；固定角步距时通过所需列数影响列时间。不是机械转角，也不是通道IFOV。
+  system_targets.scan_time_utilization:
+    label: 扫描时间利用率
+    unit: 比例（UI显示%）
+    description: 一帧中可分配给有效扫描列的时间占比，范围大于0且不超过1；固定回扫、稳定和保护开销在高层统一核算，不能重复扣除。不同于激光占空比或DSP/MIPI利用率。当前参考继承前扫占比，额外硬件开销未知。
+  system_targets.slot_count:
+    label: 每帧slot数量
+    unit: 列
+    description: 每帧点云列数，必须为正整数；一列一个slot，和线阵16行、H兼容路数、每列脉冲数分开。均匀分配时用于有效扫描时间等分。
+  system_targets.slot_max_ns:
+    label: 每列可用最大时间
+    unit: ns（UI显示μs）
+    description: 高层均匀等分预算的派生上限；由有效扫描时间除以列数得到，不可在下层独立修改。非均匀列计划应改为逐列预算与总和约束。
+  system_targets.slot_target_ns:
+    label: 高层下发列时间目标
+    unit: ns（UI显示μs）
+    description: 高层输出、下层只读的列启动节拍/计划窗口，不能超过等分上限；不同于接收门宽或结果完成延迟。本参考未另加预留，展示等分上限；下发只作用于审核页面，不运行正式仿真。上游修改后撤销旧目标有效性。
   tx.pulse_plan:
     label: 列内逐发计划
     unit: 列表

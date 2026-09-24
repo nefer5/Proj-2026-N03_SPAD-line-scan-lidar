@@ -1,0 +1,16 @@
+{
+  "config/formulas.yaml": "8d1feab84f910f9f8ea5faa6792fef69920106b1105f8154f64222284c7d4f4b",
+  "config/formula-notes.yaml": "6d9395901203b8129153e77e414108c3fc5d1fdeb0c7434087021177ad3cdf3f",
+  "config/parameter-help.yaml": "cda468bfb8e29b199f96c627c218b7bb260c2d25abee990375a57a5469e8d17e",
+  "docs/c-exposure-workspace-design.md": "15b85af420d534de2392fca2b89cbfe5691c39003c4433a21ebfff049cf46ca9",
+  "tools/build_c_design_preview.py": "7faaf8613db77b51fe6e4855b8eae4096960c6e91bd5bb3ea06bf5aae0d3dde9",
+  "web/prototypes/c-exposure/index.template.html": "b6fe6f9a073ae9ec440e32299e6939e186b30ea6c28a8d97184957b7b38e94d8",
+  "web/prototypes/c-exposure/index.html": "bdebde39a69b21d431ad4459555bbfa3d0b722002ab91ce8badf306f895f2cb1",
+  "web/prototypes/c-exposure/design.css": "5a81a18a34778377e4987f39f2bd9b45a56dbd23843eb8b649154ab05bc307f3",
+  "web/prototypes/c-exposure/design.js": "184acf6ed197854b1f8cf17c5ee17b5bffa8a4c15013ae5bf335d56825af682e",
+  "web/prototypes/c-exposure/high-level.js": "70d1cea32d7881da2ca4e1f0b13674455f85dc2a92bc2acd0c5bb3ecc8552d0d",
+  "web/prototypes/c-exposure/reference.json": "75ffd23edef50a96924860d27aa88b78f55d22a20fca0c998964c756163eda17",
+  "artifacts/c-design-review/v3/01-high-level.png": "c15aa698a48d7cff87ac511c0d1c68dc9762f5264c0ad0460dcb970926276a10",
+  "artifacts/c-design-review/v3/02-target-received.png": "4b50c2af76e4efa6a1b27a3959402a44362bf456872f5f57dc05bab2b3c6f037",
+  "artifacts/c-design-review/v3/03-budget-formulas.png": "52db4c2ac4c9961daa825f33b36279f98013b1ea14f7b1fdfce9761757928356"
+}

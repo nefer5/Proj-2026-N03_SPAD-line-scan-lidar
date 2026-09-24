@@ -1,0 +1,3 @@
+const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.setViewportSize({width:1536,height:1100});await page.goto('http://127.0.0.1:8016/static/prototypes/c-exposure/index.html?revision=03',{waitUntil:'networkidle'});await page.waitForFunction(()=>document.body.dataset.ready==='true');
+const state=await page.evaluate(()=>({target:document.querySelector('#hlSlotTarget').textContent,formulas:document.querySelectorAll('#highFormulas .katex').length,formulaErrors:[...document.querySelectorAll('#highFormulas .validation-error')].map(x=>x.textContent),width:document.documentElement.scrollWidth,client:document.documentElement.clientWidth}));
+return {errors,state,screenshot:await page.screenshot({fullPage:false})};

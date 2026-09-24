@@ -37,3 +37,6 @@ b_rx_mapping_inverted: '\begin{aligned}x_{\mathrm{c}}&=-f_H\tan(H)+\Delta x\\y_{
 b_rx_mapping_legacy: '\begin{aligned}x_{\mathrm{c}}&=f_H\tan(H)+\Delta x\\y_{\mathrm{c}}&=f_V\tan(V)+\Delta y\end{aligned}'
 b_channel_ratio_db: 'C_{j\mid r}(a)=10\log_{10}\!\left(\frac{\eta_j(a)}{\eta_r(a)}\right)\;\mathrm{dB}'
 b_response_matrix: '\mathbf{n}=\mathbf{P}\,\mathbf{D}\,\mathbf{q}'
+c_high_level_frame: 'T_{\mathrm{frame}}=\frac{1}{f_{\mathrm{frame}}},\qquad T_{\mathrm{scan}}=\eta_{\mathrm{scan}}T_{\mathrm{frame}}'
+c_high_level_slot: 'T_{\mathrm{slot,max}}=\frac{T_{\mathrm{scan}}}{N_{\mathrm{slot}}}=\frac{\eta_{\mathrm{scan}}}{f_{\mathrm{frame}}N_{\mathrm{slot}}},\qquad T_{\mathrm{slot,target}}\leq T_{\mathrm{slot,max}}'
+c_high_level_angle: '\Delta\theta_H=\frac{\mathrm{HFOV}}{N_{\mathrm{slot}}},\qquad \overline{\omega}_{\mathrm{opt,target}}=\frac{\mathrm{HFOV}}{N_{\mathrm{slot}}T_{\mathrm{slot,target}}}'

@@ -1,0 +1,1 @@
+await page.goto('http://127.0.0.1:8016/static/prototypes/c-exposure/index.html?revision=03',{waitUntil:'networkidle'});await page.waitForFunction(()=>document.body.dataset.ready==='true');return {ready:true,url:page.url(),target:await page.locator('#hlSlotTarget').textContent()};
