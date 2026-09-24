@@ -16,6 +16,7 @@ from spad_lidar.configuration import Algorithms,read_yaml
 from spad_lidar.scan.schedule import build_schedule
 from spad_lidar.scan.aggregation import count_pulses
 from spad_lidar.scan.trajectory import mirror_pose
+from spad_lidar.scan.planning import uniform_column_budget
 from spad_lidar.scene.scan_target import reflection_range
 from spad_lidar.rx.spatial import image_center
 from spad_lidar.reporting.a_view import laser_quantities
@@ -26,24 +27,21 @@ from spad_lidar import __version__
 OUT=ROOT/'web/prototypes/c-exposure'
 
 
-def high_level_reference(cfg, column_count, frame_period_ns, hfov_mrad):
+def high_level_reference(targets):
     """Uniform budget illustration only; never modifies the scan or detector plan."""
-    scan_ns=frame_period_ns*cfg.scan.active_fraction
-    slot_ns=scan_ns/column_count
+    derived=uniform_column_budget(targets)
     formula_ids=('c_high_level_frame','c_high_level_slot','c_high_level_angle')
     formulas=read_yaml('formulas.yaml');notes=read_yaml('formula-notes.yaml')
-    inputs={'frame_rate_hz':cfg.scan.frame_rate_hz,'hfov_mrad':hfov_mrad,
-            'scan_time_utilization':cfg.scan.active_fraction,'slot_count':column_count}
+    inputs={'frame_rate_hz':targets.frame_rate_hz,'hfov_mrad':derived['hfov_mrad'],
+            'scan_time_utilization':targets.scan_time_utilization,'slot_count':targets.slot_count}
     return {'inputs':inputs,'allocation':'uniform_equal_share',
-        'derived':{'frame_period_ns':frame_period_ns,'scan_allocatable_ns':scan_ns,
-            'non_scan_ns':frame_period_ns-scan_ns,'slot_max_ns':slot_ns,'slot_target_ns':slot_ns,
-            'angle_per_slot_mrad':hfov_mrad/column_count,'hfov_deg':float(np.degrees(hfov_mrad*1e-3)),
-            'required_average_optical_rad_s':hfov_mrad*1e6/(column_count*slot_ns)},
+        'derived':derived,'configuration':targets.model_dump(),
+        'defaults_source':'config/defaults.yaml:experiments.system_targets',
         'target_source':'high_level_system_budget','scope':'design_review_reference_only',
         'input_sha256':hashlib.sha256(json.dumps(inputs,sort_keys=True,separators=(',',':')).encode()).hexdigest(),
         'formulas':[{ 'id':fid,'latex':formulas[fid],'note':notes[fid]} for fid in formula_ids],
         'limitations':['Uniform equal slots; no extra margin is reserved in this illustration.',
-            'Current scan.active_fraction supplies the reference utilization. Additional hardware overhead is not known.',
+            'Utilization is an explicit system requirement, not the legacy detector reference active fraction.',
             'HFOV means angular-cell coverage; angular width per slot uses N, not N-1.',
             'Target is a requirement, not proof of DSP, MIPI, buffering or ranging feasibility.']}
 
@@ -138,7 +136,7 @@ def build():
         'configuration':cfg.model_dump(),'algorithm_configuration':a.model_dump(),
         'columns':columns,'frame_rows':rows,'frame_budget':budget,
         'motion':motion_reference(cfg,a,columns,budget['frame_period_ns']),
-        'high_level':high_level_reference(cfg,slots,budget['frame_period_ns'],float(edges[-1]-edges[0])),
+        'high_level':high_level_reference(SimulationConfig.system_targets({})),
         'assigned_counts':counts['assigned'][0].tolist(),'true_counts':counts['true_useful'][0].tolist(),
         'line_rows':lines,'h_routes':routes,'physical_shape':[lines*cfg.device.V_binning,routes*cfg.device.H_binning],
         'timing':{'trigger_period_ns':cfg.timing.period_ns,'gate_offset_ns':cfg.timing.gate_start_ns,

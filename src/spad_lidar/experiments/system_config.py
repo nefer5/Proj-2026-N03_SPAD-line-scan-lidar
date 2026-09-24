@@ -71,13 +71,17 @@ class BSystemConfig(StrictConfig):
 
     @model_validator(mode='after')
     def valid(self):
+        self.validate_spatial_domains()
+        if self.tx.pulse_fwhm_ps*1e-3 >= self.acquisition.period_ns:
+            raise ValueError('Pulse width must be shorter than period')
+        return self
+
+    def validate_spatial_domains(self):
         self.optics  # Validate coupled optical domains and model/data requirements.
         if self.readout.readout_mode == 'analytic_reference':
             raise ValueError('B acquisition requires a digital readout mode')
         if self.readout.readout_mode.startswith('coincidence') and self.readout.coincidence_threshold > self.device.spads_per_channel:
             raise ValueError('Coincidence threshold exceeds H_binning × V_binning')
-        if self.tx.pulse_fwhm_ps*1e-3 >= self.acquisition.period_ns:
-            raise ValueError('Pulse width must be shorter than period')
         return self
 
 

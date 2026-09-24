@@ -24,3 +24,16 @@ artifacts/b-platform/final/*-result.json
 artifacts/ui-prototypes/*/statistical-arrays.json
 artifacts/ui-prototypes/*/first-acquisition.json
 artifacts/launcher-check/
+
+artifacts/c-implementation/*-result.json
+artifacts/c-implementation/*.log
+# One-time implementation transforms are local working notes, not replay tools.
+artifacts/c-implementation/column-flow-definition.py
+artifacts/c-implementation/extract-series.py
+artifacts/c-implementation/finalize-metadata.py
+artifacts/c-implementation/modular-gates.py
+artifacts/c-implementation/parameter-help.py
+artifacts/c-implementation/point-projections.py
+artifacts/c-implementation/scope-parameter-help.py
+artifacts/c-implementation/histogram-focus.py
+artifacts/c-implementation/map-display.py

@@ -1,0 +1,1 @@
+return await page.evaluate(()=>({url:location.href,state:document.querySelector('#draftState')?.textContent,scope:document.querySelector('[data-path="acquisition.scope_mode"]')?.value}));

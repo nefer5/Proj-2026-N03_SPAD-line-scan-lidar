@@ -1,0 +1,19 @@
+{
+  "config/defaults.yaml": "0dcaad49904c7f994041685538888ead131e713a44f80aafef1ff63ac94057c6",
+  "config/algorithms.yaml": "cd8a0db4f1b69e04425f6abaff62764aa4828d13ed1159b3fa17c76803e3a4c0",
+  "config/parameter-help.yaml": "a0beada663da1647794e04f01856c3cbe785fa462dcfe3982ff96ed999d409b3",
+  "config/formulas.yaml": "0498272af53a6b2944377b42bb1e74ca4a192c81f3db78cd24f5392bb8ed9432",
+  "config/formula-notes.yaml": "186335171dca20972b11b38facdcd63adf7a0565ff40b86dee3a82c8c464751d",
+  "config/photon-flow.yaml": "7f385b0e237ee593ddb002b2ea1adbe204dd362ff229a74215598d046aec8268",
+  "docs/column-scanning.md": "92d5cc08b1076fda67f301f80a4b0ad77b55a12ad4b366a5ea4d14c9cd2c0258",
+  "web/columns.html": "3918141bd61a668fd60e8df8a22893f6ac0ec4d237395043de46e291400e6f99",
+  "web/columns.js": "e47dd000b41f0fa89a6c156cc4a383438114afb5951b039e7ed45e88d58a927a",
+  "web/columns.css": "6b4a444cb0b2716e1f6ad2702f0c02e866ac0e82caee8db42b5aa3fd0985577f",
+  "src/spad_lidar/experiments/columns.py": "266953e2c8c056cd9474d79ba86691ca347e7d6575cda168352e64a5d18e53f9",
+  "src/spad_lidar/scan/column_schedule.py": "07610edae0fa38be33f82987c90d9e53ab810292bb229902f3e21a53c1b29f71",
+  "src/spad_lidar/scan/column_optics.py": "09ed6fa5f6a751d80e6c9a133634d804bf64a202c8bf3e15ec13fb1c2f0d1523",
+  "src/spad_lidar/scan/transport.py": "8362062756e7aa583f2a7d6e933653c06b2e8cd799c6784fc0cf87b3fbbb0d83",
+  "artifacts/c-implementation/01-system-targets.png": "6433760d072264fa42a0b079e32ed70d6690884beb2af27d2247d1878dd3b534",
+  "artifacts/c-implementation/03-full-frame-result.png": "2561b2ecee6adf2cd894130ceb8142ff28693c1ebfa6b6abf511eaf7fc04af8a",
+  "artifacts/c-implementation/05-final-scoped-layout.png": "094e8a5c2c40f2c0d4bc913d10c8bd59af365a2aad6eb995a07939bf80cbcb5b"
+}

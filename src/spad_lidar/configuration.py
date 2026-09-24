@@ -74,6 +74,17 @@ def default_values():
 
 class Algorithms(BaseModel):
     model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    max_column_projection_work: int = Field(gt=0)
+    max_column_pulses: int = Field(gt=0)
+    max_column_count: int = Field(gt=0)
+    max_column_histogram_work: int = Field(gt=0)
+    max_column_selected_histogram_cells: int = Field(gt=0)
+    max_column_sampling_work: int = Field(gt=0)
+    column_projection_cache_entries: int = Field(ge=0)
+    max_column_analysis_events: int = Field(gt=0)
+    max_column_analysis_candidates: int = Field(gt=0)
+    max_column_reference_work: int = Field(gt=0)
+    column_result_cache_entries: int = Field(ge=0)
     parameter_preview_debounce_ms: int = Field(ge=0)
     max_visible_channels: int = Field(ge=1)
     max_lab_analysis_events: int = Field(gt=0)
@@ -172,7 +183,10 @@ class Algorithms(BaseModel):
         """
         additions=('parameter_preview_debounce_ms','max_visible_channels','max_lab_analysis_events',
                    'max_lab_analysis_histogram_cells','max_lab_reference_cells','max_channel_ratio_cells',
-                   'lab_analysis_seed_streams')
+                   'lab_analysis_seed_streams','max_column_projection_work','max_column_pulses',
+                   'max_column_count','max_column_histogram_work','max_column_selected_histogram_cells',
+                   'max_column_sampling_work','column_projection_cache_entries','max_column_analysis_events',
+                   'max_column_reference_work','max_column_analysis_candidates','column_result_cache_entries')
         current=read_yaml('algorithms.yaml')
         merged=dict(values)
         for key in additions:

@@ -31,3 +31,38 @@ def timing_sigma_ns(cfg):
     return sqrt(laser_sigma**2 + (cfg.spad_jitter_fwhm_ps / FWHM_TO_SIGMA)**2
                 + (cfg.other_jitter_fwhm_ps / FWHM_TO_SIGMA)**2) * 1e-3
 
+
+def temporal_cdf(delta_ns,shape,fwhm_ps,tail=None):
+    """Normalized incident-pulse CDF, including an optional delayed fraction."""
+    x=np.asarray(delta_ns,dtype=float);width=fwhm_ps*1e-3
+    if shape=='gaussian':base=ndtr(x/(width/FWHM_TO_SIGMA))
+    elif shape=='rectangular':base=np.clip(x/width+.5,0,1)
+    else:raise ValueError('Unsupported temporal distribution')
+    if tail is None:return base
+    fraction,tau=tail
+    if shape=='gaussian':
+        from scipy.stats import exponnorm
+        sigma=width/FWHM_TO_SIGMA
+        delayed=exponnorm.cdf(x,tau/sigma,scale=sigma)
+    else:
+        u=np.maximum(x+width/2,0)
+        middle=(u+tau*np.expm1(-u/tau))/width
+        upper=1+tau/width*np.exp(-np.maximum(x-width/2,0)/tau)*np.expm1(-width/tau)
+        delayed=np.clip(np.where(x<width/2,middle,upper),0,1)
+    return (1-fraction)*base+fraction*delayed
+
+
+def temporal_pdf(delta_ns,shape,fwhm_ps,tail=None):
+    x=np.asarray(delta_ns,dtype=float);width=fwhm_ps*1e-3
+    if shape=='gaussian':
+        sigma=width/FWHM_TO_SIGMA;base=np.exp(-.5*(x/sigma)**2)/(np.sqrt(2*np.pi)*sigma)
+    elif shape=='rectangular':base=np.where(np.abs(x)<=width/2,1/width,0.)
+    else:raise ValueError('Unsupported temporal distribution')
+    if tail is None:return base
+    fraction,tau=tail
+    if shape=='gaussian':
+        from scipy.stats import exponnorm
+        delayed=exponnorm.pdf(x,tau/sigma,scale=sigma)
+    else:
+        delayed=np.exp(-np.maximum(x-width/2,0)/tau)*(-np.expm1(-np.clip(x+width/2,0,width)/tau))/width
+    return (1-fraction)*base+fraction*delayed

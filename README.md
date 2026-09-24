@@ -1,15 +1,18 @@
 # SPAD + VCSEL + 转镜一维线扫 LiDAR 建模器
 
-**模块化研究版 0.4.0.dev0：独立SPAD、B空间光学、C逐脉冲扫描均已实现并自检，等待整体验收。**
+**列级 C 研究版 0.6.0.dev0：高层系统目标、逐发曝光、共用SPAD采集与DSP/MIPI资源规划。**
 
 - `/spad`：独立 SPAD 研究台，直接设定探测面照明，无需目标或系统光学参数。
 - `/system`：B 全光斑研究台，Tx角分布、Rx效率/PSF、二维像素与各通道采集共用同一SPAD核心。
-- `/system/scan`：C 扫描采集；逐发/回波姿态、回扫、实际角bin发数、同步误差、径向运动、距离线图和XYZ点云。B参数可一键转入C。
+- `/system/scan`：正式 C 列级工作台；默认10 Hz、HFOV 120 deg、66.7%扫描时间利用率、1000列，目标66.7 μs/列。逐发时间/能量列表、拖尾、三维扫描/返回姿态、共享SPAD、DSP/MIPI双缓冲均由Python计算。B光学/器件参数可一键转入，C系统目标保留。
+- `/system/scan/legacy`：保留旧周期C视图；旧任务链接自动使用历史视图，不改写旧记录。
 - `/`、`/debug`：保留 A 单角通道评估与调试入口。
 - 后台任务支持进度、取消、刷新后找回结果及完整导出；记录可重放分箱。
 - 默认 B 光学与C扫描/场景参数明确属于**构造研究工况**；可替换为实际数据。C距离和点云仍是未经检测门限判定的原始估计。
 
-设计见 [架构说明](docs/architecture.md)，B见 [空间光学](docs/spatial-optics.md)，C见 [扫描机制](docs/scanning.md)。包含C的完整源码、数组、CSV、测试和页面快照位于 `artifacts/scan-upgrade/`；前期快照保留在 `artifacts/architecture-upgrade/`。普通刷新即可获取内容指纹更新后的页面资源。
+设计见 [架构说明](docs/architecture.md)，B见 [空间光学](docs/spatial-optics.md)，正式C见 [列级扫描使用与模型](docs/column-scanning.md)，旧周期C见 [扫描机制](docs/scanning.md)。新设计快照在 `artifacts/c-design-review/`，实现验收记录在 `artifacts/c-implementation/`；历史记录仍保留在 `artifacts/scan-upgrade/` 与 `artifacts/architecture-upgrade/`。普通刷新即可获取内容指纹更新后的页面资源。
+
+默认强环境光的整帧事件数可能超过明确的资源限额。可以显式选择“两列局部实验”保留当前背景，或载入关闭太阳/其他环境光但保留DCR的具名快速示例；两者都不会改写YAML默认值。未仿真区域显示未知，不当成零回波或完整帧结果。
 
 下面保留 A 阶段的历史版本记录；当前模型状态以 [路标](docs/roadmap.md) 为准。
 

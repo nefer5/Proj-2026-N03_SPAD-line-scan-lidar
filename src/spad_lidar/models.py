@@ -32,8 +32,17 @@ class SimulationConfig(BaseModel):
     @classmethod
     def for_experiment(cls, kind, overrides, algorithms=None):
         """Unified config entry without constructing irrelevant A optical fields."""
+        if kind=='columns':
+            from .scan.column_config import resolve_columns
+            return resolve_columns(overrides,Algorithms.load() if algorithms is None else algorithms)
         from .experiments.configuration import resolve_experiment
         return resolve_experiment(kind, overrides, algorithms)
+
+    @classmethod
+    def system_targets(cls, overrides):
+        """Resolve system requirements through the common configuration entry."""
+        from .scan.planning import resolve_system_targets
+        return resolve_system_targets(overrides)
     pulse_shape: Literal["gaussian", "rectangular"]
     laser_prf_hz: float = Field(gt=0)
     rx_aperture_shape: Literal["circle", "ellipse", "rectangle"]

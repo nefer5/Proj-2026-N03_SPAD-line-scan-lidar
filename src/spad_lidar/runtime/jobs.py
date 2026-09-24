@@ -83,6 +83,9 @@ def worker(root, job_id, kind, config, algorithms, snapshot):
                 elif kind == 'scan':
                     from ..experiments.scanning import run_scan
                     result = run_scan(cfg, a, progress, cancelled)
+                elif kind == 'columns':
+                    from ..experiments.columns import run_columns
+                    result = run_columns(cfg,a,progress,cancelled)
                 else:
                     from ..experiments.spatial_analysis import run_system_analysis
                     result = run_system_analysis(cfg, a, progress, cancelled)
@@ -118,7 +121,7 @@ class JobManager:
                     db.execute("UPDATE jobs SET status='interrupted',message='原执行服务已停止；配置快照已保留，可重新提交' WHERE id=?", (row['id'],))
 
     def submit(self, kind, overrides):
-        if kind not in ('a', 'spad', 'system', 'scan'):
+        if kind not in ('a', 'spad', 'system', 'scan', 'columns'):
             raise ValueError('Unknown experiment kind')
         snapshot = yaml_snapshot()
         with frozen_yaml(snapshot):

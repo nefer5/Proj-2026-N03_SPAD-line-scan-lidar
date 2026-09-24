@@ -7,16 +7,27 @@ from ..numerics.temporal import sample_pulse_offsets
 
 
 def draw_cycle_events(rng, signal_counts, noise_counts, centers_ns, pulse_shape, pulse_fwhm_ps,
-                      device_jitter_ps, noise_start_ns, noise_duration_ns):
+                      device_jitter_ps, noise_start_ns, noise_duration_ns,*,tail=None,noise_intervals=None):
     """Common temporal/pixel sampler used by static and time-varying illumination."""
     times_out=[];pixels_out=[]
-    for pixel in range(signal_counts.shape[1]):
+    # Empty draws consume no RNG state; skip zero-count pixels without changing
+    # the numerical protocol or event ordering of any active pixel.
+    for pixel in np.flatnonzero(signal_counts.sum(axis=0)+noise_counts):
         pieces=[]
-        for component in range(signal_counts.shape[0]):
+        for component in np.flatnonzero(signal_counts[:,pixel]):
             n=int(signal_counts[component,pixel])
             offsets=sample_pulse_offsets(rng,pulse_shape,pulse_fwhm_ps,n)
+            if tail is not None:
+                delayed=rng.random(n)<tail[0]
+                offsets[delayed]+=rng.exponential(tail[1],int(delayed.sum()))
             pieces.append(apply_jitter(rng,centers_ns[component]+offsets,device_jitter_ps))
         noise=noise_start_ns+rng.uniform(0,noise_duration_ns,int(noise_counts[pixel]))
+        if noise_intervals is not None and len(noise):
+            lengths=np.array([hi-lo for lo,hi in noise_intervals]);cumulative=np.cumsum(lengths)
+            coordinates=noise-noise_start_ns
+            intervals=np.searchsorted(cumulative,coordinates,side='right')
+            previous=np.r_[0,cumulative[:-1]]
+            noise=np.array([lo for lo,hi in noise_intervals])[intervals]+coordinates-previous[intervals]
         times_out.extend(np.concatenate([*pieces,noise]))
         pixels_out.extend([pixel]*(int(signal_counts[:,pixel].sum())+int(noise_counts[pixel])))
     return times_out,pixels_out
@@ -60,7 +71,7 @@ def sample_candidates(illumination, device, pde_curve, program, rng, event_limit
 
 
 def sample_varying_candidates(signal_provider, background, device, pde_curve, program, rng,
-                              event_limit, sampling_work_limit, progress, cancelled):
+                              event_limit, sampling_work_limit, progress, cancelled,*,progress_stride=None):
     response=effective_pde(pde_curve(background.wavelength_nm),device.fill_factor)
     optical_noise=background.background_photons_per_second@response
     noise_rate=optical_noise+device.dcr_cps_per_spad+device.other_noise_cps_per_spad
@@ -75,7 +86,10 @@ def sample_varying_candidates(signal_provider, background, device, pde_curve, pr
         work+=signal.size+noise_rate.size
         if work>sampling_work_limit:
             raise ValueError('Time-varying photon sampling exceeds configured work limit')
-        duration=w.end_ns-w.start_ns if device.detector_operation=='free_running' else w.gate_close_ns-w.gate_open_ns
+        gate_provider=getattr(program,'detector_intervals',None)
+        gate_intervals=gate_provider(w) if gate_provider is not None and device.detector_operation=='gated' else None
+        duration=(sum(hi-lo for lo,hi in gate_intervals) if gate_intervals is not None else
+                  w.end_ns-w.start_ns if device.detector_operation=='free_running' else w.gate_close_ns-w.gate_open_ns)
         start=w.start_ns if device.detector_operation=='free_running' else w.gate_open_ns
         expected+=float(signal.sum()+noise_rate.sum()*duration*1e-9)
         if expected>event_limit:
@@ -85,11 +99,12 @@ def sample_varying_candidates(signal_provider, background, device, pde_curve, pr
         if count>event_limit:
             raise ValueError('Actual candidate count exceeds event resource limit')
         t,p=draw_cycle_events(rng,ns,nb,pulse.arrival_center_ns,pulse.pulse_shape,pulse.pulse_fwhm_ps,
-                              device.spad_jitter_fwhm_ps,start,duration)
+                              device.spad_jitter_fwhm_ps,start,duration,tail=pulse.tail,noise_intervals=gate_intervals)
         times.extend(t);pixels.extend(p)
         if w.measured:
             expected_signal.append({'cycle':w.cycle,'per_pixel':signal.sum(axis=0).tolist()})
-        progress(index+1,len(program.windows),'逐发光学与光子采样')
+        if progress_stride is None or (index+1)%progress_stride==0 or index+1==len(program.windows):
+            progress(index+1,len(program.windows),'逐发光学与光子采样')
     times=np.asarray(times);pixels=np.asarray(pixels,dtype=int)
     inside=(times>=program.windows[0].start_ns)&(times<program.windows[-1].end_ns)
     audit={'expected_signal_candidates_by_cycle':expected_signal,

@@ -22,6 +22,8 @@ from . import __version__
 app = FastAPI(title="SPAD Line-Scanning LiDAR Model", version=__version__)
 from .webapi.labs import router as labs_router
 app.include_router(labs_router)
+from .webapi.columns import router as columns_router
+app.include_router(columns_router)
 app.mount("/static", StaticFiles(directory=WEB), name="static")
 
 

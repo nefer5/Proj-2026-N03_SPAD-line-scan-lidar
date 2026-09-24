@@ -66,6 +66,17 @@ max_scan_pulses: 10000
 max_scan_angle_bins: 256
 max_scan_histogram_cells: 4000000
 max_scan_projection_work: 20000000
+max_column_projection_work: 1000000000
+max_column_pulses: 20000
+max_column_count: 10000
+max_column_histogram_work: 100000000
+max_column_selected_histogram_cells: 2000000
+max_column_sampling_work: 100000000
+column_projection_cache_entries: 64
+max_column_analysis_events: 2000000
+max_column_analysis_candidates: 4000000
+max_column_reference_work: 64000000
+column_result_cache_entries: 2
 max_scan_sampling_work: 2000000
 scan_preview_table_rows: 50
 scan_angle_boundary_tolerance_mrad: 1.0e-12

@@ -40,18 +40,8 @@ def acquire_candidates(cfg,a,candidates,source_audit,pixel_groups,program,electr
     timing=cfg.timing
     if cancelled():
         raise InterruptedError('Cancelled before event acquisition')
-    session = AcquisitionSession(cfg.device, cfg.readout, pixel_groups, program, a.readout_trace_events)
-    windows = program.windows
-    offset = 0
-    for end_index in range(a.acquisition_block_cycles, len(windows)+a.acquisition_block_cycles, a.acquisition_block_cycles):
-        end_index = min(end_index, len(windows))
-        until = windows[end_index-1].end_ns
-        stop = int(np.searchsorted(candidates.time_ns, until, side='left'))
-        session.advance(CandidateEvents(candidates.time_ns[offset:stop], candidates.pixel_id[offset:stop]), until)
-        offset = stop
-        progress(end_index, len(windows), '采集事件')
-        if cancelled():
-            raise InterruptedError('Cancelled; incomplete acquisition is not reported as a complete result')
+    from ..spad.acquisition import evolve_program
+    session=evolve_program(cfg.device,cfg.readout,pixel_groups,program,candidates,a,progress,cancelled)
     by_cycle={w.cycle:w for w in program.windows}
     records = session.readout.records
     jittered = apply_jitter(np.random.default_rng(electronic_seed), np.array([r['phase_ns'] for r in records]), cfg.readout.other_jitter_fwhm_ps)

@@ -37,15 +37,24 @@ def system_page():
 def workspace_page(kind):
     html=(WEB/'system.html').read_text(encoding='utf-8')
     html=html.replace('data-lab="system"',f'data-lab="{kind}"')
-    for name in ('system.css','system.js','shared/scan-workspace.js','shared/optical-panels.js','shared/histogram-window.js','curve-editor.js',
+    for name in ('system.css','system.js','shared/scan-workspace.js','shared/optical-panels.js','shared/plot-series.js','shared/histogram-window.js','curve-editor.js',
                  'vendor/katex/katex.min.js','vendor/katex/katex.min.css'):
         html=html.replace(f'/static/{name}"',f'/static/{name}?v={sha256((WEB/name).read_bytes()).hexdigest()}"')
     return HTMLResponse(html)
 
 
 @router.get('/system/scan')
-def scan_page():
-    return workspace_page('scan')
+def scan_page(job:str|None=None):
+    if job:
+        try:
+            if manager().get(job)['kind']=='scan':return workspace_page('scan')
+        except KeyError:pass
+    from .columns import column_page
+    return column_page()
+
+
+@router.get('/system/scan/legacy')
+def legacy_scan_page():return workspace_page('scan')
 
 
 @router.post('/api/experiments/{kind}/optical-data')
@@ -102,7 +111,7 @@ def validate_experiment(kind: str, config: dict):
 
 class JobRequest(BaseModel):
     model_config = ConfigDict(extra='forbid')
-    kind: Literal['a', 'spad', 'system', 'scan']
+    kind: Literal['a', 'spad', 'system', 'scan', 'columns']
     config: dict
 
 
@@ -174,7 +183,7 @@ def replay(job_id: str, request: ReplayRequest):
         result = manager().result(job_id)
         if 'statistics' in result and 'references' in result:
             from ..experiments.spatial_analysis import replay_analysis
-            a=Algorithms.model_validate(result['configuration']['algorithms'])
+            a=Algorithms.from_snapshot(result['configuration']['algorithms'])
             cfg=SimulationConfig.for_experiment('system',result['configuration']['experiment'],a)
             return replay_analysis(result,cfg,a,request.bin_ps)
         records = result['records']

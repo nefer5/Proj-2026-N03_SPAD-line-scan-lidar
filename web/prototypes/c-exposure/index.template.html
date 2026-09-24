@@ -7,7 +7,7 @@
  <div class="side-head"><div><h2>研究配置草案</h2><span id="draftStatus">参考工况</span></div><button id="workflow" class="primary">查看拟定运行流程 →</button><div class="fold-tools"><button id="collapse">全部折叠</button><button id="expand">全部展开</button><button id="reset">恢复参考</button></div></div>
  <div id="parameters"></div><div class="side-foot"><button id="exportDraft">导出设计草案</button><span>配置可评审 · 计算待接入</span></div>
 </aside>
-<div class="content">
+<div class="content"><div class="draft-banner">此页保留设计预览及旧数值示例。<a href="/system/scan">打开已接入Python计算的正式C平台 →</a></div>
  <section class="panel high-level-panel" id="highLevelPanel"><details open><summary><span><small class="kicker">00 / HIGH LEVEL SYSTEM BUDGET</small><strong>先定系统目标，再向下分配列时间</strong></span><span class="mini-tag">T_slot 由高层下发</span></summary>
   <p class="high-intro">帧率决定帧周期，扫描时间利用率决定可分配时段，列数决定每个 slot 的预算。HFOV 同时约束角采样与扫描速度。</p>
   <div class="high-inputs"><label><span>目标帧率</span><div><input id="hlFrameRate" type="number" step="any" aria-label="高层目标帧率"><b>Hz</b></div></label><label><span>水平视场 HFOV</span><div><input id="hlHfov" type="number" step="any" aria-label="高层 HFOV"><b>deg</b></div><small id="hlDegree"></small></label><label><span>扫描时间利用率</span><div><input id="hlUtilization" type="number" step="any" aria-label="高层扫描时间利用率"><b>%</b></div><small>可分配给有效扫描列的帧时间占比</small></label><label><span>每帧 slot 数量</span><div><input id="hlSlotCount" type="number" step="1" aria-label="高层每帧 slot 数量"><b>列</b></div><small>一 slot 一列 · 与 16 条线数分开</small></label></div>

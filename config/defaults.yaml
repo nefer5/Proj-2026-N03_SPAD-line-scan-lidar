@@ -214,6 +214,53 @@ simulation:
 
 # Domain experiment additions; shared device/readout/curve defaults reuse simulation above.
 experiments:
+  # High-level system requirements; independent of the existing small-angle
+  # detector reference. These targets do not silently replace a scan program.
+  system_targets:
+    frame_rate_hz: 10
+    hfov_deg: 120
+    scan_time_utilization: 0.667
+    slot_count: 1000
+  columns:
+    acquisition:
+      scope_mode: frame
+      scope_first_column: 0
+      scope_column_count: 2
+      analysis_bin_ps: null
+      trial_count: 1
+      noise_trial_count: 0
+    diagnostics:
+      pixel_id: null
+      start_ns: null
+      end_ns: null
+    exposure:
+      gate_mode: per_pulse
+      pulses:
+      - time_offset_ns: 0
+        energy_nj: null
+      - time_offset_ns: 10000
+        energy_nj: null
+      - time_offset_ns: 20000
+        energy_nj: null
+      - time_offset_ns: 30000
+        energy_nj: null
+      tail_fraction: 0
+      tail_tau_ns: null
+    transport:
+      enabled: false
+      buffer_count: 2
+      dsp_time_us: null
+      dsp_mode: serial
+      dsp_initiation_us: null
+      mipi_mode: duration
+      mipi_time_us: null
+      point_bytes: null
+      payload_format: points
+      histogram_count_bits: null
+      event_record_bytes: null
+      column_header_bytes: null
+      mipi_net_mbps: null
+      overflow_policy: drop_column
   spad:
     illumination:
       signal_photons_per_pulse: 20

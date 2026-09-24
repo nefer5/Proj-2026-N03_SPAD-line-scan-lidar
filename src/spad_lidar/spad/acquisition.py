@@ -8,6 +8,21 @@ from .device import DeviceState
 from .readout import ReadoutEngine
 
 
+def evolve_program(device,readout,pixel_groups,program,candidates,algorithms,progress,cancelled,*,readout_factory=None,device_engine=None):
+    """One shared continuous state evolution for B, legacy C and column C."""
+    from ..contracts import CandidateEvents
+    session=AcquisitionSession(device,readout,pixel_groups,program,algorithms.readout_trace_events,readout_factory=readout_factory,device_engine=device_engine)
+    windows=program.windows;offset=0
+    for end_index in range(algorithms.acquisition_block_cycles,len(windows)+algorithms.acquisition_block_cycles,algorithms.acquisition_block_cycles):
+        if cancelled():raise InterruptedError('Cancelled during continuous detector acquisition')
+        end_index=min(end_index,len(windows));until=windows[end_index-1].end_ns
+        stop=int(np.searchsorted(candidates.time_ns,until,side='left'))
+        session.advance(CandidateEvents(candidates.time_ns[offset:stop],candidates.pixel_id[offset:stop]),until)
+        offset=stop;progress(end_index,len(windows),'采集事件')
+        if cancelled():raise InterruptedError('Cancelled; incomplete acquisition is withheld')
+    return session
+
+
 class AcquisitionSession:
     def __init__(self, device, readout, pixel_groups, program, trace_limit, *, device_engine=None, readout_factory=None):
         groups = np.asarray(pixel_groups)

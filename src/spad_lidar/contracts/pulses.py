@@ -14,6 +14,7 @@ class IncidentPulseGroup:
     arrival_center_ns: np.ndarray
     pulse_shape: str
     pulse_fwhm_ps: float
+    tail: tuple[float,float] | None = None
 
     def __post_init__(self):
         photons=np.asarray(self.photons_per_pixel,dtype=float)
@@ -25,6 +26,8 @@ class IncidentPulseGroup:
             raise ValueError('Invalid incident photon components')
         if self.pulse_shape not in ('gaussian','rectangular') or not np.isfinite(self.pulse_fwhm_ps) or self.pulse_fwhm_ps<=0:
             raise ValueError('Invalid incident temporal distribution')
+        if self.tail is not None and (len(self.tail)!=2 or not np.all(np.isfinite(self.tail)) or not 0<=self.tail[0]<=1 or self.tail[1]<=0):
+            raise ValueError('Temporal tail requires finite fraction in [0,1] and positive time constant')
         object.__setattr__(self,'photons_per_pixel',photons)
         object.__setattr__(self,'wavelength_nm',wavelengths)
         object.__setattr__(self,'arrival_center_ns',centers)

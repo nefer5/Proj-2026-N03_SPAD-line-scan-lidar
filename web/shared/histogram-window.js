@@ -8,7 +8,7 @@ function drawHistogram(canvas,data,ch,range,ymax,series,overview=false,windowRan
  const [c,w,h]=canvasSetup(canvas),left=overview?43:43,right=15,top=overview?5:22,bottom=overview?16:32,pw=w-left-right,ph=h-top-bottom;
  const sx=t=>left+(t-range[0])/(range[1]-range[0])*pw,sy=y=>top+ph-y/ymax*ph;
  c.clearRect(0,0,w,h);c.font='9px Consolas, monospace';c.lineWidth=1;
- if(!overview){for(let i=0;i<=4;i++){const y=top+ph*i/4;c.strokeStyle='#1b3041';c.beginPath();c.moveTo(left,y);c.lineTo(w-right,y);c.stroke();c.fillStyle='#68899f';c.textAlign='right';c.fillText(fmt(ymax*(1-i/4),1),left-9,y+3);}c.fillStyle='#85a3b6';c.textAlign='left';c.fillText('计数 / bin',left,11);}
+ if(!overview){for(let i=0;i<=4;i++){const y=top+ph*i/4;c.strokeStyle='#1b3041';c.beginPath();c.moveTo(left,y);c.lineTo(w-right,y);c.stroke();c.fillStyle='#68899f';c.textAlign='right';c.fillText(fmt(ymax*(1-i/4),1),left-9,y+3);}c.fillStyle='#85a3b6';c.textAlign='left';c.fillText('计数 / 时间分箱',left,11);}
  for(let i=0;i<=4;i++){const t=range[0]+(range[1]-range[0])*i/4;c.fillStyle='#6f90a5';c.textAlign='center';c.fillText(fmt(t,1),sx(t),h-(overview?2:14));}if(!overview){c.textAlign='right';c.fillText('时间 · ns',w-right,h-1);}
  c.save();c.beginPath();c.rect(left,top,pw,ph);c.clip();
  const counts=data.histogram.counts[ch],edges=data.histogram.edges_ns,centers=data.histogram.time_ns;

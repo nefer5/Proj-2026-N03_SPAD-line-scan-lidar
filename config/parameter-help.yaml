@@ -685,56 +685,262 @@ experiments:
     description: 同参数、同算法配置、同运行依赖时可复现抽样；更改种子获得另一组随机样本。
 
 # Design-review inputs have no SimulationConfig counterpart yet.
-design_review:
-  system_targets.frame_rate_hz:
-    label: 高层目标帧率
-    unit: Hz
-    description: 系统需求输入，必须为正有限数；决定帧周期。当前预览只可下发现有Python参考预算，修改后等待统一计算，不回写正式扫描配置。
-  system_targets.hfov_mrad:
-    label: 高层水平视场
-    unit: deg（界面）；mrad（内部）
-    description: 有效水平角覆盖全宽，界面以deg输入和显示，进入内部草案时显式换算为mrad，必须为正有限数。固定列数时决定每列角格宽与扫描速度；固定角步距时通过所需列数影响列时间。不是机械转角，也不是通道IFOV。
-  system_targets.scan_time_utilization:
-    label: 扫描时间利用率
-    unit: 比例（UI显示%）
-    description: 一帧中可分配给有效扫描列的时间占比，范围大于0且不超过1；固定回扫、稳定和保护开销在高层统一核算，不能重复扣除。不同于激光占空比或DSP/MIPI利用率。当前参考继承前扫占比，额外硬件开销未知。
-  system_targets.slot_count:
-    label: 每帧slot数量
-    unit: 列
-    description: 每帧点云列数，必须为正整数；一列一个slot，和线阵16行、H兼容路数、每列脉冲数分开。均匀分配时用于有效扫描时间等分。
-  system_targets.slot_max_ns:
-    label: 每列可用最大时间
-    unit: ns（UI显示μs）
-    description: 高层均匀等分预算的派生上限；由有效扫描时间除以列数得到，不可在下层独立修改。非均匀列计划应改为逐列预算与总和约束。
-  system_targets.slot_target_ns:
-    label: 高层下发列时间目标
-    unit: ns（UI显示μs）
-    description: 高层输出、下层只读的列启动节拍/计划窗口，不能超过等分上限；不同于接收门宽或结果完成延迟。本参考未另加预留，展示等分上限；下发只作用于审核页面，不运行正式仿真。上游修改后撤销旧目标有效性。
-  tx.pulse_plan:
-    label: 列内逐发计划
-    unit: 列表
-    description: 每列重复的时间/能量模板。仅供C前端审核；可导出设计草案，未驱动正式探测器或光学计算，不能直接导入SimulationConfig。
-  tx.pulse_plan.time_offset_ns:
-    label: slot内发射时间
-    unit: ns
-    description: 波形中心相对被采集列开始的时间。按当前参考列长校验半开区间，必须有限且严格递增；不自动排序或裁剪。仅绘制草案事件。
-  tx.pulse_plan.energy_nj:
-    label: 逐发能量
-    unit: nJ
-    description: Tx光学前的全光斑单发能量，非负有限值；零表示暗触发。波形暂继承Tx形状/宽度。草案能量不用于现有回波和角度参考计算。
-  transport.dsp_start_us:
-    label: DSP起点
-    unit: μs
-    description: 相对被处理列开始。审核预览约定整列在slot末锁存后开始DSP；与下一列采集可重叠。空白表示待定义；仅画输入区间，未求解队列。
-  transport.dsp_duration_us:
-    label: DSP整列耗时
-    unit: μs
-    description: 一整列数据的处理持续时间，非负且有限，不是逐行串行耗时。未定义并发度或启动间隔，不能据此断定吞吐可行。仅设计草案生效。
-  transport.mipi_start_us:
-    label: MIPI起点
-    unit: μs
-    description: 相对被处理列开始；用户指定MIPI位于DSP后向主机输出结果，起点不得早于同列DSP结束。预览不会自动推迟或仲裁冲突。
-  transport.mipi_duration_us:
-    label: MIPI搬运耗时
-    unit: μs
-    description: 一列结果在MIPI输出阶段占用的持续时间，非负且有限，空白不当作零。正式计算须明确数据格式、协议开销、净带宽和缓存规则；当前只画用户输入区间。
+  design_review:
+    system_targets.frame_rate_hz:
+      label: 高层目标帧率
+      unit: Hz
+      description: 系统需求输入，必须为正有限数；决定帧周期。当前预览只可下发现有Python参考预算，修改后等待统一计算，不回写正式扫描配置。
+    system_targets.hfov_mrad:
+      label: 高层水平视场
+      unit: deg（界面）；mrad（内部）
+      description: 有效水平角覆盖全宽，界面以deg输入和显示，进入内部草案时显式换算为mrad，必须为正有限数。固定列数时决定每列角格宽与扫描速度；固定角步距时通过所需列数影响列时间。不是机械转角，也不是通道IFOV。
+    system_targets.scan_time_utilization:
+      label: 扫描时间利用率
+      unit: 比例（UI显示%）
+      description: 一帧中可分配给有效扫描列的时间占比，范围大于0且不超过1；固定回扫、稳定和保护开销在高层统一核算，不能重复扣除。不同于激光占空比或DSP/MIPI利用率。当前参考继承前扫占比，额外硬件开销未知。
+    system_targets.slot_count:
+      label: 每帧slot数量
+      unit: 列
+      description: 每帧点云列数，必须为正整数；一列一个slot，和线阵16行、H兼容路数、每列脉冲数分开。均匀分配时用于有效扫描时间等分。
+    system_targets.slot_max_ns:
+      label: 每列可用最大时间
+      unit: ns（UI显示μs）
+      description: 高层均匀等分预算的派生上限；由有效扫描时间除以列数得到，不可在下层独立修改。非均匀列计划应改为逐列预算与总和约束。
+    system_targets.slot_target_ns:
+      label: 高层下发列时间目标
+      unit: ns（UI显示μs）
+      description: 高层输出、下层只读的列启动节拍/计划窗口，不能超过等分上限；不同于接收门宽或结果完成延迟。本参考未另加预留，展示等分上限；下发只作用于审核页面，不运行正式仿真。上游修改后撤销旧目标有效性。
+    tx.pulse_plan:
+      label: 列内逐发计划
+      unit: 列表
+      description: 每列重复的时间/能量模板。仅供C前端审核；可导出设计草案，未驱动正式探测器或光学计算，不能直接导入SimulationConfig。
+    tx.pulse_plan.time_offset_ns:
+      label: slot内发射时间
+      unit: ns
+      description: 波形中心相对被采集列开始的时间。按当前参考列长校验半开区间，必须有限且严格递增；不自动排序或裁剪。仅绘制草案事件。
+    tx.pulse_plan.energy_nj:
+      label: 逐发能量
+      unit: nJ
+      description: Tx光学前的全光斑单发能量，非负有限值；零表示暗触发。波形暂继承Tx形状/宽度。草案能量不用于现有回波和角度参考计算。
+    transport.dsp_start_us:
+      label: DSP起点
+      unit: μs
+      description: 相对被处理列开始。审核预览约定整列在slot末锁存后开始DSP；与下一列采集可重叠。空白表示待定义；仅画输入区间，未求解队列。
+    transport.dsp_duration_us:
+      label: DSP整列耗时
+      unit: μs
+      description: 一整列数据的处理持续时间，非负且有限，不是逐行串行耗时。未定义并发度或启动间隔，不能据此断定吞吐可行。仅设计草案生效。
+    transport.mipi_start_us:
+      label: MIPI起点
+      unit: μs
+      description: 相对被处理列开始；用户指定MIPI位于DSP后向主机输出结果，起点不得早于同列DSP结束。预览不会自动推迟或仲裁冲突。
+    transport.mipi_duration_us:
+      label: MIPI搬运耗时
+      unit: μs
+      description: 一列结果在MIPI输出阶段占用的持续时间，非负且有限，空白不当作零。正式计算须明确数据格式、协议开销、净带宽和缓存规则；当前只画用户输入区间。
+
+  columns:
+    system_targets.frame_rate_hz:
+      label: 目标帧率
+      unit: Hz
+      description: 正式C高层输入，由公共Python预算生成帧周期；下层不得自行修改列目标。
+    system_targets.hfov_deg:
+      label: 水平视场HFOV
+      unit: deg
+      description: 正式高层配置的水平全角，0到180deg之间；计算时显式转为rad/mrad。与局部Tx/Rx角域、每通道IFOV分开。
+    system_targets.scan_time_utilization:
+      label: 扫描时间利用率
+      unit: 比例（UI为%）
+      description: 用户指定可分配给有效列扫描的帧时间比例；不同于激光/接收门占空比，不从旧扫描示例推断。
+    system_targets.slot_count:
+      label: 每帧列数
+      unit: slot/frame
+      description: 全系统计划的列数。一列一个slot，与并行线数、H兼容路和每列发数分开；局部实验不改变此目标。
+    acquisition.scope_mode:
+      label: 事件仿真范围
+      unit: 模式
+      description: frame模拟所有计划帧；columns显式只激励选定列及有限前驱预热。局部实验不是完整帧记录裁剪，未仿真区域保持未知。
+    acquisition.scope_first_column:
+      label: 选区起始全局列ID
+      unit: 索引
+      description: 仅columns生效，按frame乘系统列数加帧内列号编号。不得越过计划范围。
+    acquisition.scope_column_count:
+      label: 选区列数
+      unit: 列
+      description: 仅columns生效，必须为正整数；不会裁剪或修改高层总列数。范围外源未激励，有限预热与边界损失独立审计。
+    motion.trajectory:
+      label: 扫描轨迹
+      unit: 枚举
+      description: static静止；sawtooth含有效前扫和回扫；triangle双向三角；sinusoidal双向正弦。由Python在每发及回波时刻求值。
+    motion.optical_multiplier:
+      label: 机械→光学倍率
+      unit: '1'
+      description: 显式角映射倍率，允许反号但不得为0；不把机械角直接当光学角。实际生效。
+    motion.optical_offset_mrad:
+      label: 光学角零点偏移
+      unit: mrad
+      description: 作用于真实Tx和编码器角映射。实际生效。
+    motion.phase_offset_ns:
+      label: 实际转镜相位偏移
+      unit: ns
+      description: 真实转镜相对于控制计划的时间偏移；控制发射开关仍按无偏移计划。实际生效。
+    motion.laser_time_offset_ns:
+      label: 激光固定时序偏移
+      unit: ns
+      description: 相对名义触发时刻的实际发射偏移。接收参考时钟不随之平移。实际生效。
+    motion.laser_jitter_std_ns:
+      label: 激光发射时间抖动 σ
+      unit: ns
+      description: 独立随机流的高斯标准差；实际样本、seed保存。若发射脉冲顺序被打乱则报错。实际生效。
+    motion.encoder_latency_ns:
+      label: 编码器时标延迟
+      unit: ns
+      description: 正值取参考时刻之前的角度；负值表示离线时标错配到后续角样本。仅改变编码器角标签，不改变真实光子输入。实际生效。
+    motion.encoder_angle_offset_mrad:
+      label: 编码器角度偏差
+      unit: mrad
+      description: 加到报告光学角；不改变真实Tx/Rx状态。实际生效。
+    motion.rx_scan_scale:
+      label: Rx扫描跟随倍率
+      unit: '1'
+      description: Rx光学指向相对真实Tx轴光学角的倍率；1为共扫，0为固定Rx。Rx数据必须覆盖实际相对入射角。实际生效。
+    motion.rx_angle_offset_mrad:
+      label: Rx光学指向偏移
+      unit: mrad
+      description: 作用于回波时刻Rx指向，亦属于已知重建几何；不会移动Rx数据库像素本身。实际生效。
+    motion.channel_direction_mode:
+      label: 通道角度标定
+      unit: 枚举
+      description: optical_centroid使用Rx效率×PSF×立体角的均匀场角质心；explicit使用显式通道H/V标定。只使用当前模式。
+    motion.channel_h_mrad:
+      label: 通道H角标定（JSON数组）
+      unit: mrad
+      description: 仅explicit生效；长度等于读出通道数，单位为Rx局部光学角，按通道行优先顺序。
+    motion.channel_v_mrad:
+      label: 通道V角标定（JSON数组）
+      unit: mrad
+      description: 仅explicit生效；长度等于读出通道数。自动标定中无响应通道不猜测角度。
+    acquisition.frame_count:
+      label: 采集帧数
+      unit: 帧
+      description: 有限观测帧数；光学、SPAD/TDC和输出缓冲跨帧连续，观测末端之外的尾部单独审计。
+    acquisition.period_ns:
+      label: 兼容单周期参考
+      unit: ns
+      description: 仅保留公共参数视图兼容字段；列C实际时序由system_targets和exposure.pulses决定，不用于产生发射周期。
+    acquisition.gate_start_ns:
+      label: 门起点 / 分析原点
+      unit: ns
+      description: 相对名义触发参考。per_pulse模式用于生成硬件门；所有门取并集。column模式为整列开门，本项只作为TDC码与分析窗口原点。
+    acquisition.gate_width_ns:
+      label: 门宽 / 分析宽度
+      unit: ns
+      description: per_pulse模式是每次名义门宽，重叠只计一次；column模式硬件按整列开门，本项用于时间分析范围。窗外实际记录仍保留，不补回源尾部。
+    acquisition.analysis_bin_ps:
+      label: 距离分析分箱
+      unit: ps
+      description: 空值显式跟随硬件TDC分箱；非空必须是其整数倍。只改变离线重建，不重新抽样或修改硬件记录。
+    acquisition.trial_count:
+      label: 独立采集次数
+      unit: 次
+      description: 包含首个观测，最少1次。多次运行保存独立seed与记录；显示重放后逐bin最小/最大范围，1次不显示伪造误差棒。
+    acquisition.noise_trial_count:
+      label: 激光关闭参考次数
+      unit: 次
+      description: 0表示不运行纯噪声参考；正值运行同一时序和器件模型，所有源能量设为零。仅已有样本计算噪声均值。
+    acquisition.rng_seed:
+      label: 随机种子
+      unit: 整数
+      description: 首个采集使用此seed；光子、电子学、激光时序及重复/噪声分析按保存的独立子流规则分开。
+    exposure.gate_mode:
+      label: 接收门策略
+      unit: 模式
+      description: per_pulse为逐发门的并集；column为每列整段开门。器件free_running时门外候选也改变SPAD状态；读出仍受记录门控制。
+    exposure.pulses:
+      label: 列内逐发列表
+      unit: 列表
+      description: 每列重复同一模板；中心时刻严格递增并位于[0,T_slot)，未知键和越界报错。空列表可研究暗场。没有零时刻触发时列起点增加无光参考锚点。
+    exposure.pulses.time_offset_ns:
+      label: 列内发射时刻
+      unit: ns
+      description: 波形中心相对列开始的名义时间。激光偏移和抖动另加；尾部和回波可以跨触发/列，SPAD恢复不重置。
+    exposure.pulses.energy_nj:
+      label: 本发Tx前能量
+      unit: nJ
+      description: 全光斑完整单发能量；null显式继承tx.total_pulse_energy_nj，数值覆盖本发，0为暗触发。所有损耗参考面同B。
+    exposure.tail_fraction:
+      label: 指数拖尾能量占比
+      unit: 0–1
+      description: 将此比例的基底波形作非负指数随机延迟，保持完整能量积分为1。0关闭尾迹。光学仍按中心姿态取值，不声称已解析长拖尾扫描拖影。
+    exposure.tail_tau_ns:
+      label: 拖尾时间常数
+      unit: ns
+      description: 非零拖尾时必须填写正数；关闭拖尾时不生效。基底FWHM不等于混合后的整体FWHM。
+    transport.enabled:
+      label: 启用输出资源计算
+      unit: 开关
+      description: 开启后必须给出DSP与所选MIPI模式所需参数；关闭表示尚未配置，不把未知耗时视为零。
+    transport.buffer_count:
+      label: 整列缓冲数量
+      unit: 个
+      description: 从列开始预留，到MIPI完成释放。默认双缓冲由用户指定；不隐含无限队列。
+    transport.dsp_time_us:
+      label: DSP整列延迟
+      unit: μs
+      description: 全部线阵行按列并行处理的延迟，不乘线数。起点由锁存完成和DSP资源决定。
+    transport.dsp_mode:
+      label: DSP列间执行模式
+      unit: 模式
+      description: serial逐列串行；pipeline允许列间流水，需另给启动间隔。二者均保持列内并行语义。
+    transport.dsp_initiation_us:
+      label: DSP列启动间隔
+      unit: μs
+      description: 仅pipeline模式生效；必须为正数，限制新列进入同一DSP流水线的节拍。
+    transport.mipi_mode:
+      label: MIPI耗时来源
+      unit: 模式
+      description: duration使用明确整列搬运耗时；payload依据输出格式、列头和净载荷速率计算，不猜测协议效率。
+    transport.mipi_time_us:
+      label: MIPI整列耗时
+      unit: μs
+      description: 仅duration模式生效。一个FIFO输出链路，起点需等待同列DSP及前一输出完成。
+    transport.payload_format:
+      label: 输出数据格式
+      unit: 模式
+      description: points为每个H/V读出通道一个固定长度结果（含无效标志）；histogram为分析窗口计数；events为实际原始记录，采集前数据量未知。
+    transport.point_bytes:
+      label: 每通道结果长度
+      unit: byte
+      description: 仅payload/points生效。一个完整列含所有配置H/V通道；不是只发送当前显示H路。
+    transport.histogram_count_bits:
+      label: 直方图计数位宽
+      unit: bit
+      description: 仅payload/histogram生效，按通道数和分析时间分箱数预算。当前只预算长度，不执行数值截断/饱和编码。
+    transport.event_record_bytes:
+      label: 每事件长度
+      unit: byte
+      description: 仅payload/events生效，事件数取本次实际记录；未采集时不会填零估计MIPI耗时。
+    transport.column_header_bytes:
+      label: 每列附加开销
+      unit: byte
+      description: payload模式生效，显式加入列头等约定开销；不另猜MIPI协议版本。
+    transport.mipi_net_mbps:
+      label: MIPI净载荷速率
+      unit: Mbit/s
+      description: payload模式生效；是已扣除未显式计入开销后的可用净速率，不等同PHY标称速率。
+    transport.overflow_policy:
+      label: 无缓冲时策略
+      unit: 模式
+      description: drop_column保留离线探测记录但标记该列未交付；error报告该列无法排程。均不通过延迟扫描掩盖超限。
+    diagnostics.pixel_id:
+      label: 观察物理SPAD
+      unit: 索引
+      description: null记录所有像素的前若干事件，数值选择一个物理像素。受readout_trace_events输出上限约束；不影响随机流或器件状态。
+    diagnostics.start_ns:
+      label: 轨迹绝对起点
+      unit: ns
+      description: null表示不加此筛选边界；只记录测量窗口内真实进入SPAD判据的事件。
+    diagnostics.end_ns:
+      label: 轨迹绝对终点
+      unit: ns
+      description: null表示不加此筛选边界；非空终点必须大于起点，采用半开区间。

@@ -35,7 +35,7 @@ def test_c_preview_reports_real_resource_lower_bound_and_does_not_fake_records()
 
 def test_c_workspace_reuses_components_and_canonical_transfer():
     client=TestClient(app)
-    html=client.get('/system/scan')
+    html=client.get('/system/scan/legacy')
     assert html.status_code==200 and 'data-lab="scan"' in html.text
     for name in ('shared/scan-workspace.js','shared/histogram-window.js','shared/optical-panels.js','system.js'):
         assert '/static/'+name+'?v=' in html.text

@@ -418,3 +418,139 @@ scan:
         - {key: energy_balance_residual_j, label: 能量平衡残差, unit: J}
         - {key: final_mixed_records, label: 全采集混合记录, unit: records}
         - {key: angle_assigned_records, label: 进入角bin重建的记录, unit: records}
+
+columns:
+  title: C 列级扫描：逐发列表、门并集、光学与器件审计
+  intro: 高层分配列时隙，每列按显式时间/能量列表发射。所有候选经过相同SPAD核心，最终混合记录不按源比例拆分。
+  steps:
+  - title: 列目标与逐发列表
+    formula_id: column_pulse_schedule
+    logic: 高层确定帧/列节拍；列表确定列内波形中心与能量。名义参考、实际发射和编码器角标签分开记录，不把列数当发数。
+    values:
+    - key: duration_ns
+      label: 事件观测时域长度（整帧或显式选区）
+      unit: ns
+    - key: column_count
+      label: 点云列数量
+      unit: columns
+    - key: trigger_count
+      label: 列表触发次数（含暗触发）
+      unit: triggers
+    - key: emitted_reference_slots
+      label: 实际启用发射的测量参考时隙
+      unit: pulses
+    - key: reference_tx_input_energy_j
+      label: 测量参考时隙Tx前能量合计
+      unit: J
+    - key: reference_tx_angular_truncation_j
+      label: 测量参考时隙Tx角域外能量
+      unit: J
+  - title: 有限测量时间窗内的Tx功率
+    formula_id: scan_tx_window_power
+    logic: 逐发能量允许不同；对包含可选归一化拖尾的完整时间分布积分。名义测量列的完整脉冲能量、实际中心计数与观测时间窗能量分别审计，不补回边界尾部。
+    values:
+    - key: center_accounted_tx_output_energy_j
+      label: 中心位于测量窗内的完整脉冲计账能量
+      unit: J
+    - key: actual_tx_output_energy_j
+      label: 测量时间窗内积分Tx后能量
+      unit: J
+    - key: actual_tx_average_power_w
+      label: 测量时间窗内积分Tx后平均功率
+      unit: W
+  - title: 参考时钟归属与门并集
+    formula_id: column_record_assignment
+    logic: 记录依据触发/列锚点参考归档，不读取隐藏的光子来源。并集门避免重复背景曝光；跨列器件状态连续。
+    values:
+    - key: trigger_count
+      label: 有列表项的触发参考数
+      unit: triggers
+    - key: gate_exposure_s
+      label: 测量门并集曝光时间
+      unit: s
+  - title: 回波：逐发Rx指向与光子求和
+    formula_id: column_rx_return
+    logic: 世界方向与接收机局部方向使用三维旋转。B的Rx效率/PSF在局部角度查询，再将探测面光子交给共同器件模型。
+    values:
+    - key: target_incident_j
+      label: 测量发射的目标入射能量
+      unit: J
+    - key: target_reflected_j
+      label: 测量发射的目标反射能量
+      unit: J
+    - key: signal_pupil_photons_total
+      label: 信号入瞳光子总数
+      unit: photons/acquisition
+    - key: signal_sensor_photons_total
+      label: 信号探测面光子总数
+      unit: photons/acquisition
+    - key: signal_candidates_total
+      label: 信号候选雪崩期望总数
+      unit: candidates/acquisition
+  - title: 构造场景：角向距离与径向运动
+    formula_id: scan_moving_range
+    logic: 逐角单元计算真实反射距离，再确定回波时刻和Rx姿态。真值距离仅用于生成光子与误差审计，不交给距离估计器寻峰。
+    values:
+    - key: reflection_range_min_m
+      label: 测量发射的最小反射距离
+      unit: m
+    - key: reflection_range_max_m
+      label: 测量发射的最大反射距离
+      unit: m
+  - title: 太阳：记录门实际曝光
+    formula_id: scan_background_total
+    logic: 太阳背景按Rx局部角域和指定积分波段积分。此处报告记录门并集内量；free_running门外背景还参与器件状态，见候选采样审计。
+    values:
+    - key: gate_exposure_s
+      label: 所有记录门实际时长之和
+      unit: s
+    - key: solar_rx_incident_photons_total
+      label: 太阳入瞳光子（限定波段）
+      unit: photons/acquisition
+    - key: solar_sensor_incident_photons_total
+      label: 太阳探测面光子
+      unit: photons/acquisition
+    - key: solar_candidate_avalanches_total
+      label: 太阳门内候选雪崩期望
+      unit: candidates/acquisition
+  - title: 其他环境光：独立积分
+    formula_id: scan_background_total
+    logic: 只使用当前环境光谱输入模式。原始光子数限定显示波段；不随Tx能量份额缩放。
+    values:
+    - key: other_rx_incident_photons_total
+      label: 其他光入瞳光子（限定波段）
+      unit: photons/acquisition
+    - key: other_sensor_incident_photons_total
+      label: 其他光探测面光子
+      unit: photons/acquisition
+    - key: other_candidate_avalanches_total
+      label: 其他光门内候选雪崩期望
+      unit: candidates/acquisition
+  - title: 整次接收能量与最终混合记录
+    formula_id: spatial_energy_balance
+    logic: 接收能量等式对测量列源脉冲求和；器件输出保留全部混合记录，分析时间窗口可再排除区间外记录。DSP/MIPI丢列另报，不更改离线探测记录。
+    values:
+    - key: pupil_energy_j
+      label: 入瞳信号能量合计
+      unit: J
+    - key: sensor_energy_j
+      label: 探测面信号能量合计
+      unit: J
+    - key: rx_loss_j
+      label: Rx损耗合计
+      unit: J
+    - key: filter_loss_j
+      label: 滤光损耗合计
+      unit: J
+    - key: edge_loss_j
+      label: 阵列外损耗合计
+      unit: J
+    - key: energy_balance_residual_j
+      label: 能量平衡残差
+      unit: J
+    - key: final_mixed_records
+      label: 全采集混合记录
+      unit: records
+    - key: angle_assigned_records
+      label: 进入列内时间分析窗口的记录
+      unit: records
