@@ -2,20 +2,86 @@
 from copy import deepcopy
 from .curves import merge_config
 from pydantic import TypeAdapter, PositiveInt
+import numpy as np
+
+
+def migrate_optical_dataset(document):
+    """Preserve physical directions when converting legacy V/y-down data to up."""
+    doc=deepcopy(document)
+    if doc.get('schema_version')!=1:return doc
+    if doc.get('coordinate_convention')!='optical_H_right_V_down__image_x_right_y_down':
+        raise ValueError('Legacy optical dataset requires its explicit coordinate convention')
+    tx,rx=doc['tx'],doc['rx']
+    tx['v_edges_mrad']=(-np.asarray(tx['v_edges_mrad'])[::-1]).tolist()
+    tx['energy_fraction']=np.asarray(tx['energy_fraction'])[::-1].tolist()
+    rx['v_angle_mrad']=(-np.asarray(rx['v_angle_mrad'])[::-1]).tolist()
+    rx['y_edges_um']=(-np.asarray(rx['y_edges_um'])[::-1]).tolist()
+    rx['collection_efficiency']=np.asarray(rx['collection_efficiency'])[:,::-1,:].tolist()
+    rx['psf_pixel_fraction']=np.asarray(rx['psf_pixel_fraction'])[:,::-1,:,::-1,:].tolist()
+    doc['schema_version']=2
+    doc['coordinate_convention']='optical_H_right_V_up__image_x_right_y_up'
+    doc['provenance']={**doc['provenance'],'coordinate_migration':'v1 V/y-down → v2 V/y-up: reversed and negated V and y axes; array axes reindexed, no energy renormalization.'}
+    return doc
 
 
 def migrate_experiment_overrides(kind,values):
-    """Older complete B configs coupled Tx/Rx domains; preserve only that explicit legacy case."""
+    """Migrate legacy B/C groups through one explicit domain conversion."""
     values=deepcopy(values)
-    if kind not in ('system','scan') or not isinstance(values.get('optics'),dict):
-        return values
-    optical=values['optics']
-    old=('angle_h_min_mrad','angle_h_max_mrad','angle_v_min_mrad','angle_v_max_mrad')
-    new=tuple('rx_'+k for k in old)
-    if all(k in optical for k in old) and not any(k in optical for k in new):
-        for source,target in zip(old,new):
-            optical[target]=optical[source]
+    if kind=='system':
+        return migrate_b_domains(values)
+    if kind=='scan':
+        extra={key:values.pop(key) for key in ('scan','scene_motion') if key in values}
+        return {**migrate_b_domains(values),**extra}
     return values
+
+
+def migrate_focal_lengths(optical):
+    if 'focal_length_mm' in optical:
+        if any(k in optical for k in ('focal_length_h_mm','focal_length_v_mm')):
+            raise ValueError('Do not mix scalar and H/V focal lengths')
+        value=optical.pop('focal_length_mm')
+        optical['focal_length_h_mm']=value
+        optical['focal_length_v_mm']=value
+        if 'mapping_mode' not in optical:
+            optical['mapping_mode']='legacy_upright'
+        # The old scalar schema used V/y positive-down; preserve physical rays.
+        for key in ('tx_center_v_mrad','rx_offset_y_um'):
+            if key in optical:optical[key]=-optical[key]
+        for lo,hi in (('angle_v_min_mrad','angle_v_max_mrad'),('rx_angle_v_min_mrad','rx_angle_v_max_mrad')):
+            if lo in optical and hi in optical:
+                optical[lo],optical[hi]=-optical[hi],-optical[lo]
+
+
+def migrate_b_domains(values):
+    from .experiments.system_config import LEGACY_PATHS
+    values=deepcopy(values)
+    if not any(k in values for k in ('optics','device','timing','rng_seed')):
+        if isinstance(values.get('rx'),dict) and values['rx'].get('dataset') is not None:
+            values['rx']['dataset']=migrate_optical_dataset(values['rx']['dataset'])
+        return values
+    if any(k in values for k in ('tx','scene','rx','spad','background','acquisition')):
+        raise ValueError('Do not mix legacy and modular B configuration groups')
+    if isinstance(values.get('optics'),dict):
+        o=values['optics'];migrate_focal_lengths(o)
+        keys=('angle_h_min_mrad','angle_h_max_mrad','angle_v_min_mrad','angle_v_max_mrad')
+        if all(k in o for k in keys) and not any('rx_'+k in o for k in keys):
+            for k in keys:o['rx_'+k]=o[k]
+    result={}
+    for group,section in values.items():
+        if group in ('readout','spectral_inputs'):
+            result[group]=section;continue
+        items=[(group,section)] if group=='rng_seed' else [(group+'.'+k,v) for k,v in section.items()] if isinstance(section,dict) else []
+        if not items and group not in ('optics','device','timing'):
+            raise ValueError(f'Unknown configuration group: {group}')
+        if not isinstance(section,dict) and group!='rng_seed':
+            raise ValueError(f'{group} must be a mapping')
+        for path,value in items:
+            if path not in LEGACY_PATHS:raise ValueError(f'Unknown configuration key: {path}')
+            target,key=LEGACY_PATHS[path].split('.')
+            result.setdefault(target,{})[key]=value
+    if isinstance(result.get('rx'),dict) and result['rx'].get('dataset') is not None:
+        result['rx']['dataset']=migrate_optical_dataset(result['rx']['dataset'])
+    return result
 
 
 def migrate(values, defaults):

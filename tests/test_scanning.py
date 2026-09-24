@@ -20,7 +20,10 @@ never=lambda:False
 
 
 def cfg(overrides=None):
-    return SimulationConfig.for_experiment('scan',{} if overrides is None else overrides)
+    from spad_lidar.curves import merge_config
+    from spad_lidar.legacy_config import migrate_experiment_overrides
+    example=read_yaml('defaults.yaml')['experiments']['scan_demo']
+    return SimulationConfig.for_experiment('scan',merge_config(example,migrate_experiment_overrides('scan',{} if overrides is None else overrides)))
 
 
 def run(overrides=None,algorithms=None):
@@ -48,7 +51,9 @@ def test_frame_budget_real_dwell_and_blanked_flyback():
 def test_static_scan_reduces_exactly_to_b_records_and_histogram(mode):
     c=cfg({'scan':{'trajectory':'static'},'readout':{'readout_mode':mode}})
     a=Algorithms.load();out=run_scan(c,a,noop,never)
-    b=SimulationConfig.for_experiment('system',{'readout':{'readout_mode':mode}})
+    from spad_lidar.experiments.system_config import form_values
+    same=form_values(c);same.pop('scan');same.pop('scene_motion');same['timing']['laser_shots']=sum(r['measured'] for r in out['scan']['schedule']) if 'measured' in out['scan']['schedule'][0] else len(out['scan']['schedule'])
+    b=SimulationConfig.for_experiment('system',same)
     reference=run_system(b,a,noop,never)
     assert out['records']==reference['records']
     assert out['histogram']==reference['histogram']
@@ -225,7 +230,8 @@ def test_roundoff_policy_is_explicit_and_does_not_change_optical_angles():
 
 
 def test_complete_legacy_b_config_preserves_coupled_rx_coverage():
-    old=SimulationConfig.for_experiment('system',{}).model_dump()
+    from spad_lidar.experiments.system_config import form_values
+    old=form_values(SimulationConfig.for_experiment('system',{}))
     for key in list(old['optics']):
         if key.startswith('rx_angle_'):old['optics'].pop(key)
     old['optics']['angle_h_min_mrad']=-10
@@ -239,8 +245,8 @@ def test_b_configuration_transfer_keeps_optics_but_recomputes_scan_pulse_budget(
     transferred=client.post('/api/experiments/scan/from-system',json={'optics':{'range_m':75},'timing':{'laser_shots':5}})
     assert transferred.status_code==200
     config=transferred.json()['experiment']
-    assert config['optics']['range_m']==75
-    assert 'laser_shots' not in config['timing']
+    assert config['scene']['range_m']==75
+    assert 'laser_shots' not in config['acquisition']
     preview=client.post('/api/experiments/scan/preview',json=config).json()
     assert preview['frame_budget']['scheduled_slots']==100
 

@@ -1,6 +1,7 @@
 """C composition: pulse schedule → B optics at emission/return poses → one SPAD session."""
 import numpy as np
-from pydantic import model_validator
+from pydantic import model_validator,Field
+from functools import cached_property
 from ..constants import C,H
 from ..curves import Curve
 from ..contracts.pulses import IncidentPulseGroup
@@ -15,14 +16,24 @@ from ..tx import transmit
 from ..numerics.temporal import pulse_interval_fractions
 from ..spad.source import sample_varying_candidates
 from ..spad.device import effective_pde
-from .spatial import SystemConfig,project_illumination
+from .spatial import project_illumination
+from .system_config import BSystemConfig
 from .lab import acquire_candidates,stamp_result
 
 
-class ScanConfig(SystemConfig):
-    timing: ScanTiming
+class ScanAcquisition(ScanTiming):
+    calibration_delay_ns: float
+    rng_seed: int = Field(ge=0,strict=True)
+
+
+class ScanConfig(BSystemConfig):
+    acquisition: ScanAcquisition
     scan: ScanSettings
     scene_motion: SceneMotion
+
+    @cached_property
+    def timing(self):
+        return ScanTiming.model_validate({k:getattr(self.acquisition,k) for k in ScanTiming.model_fields})
 
     @model_validator(mode='after')
     def scan_valid(self):

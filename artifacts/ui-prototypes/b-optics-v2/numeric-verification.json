@@ -1,0 +1,21 @@
+{
+  "inherited_defaults": true,
+  "inverted_centroids_all_angles": true,
+  "energy_conservation": true,
+  "db_coefficient_and_zero_cases": true,
+  "spectral_units_and_composition": true,
+  "first_observation_in_sample_range": true,
+  "parameter_figures": [
+    "pulse",
+    "filter",
+    "solar",
+    "environment",
+    "pde",
+    "combined",
+    "tx_profile",
+    "mapping",
+    "psf",
+    "timing"
+  ],
+  "records": 9392
+}

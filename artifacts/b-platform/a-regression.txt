@@ -1,0 +1,1 @@
+All 8 A modes: exact fixture equality (budgets, histograms, metrics, detection, readout).

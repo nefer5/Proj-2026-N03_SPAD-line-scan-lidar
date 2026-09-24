@@ -51,7 +51,7 @@
 
 `SimulationConfig` 保留 A 构造入口，并通过 `for_experiment(kind, overrides)` 解析实验配置。SPAD 实验无需构造距离、孔径、反射率等无关字段。
 
-- 默认值仅在 `config/defaults.yaml`；公共器件/曲线默认值按字段复用 `simulation`，实验特有项位于 `experiments`。
+- 默认值仅在 `config/defaults.yaml`；B/C的公共器件、时序、光谱、背景默认值按字段复用 `simulation`，新增光学值按 `experiments.system.tx/rx/spad` 分类。B不再另设100发/关闭背景的隐含演示覆盖；C也继承共有默认值。关闭背景的快速扫描示例位于`experiments.scan_demo`，须明确载入；B→C转移会带入用户当前选择。
 - 所有采样策略、容差和资源限额在 `config/algorithms.yaml`，类型与边界由 `Algorithms` 校验。
 - 新参数在 `parameter-help.yaml` 的 `experiments` 分支注明单位、条件和生效模式。
 - 缺失默认键即使能由用户覆盖补齐，也会报错；未知键、重复 YAML 键、NaN/Infinity及非法范围均拒绝。
@@ -59,7 +59,9 @@
 - A 保留原 RNG 协议；新实验使用 `per-cycle-per-pixel-v1`，光子采样与电子时间抖动分流。两种采样协议不要求逐样本相同，但共享器件模型。
 - 结果包含 seed、版本、时间、配置指纹、数据指纹、物理中间量、模型限制、全部记录及直方图。B 另外保存完整光学数据库和光谱积分数组。
 
-旧 A 配置继续经 `legacy_config` 迁移。新实验使用 schema_version 2 的 `{kind, experiment}` 信封，类型不匹配明确拒绝；不会把旧总像素数猜成二维布局。
+旧 A 配置继续经 `legacy_config` 迁移。B/C新导出使用schema_version 3的`{kind, experiment}`信封；SPAD目前仍使用版本2。B按`tx/scene/rx/spad/readout/background/acquisition/spectral_inputs`组织配置；C在相同分类上增加`scan/scene_motion`，采集设置不含独立发数。Python类型、YAML新增项与网页物理分类对应。`spectral_inputs`仍是唯一光谱输入，页面将各编辑器放在所属物理模块。
+
+旧B的`optics/device/timing`字段仅经`legacy_config`转换；同时出现新旧分组或新旧焦距字段会报错。旧标量焦距迁为两轴焦距并显式保留`legacy_upright`；旧V/y向下的相关参数转换到向上坐标。构造新工况默认双轴倒置。共享采集核心使用只读扁平适配视图，不复制参数默认值。
 
 ## 任务与记录重放
 
@@ -68,6 +70,10 @@
 服务重启时未完成任务标为 `interrupted`，保留配置以重新提交；不宣称作业能从进程崩溃自动续算。更改工作进程数在空闲队列时生效，活动任务期间明确拒绝重配。
 
 重放只使用已记录信息。当前网页提供按原 TDC 宽度整数倍、相同门起点的重新分箱，保持总记录数。不能恢复量化精度，也不能借此改变 PDE、死时间或硬件读出。检测/测距代码已经独立；B 当前仅输出未经门限标定的距离估计，不报告 B 的 Pd/PFA。
+
+B正式界面将当前参数预览与已采集结果分开保存。参数图/光学预览由Python公共核心计算；修改输入不会修改历史记录。`spatial_analysis`在一次采集之外组织重复试验，保存逐次直方图与独立随机种子；重放先对每次直方图重新分箱，再计算最小/最大范围，不能将旧误差棒简单相加。A/B复用`shared/histogram-window.js`绘图和公共纯信号解析函数。橙色观察窗口、拖动和图旁精确时间输入只改变显示。
+
+C复用同一工作台、光谱编辑器、参数图与直方图组件，扩展帧/角bin/通道联动、距离分面、等比例点云、逐发像面和时序明细。当前C结果只保存一次扫描，不伪造逐角理想/噪声/重复统计；这些图层明确禁用。轨迹预览与采集结果可显式切换。界面原则见`ui-design-guidelines.md`。
 
 ## 回归与快照
 

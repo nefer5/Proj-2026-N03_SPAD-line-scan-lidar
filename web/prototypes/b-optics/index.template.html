@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>B 空间光学 · 界面设计预览</title>
+<link rel="stylesheet" href="{{preview.css}}">
+<link rel="stylesheet" href="{{katex.css}}">
+<script defer src="{{katex.js}}"></script>
+<script defer src="{{histogram-window.js}}"></script>
+<script defer src="{{preview-panels.js}}"></script>
+<script defer src="{{preview.js}}"></script></head>
+<body data-snapshot="{{snapshot.json}}">
+<header class="app-header">
+  <a class="brand" href="#"><span class="brand-mark">S<span>·</span></span><span>SPAD<span class="brand-sub">LIDAR LAB</span></span></a>
+  <nav aria-label="研究平台"><a href="/spad">SPAD 研究</a><a class="active" aria-current="page" href="#">B 空间光学</a><a href="/system/scan">C 扫描采集</a><a href="/">A 单通道</a></nav>
+  <span class="preview-badge"><i></i> 界面设计预览 <b>02</b></span>
+</header>
+<div class="page-heading"><div><p class="eyebrow">SYSTEM SIMULATION <span>/</span> STATIC OPTICS</p><h1>B <span>空间光学</span><span class="version">静态全光斑</span></h1><p class="heading-note">从发射角分布到探测面，观察光在每一个通道中的去向。</p></div><div class="preview-notice"><span class="dot"></span><div><strong>可交互前端 · 固定样例</strong><p>参数可编辑；本页尚未接入重新计算。</p></div></div></div>
+<main class="workspace">
+<aside class="parameter-panel" aria-label="参数配置">
+  <div class="parameter-head"><div class="label-row"><h2>参数配置</h2><span id="draftState" class="tiny muted">初版共有默认值</span></div><div class="primary-actions"><button id="runPreview" class="primary"><span>▷</span> 运行仿真 <small>待接入</small></button><button id="resetDraft" class="quiet" title="恢复继承初版共有默认值的本页参数">恢复默认</button></div><div class="fold-actions"><span class="micro muted">按物理模块组织</span><div><button id="collapseAll" class="text-button">全部折叠</button><span>·</span><button id="expandAll" class="text-button">全部展开</button></div></div><p class="defaults-note">共有参数沿用初版 · B 新增项沿用光学样例</p></div>
+  <div id="parameterGroups" class="parameter-groups"></div>
+  <div class="parameter-footer"><button id="exportDraft" class="quiet">↗ 导出界面草稿</button><button id="showSources" class="text-button">样例来源</button></div>
+</aside>
+<div class="content">
+  <section class="panel overview" aria-labelledby="overviewTitle">
+    <div class="card-head"><div><span class="section-kicker">01 / MODEL OVERVIEW</span><h2 id="overviewTitle">一个光斑，完整的探测链路</h2></div><button id="toggleOverview" class="text-button" aria-expanded="false">概念与计算逻辑 <span>＋</span></button></div>
+    <div class="pipeline" id="pipeline">
+      <button data-concept="tx"><span class="pipeline-symbol">↗</span><span><strong>Tx 发射</strong><small>角度 · 能量</small></span></button><span class="flow-arrow">→</span>
+      <button data-concept="scene"><span class="pipeline-symbol">▱</span><span><strong>场景传播</strong><small>距离 · 反射</small></span></button><span class="flow-arrow">→</span>
+      <button data-concept="rx"><span class="pipeline-symbol">◎</span><span><strong>Rx 成像</strong><small>位置 · PSF</small></span></button><span class="flow-arrow">→</span>
+      <button data-concept="spad"><span class="pipeline-symbol">▦</span><span><strong>SPAD 阵列</strong><small>光子 · 雪崩</small></span></button><span class="flow-arrow">→</span>
+      <button data-concept="readout"><span class="pipeline-symbol">▥</span><span><strong>读出通道</strong><small>记录 · 直方图</small></span></button>
+    </div>
+    <div id="overviewDetail" class="overview-detail hidden"></div>
+    <div class="overview-foot"><span><i class="dot"></i> 共用 SPAD / 读出核心</span><span id="sceneSummary"></span><span class="amber">构造光学样例</span></div>
+  </section>
+  <section class="job-strip" aria-label="运行任务"><span class="job-state"><i class="dot"></i> 固定样例已载入</span><span id="jobSummary" class="muted"></span><button id="toggleJobs" class="text-button" aria-expanded="false">任务记录 <span>⌄</span></button></section>
+  <div id="jobHistory" class="panel job-history hidden"><div><strong>离线样例采集</strong><span class="pill">已完成</span><span id="jobDate" class="muted"></span></div><p>此原型展示已保存的样例结果。正式版将在这里查看、取消和恢复运行任务。</p></div>
+  <div id="staleBanner" class="stale-banner hidden" role="status">参数草稿已修改。下方仍为固定样例结果，未重新计算。<button id="reviewChanges" class="text-button">查看改动</button></div>
+  <section class="panel parameter-viz-panel" id="parameterVizPanel">
+    <details id="parameterVizDetails"><summary><span><span class="section-kicker">PARAMETER VISUALIZATION</span><strong>基础参数可视化</strong><small>波形 · 光谱 · 角分布 · Rx 映射 · 采集时序</small></span><span class="viz-expand-label">展开查看 <b>＋</b></span></summary>
+      <div class="viz-body"><div class="viz-toolbar"><span class="sample-label">固定默认工况 · Python 生成曲线</span><button id="exportParameterFigure" class="text-button">↗ 导出当前曲线数据</button></div>
+      <div id="parameterVizTabs" class="viz-tabs" role="tablist" aria-label="基础参数图选择"></div>
+      <div id="parameterVizContent" role="tabpanel" aria-label="基础参数图"></div>
+      <p class="field-note">参数草稿修改后，此处仍显示固定默认工况；所有物理曲线由 Python 提供。</p></div>
+    </details>
+  </section>
+  <section class="metrics" id="metrics" aria-label="关键指标"></section>
+  <section class="panel spatial-card" aria-labelledby="spatialTitle">
+    <div class="card-head"><div><span class="section-kicker">02 / SPATIAL DISTRIBUTION</span><h2 id="spatialTitle">光的空间分布</h2></div><span class="sample-label">固定样例 · PDE / FF 前</span></div>
+    <div class="spatial-grid">
+      <article class="plot-block"><div class="plot-heading"><h3>Tx 角能量分布</h3><span class="unit">Tx 后 · 单元能量份额</span></div><div id="txPlot" class="heatmap" role="img" aria-label="Tx角度单元能量分布及色标"></div><div class="plot-caption"><span>H / V 光学角 · mrad</span><span id="txCoverage"></span></div></article>
+      <article class="plot-block"><div class="plot-heading"><h3>探测面入射光子</h3><label class="inline-check"><input type="checkbox" id="showGroups" checked>通道边界</label></div><div id="sensorPlot" class="heatmap" role="img" aria-label="探测面光子分布及色标"></div><div class="plot-caption"><span id="arraySummary"></span><span>光子 / 像素 / 发</span></div></article>
+    </div>
+    <div id="spatialHover" class="readout-line" aria-live="polite">坐标：右正左负，上正下负。移动到图中查看物理坐标、单元编号与数值。</div>
+  </section>
+  <section class="panel histogram-card" id="histogramPanel" aria-labelledby="histogramTitle">
+    <div class="card-head"><div><span class="section-kicker">03 / CHANNEL ACQUISITION</span><h2 id="histogramTitle">通道探测直方图</h2></div><button id="exportHistogram" class="quiet small">↗ 导出当前通道</button></div>
+    <div class="hist-controls"><div class="channel-control"><label for="channelInput">展示通道 <span class="muted">编号 / 范围</span></label><div class="input-action"><input id="channelInput" type="text" placeholder="如 0, 2, 4-5"><button id="applyChannels" class="quiet small">应用</button></div><div id="channelPicker" class="channel-picker" aria-label="二维读出通道选择"></div></div><div class="time-control"><label>局部时间窗口 <span class="unit">ns</span></label><div class="range-input"><input id="timeMin" type="number" step="any" aria-label="局部时间起点"><span>—</span><input id="timeMax" type="number" step="any" aria-label="局部时间终点"><button id="applyWindow" class="quiet small">缩放</button></div><div class="window-presets"><button id="focusPeak" class="text-button">聚焦回波</button><button id="showFullGate" class="text-button">显示全门</button><label class="inline-check"><input type="checkbox" id="sharedScale" checked>统一纵轴</label></div></div></div>
+    <p id="histError" class="inline-error hidden" role="alert"></p>
+    <div class="hist-legend"><label><input type="checkbox" data-series="observed" checked><i class="legend-bar blue"></i>探测直方图</label><label><input type="checkbox" data-series="ideal" checked><i class="legend-line cyan"></i>理想信号</label><label><input type="checkbox" data-series="noise" checked><i class="legend-line orange"></i>纯噪声期望</label><label><input type="checkbox" data-series="error" checked><i class="legend-error"></i>误差棒</label></div>
+    <div id="histogramPlots" class="histogram-plots"></div>
+    <div class="plot-caption histogram-foot"><span id="statisticsNote"></span><span id="binNote"></span></div>
+    <details class="explanation"><summary>如何理解理想曲线和误差棒？</summary><p>蓝柱是一次含噪采集；青色散点是各 bin 内的纯信号解析积分，虚线是连续计数密度 × bin 宽。青色已包含 PDE / FF，不含背景、死时间或读出损失。橙线来自关闭激光的独立重复采集。误差棒是逐 bin 样本最小—最大值，不是置信区间；包含首次蓝柱。</p><p>这里的统计数组由现有 Python 核心离线生成。页面缩放、选通道和切换图层只改变显示。</p></details>
+  </section>
+  <section class="panel mapping-card" id="mappingPanel" aria-labelledby="mappingTitle">
+    <div class="card-head"><div><span class="section-kicker">04 / OPTICAL RESPONSE</span><h2 id="mappingTitle">从一个入射角，追踪到像面</h2></div><button id="exportMapping" class="quiet small">↗ 导出所选响应</button></div>
+    <div class="mapping-help"><span class="step-dot">1</span>选择角度单元<span class="mapping-arrow">→</span><span class="step-dot">2</span>查看 PSF 与通道份额<span id="responseFormula" class="mapping-notation" aria-label="像素光子等于PSF积分矩阵乘光学效率乘入瞳光子"></span></div>
+    <div class="angle-toolbar"><div class="angle-fields"><label>H 索引<select id="angleH" aria-label="角度H索引"></select></label><label>V 索引<select id="angleV" aria-label="角度V索引"></select></label></div><div id="angleLabel" class="selected-angle"></div></div>
+    <div class="mapping-grid"><article class="plot-block"><div class="plot-heading"><h3>角度单元选择</h3><span class="unit">点选网格 · PSF 截获比例</span></div><div id="anglePlot" class="heatmap interactive" role="group" aria-label="点选二维角度单元"></div></article><article class="plot-block"><div class="plot-heading"><h3>所选角单元的像面 PSF</h3><span class="unit">完整像素积分份额</span></div><div id="psfPlot" class="heatmap" role="img" aria-label="选中角度对应的像面PSF"></div></article></div>
+    <div class="mapping-bottom"><div class="capture-box"><span class="muted">感光面截获比例</span><strong id="captureValue"></strong><small>阵列外的光保留为边缘损失</small></div><div class="channel-share"><div class="plot-heading"><h3>各读出通道份额</h3><span class="unit">P 按通道分组求和</span></div><div id="channelFractions"></div></div></div>
+    <div class="mapping-convention"><span class="pill">成像倒置</span><span id="invertedMappingFormula"></span><span class="muted">右正左负 · 上正下负</span></div>
+    <details class="explanation"><summary>位置映射、PSF 与响应矩阵</summary><p>位置映射分别使用 f_H / f_V，并计入两轴倒置。矩阵 P 的每一列是一个入射角单元在各像素内的积分份额，D 包含 Rx 效率和滤光透过率，q 是入瞳各角单元的光子数。n 位于 PDE / FF 前。分组矩阵 G 将像素光子汇总为通道光子；SPAD 死时间和读出限制继续由事件模型处理。</p></details>
+  </section>
+  <section class="panel crosstalk-panel" id="crosstalkPanel" aria-labelledby="crosstalkTitle">
+    <div class="card-head"><div><span class="section-kicker">05 / CHANNEL LEAKAGE</span><h2 id="crosstalkTitle">所选角单元 · 光学串扰 / 通道比值</h2></div><button id="exportCrosstalk" class="quiet small">↗ 导出 dB 数据</button></div>
+    <div class="crosstalk-toolbar"><span id="crosstalkAngle" class="selected-angle"></span><label>参考通道<select id="crosstalkReference" aria-label="串扰参考通道"></select></label><button id="backToAngle" class="text-button">↑ 选择角度单元</button></div>
+    <div class="crosstalk-definition"><span id="crosstalkFormula"></span><p>η 是同一入射角、同一波长下落入通道的光学能量份额。使用功率 / 能量比的 <strong>10 倍对数</strong>；幅度平方对应功率时，幅度比才使用 20 倍对数。此处不使用幅度定义。</p></div>
+    <div class="crosstalk-layout"><div><div class="plot-heading"><h3>按通道空间布局</h3><span class="unit">相对所选参考 · dB</span></div><div id="crosstalkSpatial" class="db-spatial"></div><p id="crosstalkScale" class="field-note"></p></div><div><div class="plot-heading"><h3>当前角单元的通道间比值矩阵</h3><span class="unit">行：观测通道 / 列：参考通道</span></div><div id="crosstalkMatrix" class="matrix-scroll"></div><p id="matrixScale" class="field-note"></p></div></div>
+    <p class="crosstalk-note">单个入射角提供一组通道响应。本矩阵比较这组响应的通道间比值，不代表逐个输入通道独立激励得到的完整串扰传递矩阵，也不包含雪崩串扰。</p>
+    <p class="field-note">参考通道有响应时为 0 dB；更弱为负，更强为正。分子为零显示 −∞；参考通道为零显示“未定义”。不加微小数、不静默截断；浮点下溢得到的零也不代表实测绝对无串扰。</p>
+  </section>
+  <section class="panel audit-panel"><details><summary><span>光子预算与可追溯信息</span><span class="muted tiny">固定样例 / 配置 / 统计来源</span></summary><div id="auditContent"></div></details></section>
+  <footer class="page-footer"><span>SPAD LIDAR LAB <span class="cyan-text">/</span> B 空间光学</span><span>交互原型 02 · 正式仿真页面保持原状</span></footer>
+</div>
+</main>
+<div id="toast" class="toast hidden" role="status"></div>
+<dialog id="previewDialog"><div class="dialog-head"><h2 id="dialogTitle"></h2><button id="closeDialog" class="icon-button" aria-label="关闭对话框">×</button></div><div id="dialogBody"></div><div class="dialog-footer"><button id="dialogDone" class="primary">知道了</button></div></dialog>
+<div id="loadingError" class="loading-error hidden" role="alert"></div>
+</body></html>

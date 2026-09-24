@@ -1,0 +1,27 @@
+const errors=[];page.on('pageerror',e=>errors.push(String(e)));
+await page.reload({waitUntil:'networkidle'});await page.waitForFunction(()=>document.body.dataset.ready==='true');
+await page.getByRole('button',{name:'全部折叠',exact:true}).click();
+await page.locator('[data-group="background"]>summary').click();
+await page.getByRole('checkbox',{name:'太阳光',exact:true}).check();
+await expect(page.getByRole('spinbutton',{name:'目标面太阳照度',exact:true})).toBeVisible();
+await page.getByRole('checkbox',{name:'其他环境光',exact:true}).check();
+await expect(page.getByRole('spinbutton',{name:'环境光强度倍率',exact:true})).toBeVisible();
+await page.getByRole('button',{name:'恢复样例',exact:true}).click();
+await page.locator('[data-group="rx"]>summary').click();
+await page.getByLabel('入瞳形状',{exact:true}).selectOption('circle');
+await expect(page.getByRole('spinbutton',{name:'入瞳直径',exact:true})).toBeVisible();
+await expect(page.getByRole('spinbutton',{name:'水平全尺寸',exact:true})).toBeHidden();
+await page.getByLabel('像面映射模型',{exact:true}).selectOption('dataset');
+await expect(page.getByRole('spinbutton',{name:'PSF 标准差 σ',exact:true})).toBeHidden();
+await page.getByRole('button',{name:'恢复样例',exact:true}).click();
+await page.getByRole('button',{name:'全部折叠',exact:true}).click();
+await page.locator('[data-group="tx"]>summary').click();
+await page.locator('[data-group="tx"] .subdetails>summary').click();
+const sizes=[];
+for(const width of [1440,1024,768,390]){await page.setViewportSize({width,height:900});await page.waitForFunction(()=>document.documentElement.scrollWidth<=innerWidth);sizes.push(await page.evaluate(()=>({width:innerWidth,scrollWidth:document.documentElement.scrollWidth})));}
+await page.setViewportSize({width:1440,height:1000});
+await page.getByLabel('角度H索引',{exact:true}).selectOption('15');
+await page.getByLabel('角度V索引',{exact:true}).selectOption('1');
+await page.locator('#mappingPanel').scrollIntoViewIfNeeded();
+const response=await page.request.get(page.url());assert.match(response.headers()['cache-control'],/no-store/);
+return {errors,sizes,modelVisibility:true,noStore:response.headers()['cache-control'],mapping:await page.locator('#angleLabel').innerText(),screenshot:await page.screenshot({fullPage:false})};

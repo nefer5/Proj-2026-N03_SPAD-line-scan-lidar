@@ -1,0 +1,13 @@
+const errors=[];page.on('pageerror',e=>errors.push(String(e)));
+await page.setViewportSize({width:1440,height:1000});
+await page.goto('http://127.0.0.1:8016/system/scan?job=8fadfae0b6844b1089fecdce9f07df25',{waitUntil:'networkidle'});await page.waitForFunction(()=>document.body.dataset.ready==='true');
+await page.locator('#scanFrameSelect').selectOption('1');await page.locator('#scanAngleSelect').selectOption('5');
+await page.locator('#channelInput').fill('0,4');await page.locator('#applyChannels').click();
+await page.locator('#scanCloudProjection').selectOption('xy');await page.locator('#scanShowTruth').check();
+const before=await page.evaluate(()=>({frame:scanFrameIndex,bin:scanAngleIndex,facets:document.querySelectorAll('[data-scan-range]').length,records:data.histogram.counts.flat().reduce((a,b)=>a+b,0),expected:scanView.histogram_cube_counts[1][5].flat().reduce((a,b)=>a+b,0),full:data.audit.final_records}));assert.equal(before.records,before.expected);assert.equal(before.facets,2);
+await page.locator('[data-window-start="0"]').fill('660.125');await page.locator('[data-window-end="0"]').fill('674.875');await page.locator('[data-window-apply="0"]').click();await expect(page.locator('[data-window-start="4"]')).toHaveValue('660.125');
+await page.locator('#replayBin').fill('2000');await page.locator('#replayRecords').click();await expect(page.locator('#replayState')).toContainText('未重新采样');
+const replay=await page.evaluate(()=>({bin:scanView.processing_bin_ps,records:data.histogram.counts.flat().reduce((a,b)=>a+b,0),points:scanView.point_cloud.length}));assert.equal(replay.records,before.records);assert.equal(replay.bin,2000);
+await page.locator('#scanPulseIndex').fill('100');await page.locator('#scanShowPulse').click();await expect(page.locator('#scanPulseNote')).toContainText('100');await page.locator('#scanShowMean').click();
+await page.locator('#scanReconstruction').scrollIntoViewIfNeeded();
+return {errors,before,replay,scope:await page.locator('#scanHistogramScope').innerText(),screenshot:await page.screenshot({fullPage:false})};

@@ -1,0 +1,1 @@
+return {job:await page.evaluate(()=>currentJob),frames:await page.getByRole('spinbutton',{name:'采集帧数',exact:true}).inputValue(),resource:await page.locator('#scanResourceStatus').innerText(),runButton:await page.locator('#runPreview').innerText(),status:await page.locator('.job-state').innerText()};

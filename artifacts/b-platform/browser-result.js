@@ -1,0 +1,3 @@
+await page.reload({waitUntil:'networkidle'});
+await page.waitForFunction(()=>document.body.dataset.ready==='true');
+return {url:page.url(),state:await page.locator('#resultViewState').innerText(),plots:await page.locator('.hist-plot').count(),error:await page.locator('#systemError').innerText(),ready:await page.locator('body').getAttribute('data-ready'),screenshot:await page.screenshot({fullPage:false})};

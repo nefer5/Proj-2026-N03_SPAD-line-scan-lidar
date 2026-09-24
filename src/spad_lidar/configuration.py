@@ -1,7 +1,7 @@
 """Read editable YAML from the source checkout, without caching defaults."""
 from pathlib import Path
 import yaml
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 from contextvars import ContextVar
 from contextlib import contextmanager
 from copy import deepcopy
@@ -74,6 +74,20 @@ def default_values():
 
 class Algorithms(BaseModel):
     model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    parameter_preview_debounce_ms: int = Field(ge=0)
+    max_visible_channels: int = Field(ge=1)
+    max_lab_analysis_events: int = Field(gt=0)
+    max_lab_analysis_histogram_cells: int = Field(gt=0)
+    max_lab_reference_cells: int = Field(gt=0)
+    max_channel_ratio_cells: int = Field(gt=0)
+    lab_analysis_seed_streams: dict[str,int]
+
+    @model_validator(mode='after')
+    def validate_analysis_streams(self):
+        streams=self.lab_analysis_seed_streams
+        if set(streams)!={'trials','noise'} or any(type(v) is not int or v<0 for v in streams.values()) or len(set(streams.values()))!=2:
+            raise ValueError('lab_analysis_seed_streams requires distinct nonnegative trials/noise stream IDs')
+        return self
     max_histogram_bins: int = Field(gt=0)
     max_spads_per_channel: int = Field(gt=0)
     max_laser_shots: int = Field(gt=0)
@@ -148,3 +162,19 @@ class Algorithms(BaseModel):
     @classmethod
     def load(cls):
         return cls.model_validate(read_yaml("algorithms.yaml"))
+
+    @classmethod
+    def from_snapshot(cls, values):
+        """Explicit compatibility for added UI/B-analysis policies only.
+
+        Existing numerical policies are never replaced or silently filled.
+        Historical C replays do not use the newly introduced B-analysis policies.
+        """
+        additions=('parameter_preview_debounce_ms','max_visible_channels','max_lab_analysis_events',
+                   'max_lab_analysis_histogram_cells','max_lab_reference_cells','max_channel_ratio_cells',
+                   'lab_analysis_seed_streams')
+        current=read_yaml('algorithms.yaml')
+        merged=dict(values)
+        for key in additions:
+            if key not in merged:merged[key]=current[key]
+        return cls.model_validate(merged)

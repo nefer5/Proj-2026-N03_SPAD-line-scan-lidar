@@ -1,0 +1,18 @@
+const errors=[];page.on('pageerror',e=>errors.push(String(e)));
+await page.goto('http://127.0.0.1:8016/system?job=2e41f842cd224e7bada49a931bc9bbc2',{waitUntil:'networkidle'});await page.waitForFunction(()=>document.body.dataset.ready==='true');
+await page.locator('#channelInput').fill('0,4');await page.getByRole('button',{name:'应用',exact:true}).first().click();
+await page.getByRole('spinbutton',{name:'通道 0 观察窗口起点',exact:true}).fill('600');await page.getByRole('spinbutton',{name:'通道 0 观察窗口终点',exact:true}).fill('800');await page.locator('[data-window-apply="0"]').click();
+const overview=page.locator('[data-overview="0"]');await overview.scrollIntoViewIfNeeded();const box=await overview.boundingBox();
+const x=box.x+43+700/2048*(box.width-58),y=box.y+box.height/2;
+await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x+25,y,{steps:5});await page.mouse.up();
+const dragged=await page.evaluate(()=>[...windowRange]);assert(dragged[0]>600);assert(Math.abs(dragged[1]-dragged[0]-200)<1e-7);
+await page.getByRole('spinbutton',{name:'通道 0 观察窗口起点',exact:true}).fill('975.6125');await page.getByRole('spinbutton',{name:'通道 0 观察窗口终点',exact:true}).fill('991.6125');await page.locator('[data-window-apply="0"]').click();
+await expect(page.getByRole('spinbutton',{name:'通道 4 观察窗口起点',exact:true})).toHaveValue('975.6125');await expect(page.locator('#timeMin')).toHaveValue('975.6125');
+await page.locator('#replayBin').fill('2000');await page.getByRole('button',{name:'使用已保存记录重放',exact:true}).click();await expect(page.locator('#replayState')).toContainText('未重新采样');
+const rebin=await page.evaluate(()=>({bin:data.histogram.bin_ps,total:data.histogram.counts.flat().reduce((a,b)=>a+b,0),raw:rawResult.histogram.bin_ps}));assert.equal(rebin.bin,2000);assert.equal(rebin.raw,1000);assert.equal(rebin.total,9392);
+await page.getByRole('button',{name:'全部折叠',exact:true}).click();await page.locator('[data-group="rx"]>summary').click();
+const h=page.getByRole('spinbutton',{name:'水平等效焦距 f_H',exact:true});await h.fill('30');await h.press('Tab');await page.waitForFunction(()=>previewData.form_configuration.optics.focal_length_h_mm===30);
+const isolation=await page.evaluate(()=>({draft:draft.optics.focal_length_h_mm,preview:previewData.form_configuration.optics.focal_length_h_mm,records:data.form_configuration.optics.focal_length_h_mm,vertical:previewData.form_configuration.optics.focal_length_v_mm}));assert.equal(isolation.records,20);assert.equal(isolation.vertical,20);
+await page.getByRole('button',{name:'恢复默认',exact:true}).click();await page.waitForFunction(()=>previewData.form_configuration.optics.focal_length_h_mm===20);
+await page.locator('#histogramPanel').scrollIntoViewIfNeeded();
+return {errors,dragged,rebin,isolation,preciseRange:await page.evaluate(()=>windowRange),screenshot:await page.screenshot({fullPage:false})};

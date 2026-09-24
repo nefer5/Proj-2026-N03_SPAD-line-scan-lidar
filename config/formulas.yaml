@@ -33,3 +33,7 @@ scan_signal_total: 'N_{\mathrm{sensor}}^{s}=\sum_{k\in\mathcal K_{\mathrm{emit}}
 scan_background_total: 'N_{\mathrm{sensor}}^{b}=\left(\sum_k T_{\mathrm{gate},k}\right)\dot N_{\mathrm{sensor}}^{b}'
 scan_moving_range: 'R_{ka}=\frac{R_0+g_R\theta_{ka}+v t_k}{1-v/c}'
 scan_tx_window_power: '\bar P_{\mathrm{Tx}}=\frac{1}{T_{\mathrm{obs}}}\sum_k E_{k,\mathrm{Tx}}\int_0^{T_{\mathrm{obs}}}s_k(t-t_k)\,\mathrm{d}t'
+b_rx_mapping_inverted: '\begin{aligned}x_{\mathrm{c}}&=-f_H\tan(H)+\Delta x\\y_{\mathrm{c}}&=-f_V\tan(V)+\Delta y\end{aligned}'
+b_rx_mapping_legacy: '\begin{aligned}x_{\mathrm{c}}&=f_H\tan(H)+\Delta x\\y_{\mathrm{c}}&=f_V\tan(V)+\Delta y\end{aligned}'
+b_channel_ratio_db: 'C_{j\mid r}(a)=10\log_{10}\!\left(\frac{\eta_j(a)}{\eta_r(a)}\right)\;\mathrm{dB}'
+b_response_matrix: '\mathbf{n}=\mathbf{P}\,\mathbf{D}\,\mathbf{q}'

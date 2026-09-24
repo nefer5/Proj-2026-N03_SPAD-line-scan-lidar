@@ -1,0 +1,13 @@
+{
+  "web\\prototypes\\b-optics\\index.html": "08373f0728eada519b350eac55d58c56152994924483e13fbe9211d29161bd27",
+  "web\\prototypes\\b-optics\\index.template.html": "6f2c34cf09d0d5111780c29f2433a062fa4b4c1c3113e63630ed8755ffc08ed5",
+  "web\\prototypes\\b-optics\\preview-panels.js": "5c55ba3b549ff8ea06115d34b1f6913c4a4d4900c6bd56ca8349fa85d89f3509",
+  "web\\prototypes\\b-optics\\preview.css": "1b5c1b5a1305bc0ecc15403665bcfb13055efcc822df57e3c32ac14c8d3a5049",
+  "web\\prototypes\\b-optics\\preview.js": "4970c83d609918c528e0108cde19d1c4fd08de261db98b65ba02436c35756005",
+  "web\\prototypes\\b-optics\\README.md": "5006aa88cf9a7f4e4f74ccaa5696b8887935dc4f03538f2d2ffea32f62aae485",
+  "web\\prototypes\\b-optics\\snapshot.json": "4f346b861106b4be50baf3a3c393822898d1e9f41d125f79c2bec0d697c472f8",
+  "tools\\build_b_ui_preview.py": "6d8a76773e2362edbb39ffd7815ecc835f7e00aa9f6ce1cdf31fb6981751852c",
+  "config\\defaults.yaml": "f331c99842f4129f24f9e5e38e94f14586a9e5c0ec9956646b5d34c252a865f8",
+  "config\\algorithms.yaml": "945219ca6a8543645b8126e338ae0b8cd5f63cb3832afc42d59b3a8859bd8eb3",
+  "config\\parameter-help.yaml": "eed26d3d728039f627ff18ed33da560e735893af0b6c22c598da2cd6b90c7fe3"
+}

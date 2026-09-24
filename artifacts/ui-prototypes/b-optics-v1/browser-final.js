@@ -1,0 +1,11 @@
+const errors=[];page.on('pageerror',e=>errors.push(String(e)));
+await page.reload({waitUntil:'networkidle'});await page.waitForFunction(()=>document.body.dataset.ready==='true');
+await expect(page.locator('#responseFormula .katex')).toBeVisible();
+await page.getByRole('button',{name:'全部折叠',exact:true}).click();
+await page.locator('[data-group="tx"]>summary').click();
+await page.locator('[data-group="tx"] .subdetails>summary').click();
+await page.getByRole('button',{name:'选择角度 H 15 V 1',exact:true}).click();
+assert.equal(await page.locator('#anglePlot .selected-cell').evaluate(el=>getComputedStyle(el).stroke),'rgb(242, 142, 87)');
+await page.getByRole('button',{name:'选择角度 H 8 V 4',exact:true}).click();
+await page.evaluate(()=>window.scrollTo(0,0));
+return {errors,formulaRendered:true,selectedHighlight:true,url:page.url(),ready:await page.locator('body').getAttribute('data-ready'),fingerprinted:await page.locator('script[src],link[rel="stylesheet"]').evaluateAll(els=>els.every(el=>(el.src||el.href).includes('?v=')))};

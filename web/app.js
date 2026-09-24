@@ -241,9 +241,7 @@ function render(result) {
   renderDetection(result);
   if(m.detection_status==='not_detected')$('mRange').textContent='未检出';
   const truth=h.ground_truth,fine=truth.high_resolution;
-  const lines=[{name:"观测柱状",y:h.observed_counts,color:colors.blue,bars:true},{name:"纯信号解析GT",x:fine.time_ns,y:fine.counts_per_nominal_bin,color:colors.cyan,width:1.5,dash:[6,4]},{name:"GT bin积分",y:truth.counts,color:colors.cyan,points:true},{name:"纯噪声",y:h.expected_noise_counts,color:colors.orange,width:1.2}];
   const bounds=h.sample_range;
-  if(bounds.available)lines.push({name:'MC最小–最大',y:bounds.upper_counts,lower:bounds.lower_counts,errorBars:true,color:'#c2d7ff',alpha:0.85});
   $('histogramErrorNote').textContent=(bounds.available?'误差棒：'+bounds.trial_count+'次测距统计MC的逐bin最小–最大范围。':'测距统计重复次数为0，未绘制误差棒。')+bounds.note;
   $('histogramSamplingNote').textContent=truth.note+' 门内GT合计：'+fmt(truth.in_gate_total,6)+' events；预算参考面为PDE/FF之后，非原始入射光子数。';
   const shots=result.configuration.simulation.laser_shots, repetitions=result.configuration.simulation.monte_carlo_trials;
@@ -257,11 +255,15 @@ function render(result) {
     ['测距统计（非图形平均）','大于0时以蓝柱为第1次，补足其余独立含噪采集。每张估计一次距离，汇总偏差、精度与成功率；同批数据也计算误差棒。',repetitions+'次，每次累计'+shots+'发；不平均蓝柱，也不决定青色GT或橙线。'],
   ];
   $('histogramMethods').replaceChildren(...methods.map(cells=>{const row=document.createElement('tr');cells.forEach(value=>{const cell=document.createElement('td');cell.textContent=value;row.append(cell);});return row;}));
-  drawLines($("histFull"),h.time_ns,lines,{xLabel:"时间 (ns)",edges:h.edges_ns,binWidth:result.configuration.simulation.tdc_bin_ps/1000});
   const cfg=result.configuration.simulation;
-  const peak=h.time_ns.reduce((best,v,i)=>Math.abs(v-result.derived.tof_ns)<Math.abs(h.time_ns[best]-result.derived.tof_ns)?i:best,0);
-  const half=Math.max(10,Math.ceil(5*result.derived.irf_sigma_ns/(cfg.tdc_bin_ps/1000)));
-  drawLines($("histZoom"),h.time_ns,lines,{i0:Math.max(0,peak-half),i1:Math.min(h.time_ns.length,peak+half+1),edges:h.edges_ns,binWidth:cfg.tdc_bin_ps/1000,xLabel:"目标峰局部时间 (ns)",xDigits:2});
+  const sharedHistogram={histogram:{time_ns:h.time_ns,edges_ns:h.edges_ns,counts:[h.observed_counts]},references:[truth],statistics:{noise_mean:[h.expected_noise_counts],lower:bounds.available?[bounds.lower_counts]:null,upper:bounds.available?[bounds.upper_counts]:null}};
+  const enabled={observed:true,ideal:true,noise:true,error:bounds.available};
+  const fullGate=[h.edges_ns[0],h.edges_ns.at(-1)];
+  const extent=algorithmConfig.ground_truth_extent_sigma*result.derived.irf_sigma_ns;
+  let zoomGate=[Math.max(fullGate[0],result.derived.tof_ns-extent),Math.min(fullGate[1],result.derived.tof_ns+extent)];
+  if(zoomGate[0]>=zoomGate[1])zoomGate=fullGate;
+  PhotonHistogram.draw($('histFull'),sharedHistogram,0,fullGate,PhotonHistogram.maximum(sharedHistogram,0,fullGate,enabled),enabled);
+  PhotonHistogram.draw($('histZoom'),sharedHistogram,0,zoomGate,PhotonHistogram.maximum(sharedHistogram,0,zoomGate,enabled),enabled);
   drawRange($("rangeChart"),result.range_sweep);
   if(result.crosstalk.status === "ok") {
     if(isDebug) drawHeatmap($("xtalkChart"),result.crosstalk.total_induced_matrix);

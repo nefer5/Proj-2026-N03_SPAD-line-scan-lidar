@@ -28,7 +28,9 @@ class OpticalConfig(StrictConfig):
     channels_h: int = Field(ge=1,strict=True)
     channels_v: int = Field(ge=1,strict=True)
     pixel_pitch_um: float = Field(gt=0)
-    focal_length_mm: float = Field(gt=0)
+    focal_length_h_mm: float = Field(gt=0)
+    focal_length_v_mm: float = Field(gt=0)
+    mapping_mode: Literal['inverted','legacy_upright']
     tx_fwhm_h_mrad: float = Field(gt=0)
     tx_fwhm_v_mrad: float = Field(gt=0)
     tx_center_h_mrad: float
@@ -115,7 +117,7 @@ def optical_dataset(cfg,a):
         rx=synthetic_receiver(o,cfg.device,[filt.x[0],o.wavelength_nm,filt.x[-1]],a)
     # Metadata explicitly distinguishes generated models from imported measurements.
     synthetic=(o.tx_model!='dataset' or o.rx_model!='dataset' or imported.synthetic)
-    doc={'schema_version':1,'coordinate_convention':'optical_H_right_V_down__image_x_right_y_down',
+    doc={'schema_version':2,'coordinate_convention':'optical_H_right_V_up__image_x_right_y_up',
          'label':'构造光学样例 / Gaussian or uniform reference' if synthetic else imported.label,
          'synthetic':synthetic,'provenance':{'generator':'spad-spatial-v1','tx_model':o.tx_model,'rx_model':o.rx_model,
          'parameters':o.model_dump(exclude={'dataset'}),'algorithms':{k:getattr(a,k) for k in ('spatial_angle_samples_h','spatial_angle_samples_v','rx_angle_samples_h','rx_angle_samples_v')},
@@ -251,6 +253,10 @@ def project_illumination(cfg,a,progress,cancelled):
 def run_system(cfg,a,progress,cancelled):
     light,groups,optics=project_illumination(cfg,a,progress,cancelled)
     result=run_illumination(cfg,a,light,groups,progress,cancelled)
+    return finish_system(cfg,a,result,light,groups,optics)
+
+
+def finish_system(cfg,a,result,light,groups,optics):
     result['illumination']={'signal_photons_per_pixel_per_pulse':light.signal_photons_per_pulse.sum(axis=1).tolist(),
                             'background_photons_per_pixel_per_second':light.background_photons_per_second.sum(axis=1).tolist(),
                             'shape':optics['array_shape'],'provenance':light.provenance}

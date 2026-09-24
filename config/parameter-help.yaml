@@ -267,6 +267,14 @@ experiments:
     label: 接收有效焦距
     unit: mm
     description: 仅构造高斯PSF时使用，以f*tan(angle)映射质心；不是完整光线追迹。
+  optics.focal_length_h_mm:
+    label: 水平等效焦距 f_H
+    unit: mm
+    description: 大于0。构造高斯PSF的位置映射使用此焦距，默认x=-f_H*tan(H)+x偏移；数据库模式由数据定义，不使用此项。
+  optics.focal_length_v_mm:
+    label: 垂直等效焦距 f_V
+    unit: mm
+    description: 大于0。构造高斯PSF的位置映射使用此焦距，默认y=-f_V*tan(V)+y偏移；数据库模式由数据定义，不使用此项。
   optics.tx_fwhm_h_mrad:
     label: Tx水平角FWHM
     unit: mrad
@@ -435,3 +443,243 @@ experiments:
     label: 构造Rx覆盖 V max
     unit: mrad
     description: 仅构造Rx模型生效，与Tx角域独立；Rx使用此角域采样数据库，禁止超域外推。导入Rx时使用文件轴。
+  optics.mapping_mode:
+    label: 几何映射方向
+    unit: ''
+    description: 新工况使用inverted倒置；legacy_upright仅保留旧配置的正向几何，必须显式选择。所有显示坐标右正左负、上正下负。
+  timing.monte_carlo_trials:
+    label: 测距统计重复次数
+    unit: 次
+    description: 完整含噪采集总次数，包含首次观测；0次不生成误差棒，1次上下限与观测重合。每次内部累计laser_shots发。样本范围不是置信区间。
+  tx.tx_model:
+    label: Tx角分布模型
+    unit: 枚举
+    description: gaussian高斯角分布；uniform有限角域均匀分布；dataset使用导入的Tx角单元份额。仅当前模型生效。
+  tx.wavelength_nm:
+    label: 激光波长
+    unit: nm
+    description: 用于单光子能量 hc/λ 和滤光片激光波长处透过率；背景换算采用窄带近似。
+  tx.total_pulse_energy_nj:
+    label: 全光斑脉冲能量 · Tx前
+    unit: nJ
+    description: 整个Tx光斑的单脉冲能量，不是A单角通道能量。先乘Tx效率，再按角度单元份额分配。实际生效。
+  tx.pulse_shape:
+    label: 时间脉冲形状
+    unit: 枚举
+    description: gaussian 为高斯，rectangular 为矩形；形状同时参与峰值功率和回波响应，不是空间角度分布。
+  tx.pulse_fwhm_ps:
+    label: 激光脉宽 FWHM
+    unit: ps
+    description: 高斯为半高全宽，矩形为全持续时间；改变脉宽保持单脉冲能量不变，峰值功率随之变化。
+  tx.tx_efficiency:
+    label: Tx 光学效率
+    unit: '1'
+    description: 输入参考面到出射端的能量透过率，乘一次；Tx后功率另行显示。
+  tx.tx_fwhm_h_mrad:
+    label: Tx水平角FWHM
+    unit: mrad
+    description: 仅gaussian Tx生效。角域外高斯尾部明确记录为损失，不重新归一化。
+  tx.tx_fwhm_v_mrad:
+    label: Tx垂直角FWHM
+    unit: mrad
+    description: 仅gaussian Tx生效。角分布为H/V可分离的二维高斯。
+  tx.tx_center_h_mrad:
+    label: Tx水平角中心
+    unit: mrad
+    description: 仅gaussian Tx生效；光学H方向远场角，非机械转镜角。
+  tx.tx_center_v_mrad:
+    label: Tx垂直角中心
+    unit: mrad
+    description: 仅gaussian Tx生效；光学V方向远场角，非机械转镜角。
+  tx.angle_h_min_mrad:
+    label: 构造Tx角域 H min
+    unit: mrad
+    description: 仅构造Tx使用；Rx覆盖独立配置。背景角积分使用实际Tx网格定义的接收局部场景域，C假设该背景随接收机局部视场均匀平稳。
+  tx.angle_h_max_mrad:
+    label: 构造Tx角域 H max
+    unit: mrad
+    description: 仅构造Tx使用；Rx覆盖独立配置。背景角积分使用实际Tx网格定义的接收局部场景域，C假设该背景随接收机局部视场均匀平稳。
+  tx.angle_v_min_mrad:
+    label: 构造Tx角域 V min
+    unit: mrad
+    description: 仅构造Tx使用；Rx覆盖独立配置。背景角积分使用实际Tx网格定义的接收局部场景域，C假设该背景随接收机局部视场均匀平稳。
+  tx.angle_v_max_mrad:
+    label: 构造Tx角域 V max
+    unit: mrad
+    description: 仅构造Tx使用；Rx覆盖独立配置。背景角积分使用实际Tx网格定义的接收局部场景域，C假设该背景随接收机局部视场均匀平稳。
+  scene.range_m:
+    label: 目标距离
+    unit: m
+    description: 正入射大朗伯平面的距离；回波中心为 2R/c 加标定延迟。
+  scene.target_reflectivity:
+    label: 目标反射率
+    unit: '1'
+    description: 当前激光波长下的朗伯反射率。背景输入已经是场景辐亮度，不再重复乘反射率。
+  scene.atmospheric_one_way_transmission:
+    label: 单程大气透过率
+    unit: '1'
+    description: 信号使用该值平方；距离扫描暂保持该输入固定，不推导消光系数。
+  scene.overlap_factor:
+    label: Tx/Rx 重叠因子
+    unit: '1'
+    description: 目标角通道的发射照明与接收视场有效重叠比例，仅作用于信号。
+  rx.rx_model:
+    label: Rx像面映射模型
+    unit: 枚举
+    description: gaussian_psf构造高斯PSF；uniform_pixel显式均匀参考；dataset使用效率及PSF数据库。仅当前模型生效。
+  rx.focal_length_h_mm:
+    label: 水平等效焦距 f_H
+    unit: mm
+    description: 大于0。构造高斯PSF的位置映射使用此焦距，默认x=-f_H*tan(H)+x偏移；数据库模式由数据定义，不使用此项。
+  rx.focal_length_v_mm:
+    label: 垂直等效焦距 f_V
+    unit: mm
+    description: 大于0。构造高斯PSF的位置映射使用此焦距，默认y=-f_V*tan(V)+y偏移；数据库模式由数据定义，不使用此项。
+  rx.mapping_mode:
+    label: 几何映射方向
+    unit: ''
+    description: 新工况使用inverted倒置；legacy_upright仅保留旧配置的正向几何，必须显式选择。所有显示坐标右正左负、上正下负。
+  rx.psf_sigma_um:
+    label: PSF高斯标准差
+    unit: μm
+    description: 仅gaussian_psf生效；是sigma而非FWHM，PSF按实际像素边界积分。
+  rx.rx_offset_x_um:
+    label: 像面水平偏移
+    unit: μm
+    description: 仅gaussian_psf生效；平移PSF质心，可研究边缘截断及通道间能量分配。
+  rx.rx_offset_y_um:
+    label: 像面垂直偏移
+    unit: μm
+    description: 仅gaussian_psf生效；移动质心而不补偿移出阵列的能量。
+  rx.rx_efficiency:
+    label: 构造Rx收光效率
+    unit: '1'
+    description: 构造Rx中的入瞳到无限像面效率，滤光/PSF截断/PDE/FF均未包含。导入Rx时使用数据表，本项不生效。
+  rx.rx_aperture_shape:
+    label: Rx 入瞳形状
+    unit: 枚举
+    description: circle/ellipse/rectangle 对应圆形/椭圆/矩形，几何参数用于有效入瞳面积。
+  rx.rx_aperture_mm:
+    label: 圆形入瞳直径
+    unit: mm
+    description: 只在圆形模式生效，是直径不是半径。
+  rx.rx_aperture_width_mm:
+    label: 入瞳水平全尺寸
+    unit: mm
+    description: 椭圆为水平全轴长、矩形为宽；不是椭圆半轴。圆形模式忽略。
+  rx.rx_aperture_height_mm:
+    label: 入瞳垂直全尺寸
+    unit: mm
+    description: 椭圆为垂直全轴长、矩形为高。圆形模式忽略。
+  rx.rx_angle_h_min_mrad:
+    label: 构造Rx覆盖 H min
+    unit: mrad
+    description: 仅构造Rx模型生效，与Tx角域独立；Rx使用此角域采样数据库，禁止超域外推。导入Rx时使用文件轴。
+  rx.rx_angle_h_max_mrad:
+    label: 构造Rx覆盖 H max
+    unit: mrad
+    description: 仅构造Rx模型生效，与Tx角域独立；Rx使用此角域采样数据库，禁止超域外推。导入Rx时使用文件轴。
+  rx.rx_angle_v_min_mrad:
+    label: 构造Rx覆盖 V min
+    unit: mrad
+    description: 仅构造Rx模型生效，与Tx角域独立；Rx使用此角域采样数据库，禁止超域外推。导入Rx时使用文件轴。
+  rx.rx_angle_v_max_mrad:
+    label: 构造Rx覆盖 V max
+    unit: mrad
+    description: 仅构造Rx模型生效，与Tx角域独立；Rx使用此角域采样数据库，禁止超域外推。导入Rx时使用文件轴。
+  rx.dataset:
+    label: 光学数据库（JSON）
+    unit: 版本化数据
+    description: 仅Tx或Rx选择dataset时使用；包含明确角度/波长/像素轴、能量参考面和来源；数据不自动归一化。
+  spad.channels_h:
+    label: 水平读出通道数
+    unit: 通道
+    description: 与H_binning共同定义阵列水平像素数；每个像素只属于一个固定矩形组。实际生效。
+  spad.channels_v:
+    label: 垂直读出通道数
+    unit: 通道
+    description: 与V_binning共同定义阵列垂直像素数；不由数量猜测IFOV。实际生效。
+  spad.pixel_pitch_um:
+    label: 像素节距
+    unit: μm
+    description: 构造Rx模型中的完整像素节距；导入Rx时使用数据库像素边界，本项不生效。FF由SPAD计算。
+  background.solar_enabled:
+    label: 启用太阳光
+    unit: bool
+    description: 启用目标面标准太阳照明。关闭后太阳计数为0，保留lux设置以便恢复。
+  background.solar_illuminance_lux:
+    label: 目标面太阳照度
+    unit: lux
+    description: 固定ASTM G173-03 AM1.5G谱形，按CIE V(λ)和683lm/W归一化。不是任意光源lux到近红外的通用换算。
+  background.solar_reflectivity:
+    label: 太阳背景目标灰反射率
+    unit: '1'
+    description: 将目标面太阳谱辐照度乘此灰朗伯反射率/π变成接收方向谱辐亮度。独立于激光反射率便于区分假设；未做目标反射谱。
+  background.other_light_enabled:
+    label: 启用其他环境光
+    unit: bool
+    description: 独立于太阳光的附加光谱背景开关。
+  background.other_light_scale:
+    label: 其他环境光倍率
+    unit: '1'
+    description: 整体缩放其他环境光光谱；不进行lux转换。
+  acquisition.calibration_delay_ns:
+    label: 固定标定延迟
+    unit: ns
+    description: 加到生成回波时间上，估计距离时减去同一值；本版代表已知且理想的标定，不是残余误差。
+  spad.H_binning:
+    label: 水平空间binning数量
+    unit: 个
+    description: 每角通道沿水平H方向聚合的SPAD数量，正整数；与V_binning相乘派生总SPAD数。A版仍均匀分配信号，不根据H/V自动修改通道IFOV。
+  spad.V_binning:
+    label: 垂直空间binning数量
+    unit: 个
+    description: 每角通道沿垂直V方向聚合的SPAD数量，正整数。H×V统一影响暗计数、均匀事件分配及独立TDC数量；实际PSF和像素间距留待B版。
+  spad.fill_factor:
+    label: 填充因子 FF
+    unit: '1'
+    description: 与输入PDE相乘作用于信号和光学背景，不作用于器件DCR。输入若为光敏区PDE，FF表示光敏区面积占比；输入若为已包含器件收集特性的文献PDE，FF表示额外折减，避免重复计入。
+  spad.dcr_cps_per_spad:
+    label: 单SPAD暗计数率
+    unit: cps
+    description: 单个SPAD每秒暗触发候选数；每门期望=DCR×SPAD数×门宽秒，不乘PDE/FF。默认按用户确认的Sony相关参考（60°C条件）；当前不会按温度自动换算。见docs/sony-reference.md。
+  spad.other_noise_cps_per_spad:
+    label: 其他单SPAD随机噪声
+    unit: cps
+    description: 额外均匀、独立随机触发率，不可用来替代有时间相关性的afterpulse或串扰。
+  spad.spad_dead_time_ns:
+    label: SPAD死时间
+    unit: ns
+    description: 事件模式为每次雪崩后的非延长型恢复时间，跨周期保留；analytic_reference理想参考忽略此参数。
+  spad.spad_jitter_fwhm_ps:
+    label: SPAD时间抖动FWHM
+    unit: ps
+    description: 高斯时间抖动的半高全宽；除以2sqrt(2ln2)得到标准差。默认按用户确认的Sony相关参考（室温、Vex=3V）；FW10%未作为独立输入。见docs/sony-reference.md。
+  spad.detector_operation:
+    label: 探测器门控方式
+    unit: 枚举
+    description: gated：门外不产生雪崩；free_running：整周期背景可触发SPAD并延续死时间。两者仅门内触发TDC。
+  acquisition.period_ns:
+    label: 采集周期
+    unit: ns
+    description: 显式控制周期，必须覆盖采集门；直接照明实验不需要激光或目标参数。实际生效。
+  acquisition.gate_start_ns:
+    label: 接收门起点
+    unit: ns
+    description: 相对发射参考时刻的记录门起点；free_running模式门外事件会使SPAD进入死时间，gated模式门外不产生雪崩。
+  acquisition.gate_width_ns:
+    label: 接收门宽
+    unit: ns
+    description: 有效采集时段长度；目标波形超出门的能量直接丢失，不归一化补回。
+  acquisition.laser_shots:
+    label: 采集周期数
+    unit: 周期
+    description: 运行中实际采集的周期数，另有算法配置的预热周期；无扫描驻留推断。实际生效。
+  acquisition.monte_carlo_trials:
+    label: 测距统计重复次数
+    unit: 次
+    description: 完整含噪采集总次数，包含首次观测；0次不生成误差棒，1次上下限与观测重合。每次内部累计laser_shots发。样本范围不是置信区间。
+  acquisition.rng_seed:
+    label: 随机种子
+    unit: 整数
+    description: 同参数、同算法配置、同运行依赖时可复现抽样；更改种子获得另一组随机样本。

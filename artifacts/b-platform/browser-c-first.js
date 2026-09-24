@@ -1,0 +1,3 @@
+const errors=[];page.on('pageerror',e=>errors.push(String(e)));
+await page.setViewportSize({width:1440,height:1000});await page.goto('http://127.0.0.1:8016/system/scan',{waitUntil:'networkidle'});
+return {ready:await page.locator('body').getAttribute('data-ready'),errors,error:await page.locator('#loadingError').innerText(),groups:await page.locator('.parameter-group>summary').allTextContents(),resource:await page.locator('#scanResourceStatus').innerText(),headings:await page.locator('h2').allTextContents()};

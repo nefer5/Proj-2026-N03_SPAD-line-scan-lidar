@@ -72,14 +72,19 @@ class LabConfig(StrictConfig):
 
 
 def experiment_defaults(kind):
+    if kind not in ('spad','system','scan'):
+        raise ValueError(f'Unknown experiment kind: {kind}')
     base = default_values()
     sections = read_yaml('defaults.yaml')['experiments']
     if kind not in sections:
         raise ValueError(f'Unknown experiment kind: {kind}')
+    if kind=='system':
+        from .system_config import domain_defaults
+        return domain_defaults(base,sections[kind])
     if kind=='scan':
-        from ..scan.config import ScanTiming
         result=experiment_defaults('system')
-        result['timing']={k:result['timing'][k] for k in ScanTiming.model_fields}
+        result['acquisition'].pop('laser_shots')
+        result['acquisition'].pop('monte_carlo_trials')
         return merge_config(result,sections[kind])
     # Reuse named existing defaults, never copy numeric fallbacks into domain code.
     result = {
@@ -103,6 +108,9 @@ def resolve_experiment(kind, overrides, algorithms=None):
     if kind != 'spad':
         from .spatial import SystemConfig
         model = SystemConfig
+    if kind=='system':
+        from .system_config import BSystemConfig
+        model=BSystemConfig
     if kind=='scan':
         from .scanning import ScanConfig
         model=ScanConfig
@@ -110,6 +118,8 @@ def resolve_experiment(kind, overrides, algorithms=None):
     model.model_validate(defaults)  # Missing/unknown default keys fail even if user overrides could fill them.
     from ..legacy_config import migrate_experiment_overrides
     cfg = model.model_validate(merge_config(defaults, migrate_experiment_overrides(kind,overrides)))
+    if kind=='system' and cfg.acquisition.monte_carlo_trials>a.max_monte_carlo_trials:
+        raise ValueError('Repeat count exceeds max_monte_carlo_trials')
     pixels = cfg.device.spads_per_channel
     if kind in ('system','scan'):
         pixels *= cfg.optics.channels_h * cfg.optics.channels_v

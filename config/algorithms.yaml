@@ -69,3 +69,12 @@ max_scan_projection_work: 20000000
 max_scan_sampling_work: 2000000
 scan_preview_table_rows: 50
 scan_angle_boundary_tolerance_mrad: 1.0e-12
+parameter_preview_debounce_ms: 500
+max_visible_channels: 16
+max_lab_analysis_events: 20000000
+max_lab_analysis_histogram_cells: 8000000
+max_lab_reference_cells: 4000000
+max_channel_ratio_cells: 1000000
+lab_analysis_seed_streams:
+  trials: 1
+  noise: 2

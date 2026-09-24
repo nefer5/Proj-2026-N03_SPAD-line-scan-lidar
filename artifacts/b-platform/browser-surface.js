@@ -1,0 +1,1 @@
+return {url:page.url(),title:await page.title()};

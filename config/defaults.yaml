@@ -222,34 +222,33 @@ experiments:
       spatial_mode: uniform
       pixel_weights: []
   system:
-    timing:
-      laser_shots: 100
-    optics:
+    tx:
       tx_model: gaussian
-      rx_model: gaussian_psf
-      dataset: null
-      channels_h: 3
-      channels_v: 2
-      pixel_pitch_um: 20
-      focal_length_mm: 20
       tx_fwhm_h_mrad: 8
       tx_fwhm_v_mrad: 3
       tx_center_h_mrad: 0
       tx_center_v_mrad: 0
-      psf_sigma_um: 8
-      rx_offset_x_um: 0
-      rx_offset_y_um: 0
       angle_h_min_mrad: -6
       angle_h_max_mrad: 6
       angle_v_min_mrad: -3
       angle_v_max_mrad: 3
+    rx:
+      rx_model: gaussian_psf
+      dataset: null
+      focal_length_h_mm: 20
+      focal_length_v_mm: 20
+      mapping_mode: inverted
+      psf_sigma_um: 8
+      rx_offset_x_um: 0
+      rx_offset_y_um: 0
       rx_angle_h_min_mrad: -6
       rx_angle_h_max_mrad: 6
       rx_angle_v_min_mrad: -3
       rx_angle_v_max_mrad: 3
-      total_pulse_energy_nj: 12
-      solar_enabled: false
-      other_light_enabled: false
+    spad:
+      channels_h: 3
+      channels_v: 2
+      pixel_pitch_um: 20
   scan:
     scan:
       trajectory: sawtooth
@@ -278,3 +277,9 @@ experiments:
     scene_motion:
       range_gradient_m_per_rad: 0
       radial_velocity_m_s: 0
+
+  # Named optional experiment, never an implicit override of shared defaults.
+  scan_demo:
+    background:
+      solar_enabled: false
+      other_light_enabled: false

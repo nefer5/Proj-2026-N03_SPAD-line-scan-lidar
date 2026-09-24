@@ -31,12 +31,21 @@ def spad_page():
 
 @router.get('/system')
 def system_page():
-    return lab_page('system')
+    return workspace_page('system')
+
+
+def workspace_page(kind):
+    html=(WEB/'system.html').read_text(encoding='utf-8')
+    html=html.replace('data-lab="system"',f'data-lab="{kind}"')
+    for name in ('system.css','system.js','shared/scan-workspace.js','shared/optical-panels.js','shared/histogram-window.js','curve-editor.js',
+                 'vendor/katex/katex.min.js','vendor/katex/katex.min.css'):
+        html=html.replace(f'/static/{name}"',f'/static/{name}?v={sha256((WEB/name).read_bytes()).hexdigest()}"')
+    return HTMLResponse(html)
 
 
 @router.get('/system/scan')
 def scan_page():
-    return lab_page('scan')
+    return workspace_page('scan')
 
 
 @router.post('/api/experiments/{kind}/optical-data')
@@ -68,9 +77,17 @@ def experiment_catalog(kind: str):
         curves = read_yaml('curve-inputs.yaml')
         curves['groups'] = {k: v for k, v in curves['groups'].items() if k in type(cfg.spectral_inputs).model_fields}
         curves.update(formulas=read_yaml('formulas.yaml'), formula_notes=read_yaml('formula-notes.yaml'))
-        return {'defaults': cfg.model_dump(), 'schema': type(cfg).model_json_schema(),
+        result={'defaults': cfg.model_dump(), 'schema': type(cfg).model_json_schema(),
                 'help': read_yaml('parameter-help.yaml'), 'curves': curves,
                 'algorithms': Algorithms.load().model_dump(), 'readout_modes': read_yaml('readout-modes.yaml')}
+        if kind in ('system','scan'):
+            from ..experiments.system_config import form_values,LEGACY_PATHS
+            form=form_values(cfg)
+            paths={old:new for old,new in LEGACY_PATHS.items() if old=='rng_seed' or old.split('.')[1] in form.get(old.split('.')[0],{})}
+            for group in ('scan','scene_motion'):
+                if group in form:paths.update({group+'.'+k:group+'.'+k for k in form[group]})
+            result.update(form_defaults=form,form_paths=paths,schema_version=3)
+        return result
     except (ValueError, KeyError) as exc:
         raise HTTPException(422, str(exc)) from exc
 
@@ -126,6 +143,26 @@ def result(job_id: str):
         raise HTTPException(409, str(exc)) from exc
 
 
+@router.get('/api/jobs/{job_id}/system-view')
+def system_result_view(job_id:str):
+    """Decorate old immutable records for display without recalculating acquisition."""
+    try:
+        result=manager().result(job_id)
+        if 'optics' not in result or 'scan' in result:
+            raise ValueError('Expected a static B result')
+        if 'form_configuration' not in result:
+            from ..reporting.spatial_view import optical_view
+            # Historical algorithms may predate display-only keys. Keep original
+            # acquisition provenance and explicitly identify current view metadata.
+            a=Algorithms.from_snapshot(result['configuration']['algorithms'])
+            cfg=SimulationConfig.for_experiment('system',result['configuration']['experiment'],a)
+            result.update(optical_view(cfg,a,result['optics']))
+            result['view_note']='历史采集记录原样保留；仅补充显示元数据，未重新采样。旧版未保存的重复统计不补造。'
+        return result
+    except (ValueError,KeyError,TypeError) as exc:
+        raise HTTPException(422,str(exc)) from exc
+
+
 class ReplayRequest(BaseModel):
     model_config = ConfigDict(extra='forbid', allow_inf_nan=False)
     bin_ps: float
@@ -135,6 +172,11 @@ class ReplayRequest(BaseModel):
 def replay(job_id: str, request: ReplayRequest):
     try:
         result = manager().result(job_id)
+        if 'statistics' in result and 'references' in result:
+            from ..experiments.spatial_analysis import replay_analysis
+            a=Algorithms.model_validate(result['configuration']['algorithms'])
+            cfg=SimulationConfig.for_experiment('system',result['configuration']['experiment'],a)
+            return replay_analysis(result,cfg,a,request.bin_ps)
         records = result['records']
         original = result['record_schema']['tdc_bin_ps']
         if request.bin_ps < original or not np.isclose(request.bin_ps/original, round(request.bin_ps/original), rtol=0, atol=np.finfo(float).eps*max(1,request.bin_ps/original)):
@@ -170,10 +212,12 @@ def preview_scan(config: dict):
 def scan_from_system(config: dict):
     try:
         a=Algorithms.load()
-        source=SimulationConfig.for_experiment('system',config,a).model_dump()
+        from ..experiments.system_config import form_values
+        source=form_values(SimulationConfig.for_experiment('system',config,a))
         source['timing'].pop('laser_shots')
+        source['timing'].pop('monte_carlo_trials',None)
         result=SimulationConfig.for_experiment('scan',source,a)
-        return {'schema_version':2,'kind':'scan','experiment':result.model_dump(),
+        return {'schema_version':3,'kind':'scan','experiment':result.model_dump(),
                 'note':'已继承B的器件、光学、读出、时序与seed；C的发数由扫描帧预算重新生成，不继承B的累计发数。'}
     except (ValueError,KeyError) as exc:
         raise HTTPException(422,str(exc)) from exc
@@ -190,9 +234,8 @@ def replay_scan(job_id: str, request: ReplayRequest):
         ratio=request.bin_ps/original
         if request.bin_ps<original or not np.isclose(ratio,round(ratio),rtol=0,atol=np.finfo(float).eps*max(1,ratio)):
             raise ValueError('Replay bin must be an integer multiple of acquisition resolution')
-        a=Algorithms.model_validate(result['configuration']['algorithms'])
-        from ..experiments.scanning import ScanConfig
-        cfg=ScanConfig.model_validate(result['configuration']['experiment'])
+        a=Algorithms.from_snapshot(result['configuration']['algorithms'])
+        cfg=SimulationConfig.for_experiment('scan',result['configuration']['experiment'],a)
         s=result['scan'];truth={int(k):{name:np.asarray(v) for name,v in row.items()} for k,row in s['source_truth_by_cycle'].items()}
         return reconstruct_scan(cfg,a,result['records'],s['warmup_schedule']+s['schedule'],np.array(s['angle_edges_mrad']),
                                 s['channel_directions_mrad'],truth,request.bin_ps)
@@ -219,8 +262,88 @@ def point_cloud_csv(job_id: str, bin_ps: float | None = None):
 def import_experiment(kind: str, document: str = Body(media_type='text/plain')):
     try:
         envelope = parse_yaml(document)
-        if set(envelope) != {'schema_version', 'kind', 'experiment'} or envelope['schema_version'] != 2 or envelope['kind'] != kind:
-            raise ValueError('Expected schema_version 2 and matching experiment kind; legacy A uses its own import entry')
+        allowed=(2,3) if kind in ('system','scan') else (2,)
+        if set(envelope) != {'schema_version', 'kind', 'experiment'} or envelope['schema_version'] not in allowed or envelope['kind'] != kind:
+            raise ValueError('Expected a supported schema_version and matching experiment kind; legacy A uses its own import entry')
         return SimulationConfig.for_experiment(kind, envelope['experiment']).model_dump()
     except (ValueError, KeyError) as exc:
         raise HTTPException(422, str(exc)) from exc
+
+
+@router.post('/api/experiments/{kind}/form')
+def system_form(kind:str,config:dict):
+    from ..experiments.system_config import form_values
+    try:
+        if kind not in ('system','scan'):raise ValueError('Expected system or scan workspace')
+        cfg=SimulationConfig.for_experiment(kind,config)
+        return {'configuration':cfg.model_dump(),'form':form_values(cfg)}
+    except (ValueError,KeyError,TypeError) as exc:
+        raise HTTPException(422,str(exc)) from exc
+
+
+@router.post('/api/experiments/system/preview')
+def system_preview(config:dict):
+    from ..experiments.spatial import project_illumination
+    from ..experiments.lab import stamp_result
+    from ..reporting.spatial_view import optical_view
+    try:
+        a=Algorithms.load();cfg=SimulationConfig.for_experiment('system',config,a)
+        light,groups,optics=project_illumination(cfg,a,lambda *args:None,lambda:False)
+        view=optical_view(cfg,a,optics)
+        view.update(optics=optics,illumination={'signal_photons_per_pixel_per_pulse':light.signal_photons_per_pulse.sum(axis=1).tolist(),
+                                              'shape':optics['array_shape']})
+        return stamp_result('B_parameter_preview_without_event_sampling',cfg,a,view)
+    except (ValueError,KeyError,TypeError) as exc:
+        raise HTTPException(422,str(exc)) from exc
+
+
+@router.post('/api/experiments/scan/workspace-preview')
+def scan_workspace_preview(config:dict):
+    from ..experiments.spatial import project_illumination
+    from ..experiments.lab import stamp_result
+    from ..reporting.spatial_view import optical_view
+    from ..scan.schedule import build_schedule
+    from ..spad.device import effective_pde
+    from ..curves import Curve
+    try:
+        a=Algorithms.load();cfg=SimulationConfig.for_experiment('scan',config,a)
+        schedule=preview_scan(config)
+        light,groups,optics=project_illumination(cfg,a,lambda *args:None,lambda:False)
+        view=optical_view(cfg,a,optics,laser_shots=schedule['summary']['emitted_reference_slots'])
+        program,_,_,_=build_schedule(cfg,a)
+        exposure=sum((w.end_ns-w.start_ns) if cfg.device.detector_operation=='free_running' else (w.gate_close_ns-w.gate_open_ns) for w in program.windows)*1e-9
+        optical_noise=light.background_photons_per_second@effective_pde(Curve(cfg.spectral_inputs.pde)(light.wavelength_nm),cfg.device.fill_factor)
+        noise=float((optical_noise+cfg.device.dcr_cps_per_spad+cfg.device.other_noise_cps_per_spad).sum()*exposure)
+        view.update(scan_preview=schedule,optics=optics,illumination={'signal_photons_per_pixel_per_pulse':light.signal_photons_per_pulse.sum(axis=1).tolist(),'shape':optics['array_shape']},
+            resource_probe={'expected_noise_candidates':noise,'event_limit':a.max_readout_events_per_run,'blocked':noise>a.max_readout_events_per_run,
+                            'note':'仅背景/器件噪声候选下界，包含预热；信号候选另计。超限不自动降低背景或发数。'})
+        view['parameter_figures']['pulse']['facts'][1][0]='连续PRF平均功率参考'
+        return stamp_result('C_schedule_and_static_optics_preview_without_event_sampling',cfg,a,view)
+    except (ValueError,KeyError,TypeError) as exc:
+        raise HTTPException(422,str(exc)) from exc
+
+
+@router.get('/api/experiments/scan/demo')
+def scan_demo():
+    try:
+        return SimulationConfig.for_experiment('scan',read_yaml('defaults.yaml')['experiments']['scan_demo']).model_dump()
+    except (ValueError,KeyError) as exc:raise HTTPException(422,str(exc)) from exc
+
+
+@router.get('/api/jobs/{job_id}/scan-view')
+def scan_result_view(job_id:str):
+    from ..reporting.spatial_view import optical_view
+    try:
+        result=manager().result(job_id)
+        if 'scan' not in result:raise ValueError('Expected a C scan result')
+        if result['optics']['dataset']['coordinate_convention'].endswith('y_down'):
+            result['view_note']='历史结果保留原坐标定义及原始记录；用于新坐标标定前，请迁移配置并重新采集。'
+        a=Algorithms.from_snapshot(result['configuration']['algorithms'])
+        cfg=SimulationConfig.for_experiment('scan',result['configuration']['experiment'],a)
+        result.update(optical_view(cfg,a,result['optics'],laser_shots=result['scan']['summary']['emitted_reference_slots']))
+        emitted=result['scan']['summary']['emitted_reference_slots']
+        result['display_summary']={'mean_sensor_photons_per_emitted_pulse':float(np.asarray(result['illumination']['signal_photons_per_pixel_per_pulse']).sum()) if emitted else None,
+                                   'normalization':'Actual measured emitted reference slots; no value when none were emitted.'}
+        result['parameter_figures']['pulse']['facts'][1][0]='连续PRF平均功率参考'
+        return result
+    except (ValueError,KeyError,TypeError) as exc:raise HTTPException(422,str(exc)) from exc

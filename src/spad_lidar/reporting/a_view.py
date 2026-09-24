@@ -10,11 +10,7 @@ from ..photon_flow import build_photon_flow
 from ..experiments.a_signal import timing_sigma_ns, _signal_shape, _signal_pdf, _time_axis, _preview_edges
 
 
-def derived_quantities(cfg, algorithms=None):
-    a = algorithms or Algorithms.load()
-    spectral=spectral_components(cfg,a,plot=True)
-    budget=photon_budget(cfg,spectral=spectral)
-    gate_fraction=float(_signal_shape(cfg,_time_axis(cfg)[0]).sum())
+def laser_quantities(cfg, a):
     width_s = cfg.pulse_fwhm_ps * 1e-12
     energy_j = cfg.pulse_energy_nj * 1e-9
     shape_factor = sqrt(pi / (4 * np.log(2))) if cfg.pulse_shape == "gaussian" else 1.0
@@ -26,6 +22,22 @@ def derived_quantities(cfg, algorithms=None):
         shape = np.exp(-4 * np.log(2) * (time_ps / cfg.pulse_fwhm_ps)**2)
     else:
         shape = (np.abs(time_ps) <= cfg.pulse_fwhm_ps / 2).astype(float)
+    return {
+        "peak_power_w": float(peak_w), "average_power_w": energy_j*cfg.laser_prf_hz,
+        "pulse_integral_factor":float(shape_factor), "repetition_period_ns":1e9/cfg.laser_prf_hz,
+        "acquisition_time_ms":cfg.laser_shots/cfg.laser_prf_hz*1e3,
+        "pulse":{"time_ps":time_ps.tolist(),"power_w":(shape*peak_w).tolist()},
+    }
+
+
+def derived_quantities(cfg, algorithms=None):
+    a = algorithms or Algorithms.load()
+    spectral=spectral_components(cfg,a,plot=True)
+    budget=photon_budget(cfg,spectral=spectral)
+    gate_fraction=float(_signal_shape(cfg,_time_axis(cfg)[0]).sum())
+    laser=laser_quantities(cfg,a)
+    peak_w=laser['peak_power_w'];energy_j=cfg.pulse_energy_nj*1e-9
+    shape_factor=laser['pulse_integral_factor']
     return {
         "peak_power_w": float(peak_w),
         "average_power_w": energy_j * cfg.laser_prf_hz,
@@ -39,7 +51,7 @@ def derived_quantities(cfg, algorithms=None):
         "irf_sigma_ns": timing_sigma_ns(cfg),
         "range_bin_m": C * cfg.tdc_bin_ps * 1e-12 / 2,
         "binning": {"H_binning":cfg.H_binning,"V_binning":cfg.V_binning,"spads_per_channel":cfg.spads_per_channel},
-        "pulse": {"time_ps": time_ps.tolist(), "power_w": (shape * peak_w).tolist()},
+        "pulse": laser["pulse"],
         "filter": filter_profile(cfg, a),
         "spectra": spectral,
         "photon_flow": build_photon_flow(cfg,budget,spectral,gate_fraction),

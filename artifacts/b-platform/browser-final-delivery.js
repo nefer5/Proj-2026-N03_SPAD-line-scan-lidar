@@ -1,0 +1,9 @@
+const errors=[];page.on('pageerror',e=>errors.push(String(e)));
+await page.setViewportSize({width:1440,height:1000});
+await page.goto('http://127.0.0.1:8016/system?job=992d9913d272436bb78e1a15ae6dba3d',{waitUntil:'networkidle'});await page.waitForFunction(()=>document.body.dataset.ready==='true');
+await page.locator('#channelInput').fill('0,4');await page.locator('#applyChannels').click();await page.locator('[data-window-start="0"]').fill('659.125');await page.locator('[data-window-end="0"]').fill('675.875');await page.locator('[data-window-apply="0"]').click();await page.locator('#histogramPanel').scrollIntoViewIfNeeded();
+const b={version:await page.evaluate(()=>data.provenance.model_version),trials:await page.evaluate(()=>data.statistics.trial_count),records:await page.evaluate(()=>data.audit.final_records),screenshot:await page.screenshot({fullPage:false})};
+await page.goto('http://127.0.0.1:8016/system/scan?job=8fadfae0b6844b1089fecdce9f07df25',{waitUntil:'networkidle'});await page.waitForFunction(()=>document.body.dataset.ready==='true');await page.locator('#scanFrameSelect').selectOption('1');await page.locator('#scanAngleSelect').selectOption('5');await page.locator('#channelInput').fill('0,4');await page.locator('#applyChannels').click();await page.locator('#scanCloudProjection').selectOption('xy');await page.locator('#scanReconstruction').scrollIntoViewIfNeeded();
+const c={sharedAxes:await page.locator('#scanSharedAxes').isChecked(),frames:await page.locator('#scanFrameSelect option').count(),screenshot:await page.screenshot({fullPage:false})};
+await page.evaluate(()=>window.scrollTo(0,0));
+return {errors,b,c};

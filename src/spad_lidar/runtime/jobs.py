@@ -84,8 +84,8 @@ def worker(root, job_id, kind, config, algorithms, snapshot):
                     from ..experiments.scanning import run_scan
                     result = run_scan(cfg, a, progress, cancelled)
                 else:
-                    from ..experiments.spatial import run_system
-                    result = run_system(cfg, a, progress, cancelled)
+                    from ..experiments.spatial_analysis import run_system_analysis
+                    result = run_system_analysis(cfg, a, progress, cancelled)
             if cancelled():
                 raise InterruptedError('Cancellation requested; completed metrics are withheld')
         path = Path(root)/job_id/'result.json'

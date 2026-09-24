@@ -1,0 +1,3 @@
+await page.goto('http://127.0.0.1:8015/static/prototypes/b-optics/index.html', {waitUntil:'networkidle'});
+await page.waitForFunction(() => document.body.dataset.ready === 'true');
+return {title:await page.title(),viewport:page.viewportSize(),headings:await page.locator('h2').allTextContents(),groups:await page.locator('.parameter-group').count(),readoutOptions:await page.locator('[data-path="readout.readout_mode"] option').count(),overflow:await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth})),screenshot:await page.screenshot({fullPage:false})};

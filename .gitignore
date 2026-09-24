@@ -16,3 +16,10 @@ artifacts/architecture-upgrade/**/*.zip
 artifacts/architecture-upgrade/*server*.log
 artifacts/scan-upgrade/**/*.zip
 artifacts/scan-upgrade/*server*.log
+artifacts/b-platform/**/*.zip
+artifacts/b-platform/*server*.log
+artifacts/ui-prototypes/**/*.zip
+artifacts/ui-prototypes/**/*.log
+artifacts/b-platform/final/*-result.json
+artifacts/ui-prototypes/*/statistical-arrays.json
+artifacts/ui-prototypes/*/first-acquisition.json

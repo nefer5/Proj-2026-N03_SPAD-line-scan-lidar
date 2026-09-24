@@ -26,8 +26,8 @@ class RxData(StrictConfig):
 
 
 class OpticalDataset(StrictConfig):
-    schema_version: Literal[1]
-    coordinate_convention: Literal['optical_H_right_V_down__image_x_right_y_down']
+    schema_version: Literal[1,2]
+    coordinate_convention: Literal['optical_H_right_V_down__image_x_right_y_down','optical_H_right_V_up__image_x_right_y_up']
     label: str = Field(min_length=1)
     synthetic: bool
     provenance: dict
@@ -43,7 +43,11 @@ def axis(values, name, minimum):
 
 
 def validate_dataset(document, algorithms):
+    from ..legacy_config import migrate_optical_dataset
+    document=migrate_optical_dataset(document)
     data = OpticalDataset.model_validate(document)
+    if data.schema_version!=2 or data.coordinate_convention!='optical_H_right_V_up__image_x_right_y_up':
+        raise ValueError('Optical dataset version and coordinate convention do not match')
     tx, rx = data.tx, data.rx
     th = axis(tx.h_edges_mrad,'tx.h_edges_mrad',2); tv = axis(tx.v_edges_mrad,'tx.v_edges_mrad',2)
     wl = axis(rx.wavelength_nm,'rx.wavelength_nm',1)

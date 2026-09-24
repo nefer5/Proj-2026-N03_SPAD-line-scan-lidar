@@ -1,0 +1,7 @@
+await page.setViewportSize({width:1440,height:1000});await page.goto('http://127.0.0.1:8016/system/scan?job=8fadfae0b6844b1089fecdce9f07df25',{waitUntil:'networkidle'});await page.waitForFunction(()=>document.body.dataset.ready==='true');
+const errors=[];page.on('pageerror',e=>errors.push(String(e)));
+await page.locator('#scanRefreshPreview').click();await expect(page.locator('#scanViewStatus')).toContainText('预览');await expect(page.locator('#histogramPanel')).toBeHidden();
+await page.locator('#scanShowAcquisition').click();await expect(page.locator('#scanViewStatus')).toContainText('实际采集');await expect(page.locator('#histogramPanel')).toBeVisible();
+const widths=[];for(const width of [1440,1024,768,390]){await page.setViewportSize({width,height:1000});await page.waitForFunction(()=>document.documentElement.scrollWidth<=innerWidth);widths.push(await page.evaluate(()=>({width:innerWidth,scroll:document.documentElement.scrollWidth})));}
+await page.setViewportSize({width:1440,height:1000});await page.evaluate(()=>window.scrollTo(0,0));
+return {errors,widths,scope:await page.locator('#scanViewStatus').innerText(),unavailable:await page.locator('[data-series]:disabled').count(),screenshot:await page.screenshot({fullPage:false})};
