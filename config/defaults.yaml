@@ -275,6 +275,8 @@ experiments:
       tx_model: gaussian
       tx_fwhm_h_mrad: 8
       tx_fwhm_v_mrad: 3
+      tx_order_h: 2
+      tx_order_v: 2
       tx_center_h_mrad: 0
       tx_center_v_mrad: 0
       angle_h_min_mrad: -6
@@ -287,7 +289,10 @@ experiments:
       focal_length_h_mm: 20
       focal_length_v_mm: 20
       mapping_mode: inverted
-      psf_sigma_um: 8
+      psf_sigma_h_um: 8
+      psf_sigma_v_um: 8
+      psf_order_h: 2
+      psf_order_v: 2
       rx_offset_x_um: 0
       rx_offset_y_um: 0
       rx_angle_h_min_mrad: -6

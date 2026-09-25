@@ -54,7 +54,7 @@ def migrate_focal_lengths(optical):
 
 def migrate_b_domains(values):
     from .experiments.system_config import LEGACY_PATHS
-    values=deepcopy(values)
+    values=migrate_psf_axes(values)
     if not any(k in values for k in ('optics','device','timing','rng_seed')):
         if isinstance(values.get('rx'),dict) and values['rx'].get('dataset') is not None:
             values['rx']['dataset']=migrate_optical_dataset(values['rx']['dataset'])
@@ -82,6 +82,19 @@ def migrate_b_domains(values):
     if isinstance(result.get('rx'),dict) and result['rx'].get('dataset') is not None:
         result['rx']['dataset']=migrate_optical_dataset(result['rx']['dataset'])
     return result
+
+
+def migrate_psf_axes(values):
+    """A scalar historical PSF sigma explicitly meant equal H/V widths."""
+    values=deepcopy(values)
+    for name in ('optics','rx'):
+        section=values.get(name)
+        if isinstance(section,dict) and 'psf_sigma_um' in section:
+            if 'psf_sigma_h_um' in section or 'psf_sigma_v_um' in section:
+                raise ValueError('Do not mix scalar and H/V PSF standard deviations')
+            sigma=section.pop('psf_sigma_um')
+            section['psf_sigma_h_um']=sigma;section['psf_sigma_v_um']=sigma
+    return values
 
 
 def migrate(values, defaults):

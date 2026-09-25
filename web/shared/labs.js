@@ -75,8 +75,8 @@ function updateVisibility(){
  const show=(p,visible)=>{const el=field(p);if(el)el.closest('label').classList.toggle('hidden',!visible);};
  if(kind==='spad'){show('illumination.pixel_weights',field('illumination.spatial_mode')?.value==='weights');return;}
  const tx=field('optics.tx_model')?.value,rx=field('optics.rx_model')?.value;
- for(const k of ['tx_fwhm_h_mrad','tx_fwhm_v_mrad','tx_center_h_mrad','tx_center_v_mrad'])show('optics.'+k,tx==='gaussian');
- for(const k of ['psf_sigma_um','focal_length_h_mm','focal_length_v_mm','mapping_mode','rx_offset_x_um','rx_offset_y_um'])show('optics.'+k,rx==='gaussian_psf');
+ for(const k of ['tx_fwhm_h_mrad','tx_fwhm_v_mrad','tx_center_h_mrad','tx_center_v_mrad'])show('optics.'+k,['gaussian','super_gaussian'].includes(tx));
+ for(const k of ['psf_sigma_h_um','psf_sigma_v_um','psf_order_h','psf_order_v','focal_length_h_mm','focal_length_v_mm','mapping_mode','rx_offset_x_um','rx_offset_y_um'])show('optics.'+k,['gaussian_psf','super_gaussian_psf'].includes(rx));
  for(const k of ['pixel_pitch_um','rx_efficiency'])show('optics.'+k,rx!=='dataset');
  show('optics.dataset',tx==='dataset'||rx==='dataset');for(const k of ['rx_angle_h_min_mrad','rx_angle_h_max_mrad','rx_angle_v_min_mrad','rx_angle_v_max_mrad'])show('optics.'+k,rx!=='dataset');if(kind==='scan'){show('scan.active_fraction',field('scan.trajectory')?.value==='sawtooth');show('scan.mechanical_end_mrad',field('scan.trajectory')?.value!=='static');for(const k of ['channel_h_mrad','channel_v_mrad'])show('scan.'+k,field('scan.channel_direction_mode')?.value==='explicit');}
  $('sourceBanner').textContent=tx!=='dataset'||rx!=='dataset'?'当前包含构造光学模型；用于验证与参数研究，不代表实测光学系统。':'当前使用导入光学数据；来源和构造标识将在结果中保留。';

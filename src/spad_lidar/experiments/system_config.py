@@ -9,10 +9,10 @@ from .spatial import OpticalConfig
 
 OPTICAL_GROUPS = {
     'tx': ('tx_model','wavelength_nm','total_pulse_energy_nj','pulse_shape','pulse_fwhm_ps',
-           'tx_efficiency','tx_fwhm_h_mrad','tx_fwhm_v_mrad','tx_center_h_mrad','tx_center_v_mrad',
+           'tx_efficiency','tx_fwhm_h_mrad','tx_fwhm_v_mrad','tx_center_h_mrad','tx_center_v_mrad','tx_order_h','tx_order_v',
            'angle_h_min_mrad','angle_h_max_mrad','angle_v_min_mrad','angle_v_max_mrad'),
     'scene': ('range_m','target_reflectivity','atmospheric_one_way_transmission','overlap_factor'),
-    'rx': ('rx_model','focal_length_h_mm','focal_length_v_mm','mapping_mode','psf_sigma_um',
+    'rx': ('rx_model','focal_length_h_mm','focal_length_v_mm','mapping_mode','psf_sigma_h_um','psf_sigma_v_um','psf_order_h','psf_order_v',
            'rx_offset_x_um','rx_offset_y_um','rx_efficiency','rx_aperture_shape','rx_aperture_mm',
            'rx_aperture_width_mm','rx_aperture_height_mm','rx_angle_h_min_mrad','rx_angle_h_max_mrad',
            'rx_angle_v_min_mrad','rx_angle_v_max_mrad','dataset'),

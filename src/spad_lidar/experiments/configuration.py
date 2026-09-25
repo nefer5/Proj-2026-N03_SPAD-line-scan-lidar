@@ -122,6 +122,8 @@ def resolve_experiment(kind, overrides, algorithms=None):
         raise ValueError('Repeat count exceeds max_monte_carlo_trials')
     pixels = cfg.device.spads_per_channel
     if kind in ('system','scan'):
+        from ..numerics.spatial_profiles import validate_profile_orders
+        validate_profile_orders(cfg.optics,a)
         pixels *= cfg.optics.channels_h * cfg.optics.channels_v
         if cfg.optics.tx_model=='dataset' or cfg.optics.rx_model=='dataset':
             from ..adapters.optical_data import validate_dataset

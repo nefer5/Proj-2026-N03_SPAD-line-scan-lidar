@@ -154,6 +154,10 @@ class Algorithms(BaseModel):
     max_lab_pixels: int = Field(gt=0)
     max_optical_cells: int = Field(gt=0)
     spatial_angle_samples_h: int = Field(ge=2)
+    max_super_gaussian_order: float = Field(ge=1)
+    psf_preview_samples: int = Field(ge=5)
+    psf_preview_extent_sigma: float = Field(gt=0)
+    psf_preview_retained_fraction: float = Field(gt=0,le=1)
     spatial_angle_samples_v: int = Field(ge=2)
     acquisition_block_cycles: int = Field(ge=1)
     max_pending_jobs: int = Field(ge=1)
@@ -193,7 +197,8 @@ class Algorithms(BaseModel):
                    'lab_analysis_seed_streams','max_column_projection_work','max_column_pulses',
                    'max_column_count','max_column_histogram_work','max_column_selected_histogram_cells',
                    'max_column_sampling_work','column_projection_cache_entries','max_column_analysis_events',
-                   'max_column_reference_work','max_column_analysis_candidates','column_result_cache_entries')
+                   'max_column_reference_work','max_column_analysis_candidates','column_result_cache_entries',
+                   'max_super_gaussian_order','psf_preview_samples','psf_preview_extent_sigma','psf_preview_retained_fraction')
         current=read_yaml('algorithms.yaml')
         merged=dict(values)
         # Explicit historical semantics, not current numerical defaults. Old B

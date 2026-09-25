@@ -31,8 +31,8 @@ function renderParameterFigure(){
  body+=`<p class="figure-note">${esc(figure.note)}</p>`;$('parameterVizContent').innerHTML=body;
  if(activeFigure!=='timing')drawSeries($('parameterCurveCanvas'),figure);
  if(figure.heatmap==='tx')heatmap('parameterHeatmap',source.optics.tx_energy_fraction,source.optics.tx_h_edges_mrad,source.optics.tx_v_edges_mrad,{percent:true});
- if(figure.heatmap==='psf')heatmap('parameterHeatmap',source.angle_psfs[figure.angle_index],source.x_edges_um,source.y_edges_um,{pixel:true,percent:true,xLabel:'x · μm',yLabel:'y · μm',groups:true,form:source.form_configuration});
- if(activeFigure==='mapping'&&source.form_configuration.optics.rx_model==='gaussian_psf')showFormula($('parameterMappingFormula'),previewFormulas.mapping);
+ if(figure.heatmap==='psf'){const map=figure.psf_map;heatmap('parameterHeatmap',map.values,map.x_edges_um,map.y_edges_um,{pixel:true,density:true,grid:false,xLabel:'x · μm',yLabel:'y · μm',colorLabel:map.color_label});}
+ if(activeFigure==='mapping'&&['gaussian_psf','super_gaussian_psf'].includes(source.form_configuration.optics.rx_model))showFormula($('parameterMappingFormula'),previewFormulas.mapping);
 }
 function openParameterFigure(id){activeFigure=id;$('parameterVizDetails').open=true;renderParameterFigure();$('parameterVizPanel').scrollIntoView({behavior:'smooth',block:'start'});}
 function dbLabel(value){return value===null?'未定义':value==='-inf'?'−∞':fmt(value,1);}
@@ -61,5 +61,5 @@ function bindExtraPanels(){
  $('crosstalkSpatial').onclick=e=>{const b=e.target.closest('[data-reference-channel]');if(b){$('crosstalkReference').value=b.dataset.referenceChannel;renderCrosstalk();}};
  $('backToAngle').onclick=()=>$('mappingPanel').scrollIntoView({behavior:'smooth',block:'start'});
  $('exportCrosstalk').onclick=()=>{const idx=selectedAngleIndex(),ref=$('crosstalkReference').value==='auto'?data.crosstalk.strongest_channel[idx]:Number($('crosstalkReference').value);download('b-angular-channel-ratios-db.json',{h_index:selectedH,v_index:selectedV,h_mrad:data.optics.angular_h_centers_mrad[idx],v_mrad:data.optics.angular_v_centers_mrad[idx],reference_channel:ref,energy_fractions:data.optics.angle_to_channel_fraction[idx],matrix_db:data.crosstalk.matrix_db[idx],definition:data.crosstalk.definition,orientation:data.crosstalk.orientation,zero_reference:'undefined represented by null',zero_numerator:'negative infinity represented by -inf',scope:'conditional channel energy ratios for one angle, not independently excited input-channel transfer matrix',configuration_sha256:data.provenance.configuration_sha256});};
- if(data.formulas){if(base.optics.rx_model==='gaussian_psf')showFormula($('invertedMappingFormula'),data.formulas[base.optics.mapping_mode==='inverted'?'b_rx_mapping_inverted':'b_rx_mapping_legacy']);else $('invertedMappingFormula').textContent='当前使用响应矩阵定义映射；构造焦距公式不生效。';showFormula($('crosstalkFormula'),previewFormulas.crosstalk);}
+ if(data.formulas){if(['gaussian_psf','super_gaussian_psf'].includes(base.optics.rx_model))showFormula($('invertedMappingFormula'),data.formulas[base.optics.mapping_mode==='inverted'?'b_rx_mapping_inverted':'b_rx_mapping_legacy']);else $('invertedMappingFormula').textContent='当前使用响应矩阵定义映射；构造焦距公式不生效。';showFormula($('crosstalkFormula'),previewFormulas.crosstalk);}
 }

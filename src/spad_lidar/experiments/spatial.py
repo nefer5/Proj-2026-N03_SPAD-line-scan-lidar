@@ -22,8 +22,8 @@ from .lab import run_illumination, stamp_result
 
 
 class OpticalConfig(StrictConfig):
-    tx_model: Literal['gaussian','uniform','dataset']
-    rx_model: Literal['gaussian_psf','uniform_pixel','dataset']
+    tx_model: Literal['gaussian','super_gaussian','uniform','dataset']
+    rx_model: Literal['gaussian_psf','super_gaussian_psf','uniform_pixel','dataset']
     dataset: dict | None
     channels_h: int = Field(ge=1,strict=True)
     channels_v: int = Field(ge=1,strict=True)
@@ -35,7 +35,12 @@ class OpticalConfig(StrictConfig):
     tx_fwhm_v_mrad: float = Field(gt=0)
     tx_center_h_mrad: float
     tx_center_v_mrad: float
-    psf_sigma_um: float = Field(gt=0)
+    tx_order_h: float = Field(ge=1)
+    tx_order_v: float = Field(ge=1)
+    psf_sigma_h_um: float = Field(gt=0)
+    psf_sigma_v_um: float = Field(gt=0)
+    psf_order_h: float = Field(ge=1)
+    psf_order_v: float = Field(ge=1)
     rx_offset_x_um: float
     rx_offset_y_um: float
     angle_h_min_mrad: float
@@ -104,6 +109,8 @@ def system_defaults(base):
 
 def optical_dataset(cfg,a):
     o=cfg.optics
+    from ..numerics.spatial_profiles import validate_profile_orders
+    validate_profile_orders(o,a)
     imported=validate_dataset(o.dataset,a) if o.tx_model=='dataset' or o.rx_model=='dataset' else None
     if o.tx_model=='dataset':
         tx=imported.tx.model_dump()
@@ -126,7 +133,7 @@ def optical_dataset(cfg,a):
     # Metadata explicitly distinguishes generated models from imported measurements.
     synthetic=(o.tx_model!='dataset' or o.rx_model!='dataset' or imported.synthetic)
     doc={'schema_version':2,'coordinate_convention':'optical_H_right_V_up__image_x_right_y_up',
-         'label':'构造光学样例 / Gaussian or uniform reference' if synthetic else imported.label,
+         'label':'构造光学样例 / Gaussian, super-Gaussian or uniform reference' if synthetic else imported.label,
          'synthetic':synthetic,'provenance':{'generator':'spad-spatial-v1','tx_model':o.tx_model,'rx_model':o.rx_model,
          'parameters':o.model_dump(exclude={'dataset'}),'tx_energy_normalization':normalization,
          'algorithms':{k:getattr(a,k) for k in ('spatial_angle_samples_h','spatial_angle_samples_v','rx_angle_samples_h','rx_angle_samples_v')},
@@ -255,7 +262,7 @@ def project_illumination(cfg,a,progress,cancelled):
           'assumptions':['Tx pulse energy is defined within the configured angular domain before Tx efficiency; cell fractions sum to unity.',
                          'Static extended Lambertian target with one range and reflectivity.',
                          'Small-angle solid angle dH*dV in radians; configured angular validity limit enforced.',
-                         'Synthetic Rx is an achromatic Gaussian PSF or an explicitly uniform reference.',
+                         'Synthetic Rx uses separable achromatic Gaussian/super-Gaussian PSFs with true H/V standard deviations, or a uniform pixel reference.',
                          'PSF fractions refer to full pixels before PDE/FF; no edge renormalization.',
                          'FF is an effective within-pixel factor; active-area microgeometry is not resolved.',
                          'No scanning, afterpulse, avalanche crosstalk or shared resources between output groups.']}

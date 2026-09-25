@@ -184,8 +184,11 @@ def column_defaults():
 
 
 def resolve_columns(overrides,algorithms):
+    from ..legacy_config import migrate_psf_axes
+    from ..numerics.spatial_profiles import validate_profile_orders
     defaults=column_defaults();ColumnConfig.model_validate(defaults)
-    cfg=ColumnConfig.model_validate(merge_config(defaults,overrides))
+    cfg=ColumnConfig.model_validate(merge_config(defaults,migrate_psf_axes(overrides)))
+    validate_profile_orders(cfg.optics,algorithms)
     if cfg.acquisition.frame_count>algorithms.max_scan_frames:raise ValueError('Column frame count exceeds configured limit')
     if cfg.transport.buffer_count>algorithms.max_column_count:raise ValueError('Buffer count exceeds configured planner capacity')
     if cfg.system_targets.slot_count*cfg.acquisition.frame_count>algorithms.max_column_count:raise ValueError('Column count exceeds configured limit')

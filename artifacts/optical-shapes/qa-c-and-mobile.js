@@ -1,0 +1,30 @@
+const scratch=await context.newPage();
+let cEvidence;
+try{
+ await scratch.setViewportSize({width:1720,height:1140});
+ await scratch.goto('http://127.0.0.1:8016/system/scan',{waitUntil:'domcontentloaded'});
+ await scratch.waitForFunction(()=>document.body.dataset.ready==='true',null,{timeout:30000});
+ await expect(scratch.locator('[data-path="rx.psf_sigma_h_um"]')).toHaveCount(1);
+ await expect(scratch.locator('[data-path="rx.psf_sigma_v_um"]')).toHaveCount(1);
+ await expect(scratch.locator('[data-path="rx.psf_sigma_um"]')).toHaveCount(0);
+ const rx=scratch.locator('.parameter-group').filter({has:scratch.locator('[data-path="rx.rx_model"]')});
+ if(!await rx.evaluate(e=>e.open))await rx.locator(':scope > summary').click();
+ await scratch.locator('[data-path="rx.rx_model"]').selectOption('super_gaussian_psf');
+ await scratch.locator('[data-path="rx.psf_sigma_h_um"]').fill('6');
+ await scratch.locator('[data-path="rx.psf_sigma_h_um"]').press('Tab');
+ const visual=scratch.locator('#parameterVisuals');if(!await visual.evaluate(e=>e.open))await visual.locator('summary').click();
+ await scratch.locator('#figureSelect').selectOption('psf');
+ await expect(scratch.locator('#figureTitle')).toContainText('PSF 自身分布',{timeout:30000});
+ await expect(scratch.locator('#figureFacts')).toContainText('σ_H');
+ cEvidence={pairedFields:await scratch.locator('.hv-pair').count(),figure:await scratch.locator('#figureTitle').innerText(),error:await scratch.locator('#errorBox').textContent()};
+ assert(!await scratch.locator('#errorBox').isVisible()||cEvidence.error.includes('背景候选下界'));
+}finally{await scratch.close();}
+await page.setViewportSize({width:520,height:960});
+await page.locator('#mappingPanel').scrollIntoViewIfNeeded();
+const mobile=await page.evaluate(()=>({width:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth,hist:document.querySelector('canvas[data-hist]')?.getBoundingClientRect().height}));
+assert(mobile.scroll<=mobile.width+1);assert.equal(mobile.hist,300);
+await page.setViewportSize({width:1720,height:1140});
+if(!await page.locator('#parameterVizDetails').evaluate(e=>e.open))await page.locator('#parameterVizDetails > summary').click();
+await page.getByRole('tab',{name:'PSF 剖面',exact:true}).click();
+await page.locator('#parameterVizPanel').scrollIntoViewIfNeeded();
+return {c:cEvidence,mobile,mapping:globalThis.shapeLayout,crosstalk:globalThis.crosstalkLayout,errors:globalThis.shapeErrors};

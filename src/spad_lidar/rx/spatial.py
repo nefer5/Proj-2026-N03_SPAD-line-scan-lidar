@@ -1,6 +1,16 @@
 """Receiver PSF database synthesis; samples are explicit model-generated data."""
 import numpy as np
 from scipy.special import ndtr
+from ..numerics.spatial_profiles import profile_bin_mass, scale_from_sigma
+
+
+def psf_axis_mass(edges,sigma,order):
+    if order==1:return normal_bin_mass(np.asarray(edges)/sigma)
+    return profile_bin_mass(edges,scale_from_sigma(sigma,order),order)
+
+
+def psf_orders(optics):
+    return (optics.psf_order_h,optics.psf_order_v) if optics.rx_model=='super_gaussian_psf' else (1,1)
 
 
 def synthetic_receiver(optics, device, wavelength_nm, algorithms):
@@ -20,7 +30,8 @@ def synthetic_receiver(optics, device, wavelength_nm, algorithms):
                 value=np.full((ny,nx),1/(ny*nx))
             else:
                 cx,cy=image_center(optics,theta_h,theta_v)
-                value=np.outer(normal_bin_mass((y-cy)/optics.psf_sigma_um),normal_bin_mass((x-cx)/optics.psf_sigma_um))
+                mh,mv=psf_orders(optics)
+                value=np.outer(psf_axis_mass(y-cy,optics.psf_sigma_v_um,mv),psf_axis_mass(x-cx,optics.psf_sigma_h_um,mh))
             psf[:,iy,ix]=value
     return {'reference_plane':'pupil_to_unbounded_image_before_filter_and_PDE_FF',
             'psf_convention':'fraction_of_unbounded_PSF_in_each_full_pixel_no_edge_renormalization',

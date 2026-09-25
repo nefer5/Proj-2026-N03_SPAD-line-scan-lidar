@@ -48,3 +48,6 @@ column_pulse_tail: 's0为归一化Gaussian或矩形基底，q为被指数延迟�
 b_readout_channel_index: 'CH为读出通道编号，H/V为从0开始的二维通道索引，N_H为H方向通道数。H向右、V向上；每行H优先递增，再移至上一行V。不是光学角度单元编号或时间分箱编号。'
 b_gate_phase: 'k为一次曝光的gate索引，t_rel是相对该次Tx的记录时间；改变计时参考不表示SPAD死时间或TDC忙状态被重置。'
 b_slot_accumulation: 'N为本次slot内累计发数，j为读出通道，b为ToF时间分箱。不同曝光在相同相对ToF时间分箱中相加。统计重复次数M产生M份独立H_slot，蓝柱只取首次，误差棒比较它们，不把M份再次相加。'
+
+spatial_super_gaussian: 'm为无量纲阶数，指数p=2m，m=1为高斯。a为正形状尺度；u和a同单位，g为该单位的倒数。P为H/V可分离二维密度，不含旋转或交叉项；Rx坐标用μm，密度用μm⁻²。'
+spatial_profile_widths: '各式分别对H、V应用。Tx的W为角分布FWHM（mrad），域内归一化后仍使用该未截断形状的FWHM参数；Rx的σ是实际边缘标准差（μm），不是指数尺度a。改变m时保持所配置的宽度定义。'

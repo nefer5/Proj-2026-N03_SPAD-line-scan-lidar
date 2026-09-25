@@ -1,0 +1,1 @@
+return await page.locator("#mappingPanel").evaluate(root=>Object.fromEntries(["#anglePlot","#channelFractions","#psfPlot"].map(id=>{const e=root.querySelector(id),r=e.getBoundingClientRect();return [id,{x:r.x,y:r.y,w:r.width,h:r.height,svg:e.querySelector("svg")?.getAttribute("viewBox"),style:e.getAttribute("style")}]})));

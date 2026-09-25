@@ -2,6 +2,7 @@
 import numpy as np
 from scipy.special import ndtr
 from ..constants import FWHM_TO_SIGMA
+from ..numerics.spatial_profiles import profile_bin_mass, scale_from_fwhm
 
 
 def transmit(energy_j, efficiency):
@@ -32,6 +33,10 @@ def angular_profile(optics, algorithms):
     v = np.linspace(optics.angle_v_min_mrad, optics.angle_v_max_mrad, algorithms.spatial_angle_samples_v+1)
     if optics.tx_model == 'uniform':
         fractions = np.outer(np.diff(v)/(v[-1]-v[0]), np.diff(h)/(h[-1]-h[0]))
+    elif optics.tx_model == 'super_gaussian':
+        fh=normalize_angular_weights(profile_bin_mass(h-optics.tx_center_h_mrad,scale_from_fwhm(optics.tx_fwhm_h_mrad,optics.tx_order_h),optics.tx_order_h))
+        fv=normalize_angular_weights(profile_bin_mass(v-optics.tx_center_v_mrad,scale_from_fwhm(optics.tx_fwhm_v_mrad,optics.tx_order_v),optics.tx_order_v))
+        fractions=np.outer(fv,fh)
     else:
         fh = gaussian_axis_fractions(h, optics.tx_center_h_mrad, optics.tx_fwhm_h_mrad/FWHM_TO_SIGMA)
         fv = gaussian_axis_fractions(v, optics.tx_center_v_mrad, optics.tx_fwhm_v_mrad/FWHM_TO_SIGMA)

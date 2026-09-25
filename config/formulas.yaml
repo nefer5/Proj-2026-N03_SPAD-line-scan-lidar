@@ -48,3 +48,6 @@ column_pulse_tail: 's(t)=(1-q)s_0(t)+q\left[s_0*\left(\tau^{-1}e^{-t/\tau}\mathb
 b_readout_channel_index: '\mathrm{CH}=V\,N_H+H'
 b_gate_phase: 't_{\mathrm{rel}}=t_{\mathrm{record}}-t_{\mathrm{Tx},k}'
 b_slot_accumulation: 'H_{\mathrm{slot},j}(b)=\sum_{k=0}^{N-1}H_{k,j}(b)'
+
+spatial_super_gaussian: '\begin{aligned}p&=2m,\quad m\geq1\\g(u;a,m)&=\frac{p}{2a\Gamma(1/p)}\exp\!\left[-\left|\frac{u}{a}\right|^p\right]\\P(x,y)&=g(x;a_H,m_H)g(y;a_V,m_V)\end{aligned}'
+spatial_profile_widths: '\begin{aligned}a_{\mathrm{Tx}}&=\frac{W_{\mathrm{FWHM}}}{2(\ln2)^{1/p}}\\a_{\mathrm{Rx}}&=\sigma\sqrt{\frac{\Gamma(1/p)}{\Gamma(3/p)}}\end{aligned}'

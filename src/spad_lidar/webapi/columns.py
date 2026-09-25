@@ -126,7 +126,7 @@ def result_view(job_id:str,frame:int|None=None):
         audit={k:v for k,v in result['audit'].items() if k!='source'}
         audit['source']={k:v for k,v in result['audit']['source'].items() if k!='expected_signal_candidates_by_cycle'}
         statistics={k:v for k,v in result['statistics'].items() if k not in ('trial_records','noise_records')}
-        return {'configuration':result['configuration'],'provenance':result['provenance'],'audit':audit,
+        return {'configuration':result['configuration'],'form_configuration':cfg.model_dump(),'provenance':result['provenance'],'audit':audit,
             'summary':scan['summary'],'transport':scan['transport'],'frame_budget':scan['frame_budget'],
             'counts':counts,'ranges':ranges,'point_cloud':[p for p in scan['point_cloud'] if p['frame']==frame],
             'statistics':statistics,'frame':frame,'measured_column_ids':scan['measured_column_ids'],

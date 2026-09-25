@@ -102,11 +102,9 @@ def parameter_figures(base, cfg, interface, optics, psfs, algorithms):
         facts=[['f_H', interface['optics']['focal_length_h_mm'], 'mm'], ['f_V', interface['optics']['focal_length_v_mm'], 'mm']])
     ix = int(np.argmin(oh**2+ov**2))
     psf = np.asarray(psfs[ix]); xe=np.asarray(optics['dataset']['rx']['x_edges_um']);ye=np.asarray(optics['dataset']['rx']['y_edges_um'])
-    psf_fig = figure('PSF · 中心角单元像素积分', '像面位置 / μm', '像素积分份额',
-        [series('x 剖面（沿 y 求和）', ((xe[:-1]+xe[1:])/2).tolist(), psf.sum(axis=0).tolist(), 'cyan'),
-         series('y 剖面（沿 x 求和）', ((ye[:-1]+ye[1:])/2).tolist(), psf.sum(axis=1).tolist(), 'amber')],
-        '剖面基于完整像素的 PSF 积分。有限阵列外的能量不补偿、不重新归一化。', heatmap='psf', angle_index=ix)
-    if cfg.optics.rx_model!='gaussian_psf':
+    from .psf_view import psf_parameter_figure
+    psf_fig=psf_parameter_figure(cfg.optics,algorithms,psf,xe,ye)
+    if cfg.optics.rx_model not in ('gaussian_psf','super_gaussian_psf'):
         all_psfs=np.asarray(psfs);capture=all_psfs.sum(axis=(1,2))
         xc=np.divide(all_psfs.sum(axis=1)@((xe[:-1]+xe[1:])/2),capture,out=np.full_like(capture,np.nan),where=capture>0)
         yc=np.divide(all_psfs.sum(axis=2)@((ye[:-1]+ye[1:])/2),capture,out=np.full_like(capture,np.nan),where=capture>0)
@@ -120,7 +118,7 @@ def parameter_figures(base, cfg, interface, optics, psfs, algorithms):
     focus=[max(cfg.timing.gate_start_ns,derived['tof_ns']-extent),
            min(cfg.timing.gate_start_ns+cfg.timing.gate_width_ns,derived['tof_ns']+extent)]
     if focus[0]>=focus[1]:focus=[cfg.timing.gate_start_ns,cfg.timing.gate_start_ns+cfg.timing.gate_width_ns]
-    if cfg.optics.rx_model=='gaussian_psf' and cfg.optics.mapping_mode=='legacy_upright':
+    if cfg.optics.rx_model in ('gaussian_psf','super_gaussian_psf') and cfg.optics.mapping_mode=='legacy_upright':
         mapping['title']='Rx 几何映射 · 历史正向约定'
         mapping['note']='此工况显式保留旧版正向映射；切换为倒置后，必须重新采集。'
     return {'pulse':pulse,'filter':filter_fig,'solar':solar,'environment':environment,'pde':pde,

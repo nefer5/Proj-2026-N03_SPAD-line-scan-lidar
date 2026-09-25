@@ -82,8 +82,11 @@
     <div class="card-head"><div><span class="section-kicker">04 / OPTICAL RESPONSE</span><h2 id="mappingTitle">从一个入射角，追踪到像面</h2></div><button id="exportMapping" class="quiet small">↗ 导出所选响应</button></div>
     <div class="mapping-help"><span class="step-dot">1</span>选择角度单元<span class="mapping-arrow">→</span><span class="step-dot">2</span>查看 PSF 与通道份额<span id="responseFormula" class="mapping-notation" aria-label="像素光子等于PSF积分矩阵乘光学效率乘入瞳光子"></span></div>
     <div class="angle-toolbar"><div class="angle-fields"><label>H 索引<select id="angleH" aria-label="角度H索引"></select></label><label>V 索引<select id="angleV" aria-label="角度V索引"></select></label></div><div id="angleLabel" class="selected-angle"></div></div>
-    <div class="mapping-grid"><article class="plot-block"><div class="plot-heading"><h3>角度单元选择</h3><span class="unit">点选网格 · PSF 截获比例</span></div><div id="anglePlot" class="heatmap interactive" role="group" aria-label="点选二维角度单元"></div></article><article class="plot-block"><div class="plot-heading"><h3>所选角单元的像面 PSF</h3><span class="unit">完整像素积分份额</span></div><div id="psfPlot" class="heatmap" role="img" aria-label="选中角度对应的像面PSF"></div></article></div>
-    <div class="mapping-bottom"><div class="capture-box"><span class="muted">感光面截获比例</span><strong id="captureValue"></strong><small>阵列外的光保留为边缘损失</small></div><div class="channel-share"><div class="plot-heading"><h3>各读出通道份额</h3><span class="unit">P 按通道分组求和</span></div><div id="channelFractions"></div></div></div>
+    <div class="mapping-layout"><div class="mapping-left">
+      <article class="plot-block"><div class="plot-heading"><h3>角度单元选择</h3><span class="unit">点选网格 · PSF 截获比例</span></div><div id="anglePlot" class="heatmap interactive" role="group" aria-label="点选二维角度单元"></div></article>
+      <div class="mapping-capture"><span>感光面截获比例 <strong id="captureValue"></strong></span><small>阵列外的光保留为边缘损失</small></div>
+      <article class="channel-share"><div class="plot-heading"><h3>各读出通道份额</h3><span class="unit">P 按通道分组求和</span></div><div id="channelFractions"></div></article>
+    </div><article class="plot-block psf-projection"><div class="plot-heading"><h3>所选角单元的像面 PSF</h3><span class="unit">完整像素积分份额</span></div><div id="psfPlot" class="heatmap" role="img" aria-label="选中角度对应的像面PSF"></div></article></div>
     <div class="mapping-convention"><span class="pill">成像倒置</span><span id="invertedMappingFormula"></span><span class="muted">右正左负 · 上正下负</span></div>
     <details class="explanation"><summary>位置映射、PSF 与响应矩阵</summary><p>位置映射分别使用 f_H / f_V，并计入两轴倒置。矩阵 P 的每一列是一个入射角单元在各像素内的积分份额，D 包含 Rx 效率和滤光透过率，q 是入瞳各角单元的光子数。n 位于 PDE / FF 前。分组矩阵 G 将像素光子汇总为通道光子；SPAD 死时间和读出限制继续由事件模型处理。</p></details>
   </section>

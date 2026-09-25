@@ -274,11 +274,11 @@ experiments:
   optics.tx_model:
     label: Tx角分布模型
     unit: 枚举
-    description: gaussian高斯角分布；uniform有限角域均匀分布；dataset使用导入的Tx角单元份额。仅当前模型生效。
+    description: gaussian高斯角分布；super_gaussian为H/V可分离超高斯，指数为2m；uniform有限角域均匀分布；dataset使用导入的Tx角单元份额。仅当前模型生效。
   optics.rx_model:
     label: Rx像面映射模型
     unit: 枚举
-    description: gaussian_psf构造高斯PSF；uniform_pixel显式均匀参考；dataset使用效率及PSF数据库。仅当前模型生效。
+    description: gaussian_psf构造双轴高斯PSF；super_gaussian_psf构造H/V可分离超高斯PSF；uniform_pixel显式均匀参考；dataset使用效率及PSF数据库。仅当前模型生效。
   optics.dataset:
     label: 光学数据库（JSON）
     unit: 版本化数据
@@ -310,31 +310,79 @@ experiments:
   optics.tx_fwhm_h_mrad:
     label: Tx水平角FWHM
     unit: mrad
-    description: 仅gaussian Tx生效。在配置Tx角域内按高斯形状归一化；FWHM描述归一化前的形状，角域外尾部不额外扣除能量。
+    description: gaussian及super_gaussian Tx生效。在配置Tx角域内按高斯形状归一化；FWHM描述归一化前的形状，角域外尾部不额外扣除能量。
   optics.tx_fwhm_v_mrad:
     label: Tx垂直角FWHM
     unit: mrad
-    description: 仅gaussian Tx生效。角分布为H/V可分离的二维高斯，在配置角域内归一化；角域内单发能量不随FWHM改变。
+    description: gaussian及super_gaussian Tx生效。角分布为H/V可分离的二维高斯，在配置角域内归一化；角域内单发能量不随FWHM改变。
   optics.tx_center_h_mrad:
     label: Tx水平角中心
     unit: mrad
-    description: 仅gaussian Tx生效；光学H方向远场角，非机械转镜角。
+    description: gaussian及super_gaussian Tx生效；光学H方向远场角，非机械转镜角。
   optics.tx_center_v_mrad:
     label: Tx垂直角中心
     unit: mrad
-    description: 仅gaussian Tx生效；光学V方向远场角，非机械转镜角。
+    description: gaussian及super_gaussian Tx生效；光学V方向远场角，非机械转镜角。
+  optics.tx_order_h:
+    label: Tx H向超高斯阶数 m
+    unit: "1"
+    description: 仅super_gaussian生效，m≥1，指数为2m；m=1退化为高斯。H/V独立，宽度仍为FWHM，角域内总能量归一化。上限见algorithms.yaml。
+  optics.tx_order_v:
+    label: Tx V向超高斯阶数 m
+    unit: "1"
+    description: 仅super_gaussian生效，m≥1，指数为2m；m=1退化为高斯。H/V独立，宽度仍为FWHM，角域内总能量归一化。上限见algorithms.yaml。
+  tx.tx_order_h:
+    label: Tx H向超高斯阶数 m
+    unit: "1"
+    description: 仅super_gaussian生效，m≥1，指数为2m；m=1退化为高斯。H/V独立，宽度仍为FWHM，角域内总能量归一化。上限见algorithms.yaml。
+  tx.tx_order_v:
+    label: Tx V向超高斯阶数 m
+    unit: "1"
+    description: 仅super_gaussian生效，m≥1，指数为2m；m=1退化为高斯。H/V独立，宽度仍为FWHM，角域内总能量归一化。上限见algorithms.yaml。
+  optics.psf_sigma_h_um:
+    label: PSF H向标准差 σ
+    unit: μm
+    description: 高斯及超高斯的实际边缘标准差，正有限数；超高斯形状尺度随阶数换算，σ不等于其指数尺度。H/V独立，按像素积分，阵列外不补偿。
+  optics.psf_order_h:
+    label: PSF H向超高斯阶数 m
+    unit: "1"
+    description: 仅super_gaussian_psf生效，m≥1，指数为2m；m=1退化为高斯。H/V可分离，无旋转或相关项。上限见algorithms.yaml。
+  optics.psf_sigma_v_um:
+    label: PSF V向标准差 σ
+    unit: μm
+    description: 高斯及超高斯的实际边缘标准差，正有限数；超高斯形状尺度随阶数换算，σ不等于其指数尺度。H/V独立，按像素积分，阵列外不补偿。
+  optics.psf_order_v:
+    label: PSF V向超高斯阶数 m
+    unit: "1"
+    description: 仅super_gaussian_psf生效，m≥1，指数为2m；m=1退化为高斯。H/V可分离，无旋转或相关项。上限见algorithms.yaml。
+  rx.psf_sigma_h_um:
+    label: PSF H向标准差 σ
+    unit: μm
+    description: 高斯及超高斯的实际边缘标准差，正有限数；超高斯形状尺度随阶数换算，σ不等于其指数尺度。H/V独立，按像素积分，阵列外不补偿。
+  rx.psf_order_h:
+    label: PSF H向超高斯阶数 m
+    unit: "1"
+    description: 仅super_gaussian_psf生效，m≥1，指数为2m；m=1退化为高斯。H/V可分离，无旋转或相关项。上限见algorithms.yaml。
+  rx.psf_sigma_v_um:
+    label: PSF V向标准差 σ
+    unit: μm
+    description: 高斯及超高斯的实际边缘标准差，正有限数；超高斯形状尺度随阶数换算，σ不等于其指数尺度。H/V独立，按像素积分，阵列外不补偿。
+  rx.psf_order_v:
+    label: PSF V向超高斯阶数 m
+    unit: "1"
+    description: 仅super_gaussian_psf生效，m≥1，指数为2m；m=1退化为高斯。H/V可分离，无旋转或相关项。上限见algorithms.yaml。
   optics.psf_sigma_um:
     label: PSF高斯标准差
     unit: μm
-    description: 仅gaussian_psf生效；是sigma而非FWHM，PSF按实际像素边界积分。
+    description: 旧配置兼容字段，迁移为相同的σ_H与σ_V；不能与双轴字段混用，新导出不包含此键。
   optics.rx_offset_x_um:
     label: 像面水平偏移
     unit: μm
-    description: 仅gaussian_psf生效；平移PSF质心，可研究边缘截断及通道间能量分配。
+    description: gaussian_psf及super_gaussian_psf生效；平移PSF质心，可研究边缘截断及通道间能量分配。
   optics.rx_offset_y_um:
     label: 像面垂直偏移
     unit: μm
-    description: 仅gaussian_psf生效；移动质心而不补偿移出阵列的能量。
+    description: gaussian_psf及super_gaussian_psf生效；移动质心而不补偿移出阵列的能量。
   optics.total_pulse_energy_nj:
     label: 角域内单发能量 · Tx前
     unit: nJ
@@ -486,7 +534,7 @@ experiments:
   tx.tx_model:
     label: Tx角分布模型
     unit: 枚举
-    description: gaussian高斯角分布；uniform有限角域均匀分布；dataset使用导入的Tx角单元份额。仅当前模型生效。
+    description: gaussian高斯角分布；super_gaussian为H/V可分离超高斯，指数为2m；uniform有限角域均匀分布；dataset使用导入的Tx角单元份额。仅当前模型生效。
   tx.wavelength_nm:
     label: 激光波长
     unit: nm
@@ -510,19 +558,19 @@ experiments:
   tx.tx_fwhm_h_mrad:
     label: Tx水平角FWHM
     unit: mrad
-    description: 仅gaussian Tx生效。在配置Tx角域内按高斯形状归一化；FWHM描述归一化前的形状，角域外尾部不额外扣除能量。
+    description: gaussian及super_gaussian Tx生效。在配置Tx角域内按高斯形状归一化；FWHM描述归一化前的形状，角域外尾部不额外扣除能量。
   tx.tx_fwhm_v_mrad:
     label: Tx垂直角FWHM
     unit: mrad
-    description: 仅gaussian Tx生效。角分布为H/V可分离的二维高斯，在配置角域内归一化；角域内单发能量不随FWHM改变。
+    description: gaussian及super_gaussian Tx生效。角分布为H/V可分离的二维高斯，在配置角域内归一化；角域内单发能量不随FWHM改变。
   tx.tx_center_h_mrad:
     label: Tx水平角中心
     unit: mrad
-    description: 仅gaussian Tx生效；光学H方向远场角，非机械转镜角。
+    description: gaussian及super_gaussian Tx生效；光学H方向远场角，非机械转镜角。
   tx.tx_center_v_mrad:
     label: Tx垂直角中心
     unit: mrad
-    description: 仅gaussian Tx生效；光学V方向远场角，非机械转镜角。
+    description: gaussian及super_gaussian Tx生效；光学V方向远场角，非机械转镜角。
   tx.angle_h_min_mrad:
     label: 构造Tx角域 H min
     unit: mrad
@@ -558,7 +606,7 @@ experiments:
   rx.rx_model:
     label: Rx像面映射模型
     unit: 枚举
-    description: gaussian_psf构造高斯PSF；uniform_pixel显式均匀参考；dataset使用效率及PSF数据库。仅当前模型生效。
+    description: gaussian_psf构造双轴高斯PSF；super_gaussian_psf构造H/V可分离超高斯PSF；uniform_pixel显式均匀参考；dataset使用效率及PSF数据库。仅当前模型生效。
   rx.focal_length_h_mm:
     label: 水平等效焦距 f_H
     unit: mm
@@ -574,15 +622,15 @@ experiments:
   rx.psf_sigma_um:
     label: PSF高斯标准差
     unit: μm
-    description: 仅gaussian_psf生效；是sigma而非FWHM，PSF按实际像素边界积分。
+    description: 旧配置兼容字段，迁移为相同的σ_H与σ_V；不能与双轴字段混用，新导出不包含此键。
   rx.rx_offset_x_um:
     label: 像面水平偏移
     unit: μm
-    description: 仅gaussian_psf生效；平移PSF质心，可研究边缘截断及通道间能量分配。
+    description: gaussian_psf及super_gaussian_psf生效；平移PSF质心，可研究边缘截断及通道间能量分配。
   rx.rx_offset_y_um:
     label: 像面垂直偏移
     unit: μm
-    description: 仅gaussian_psf生效；移动质心而不补偿移出阵列的能量。
+    description: gaussian_psf及super_gaussian_psf生效；移动质心而不补偿移出阵列的能量。
   rx.rx_efficiency:
     label: 构造Rx收光效率
     unit: '1'
@@ -976,3 +1024,20 @@ experiments:
       label: 轨迹绝对终点
       unit: ns
       description: null表示不加此筛选边界；非空终点必须大于起点，采用半开区间。
+
+  algorithms.max_super_gaussian_order:
+    label: 超高斯阶数上限
+    unit: '1'
+    description: 限定当前数值实现支持的有效超高斯阶数；只对激活的超高斯模型检查，超限明确报错，不静默裁剪。
+  algorithms.psf_preview_samples:
+    label: PSF参数图每轴采样数
+    unit: 个
+    description: 构造PSF独立二维密度图每轴的显示采样数；与真实像素积分及随机采集无关，分配前检查max_optical_cells。
+  algorithms.psf_preview_extent_sigma:
+    label: PSF参数图单侧范围
+    unit: σ
+    description: 相对PSF中心的单侧显示范围；H/V分别乘各自实际标准差，裁切只影响显示，不对模型PSF重新归一化。
+  algorithms.psf_preview_retained_fraction:
+    label: 导入PSF显示区能量分位范围
+    unit: '1'
+    description: 在已采样有限像面中按边缘累积分布选择中央显示区；不改变原数组、不外推、不补偿阵列外能量，未被显示的份额仍在完整导出中。

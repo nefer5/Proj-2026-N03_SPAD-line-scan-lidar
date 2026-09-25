@@ -1,0 +1,1 @@
+return {url:page.url(),error:await page.locator("#systemError").textContent(),psfNote:await page.locator("#parameterVizContent .figure-note").textContent(),rxOpen:await page.locator('[data-group="rx"]').evaluate(e=>e.open),visiblePairs:await page.locator('[data-group="rx"] .axis-pairs:visible').count(),model:await page.locator('[data-path="optics.rx_model"]').inputValue()};

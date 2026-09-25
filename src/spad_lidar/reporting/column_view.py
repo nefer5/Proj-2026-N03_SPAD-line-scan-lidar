@@ -34,7 +34,7 @@ def motion_view(cfg,a,rows,column_id):
     selected=[r for r in rows if r['measured'] and r['column_id'] in (column_id,column_id+1)]
     ranges=sorted(set([*a.performance_sweep_range_values,cfg.scene.range_m]))
     output=[];previous={};table=None
-    if cfg.rx.rx_model!='gaussian_psf':
+    if cfg.rx.rx_model not in ('gaussian_psf','super_gaussian_psf'):
         from ..experiments.spatial import optical_dataset
         from ..adapters.optical_data import RxTable
         rx=optical_dataset(cfg,a).rx;table=RxTable(rx)

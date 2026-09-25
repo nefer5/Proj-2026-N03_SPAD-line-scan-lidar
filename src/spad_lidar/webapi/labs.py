@@ -160,21 +160,27 @@ def system_result_view(job_id:str):
         result=manager().result(job_id)
         if 'optics' not in result or 'scan' in result:
             raise ValueError('Expected a static B result')
+        a=Algorithms.from_snapshot(result['configuration']['algorithms'])
+        cfg=SimulationConfig.for_experiment('system',result['configuration']['experiment'],a)
         if 'form_configuration' not in result:
             from ..reporting.spatial_view import optical_view
             # Historical algorithms may predate display-only keys. Keep original
             # acquisition provenance and explicitly identify current view metadata.
-            a=Algorithms.from_snapshot(result['configuration']['algorithms'])
-            cfg=SimulationConfig.for_experiment('system',result['configuration']['experiment'],a)
             result.update(optical_view(cfg,a,result['optics']))
             result['view_note']='历史采集记录原样保留；仅补充显示元数据，未重新采样。旧版未保存的重复统计不补造。'
+        # Adapt display metadata and scalar PSF fields without changing saved arrays/records.
+        from ..experiments.system_config import form_values
+        from ..reporting.psf_view import psf_parameter_figure
+        o=result['optics']
+        center=min(range(len(o['angular_h_centers_mrad'])),key=lambda i:o['angular_h_centers_mrad'][i]**2+o['angular_v_centers_mrad'][i]**2)
+        result['form_configuration']=form_values(cfg)
+        result['parameter_figures']['psf']=psf_parameter_figure(cfg.optics,a,result['angle_psfs'][center],result['x_edges_um'],result['y_edges_um'])
+        result['view_note']='采集记录与预算保持原样；参数表适配双轴PSF，PSF参数图使用独立分布视图。'
         result['readout_layout']=readout_layout(result['optics'])
         result['readout_channel_values']=channel_display_values(result)
         result['formulas']['b_readout_channel_index']=read_yaml('formulas.yaml')['b_readout_channel_index']
         result['formula_notes']['b_readout_channel_index']=read_yaml('formula-notes.yaml')['b_readout_channel_index']
         from ..reporting.b_acquisition import acquisition_context,spatial_scope_values
-        a=Algorithms.from_snapshot(result['configuration']['algorithms'])
-        cfg=SimulationConfig.for_experiment('system',result['configuration']['experiment'],a)
         result['acquisition_context']=acquisition_context(cfg,a,result['optics'],result=result)
         result['spatial_scopes']=spatial_scope_values(result['illumination'],cfg.timing.laser_shots)
         return result

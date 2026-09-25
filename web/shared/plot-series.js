@@ -17,7 +17,7 @@ function drawSeries(canvas,figure){
  c.fillStyle='#abc2d1';c.textAlign='left';c.fillText(figure.y_label,left,15);c.textAlign='right';c.fillText(figure.x_label,w-right,h-5);
  c.save();c.beginPath();c.rect(left,top,pw,ph);c.clip();
  if(figure.marker_x!==undefined&&figure.marker_x>=xmin&&figure.marker_x<=xmax){c.strokeStyle='#b38c5d';c.setLineDash([3,4]);c.beginPath();c.moveTo(sx(figure.marker_x),top);c.lineTo(sx(figure.marker_x),top+ph);c.stroke();c.setLineDash([]);c.fillStyle='#d8b785';c.textAlign='right';c.fillText(`${figure.marker_x} nm`,sx(figure.marker_x)-5,top+12);}
- for(const line of figure.series){c.strokeStyle=figureColors[line.color];c.fillStyle=figureColors[line.color];c.lineWidth=1.5;c.beginPath();line.x.forEach((x,i)=>{if(i)c.lineTo(sx(x),sy(line.y[i]));else c.moveTo(sx(x),sy(line.y[i]));});c.stroke();if(line.points_x)line.points_x.forEach((x,i)=>{c.beginPath();c.arc(sx(x),sy(line.points_y[i]),2.3,0,2*Math.PI);c.fill();});}
+ for(const line of figure.series){c.strokeStyle=figureColors[line.color];c.fillStyle=figureColors[line.color];c.lineWidth=1.5;c.setLineDash(line.dash||[]);c.beginPath();line.x.forEach((x,i)=>{if(i)c.lineTo(sx(x),sy(line.y[i]));else c.moveTo(sx(x),sy(line.y[i]));});c.stroke();c.setLineDash([]);if(line.points_x)line.points_x.forEach((x,i)=>{c.beginPath();const px=sx(x),py=sy(line.points_y[i]);if(line.marker==='diamond'){c.moveTo(px,py-3);c.lineTo(px+3,py);c.lineTo(px,py+3);c.lineTo(px-3,py);c.closePath();c.fill();}else{c.arc(px,py,line.marker?3:2.3,0,2*Math.PI);if(line.marker)c.stroke();else c.fill();}});}
  c.restore();
 }
 globalThis.PhotonPlots={drawSeries,canvasSetup};
