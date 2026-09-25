@@ -4,7 +4,7 @@
 
 - B默认真实采集：`/system?job=992d9913d272436bb78e1a15ae6dba3d`
 - C两帧快速示例：`/system/scan?job=8fadfae0b6844b1089fecdce9f07df25`
-- 项目界面规范：`docs/ui-design-guidelines.md`。
+- 项目界面规范：`docs/design/ui-design-guidelines.md`。
 
 ## 已完成
 

@@ -1,120 +1,75 @@
-# SPAD + VCSEL + 转镜一维线扫 LiDAR 建模器
+# SPAD 线扫 LiDAR 建模器
 
-**列级 C 研究版 0.6.0.dev0：高层系统目标、逐发曝光、共用SPAD采集与DSP/MIPI资源规划。**
+当前研究版本 **0.6.3.dev0**：独立SPAD研究、B空间光学、C列级扫描共用同一Python器件与读出核心。网页负责配置、绘图和审计；构造光学/扫描样例不代表实测整机。
 
-- `/spad`：独立 SPAD 研究台，直接设定探测面照明，无需目标或系统光学参数。
-- `/system`：B 全光斑研究台，Tx角分布、Rx效率/PSF、二维像素与各通道采集共用同一SPAD核心。采集结果支持通道列表、等比例像面示意图与直方图联动，光斑底图可调不透明度。
-- `/system/scan`：正式 C 列级工作台；默认10 Hz、HFOV 120 deg、66.7%扫描时间利用率、1000列，目标66.7 μs/列。逐发时间/能量列表、拖尾、三维扫描/返回姿态、共享SPAD、DSP/MIPI双缓冲均由Python计算。B光学/器件参数可一键转入，C系统目标保留。
-- `/system/scan/legacy`：保留旧周期C视图；旧任务链接自动使用历史视图，不改写旧记录。
-- `/`、`/debug`：保留 A 单角通道评估与调试入口。
-- 后台任务支持进度、取消、刷新后找回结果及完整导出；记录可重放分箱。
-- 默认 B 光学与C扫描/场景参数明确属于**构造研究工况**；可替换为实际数据。C距离和点云仍是未经检测门限判定的原始估计。
+## 启动与入口
 
-设计见 [架构说明](docs/architecture.md)，B见 [空间光学](docs/spatial-optics.md)，正式C见 [列级扫描使用与模型](docs/column-scanning.md)，旧周期C见 [扫描机制](docs/scanning.md)。新设计快照在 `artifacts/c-design-review/`，实现验收记录在 `artifacts/c-implementation/`；历史记录仍保留在 `artifacts/scan-upgrade/` 与 `artifacts/architecture-upgrade/`。普通刷新即可获取内容指纹更新后的页面资源。
-
-默认强环境光的整帧事件数可能超过明确的资源限额。可以显式选择“两列局部实验”保留当前背景，或载入关闭太阳/其他环境光但保留DCR的具名快速示例；两者都不会改写YAML默认值。未仿真区域显示未知，不当成零回波或完整帧结果。
-
-下面保留 A 阶段的历史版本记录；当前模型状态以 [路标](docs/roadmap.md) 为准。
-
-**V0.2.1：两个P0优化。** 增加全门检测门限、独立无目标PFA验证、Pd及精确二项区间；性能扫参支持距离/太阳照度/累计发数，每点调用当前读出引擎。未检出与原始寻峰结果分开，详见 [检测与性能扫参](docs/detection-performance.md)。V0.2基线已保留为Git标签v0.2.0。
-
-**当前阶段基线：V0.2（0.2.0），仍属于A单角通道模型。** 包含纯信号解析GT、首次观测与MC范围误差棒、参数批量展开/折叠，以及当前用户工况。默认独立多次记录、累计1发、SPAD死时间6ns、TDC死时间0、每周期记录上限1000。以下旧版本记录保留为历史，不再将V0.2等同于B全光斑模型。
-
-直方图青色散点/虚线为纯信号解析ground truth，不含背景和读出损失；蓝柱为一次实际含噪观测，橙线为纯噪声期望。参考面、积分方式及24/40次的区别见 [直方图显示说明](docs/histogram-display.md)。
-
-当前噪声计算见 [统一噪声说明](docs/noise-model.md)，默认器件参数的工程参考见 [Sony参考说明](docs/sony-reference.md)，A版后续建议见 [项目审视](docs/a-review.md)。公开论文的本地副本与来源索引放在 `data/reference/papers/`。
-
-PDE波段扩展：默认CSV保留460–960nm的26个论文图提取点，追加980nm（12.22%）、1000nm（8.35%）两个末端线性外插估计点。界面区分提取点与估计点；方法与边界见 [文献PDE说明](docs/pde-literature.md)。
-
-**V0.1.8：文献PDE默认CSV。** 采用Van Sieleghem等2022年图7的3.5V过压曲线，26个矢量提取点覆盖460–960nm；905nm处PCHIP约27.41%。FF按用户要求默认0.92，额外相乘后约25.22%，与论文原始PDE区分显示。提取方法、来源和边界见 [文献PDE说明](docs/pde-literature.md)。
-
-**V0.1.7：H/V空间binning。** 以H_binning、V_binning替代可编辑总SPAD数，默认4×4，乘积统一供核心使用；旧总数配置迁移为一行。滤光片范围为855–955nm，当前默认峰值透过率0.95、矩形通带10nm，加权带宽9.5nm。PDE/太阳备用中心保持独立，界面显示当前生效模式和激光处PDE。说明见 [空间binning与参数联动](docs/binning.md)。
-
-**V0.1.6：三条光子预算链路。** 评估页和专家页新增回波/太阳/其他环境光的公式、逻辑、符号单位和逐步数值。见 [光子预算公式与逻辑](docs/photon-budget.md)，该文档与网页引用同一套共享定义并可检查同步。默认激光与滤光片中心为905nm；PDE及太阳基础模式的备用中心独立，不应强制联动。光谱采样点仍保留原横坐标。
-
-**V0.1.5：统一光谱输入。** 滤光片、其他环境光和PDE先选择基础类型 / CSV文件导入 / 手动输入；太阳光额外保留标准谱模式。基础类型支持常量、矩形、高斯和cosine平顶。输入区按模式切换，各模式数据独立保存；默认值仍在YAML中。详见 [统一光谱输入](docs/curve-inputs.md)。下文为历史版本说明。
-
-本轮 **A / V0.1.4** 增加太阳标准谱（lux输入）、独立其他环境光、可编辑PDE谱及联合光谱积分；增加7种数字SPAD事件读出模式和1种理想解析参考。说明见 [光谱与背景](docs/spectral-background.md)、[读出架构](docs/readout-modes.md)。专家页显示事件损失和积分审计，公式使用随项目提供的KaTeX离线渲染。下面V0.1.1–V0.1.3段落为历史功能说明，旧“每SPAD每发一时间戳、死时间未生效”的限制现仅适用于analytic_reference。
-
-当前交付 **A：单角通道（V0.1.4）**，评估页与专家调试页均属于A。后续按 **B：全光斑光学映射 → C：扫描机制** 演进，详见 [A/B/C计划](docs/roadmap.md)。
-
-V0.1.3 支持手动输入或CSV导入滤光片离散采样点；默认PCHIP保形插值，也可选线性。图中同时展示原始散点和插值曲线。激光处透过率及背景加权带宽均取自同一个插值函数。手动编辑后点击“应用采样点”，再运行仿真；原始点和插值方法随YAML保存。
-
-V0.1.2 修复静态资源缓存导致下拉框字符串被旧脚本转为null的问题：页面按文件内容生成JS/CSS指纹地址，并禁用缓存。普通刷新即可获取匹配资源。新增滤光片光谱图，支持矩形参数或导入CSV，标注激光透过率、加权带宽并与预算共用曲线；可清除导入曲线。旧串扰矩阵放在专家调试的附加诊断中。
-
-这是一个用于快速评估 dToF 测距性能的基础版本。它把当前扫描角通道建模为：
-
-`VCSEL 脉冲能量 -> 朗伯目标 -> 接收孔径/滤光片 -> SPAD 面阵按线 binning -> 首光子 TCSPC 直方图 -> 距离估计`
-
-当前版本不做光线追迹。Tx 角度分布、Rx 收光效率/PSF 数据库的接口和推荐格式见 [docs/model-design.md](docs/model-design.md)。
-
-## 已实现
-
-V0.1.1 新增 YAML 配置、专家调试页 `/debug`、脉冲功率联动、圆形/椭圆/矩形入瞳和柱状观测直方图。参数默认值唯一来源为 `config/defaults.yaml`；点击网页“恢复默认”重新读取。算法策略见 `config/algorithms.yaml`，参数说明见 `config/parameter-help.yaml`，项目铁律见 [AGENTS.md](AGENTS.md)。
-
-详细公式和调试说明见 [专家调试手册](docs/debug-guide.md)。调试页共用评估页核心，可导出完整中间量 JSON。旧 `examples/config.json` 为20000发的历史示例，不是默认值源。PRF暂不关联扫描轨迹，Tx/Rx数据库属于后续B阶段，发布版本待定。
-
-- 网页输入和修改核心参数；
-- 标准扩展朗伯目标光子预算；
-- 太阳/环境光谱辐亮度、滤光片曲线、DCR 和自定义噪声；
-- VCSEL 脉宽、SPAD 抖动、TDC 分箱；
-- 每个 SPAD 每发只记录首光子的 TCSPC pile-up 模型；
-- 期望直方图和随机观测直方图；
-- 质心测距、重复仿真的偏差/精度/成功率；
-- 距离扫描性能曲线；
-- 通道间直接串扰矩阵及级联串扰期望模型；
-- 配置 JSON、滤光片 CSV 和直方图 CSV 导出。
-
-## 启动
-
-### 双击开发版（适合频繁修改源码）
-
-在资源管理器里双击项目根目录的 `start-dev.cmd`，自动启动服务并打开
-<http://127.0.0.1:8016>。开发版与普通启动统一使用 `run.py` 中的默认端口；一键脚本不再单独指定端口。
-
-同一服务提供 [SPAD研究台](http://127.0.0.1:8016/spad)、[B空间光学](http://127.0.0.1:8016/system) 和 [C扫描采集](http://127.0.0.1:8016/system/scan)。
-
-- 本机现有 Python 环境可直接使用；如果项目有 `.venv`，启动器优先使用它。
-- 修改 `src/` 中的 Python 文件并保存后，服务自动重载；重载结束后再点击“运行仿真”。
-- 修改 HTML、CSS、JavaScript 后普通刷新即可；页面使用内容指纹资源地址，开发响应禁用缓存。
-- 修改 `run.py` 或安装依赖后，请重启启动器。
-- 运行时保留命令窗口（可最小化），其中显示日志；退出时在该窗口按 `Ctrl+C`。
-- 关闭浏览器不会停止服务。重复双击会打开已经运行的同名应用，不会重复启动服务。
-- 分享给别人时可直接分享源码文件夹，但对方仍需首次安装 Python 和依赖，随后就能双击使用；这不是包含 Python 的独立安装包。
-
-首次准备环境（在项目目录打开终端执行一次）：
+首次在项目目录执行：
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -e .
 ```
 
-### 普通启动
+之后双击根目录 `start-dev.cmd`，或执行 `.\.venv\Scripts\python.exe run.py --reload --open`。默认端口由 `run.py` 统一维护为8016。启动脚本优先使用项目虚拟环境，未创建时使用PATH中的Python；后者也须已安装项目依赖。
 
-本机已有 FastAPI、Uvicorn、NumPy 和 SciPy 时，可直接运行：
+| 入口 | 适用研究 |
+|---|---|
+| [独立SPAD](http://127.0.0.1:8016/spad) | 直接输入探测面照明，研究器件、门控与读出，无需设置整机光学 |
+| [B空间光学](http://127.0.0.1:8016/system) | Tx角分布、场景、Rx效率/PSF、物理像素与通道采集 |
+| [C列级扫描](http://127.0.0.1:8016/system/scan) | 系统目标、列内逐发时间/能量、转镜、返回角、DSP/MIPI资源规划 |
+| [A评估](http://127.0.0.1:8016/) / [A调试](http://127.0.0.1:8016/debug) | 保留单角通道模型的两种视图及数值基线 |
+| [历史周期C](http://127.0.0.1:8016/system/scan/legacy) | 查看旧周期扫描任务；不将其冒充正式列级C |
+
+首次启动服务时保留原命令窗口，按Ctrl+C停止。已有同名服务时再次双击只打开网页，新窗口可以退出，不表示原服务停止。关闭网页不会停止服务。Python源码在开发模式下自动重载；HTML/CSS/JS通过内容指纹和禁用缓存支持普通刷新。修改启动器或安装依赖后需要重启原服务。
+
+## 当前能力与使用原则
+
+- **统一核心**：PDE/FF、DCR、抖动、SPAD恢复、TDC/容量/符合等机制在公共核心中实现，A/B/C不维护不同版本。
+- **B光学**：Tx高斯/超高斯/均匀/导入分布；Rx双轴高斯/超高斯/均匀参考/导入响应。新配置使用倒置成像，H/V参数成组，PSF独立参数图与通道投影图分开。
+- **Tx能量口径**：B/C输入是配置Tx角域内、Tx光学前的完整单发能量，域内份额归一化。Tx效率仍计入，Rx像面损失和时间门损失仍分别保留。
+- **光谱与带外漏光**：四种基础滤光片都可配置带外透过率；非零时覆盖提供的源光谱，并明确受导入Rx已知波段约束。构造无色差Rx使用精确外积分解降低存储与计算量。
+- **统计口径**：N是一次采集中的累计发数，M是独立重复次数。B蓝柱取首次采集，误差棒比较M份样本；单gate显示真实记录，不用slot结果除N代替。
+- **直方图**：青色参考位于PDE/FF之后、死时间与读出损失之前；虚线密度与分箱积分点不同。整数纵轴支持全门固定或局部自适应，观察窗口可拖动也可精确输入。
+- **背景计量**：太阳/其他光每time_bin值是候选率直接乘bin时长，不做额外随机统计。B/C按全阵列汇总；通道和像素分配并不均匀。
+- **C工作台**：一个slot对应点云一列，线阵并行；逐发列表允许不同时间与能量。高层下发T_slot目标，HFOV以deg输入；DSP之后通过MIPI输出，支持双缓冲流水。
+
+参数草稿、当前预览、历史采集和记录重放分别标记。修改物理参数后须提交新任务；只改变通道选择、观察窗口或合法重放分箱不会改写原记录。
+
+## 必须一起理解的模型边界
+
+1. **背景角域尚未独立于Tx网格。** 当前只计算配置场景角域贡献，不能将全阵列求和值称为完整Rx环境视场总背景；更宽视场的背景可能漏算。
+2. **C列间完全复位与复位开销尚未实现。** 用户已确认“列末完全复位、置于列间、额外计入帧时间”，当前C仍保持跨列连续器件状态，不能将示意图当成实现。
+3. C直方图主要由事件重建，芯片累积器写入吞吐、计数饱和和锁存约束未完整建模；带宽位宽目前是负载预算。
+4. 扫描光学按脉冲/回波中心姿态计算，未解析长尾期间的连续扫描拖影。B/C距离与点云为原始估计，没有专用Pd/PFA标定。
+5. 未实现afterpulse、事件级雪崩串扰、温度/过压联动；PSF通道比值不等于器件串扰。
+
+强背景完整帧可能超过资源限额。可显式选局部列实验，或载入具名快速示例；程序不静默关光、减少发数或降低采样来绕过限制。
+
+## 配置、结果与文档
+
+| 内容 | 唯一来源 / 入口 |
+|---|---|
+| 工况默认值 | `config/defaults.yaml`，网页“恢复默认”重新加载 |
+| 算法、采样策略、资源限额 | `config/algorithms.yaml` |
+| 参数说明与输入模式 | `config/parameter-help.yaml`、`config/curve-inputs.yaml` |
+| 公式与光子链路 | `config/formulas.yaml`、`config/formula-notes.yaml`、`config/photon-flow.yaml` |
+| 任务输入和结果 | `artifacts/runs/<任务ID>/request.json`、`result.json` |
+| 任务状态索引 | `artifacts/runs/jobs.sqlite3` |
+| 规范与当前状态 | [文档目录](docs/index.md)、[架构决策与偏好](docs/design/architecture-decisions.md)、[界面规范](docs/design/ui-design-guidelines.md)、[路标](docs/roadmap.md) |
+
+运行数据、下载的论文PDF和本机客户端缓存不会随Git推送；需要另行备份。源码、配置、文档、选定验收报告和快照进入版本管理。保存与复现方式见[运行数据说明](docs/guides/run-artifacts.md)。
+
+模型说明：[B空间光学](docs/models/spatial-optics.md) · [双轴空间模型](docs/models/spatial-profiles.md) · [C列级扫描](docs/models/column-scanning.md) · [统一光谱](docs/models/curve-inputs.md) · [光子预算](docs/models/photon-budget.md) · [直方图](docs/guides/histogram-display.md)。当前发布说明见[版本记录](docs/release-notes.md)；旧README已移入[历史记录](docs/history/readme-through-0.6.0.md)。
+
+## 开发验证
 
 ```powershell
-python run.py
+.venv\Scripts\python.exe -m pip install pytest httpx
+.venv\Scripts\python.exe -m pytest -q
+.venv\Scripts\python.exe scripts/render-photon-budget-doc.py --check
+.venv\Scripts\python.exe scripts/render-spatial-profiles-doc.py --check
+node scripts/check-histogram-rendering.cjs
 ```
 
-然后打开 <http://127.0.0.1:8016>。如需临时使用其他端口，可显式指定 `python run.py --port <端口号>`。
-
-如需安装依赖：
-
-```powershell
-python -m pip install -e .
-python run.py
-```
-
-运行测试：
-
-```powershell
-python -m pytest
-```
-
-## 首版的重要定义
-
-- `脉冲能量` 是分配到当前被评估扫描角通道、Tx 光学之前的能量，不是整条线阵总能量。
-- `PDE × fill factor` 是光子到达 SPAD 感光面后的有效探测比例。如果器件给出的 PDP 已含填充因子，请将 fill factor 设为 1。
-- `背景光谱辐亮度` 是目标/场景射向接收机的谱辐亮度，单位 W/(m²·sr·nm)，不是照度 lux。
-- 当前读出假定每个 SPAD 每次激光发射最多输出一个时间戳；死时间和共享 TDC 的多事件模型属于下一阶段。
+模型变更验证量纲、能量、极限和共享核心一致性；界面变更实际检查表单、联动、普通刷新及图形。详细约束见[AGENTS.md](AGENTS.md)。

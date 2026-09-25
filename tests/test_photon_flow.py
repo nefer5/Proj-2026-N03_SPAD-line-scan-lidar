@@ -54,7 +54,7 @@ def test_photon_flow_is_shared_and_does_not_invent_final_source_counts():
 def test_generated_document_matches_shared_definitions():
     root=Path(__file__).resolve().parents[1]
     render=runpy.run_path(str(root/'scripts/render-photon-budget-doc.py'))['render']
-    assert render()==(root/'docs/photon-budget.md').read_text(encoding='utf-8')
+    assert render()==(root/'docs/models/photon-budget.md').read_text(encoding='utf-8')
 
 
 def test_laser_and_filter_are_905_without_forcing_other_spectral_centers():

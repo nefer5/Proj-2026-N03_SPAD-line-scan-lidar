@@ -37,3 +37,11 @@ artifacts/c-implementation/point-projections.py
 artifacts/c-implementation/scope-parameter-help.py
 artifacts/c-implementation/histogram-focus.py
 artifacts/c-implementation/map-display.py
+
+# Raw audit replays stay local; the small audit report and input fingerprint are versioned.
+artifacts/b-noise-audit/mixed_replay.json
+artifacts/b-noise-audit/laser_off.json
+artifacts/b-noise-audit/optical_background_off.json
+# Local cross-project research clients / attachment inventories are not simulator sources.
+artifacts/spad-research-archive/
+artifacts/zotero-connector-test/

@@ -1,10 +1,10 @@
 # 建模设计参考与演进路线
 
-当前回波、太阳背景和其他环境光的逐步公式以 [光子预算公式与逻辑](photon-budget.md) 为准；该文档从网页共用的公式/步骤定义生成。
+当前回波、太阳背景和其他环境光的逐步公式以 [光子预算公式与逻辑](../models/photon-budget.md) 为准；该文档从网页共用的公式/步骤定义生成。
 
 本文公式使用 `$...$` 与独立行 `$$`，兼容 VS Code 内置 Markdown 预览。按 `Ctrl+Shift+V` 打开预览；项目工作区已启用 `markdown.math.enabled`。依据：[VS Code 官方数学预览说明](https://code.visualstudio.com/docs/languages/markdown#_math-formula-rendering)。
 
-V0.1.1 已实现的详细公式、参数参考面和审核流程见 [专家调试手册](debug-guide.md)。以下保留早期二维阵列/数据库设计思路。当前模块边界以 [架构说明](architecture.md) 为准，B数据契约及验收状态以 [空间光学](spatial-optics.md) 为准；本文 NPZ/HDF5 格式仍为历史草案。
+V0.1.1 已实现的详细公式、参数参考面和审核流程见 [专家调试手册](../guides/debug-guide.md)。以下保留早期二维阵列/数据库设计思路。当前模块边界以 [架构说明](../design/architecture.md) 为准，B数据契约及验收状态以 [空间光学](../models/spatial-optics.md) 为准；本文 NPZ/HDF5 格式仍为历史草案。
 
 ## 1. 系统边界
 
@@ -152,7 +152,7 @@ $$
 
 ## 6. 当前版本路线：A → B → C
 
-详细计划与验收条件以 [A/B/C路线](roadmap.md) 为准，本节替代初始路线。
+详细计划与验收条件以 [A/B/C路线](../roadmap.md) 为准，本节替代初始路线。
 
 - A：单角通道基线保留；数字读出、检测与性能扫参已实现。
 - B：Tx全光斑、Rx效率/PSF数据库、二维SPAD映射及binning已实现，构造样例通过自动验证，待人工验收。
@@ -173,5 +173,5 @@ $$
 - P. Padmanabhan, C. Zhang, E. Charbon, [Modeling and Analysis of a Direct Time-of-Flight Sensor Architecture for LiDAR Applications](https://doi.org/10.3390/s19245464), *Sensors*, 2019。适合共享 TDC、像素分组、coincidence、time-gating 和太阳背景下的系统架构分析。
 - A. Incoronato, M. Locatelli, F. Zappa, [Statistical Modelling of SPADs for Time-of-Flight LiDAR](https://doi.org/10.3390/s21134481), *Sensors*, 2021。用于 hold-off、afterpulsing、crosstalk、TDC 死时间/共享及解析模型与 Monte Carlo 对照。
 - K. Pasquinelli et al., [Single-Photon Detectors Modeling and Selection Criteria for High-Background LiDAR](https://doi.org/10.1109/JSEN.2020.2977775), *IEEE Sensors Journal*, 2020。用于高背景下 SPAD/APD/SiPM 比较和测距成功率定义。
-- D. B. Lindell et al., [High-flux single-photon lidar](https://doi.org/10.1364/OPTICA.403190), *Optica*, 2021。用于 detector/electronics dead time、pile-up 和高通量恢复模型。
+- J. Rapp et al., [High-flux single-photon lidar](https://doi.org/10.1364/OPTICA.403190), *Optica*, 2021。用于 detector/electronics dead time、pile-up 和高通量恢复模型。
 - [ASTM G173 reference solar spectral irradiance](https://www.nrel.gov/grid/solar-resource/spectra-am1.5)（NREL/NIST 标准参考数据入口）。后续精细太阳背景模型应采用光谱积分。

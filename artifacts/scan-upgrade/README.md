@@ -7,7 +7,7 @@
 - [C默认完整结果](http://127.0.0.1:8015/system/scan?job=9e9a5ca623764bb38ad1dcf3dabbe316)
 - [B静态光学](http://127.0.0.1:8015/system)
 - [独立SPAD](http://127.0.0.1:8015/spad)
-- [扫描模型与验收说明](../../docs/scanning.md)
+- [扫描模型与验收说明](../../docs/models/scanning.md)
 - [最终自动验收记录](final/acceptance.md)
 
 服务运行在8015。关闭后可在项目目录执行 `python run.py --port 8015` 重新启动；保存的任务仍在本地 `artifacts/runs/` 中。

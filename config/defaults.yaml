@@ -25,7 +25,7 @@ simulation:
   H_binning: 4
   V_binning: 4
   fill_factor: 0.92
-  # 用户确认的Sony/IMX459相关工程参考；条件与未映射项见docs/sony-reference.md。
+  # 用户确认的Sony/IMX459相关工程参考；条件与未映射项见docs/references/sony-reference.md。
   dcr_cps_per_spad: 2007
   other_noise_cps_per_spad: 0
   spad_dead_time_ns: 6

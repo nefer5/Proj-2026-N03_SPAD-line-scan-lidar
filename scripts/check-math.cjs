@@ -14,11 +14,22 @@ vm.runInContext(bundle.replace("export{xs as activate};", "globalThis.qaKatex = 
   .replaceAll("import.meta.url", JSON.stringify(bundlePath)), context);
 const docs = path.resolve(__dirname, "../docs");
 let count = 0;
-for (const name of fs.readdirSync(docs).filter(name => name.endsWith(".md"))) {
-  let text = fs.readFileSync(path.join(docs, name), "utf8");
+function* markdownFiles(dir) {
+  for (const entry of fs.readdirSync(dir, {withFileTypes:true})) {
+    const file = path.join(dir, entry.name);
+    if (entry.isDirectory()) yield* markdownFiles(file);
+    else if (entry.isFile() && entry.name.endsWith(".md")) yield file;
+  }
+}
+for (const file of markdownFiles(docs)) {
+  let text = fs.readFileSync(file, "utf8");
   text = text.replace(/~~~[\s\S]*?~~~/g, "").replace(/\x60{3}[\s\S]*?\x60{3}/g, "").replace(/\x60[^\x60]*\x60/g, "");
   for (const match of text.matchAll(/\$\$([\s\S]*?)\$\$|\$([^$\n]+)\$/g)) {
-    context.qaKatex.renderToString(match[1] ?? match[2], {throwOnError:true, displayMode:match[1] !== undefined});
+    try {
+      context.qaKatex.renderToString(match[1] ?? match[2], {throwOnError:true, displayMode:match[1] !== undefined});
+    } catch (error) {
+      throw new Error(path.relative(docs, file) + ": " + error.message);
+    }
     count++;
   }
 }

@@ -58,9 +58,9 @@ if __name__=="__main__":
     args=parser.parse_args()
     text=render()
     if args.check:
-        target=ROOT/"docs"/"photon-budget.md"
+        target=ROOT/"docs"/"models"/"photon-budget.md"
         if not target.exists() or target.read_text(encoding="utf-8")!=text:
-            raise SystemExit("docs/photon-budget.md is out of sync with shared definitions")
+            raise SystemExit("docs/models/photon-budget.md is out of sync with shared definitions")
         print("Photon-budget document matches shared definitions.")
     else:
         sys.stdout.reconfigure(encoding="utf-8")

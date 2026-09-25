@@ -34,4 +34,4 @@
 
 快照：`01-independent-psf.png`、`02-stacked-mapping.png`、`03-crosstalk-width.png`。
 
-模型数学定义和来源见[双轴高斯与超高斯](../../docs/spatial-profiles.md)。
+模型数学定义和来源见[双轴高斯与超高斯](../../docs/models/spatial-profiles.md)。

@@ -77,7 +77,7 @@ fill_factor:
 dcr_cps_per_spad:
   label: 单SPAD暗计数率
   unit: cps
-  description: 单个SPAD每秒暗触发候选数；每门期望=DCR×SPAD数×门宽秒，不乘PDE/FF。默认按用户确认的Sony相关参考（60°C条件）；当前不会按温度自动换算。见docs/sony-reference.md。
+  description: 单个SPAD每秒暗触发候选数；每门期望=DCR×SPAD数×门宽秒，不乘PDE/FF。默认按用户确认的Sony相关参考（60°C条件）；当前不会按温度自动换算。见docs/references/sony-reference.md。
 other_noise_cps_per_spad:
   label: 其他单SPAD随机噪声
   unit: cps
@@ -89,7 +89,7 @@ spad_dead_time_ns:
 spad_jitter_fwhm_ps:
   label: SPAD时间抖动FWHM
   unit: ps
-  description: 高斯时间抖动的半高全宽；除以2sqrt(2ln2)得到标准差。默认按用户确认的Sony相关参考（室温、Vex=3V）；FW10%未作为独立输入。见docs/sony-reference.md。
+  description: 高斯时间抖动的半高全宽；除以2sqrt(2ln2)得到标准差。默认按用户确认的Sony相关参考（室温、Vex=3V）；FW10%未作为独立输入。见docs/references/sony-reference.md。
 pulse_fwhm_ps:
   label: 激光脉宽 FWHM
   unit: ps
@@ -722,7 +722,7 @@ experiments:
   spad.dcr_cps_per_spad:
     label: 单SPAD暗计数率
     unit: cps
-    description: 单个SPAD每秒暗触发候选数；每门期望=DCR×SPAD数×门宽秒，不乘PDE/FF。默认按用户确认的Sony相关参考（60°C条件）；当前不会按温度自动换算。见docs/sony-reference.md。
+    description: 单个SPAD每秒暗触发候选数；每门期望=DCR×SPAD数×门宽秒，不乘PDE/FF。默认按用户确认的Sony相关参考（60°C条件）；当前不会按温度自动换算。见docs/references/sony-reference.md。
   spad.other_noise_cps_per_spad:
     label: 其他单SPAD随机噪声
     unit: cps
@@ -734,7 +734,7 @@ experiments:
   spad.spad_jitter_fwhm_ps:
     label: SPAD时间抖动FWHM
     unit: ps
-    description: 高斯时间抖动的半高全宽；除以2sqrt(2ln2)得到标准差。默认按用户确认的Sony相关参考（室温、Vex=3V）；FW10%未作为独立输入。见docs/sony-reference.md。
+    description: 高斯时间抖动的半高全宽；除以2sqrt(2ln2)得到标准差。默认按用户确认的Sony相关参考（室温、Vex=3V）；FW10%未作为独立输入。见docs/references/sony-reference.md。
   spad.detector_operation:
     label: 探测器门控方式
     unit: 枚举

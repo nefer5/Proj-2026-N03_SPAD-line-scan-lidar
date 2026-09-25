@@ -2,7 +2,7 @@
 
 来源：[Van Sieleghem等，2022，A Backside-Illuminated Charge-Focusing Silicon SPAD with Enhanced Near-Infrared Sensitivity](https://arxiv.org/abs/2203.01560v1)，PDF第8页图7，过压3.5V的蓝色三角曲线。
 
-默认文件为 [pde-van-sieleghem-2022-3p5v.csv](../examples/pde-van-sieleghem-2022-3p5v.csv)，两列为波长nm与0–1的PDE。保留26个论文图提取点，并追加980、1000nm两个外插估计点，共28点。默认模式为CSV，插值为PCHIP。YAML中的默认采样点与该文件有一致性测试。
+默认文件为 [pde-van-sieleghem-2022-3p5v.csv](../../examples/pde-van-sieleghem-2022-3p5v.csv)，两列为波长nm与0–1的PDE。保留26个论文图提取点，并追加980、1000nm两个外插估计点，共28点。默认模式为CSV，插值为PCHIP。YAML中的默认采样点与该文件有一致性测试。
 
 ## 数据提取及精度
 

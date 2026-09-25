@@ -29,7 +29,7 @@ def render():
 
 
 if __name__=='__main__':
-    target=ROOT/'docs/spatial-profiles.md';content=render()
+    target=ROOT/'docs/models/spatial-profiles.md';content=render()
     if '--check' in sys.argv:
         if target.read_text(encoding='utf-8')!=content:raise SystemExit('Spatial profile document is out of sync')
         print('Spatial profile document matches shared definitions.')

@@ -62,7 +62,7 @@ Rx可共扫、部分跟随或固定。Tx角域与构造Rx数据库覆盖域现�
 
 背景在接收机局部角域内均匀平稳，延续B的角网格域和光谱口径，不随Tx能量份额或发射开关缩放。太阳、其他光、DCR和其他电子候选分别审计。末帧的非整周期记录门按实际截止时间截断，记录requested/effective差异，不补回曝光或光子。
 
-所有跨页面/文档公式均维护在 `config/formulas.yaml` 与 `formula-notes.yaml`。C的展示流程位于 `photon-flow.yaml` 的scan分支，并随 `docs/photon-budget.md` 生成和校验。
+所有跨页面/文档公式均维护在 `config/formulas.yaml` 与 `formula-notes.yaml`。C的展示流程位于 `photon-flow.yaml` 的scan分支，并随 `docs/models/photon-budget.md` 生成和校验。
 
 ## 角bin、距离线图和点云
 

@@ -53,4 +53,4 @@ VS Code Markdown原生预览遇到Windows锁屏，首次激活报`GetCursorPos f
 
 ## 模型边界
 
-光学仍按脉冲/回波中心姿态，不解析长拖尾内连续扫描拖影；构造Tx/Rx覆盖不会因16线自动扩大；点云是未阈值化原始估计，尚无C专用Pd/PFA标定；MIPI模型依据输入服务时间/净载荷，未声称实测性能或完成编码饱和模型。详见`docs/column-scanning.md`。
+光学仍按脉冲/回波中心姿态，不解析长拖尾内连续扫描拖影；构造Tx/Rx覆盖不会因16线自动扩大；点云是未阈值化原始估计，尚无C专用Pd/PFA标定；MIPI模型依据输入服务时间/净载荷，未声称实测性能或完成编码饱和模型。详见`docs/models/column-scanning.md`。

@@ -160,7 +160,7 @@ def test_unstable_crosstalk_is_rejected_not_silently_scaled():
 
 def test_docs_use_vscode_math_delimiters():
     docs = Path(__file__).resolve().parents[1]/"docs"
-    for path in docs.glob("*.md"):
+    for path in docs.rglob("*.md"):
         text = path.read_text(encoding="utf-8")
         assert "\\[" not in text and "\\]" not in text
         assert "\\(" not in text and "\\)" not in text

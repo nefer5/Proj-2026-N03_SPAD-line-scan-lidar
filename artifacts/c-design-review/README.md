@@ -6,7 +6,7 @@
 
 ## 来源与复现
 
-- 设计说明：`docs/c-exposure-workspace-design.md`。
+- 设计说明：`docs/history/c-exposure-workspace-design.md`。
 - 工况唯一默认源：`config/defaults.yaml`；说明：`config/parameter-help.yaml`。
 - `python tools/build_c_design_preview.py`：从当前 SimulationConfig、算法配置、已有调度和公共波形函数生成参考 JSON，再为 CSS/JS/JSON 生成内容指纹。
 - 只更新页面样式/交互时：`python tools/build_c_design_preview.py --assets-only`。

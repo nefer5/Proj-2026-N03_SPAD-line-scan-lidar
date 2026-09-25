@@ -1,17 +1,18 @@
 # 模块化 SPAD / 光学研究架构
 
-本方案由十项架构讨论决策形成。实现保持同一仓库、共用 Python 物理核心和两个网页研究入口。
+本方案由架构讨论和后续迭代形成，当前对应0.6.3.dev0。实现保持同一仓库、共用Python物理核心、按研究角色分开的网页入口。已确认的长期偏好与实现状态见[架构决策](architecture-decisions.md)，后续统一工作见[路标](../roadmap.md)。
 
 ## 入口与模型范围
 
 | 入口 | 实验 | 当前状态 |
 |---|---|---|
 | `/spad` | 直接给定探测面照明，独立研究 SPAD 与数字读出 | 已实现并自动验收 |
-| `/system` | B 全光斑 Tx/场景/Rx 映射，再调用同一 SPAD 核心 | 已实现，等待人工验收 |
-| `/system/scan` | C 逐脉冲扫描、帧/角bin积累和点云 | 已实现并自检，等待整体验收 |
+| `/system` | B 全光斑 Tx/场景/Rx 映射，再调用同一 SPAD 核心 | 已实现并自检，按用户反馈持续优化 |
+| `/system/scan` | C 列级逐发计划、扫描、按列重建与DSP/MIPI | 已实现并自检，人工精细验收待完成 |
+| `/system/scan/legacy` | 历史周期C与旧任务 | 兼容保留 |
 | `/`、`/debug` | 兼容 A 单角通道的评估与专家视图 | 保留并对照基线验证 |
 
-评估/调试是观察方式。C通过扫描与控制时序组装逐发光学输入，在一个连续SPAD/读出会话中采集；实际范围和限制见scanning.md。
+评估/调试是观察方式。C通过扫描与控制时序组装逐发光学输入，在一个连续SPAD/读出会话中采集；正式C见[column-scanning.md](../models/column-scanning.md)，历史周期C见[scanning.md](../models/scanning.md)。用户确认的C列间完全复位尚未接入，不能把连续状态实现称为复位架构。
 
 ## 代码职责与依赖
 
@@ -37,7 +38,7 @@
 
 ## 稳定契约
 
-1. `SensorIllumination`：`[pixel,wavelength]` 信号光子/发和背景光子/秒。数组元素已经含光谱单元积分权重，不是每 nm 密度。参考面为包含非敏感区的完整像素，尚未应用 PDE/FF。
+1. `SensorIllumination`：逻辑形状`[pixel,wavelength]`的信号光子/发和背景光子/秒。可用稠密数组或精确`SpectralProduct`外积表示；元素已含光谱积分权重，不是每nm密度。参考面为完整像素，尚未应用PDE/FF；分离表示不丢弃零PDE波段的入射光子。
 2. `CandidateEvents`：内部候选雪崩，绝对时间 ns 和物理像素 ID。它是低层测试/兼容入口，不能冒充光学入口。
 3. `AcquisitionProgram`：显式周期起止、器件门、读出门与是否计入测量。器件门和读出门可以不同；周期型网页表单目前将两者设置为同一门。
 4. `AcquisitionSession`：器件恢复、OR/符合窗口、TDC恢复/容量和时间水位跨处理块保留。`checkpoint()` 输出 JSON 状态，`restore()` 接续事件流。
@@ -59,9 +60,9 @@
 - A 保留原 RNG 协议；新实验使用 `per-cycle-per-pixel-v1`，光子采样与电子时间抖动分流。两种采样协议不要求逐样本相同，但共享器件模型。
 - 结果包含 seed、版本、时间、配置指纹、数据指纹、物理中间量、模型限制、全部记录及直方图。B 另外保存完整光学数据库和光谱积分数组。
 
-旧 A 配置继续经 `legacy_config` 迁移。B/C新导出使用schema_version 3的`{kind, experiment}`信封；SPAD目前仍使用版本2。B按`tx/scene/rx/spad/readout/background/acquisition/spectral_inputs`组织配置；C在相同分类上增加`scan/scene_motion`，采集设置不含独立发数。Python类型、YAML新增项与网页物理分类对应。`spectral_inputs`仍是唯一光谱输入，页面将各编辑器放在所属物理模块。
+旧A配置继续经`legacy_config`迁移。独立SPAD使用信封版本2，B及历史周期C使用版本3，正式列级C使用版本4；schema_version是配置格式，不是模型版本。B按`tx/scene/rx/spad/readout/background/acquisition/spectral_inputs`组织；历史C增加`scan/scene_motion`，正式C使用`system_targets/motion/exposure/transport/diagnostics`等独立域。具体类型以各配置模型为准，跨平台命名/字段归一还需R03–R04专项核验。
 
-旧B的`optics/device/timing`字段仅经`legacy_config`转换；同时出现新旧分组或新旧焦距字段会报错。旧标量焦距迁为两轴焦距并显式保留`legacy_upright`；旧V/y向下的相关参数转换到向上坐标。构造新工况默认双轴倒置。共享采集核心使用只读扁平适配视图，不复制参数默认值。
+旧B的`optics/device/timing`字段仅经`legacy_config`转换；同时出现新旧分组或新旧焦距/PSF字段会报错。旧标量焦距迁为两轴焦距并显式保留`legacy_upright`；旧V/y向下的相关参数转到向上坐标。旧PSF标量迁为等值双轴σ；旧完整滤光片配置明确保留零带外语义。构造新工况默认双轴倒置。共享采集核心使用只读适配视图，不复制默认值或另造物理参数源。
 
 ## 任务与记录重放
 
