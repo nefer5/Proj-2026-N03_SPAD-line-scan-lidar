@@ -1,0 +1,1 @@
+return {pages:context.pages().map(p=>p.url()),state:await page.evaluate(()=>({url:location.href,selection:document.querySelector("#channelInput")?.value,case:document.querySelector("#casePicker")?.value,open:localStorage.getItem("spad-system-modular-v3-open")}))};

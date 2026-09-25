@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>B 空间光学 · 通道分布设计预览</title>
+<link rel="stylesheet" href="preview.css?v=b9899ffc9ee4f079">
+<link rel="stylesheet" href="/static/vendor/katex/katex.min.css?v=19095127357ed6d2">
+<script defer src="/static/vendor/katex/katex.min.js?v=e8d885505949f3a5"></script>
+<script defer src="/static/shared/histogram-window.js?v=78c6a4f26c350775"></script>
+<script defer src="preview.js?v=699803ed2e5bdaf7"></script>
+</head>
+<body data-snapshot="snapshot.json?v=29fdfee1a2409fa3">
+<header class="topbar"><a class="brand" href="/system"><b>S<span>·</span></b><span>SPAD <small>LIDAR LAB</small></span></a><nav><a href="/system">B 空间光学</a><span>/</span><strong>通道探测</strong></nav><span class="badge">界面设计预览 · 01</span></header>
+<main>
+ <div class="page-title"><div><p class="eyebrow">B / CHANNEL DETECTION</p><h1>从像面上的位置，找到读出通道</h1><p class="subtitle">选通道、看光斑、对照探测记录。编号、空间位置与直方图保持联动。</p></div><div class="review-note"><i></i><span>交互预览，等待审核<br><small>新示意图尚未接入正式页</small></span></div></div>
+ <section class="source-panel" aria-label="展示数据来源"><label for="casePicker">展示工况<select id="casePicker"></select></label><div class="source-info"><strong id="sourceState"></strong><span id="sourceDetail"></span></div><button class="quiet small" id="sourceToggle" aria-expanded="false">工况来源</button></section>
+ <div id="sourceDescription" class="source-description" hidden></div>
+ <div id="layoutMetrics" class="metrics" aria-label="当前展示工况布局"></div>
+ <section class="panel">
+  <div class="panel-head"><div><p class="eyebrow">01 / CHANNEL LOCATOR</p><h2>通道选择与像面位置</h2></div><span class="muted">同一工况 · 双向点选</span></div>
+  <div class="locator-layout">
+   <aside class="selection-panel">
+    <label for="channelInput" class="field-label">展示通道 <span class="muted">编号 / 范围</span></label>
+    <div class="input-action"><input id="channelInput" type="text" placeholder="如 0, 2, 4-5"><button id="applyChannels" class="primary">应用</button></div>
+    <div class="selection-summary"><strong id="selectionCount"></strong><button id="firstChannel" class="text-button">仅选 CH 00</button></div>
+    <p id="selectionError" class="error" role="alert" hidden></p>
+    <div id="pickerHeading" class="picker-heading"></div>
+    <div id="channelPicker" class="channel-picker" aria-label="展示通道选择"></div>
+    <div class="selection-key"><span><i class="selected-key"></i>已选择</span><span><i></i>未选择</span><span>↑ V 增大</span></div>
+    <p class="muted small-text">选择只改变显示，不改变采集通道、能量或统计。</p>
+   </aside>
+   <div class="sensor-panel">
+    <div class="sensor-head"><h3>SPAD 像面 · 读出通道分布</h3><span class="unit">物理等比例 · μm</span></div>
+    <div class="map-tools"><label><input id="spotVisible" type="checkbox" checked>光斑底图</label><label class="opacity-control">不透明度<input id="spotOpacity" type="range" min="0" max="100" value="55"><output id="opacityValue">55%</output></label><label><input id="pixelGrid" type="checkbox" checked>SPAD 像素边界</label></div>
+    <div class="sensor-body">
+     <div class="map-wrap"><div id="sensorMap" role="group" aria-label="可点选的 SPAD 通道分布"></div><p class="map-caption">H / x →　V / y ↑　<span>正上 · 负下</span></p></div>
+     <aside class="map-detail">
+      <div class="detail-card"><span class="eyebrow">CHANNEL DETAIL</span><h3 id="detailTitle"></h3><div id="channelDetail"></div><p class="muted small-text">悬停或键盘聚焦通道查看；点击加入 / 移出选择。</p></div>
+      <div class="numbering-card"><h3>编号从左下角开始</h3><p><span id="numberingFormula"></span></p><p>N_H 为 H 通道数。H 优先递增，走完一行再向上。索引均从 0 开始。</p><div id="numberingExample" class="numbering-example"></div></div>
+      <div class="spot-key"><span class="field-label">光斑底图色标</span><div id="colorScale" class="color-scale"></div><div class="scale-values"><span>0</span><span id="photonPeak"></span></div><p>信号光子 / 物理像素 / 发<br><span class="muted">探测面 · PDE / FF 前</span></p></div>
+     </aside>
+    </div>
+    <div class="map-note">底图显示该工况全光斑在像面的像素积分，非单角 PSF，也非最终探测计数。网格表示完整物理像素；当前 FF 模型未定义像素内部感光区的具体形状。</div>
+   </div>
+  </div>
+ </section>
+ <section class="panel histogram-section">
+  <div class="panel-head"><div><p class="eyebrow">02 / SELECTED CHANNELS</p><h2>所选通道 · 探测直方图</h2></div><span id="histSource" class="muted"></span></div>
+  <div id="histControls"><div class="time-toolbar"><label>观察窗口 <span class="unit">ns</span><input id="timeMin" type="number" step="any" aria-label="观察窗口起点"><span>—</span><input id="timeMax" type="number" step="any" aria-label="观察窗口终点"></label><button class="quiet" id="applyWindow">应用时间</button><button class="text-button" id="focusEcho">聚焦回波</button><button class="text-button" id="fullGate">全门</button></div><p id="timeError" class="error" role="alert" hidden></p><div class="hist-legend"><label><input type="checkbox" data-series="observed" checked><i class="bar"></i>探测记录</label><label><input type="checkbox" data-series="ideal" checked><i class="line cyan"></i>理想信号</label><label><input type="checkbox" data-series="noise" checked><i class="line amber"></i>纯噪声均值</label><label><input type="checkbox" data-series="error" checked>↕ 样本最小—最大</label></div></div>
+  <div id="histograms" class="histograms"></div><p id="statisticsNote" class="muted small-text"></p>
+ </section>
+ <footer>本页保留数据快照以供复查；布局、光斑和统计均来自 Python 公共核心。<a href="/system">返回正式 B 平台 ↗</a></footer>
+</main><div id="loadingError" class="error" role="alert" hidden></div>
+</body></html>

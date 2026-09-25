@@ -156,6 +156,7 @@ def result(job_id: str):
 def system_result_view(job_id:str):
     """Decorate old immutable records for display without recalculating acquisition."""
     try:
+        from ..reporting.readout_layout import readout_layout
         result=manager().result(job_id)
         if 'optics' not in result or 'scan' in result:
             raise ValueError('Expected a static B result')
@@ -167,6 +168,7 @@ def system_result_view(job_id:str):
             cfg=SimulationConfig.for_experiment('system',result['configuration']['experiment'],a)
             result.update(optical_view(cfg,a,result['optics']))
             result['view_note']='历史采集记录原样保留；仅补充显示元数据，未重新采样。旧版未保存的重复统计不补造。'
+        result['readout_layout']=readout_layout(result['optics'])
         return result
     except (ValueError,KeyError,TypeError) as exc:
         raise HTTPException(422,str(exc)) from exc

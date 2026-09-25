@@ -1,0 +1,14 @@
+const errors=[];page.on('pageerror',e=>errors.push(e.message));
+await page.goto('http://127.0.0.1:8016/static/prototypes/b-channel-layout/index.html',{waitUntil:'networkidle'});await page.waitForFunction(()=>document.body.dataset.ready==='true');
+await page.setViewportSize({width:1536,height:1180});
+await page.locator('#channelInput').fill('3,4');await page.locator('#applyChannels').click();
+await page.locator('[data-map-channel="4"]').hover();
+await page.locator('#sourceToggle').click();await expect(page.locator('#sourceDescription')).toBeVisible();await page.locator('#sourceToggle').click();
+await expect(page.locator('#numberingFormula .katex')).toBeVisible();
+assert.equal(await page.locator('[data-hist-card]').count(),2);
+assert.equal(await page.locator('[data-map-channel].selected').count(),2);
+const canvases=await page.locator('[data-hist]').evaluateAll(es=>es.map(e=>({width:e.width,height:e.height})));assert(canvases.every(c=>c.width>0&&c.height>0));
+await page.evaluate(()=>scrollTo(0,0));
+await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
+assert.equal(errors.length,0,errors.join('\n'));
+return {errors,selected:await page.locator('#channelInput').inputValue(),screenshot:await page.screenshot({fullPage:true})};

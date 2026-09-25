@@ -129,6 +129,7 @@ def parameter_figures(base, cfg, interface, optics, psfs, algorithms):
 
 def optical_view(cfg, algorithms, optics, laser_shots=None):
     from ..experiments.system_config import form_values
+    from .readout_layout import readout_layout
     interface=form_values(cfg)
     rx=RxData.model_validate(optics['dataset']['rx'])
     _,psfs=RxTable(rx).evaluate(cfg.optics.wavelength_nm,optics['angular_h_centers_mrad'],optics['angular_v_centers_mrad'])
@@ -143,7 +144,7 @@ def optical_view(cfg, algorithms, optics, laser_shots=None):
     proxy=SimpleNamespace(**parameters)
     plot_cfg=SimpleNamespace(optics=cfg.optics,device=cfg.device,readout=cfg.readout,
                              timing=SimpleNamespace(**{**cfg.timing.model_dump(),'laser_shots':shots}))
-    return {'form_configuration':interface,'x_edges_um':rx.x_edges_um,'y_edges_um':rx.y_edges_um,
+    return {'form_configuration':interface,'readout_layout':readout_layout(optics),'x_edges_um':rx.x_edges_um,'y_edges_um':rx.y_edges_um,
             'angle_psfs':psfs.tolist(),'crosstalk':channel_db_tables(optics['angle_to_channel_fraction']),
             'parameter_figures':parameter_figures(proxy,plot_cfg,interface,optics,psfs,algorithms),
             'formulas':{key:read_yaml('formulas.yaml')[key] for key in ('b_rx_mapping_inverted','b_rx_mapping_legacy','b_channel_ratio_db','b_response_matrix')},

@@ -67,6 +67,27 @@ def test_anamorphic_focals_and_inverted_psf_energy():
     assert p[idx].sum(axis=1)@((ye[:-1]+ye[1:])/2)<0
 
 
+def test_readout_layout_uses_acquisition_groups_and_actual_pixel_edges():
+    # Regression: the reported 1x8 / 16x4 form must not retain an old 8x32 layout.
+    from spad_lidar.reporting.readout_layout import readout_layout
+    c=SimulationConfig.for_experiment('system',{'spad':{'channels_h':1,'channels_v':8,'H_binning':16,'V_binning':4}})
+    _,groups,info=project_illumination(c,Algorithms.load(),quiet,never)
+    layout=readout_layout(info)
+    assert (layout['pixels_h'],layout['pixels_v'],layout['total_channels'],layout['spads_per_channel'])==(16,32,8,64)
+    assert sum(ch['spad_count'] for ch in layout['channels'])==layout['total_pixels']==512
+    for channel in layout['channels']:
+        assert channel['spad_count']==int((groups==channel['id']).sum())
+        assert channel['id']==channel['v']*layout['channels_h']+channel['h']
+    # An imported Rx table can use nonuniform coordinates: display those actual
+    # boundaries, never reconstruct a second geometry from a nominal pixel pitch.
+    info['dataset']['rx']['x_edges_um'][0]=-173.0
+    info['dataset']['rx']['y_edges_um'][-1]=347.0
+    changed=readout_layout(info)
+    assert changed['channels'][0]['x_um'][0]==-173.0
+    assert changed['channels'][0]['y_um'][1]<changed['channels'][-1]['y_um'][0]
+    assert changed['channels'][-1]['y_um'][-1]==347.0
+
+
 def test_gaussian_far_tail_is_not_cancellation_zero():
     from spad_lidar.rx.spatial import normal_bin_mass
     right=normal_bin_mass(np.array([8.,9.]))[0]
