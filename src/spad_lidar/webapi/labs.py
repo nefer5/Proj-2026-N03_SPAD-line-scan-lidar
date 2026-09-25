@@ -37,7 +37,7 @@ def system_page():
 def workspace_page(kind):
     html=(WEB/'system.html').read_text(encoding='utf-8')
     html=html.replace('data-lab="system"',f'data-lab="{kind}"')
-    for name in ('system.css','system.js','shared/scan-workspace.js','shared/optical-panels.js','shared/plot-series.js','shared/histogram-window.js','curve-editor.js',
+    for name in ('system.css','system.js','shared/channel-locator.css','shared/channel-locator.js','shared/scan-workspace.js','shared/optical-panels.js','shared/plot-series.js','shared/histogram-window.js','curve-editor.js',
                  'vendor/katex/katex.min.js','vendor/katex/katex.min.css'):
         html=html.replace(f'/static/{name}"',f'/static/{name}?v={sha256((WEB/name).read_bytes()).hexdigest()}"')
     return HTMLResponse(html)
@@ -156,7 +156,7 @@ def result(job_id: str):
 def system_result_view(job_id:str):
     """Decorate old immutable records for display without recalculating acquisition."""
     try:
-        from ..reporting.readout_layout import readout_layout
+        from ..reporting.readout_layout import readout_layout, channel_display_values
         result=manager().result(job_id)
         if 'optics' not in result or 'scan' in result:
             raise ValueError('Expected a static B result')
@@ -169,6 +169,9 @@ def system_result_view(job_id:str):
             result.update(optical_view(cfg,a,result['optics']))
             result['view_note']='历史采集记录原样保留；仅补充显示元数据，未重新采样。旧版未保存的重复统计不补造。'
         result['readout_layout']=readout_layout(result['optics'])
+        result['readout_channel_values']=channel_display_values(result)
+        result['formulas']['b_readout_channel_index']=read_yaml('formulas.yaml')['b_readout_channel_index']
+        result['formula_notes']['b_readout_channel_index']=read_yaml('formula-notes.yaml')['b_readout_channel_index']
         return result
     except (ValueError,KeyError,TypeError) as exc:
         raise HTTPException(422,str(exc)) from exc
@@ -297,12 +300,14 @@ def system_preview(config:dict):
     from ..experiments.spatial import project_illumination
     from ..experiments.lab import stamp_result
     from ..reporting.spatial_view import optical_view
+    from ..reporting.readout_layout import channel_display_values
     try:
         a=Algorithms.load();cfg=SimulationConfig.for_experiment('system',config,a)
         light,groups,optics=project_illumination(cfg,a,lambda *args:None,lambda:False)
         view=optical_view(cfg,a,optics)
         view.update(optics=optics,illumination={'signal_photons_per_pixel_per_pulse':light.signal_photons_per_pulse.sum(axis=1).tolist(),
                                               'shape':optics['array_shape']})
+        view['readout_channel_values']=channel_display_values(view)
         return stamp_result('B_parameter_preview_without_event_sampling',cfg,a,view)
     except (ValueError,KeyError,TypeError) as exc:
         raise HTTPException(422,str(exc)) from exc

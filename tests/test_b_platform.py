@@ -137,6 +137,33 @@ def test_repeats_use_shared_records_and_independent_roles(analysis):
     assert sum(x['full_signal_total'] for x in r['references'])==pytest.approx(cfg.timing.laser_shots*r['optics']['budget']['signal_candidate_avalanches_per_pulse'])
 
 
+def test_channel_locator_values_conserve_sensor_photons_and_preserve_old_result(analysis,monkeypatch):
+    from types import SimpleNamespace
+    from spad_lidar.webapi import labs
+    from spad_lidar.reporting.readout_layout import channel_display_values
+    _,_,r=analysis
+    before=deepcopy(r)
+    values=channel_display_values(r)
+    photons=np.asarray(r['illumination']['signal_photons_per_pixel_per_pulse'])
+    groups=np.asarray(r['optics']['pixel_group_ids'])
+    assert sum(c['signal_photons_per_pulse'] for c in values['channels'])==pytest.approx(photons.sum())
+    for channel in values['channels']:
+        assert channel['signal_photons_per_pulse']==pytest.approx(photons[groups==channel['id']].sum())
+        assert channel['record_count']==sum(r['histogram']['counts'][channel['id']])
+    assert values['signal_peak']==photons.max()
+    # Old jobs acquire display metadata on read, not by resampling or editing the
+    # source job. Keep the original arrays, configuration and audit fingerprint.
+    old=deepcopy(r);old.pop('readout_layout',None)
+    old['formulas'].pop('b_readout_channel_index',None)
+    monkeypatch.setattr(labs,'manager',lambda:SimpleNamespace(result=lambda job:deepcopy(old)))
+    view=labs.system_result_view('old-result')
+    assert view['readout_channel_values']==values
+    assert view['provenance']==r['provenance'] and view['records']==r['records']
+    assert view['readout_layout']['total_channels']==len(values['channels'])
+    assert view['formulas']['b_readout_channel_index']==read_yaml('formulas.yaml')['b_readout_channel_index']
+    assert r==before
+
+
 def test_replay_rebins_every_replicate_and_keeps_original(analysis):
     cfg,a,r=analysis;before=deepcopy(r)
     coarse=replay_analysis(r,cfg,a,2*cfg.readout.tdc_bin_ps)
@@ -169,6 +196,7 @@ def test_live_api_preview_config_and_shared_formula_contracts():
     response=client.post('/api/experiments/system/preview',json={'rx':{'focal_length_h_mm':30}})
     assert response.status_code==200
     view=response.json();assert 'records' not in view
+    assert all('record_count' not in c for c in view['readout_channel_values']['channels'])
     assert len(view['parameter_figures'])==10
     assert view['form_configuration']['optics']['focal_length_h_mm']==30
     assert view['parameter_figures']['timing']['focus_window_ns'][0]>0

@@ -6,6 +6,31 @@ current SPAD model; it does not define a fabricated photosensitive sub-pixel sha
 import numpy as np
 
 
+def channel_display_values(view):
+    """Summarize saved sensor photons and records with acquisition's grouping.
+
+    No PDE/FF or acquisition recalculation. A preview has no record_count field.
+    """
+    optics = view['optics']
+    groups = np.asarray(optics['pixel_group_ids'])
+    photons = np.asarray(view['illumination']['signal_photons_per_pixel_per_pulse'])
+    cv, ch = optics['channel_shape']
+    if photons.shape != groups.shape or not np.all(np.isfinite(photons)) or np.any(photons < 0):
+        raise ValueError('Readout photon display requires one nonnegative finite value per pixel')
+    values = np.bincount(groups, weights=photons, minlength=cv * ch)
+    channels = [{'id': i, 'signal_photons_per_pulse': float(value)} for i, value in enumerate(values)]
+    if 'histogram' in view:
+        counts = np.asarray(view['histogram']['counts'])
+        if counts.ndim != 2 or counts.shape[0] != len(channels):
+            raise ValueError('Histogram channels disagree with readout layout')
+        for channel, count in zip(channels, counts.sum(axis=1)):
+            channel['record_count'] = int(count)
+    return {'signal_peak': float(photons.max()), 'channels': channels,
+            'reference_plane': 'sensor_incident_before_PDE_FF',
+            'pixel_signal_unit': 'photons_per_physical_pixel_per_emitted_pulse',
+            'channel_signal_unit': 'photons_per_channel_per_emitted_pulse'}
+
+
 def readout_layout(optics):
     nv, nh = optics['array_shape']
     cv, ch = optics['channel_shape']

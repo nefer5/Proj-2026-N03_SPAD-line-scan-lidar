@@ -147,5 +147,5 @@ def optical_view(cfg, algorithms, optics, laser_shots=None):
     return {'form_configuration':interface,'readout_layout':readout_layout(optics),'x_edges_um':rx.x_edges_um,'y_edges_um':rx.y_edges_um,
             'angle_psfs':psfs.tolist(),'crosstalk':channel_db_tables(optics['angle_to_channel_fraction']),
             'parameter_figures':parameter_figures(proxy,plot_cfg,interface,optics,psfs,algorithms),
-            'formulas':{key:read_yaml('formulas.yaml')[key] for key in ('b_rx_mapping_inverted','b_rx_mapping_legacy','b_channel_ratio_db','b_response_matrix')},
-            'formula_notes':{key:read_yaml('formula-notes.yaml')[key] for key in ('b_rx_mapping_inverted','b_rx_mapping_legacy','b_channel_ratio_db','b_response_matrix')}}
+            'formulas':{key:read_yaml('formulas.yaml')[key] for key in ('b_rx_mapping_inverted','b_rx_mapping_legacy','b_channel_ratio_db','b_response_matrix','b_readout_channel_index')},
+            'formula_notes':{key:read_yaml('formula-notes.yaml')[key] for key in ('b_rx_mapping_inverted','b_rx_mapping_legacy','b_channel_ratio_db','b_response_matrix','b_readout_channel_index')}}

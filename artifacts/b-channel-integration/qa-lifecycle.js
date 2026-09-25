@@ -1,0 +1,34 @@
+const check=await context.newPage();let storage;
+try{
+ await check.goto('http://127.0.0.1:8016/system?job=eff344ee56f24799876b5df6a08fa3e2',{waitUntil:'networkidle'});await check.waitForFunction(()=>document.body.dataset.ready==='true');
+ storage=await check.evaluate(()=>({draft:localStorage.getItem('spad-system-modular-v3'),open:localStorage.getItem('spad-system-modular-v3-open')}));
+ await check.locator('#expandAll').click();
+ const fixed=await check.locator('#channelLocator').getAttribute('data-configuration');
+ await check.locator('[data-path="optics.channels_h"]').fill('2');await check.locator('[data-path="optics.channels_h"]').press('Tab');
+ await expect(check.locator('#readoutLayoutSummary')).toContainText('32 × 32');
+ assert.equal(await check.locator('#channelLocator [data-map-channel]').count(),8);assert.equal(await check.locator('#channelLocator').getAttribute('data-configuration'),fixed);await expect(check.locator('#staleBanner')).toBeVisible();
+ await check.locator('#resetDraft').click();await expect(check.locator('[data-path="optics.channels_v"]')).toHaveValue('16');
+ await expect(check.locator('#readoutLayoutSummary')).toContainText('8 × 64');
+ await check.locator('#expandAll').click();
+ await check.locator('[data-path="optics.solar_enabled"]').uncheck();await check.locator('[data-path="optics.other_light_enabled"]').uncheck();
+ await check.locator('[data-path="timing.laser_shots"]').fill('2');await check.locator('[data-path="timing.monte_carlo_trials"]').fill('2');await check.locator('[data-path="timing.monte_carlo_trials"]').press('Tab');
+ await check.locator('#runPreview').click();
+ await check.waitForFunction(()=>document.querySelectorAll('#channelLocator [data-map-channel]').length===32,{},{timeout:45000});
+ const jobId=new URL(check.url()).searchParams.get('job');assert(jobId!=='eff344ee56f24799876b5df6a08fa3e2');
+ await check.locator('#channelInput').fill('0, 15, 30-31');await check.locator('#applyChannels').click();
+ assert.equal(await check.locator('[data-map-channel].selected').count(),4);assert.equal(await check.locator('[data-hist]').count(),4);
+ const positions=await check.locator('[data-map-channel]').evaluateAll(ns=>ns.filter(n=>['0','1','30'].includes(n.dataset.mapChannel)).map(n=>({id:n.dataset.mapChannel,x:+n.querySelector('rect').getAttribute('x'),y:+n.querySelector('rect').getAttribute('y'),w:+n.querySelector('rect').getAttribute('width'),h:+n.querySelector('rect').getAttribute('height')})));
+ assert(positions[0].x<positions[1].x&&positions[0].y>positions[2].y);assert(Math.abs(positions[0].w-positions[0].h)<1e-6);
+ await check.locator('#channelInput').fill('0-31');await check.locator('#applyChannels').click();await expect(check.locator('#histError')).toBeVisible();assert.equal(await check.locator('[data-map-channel].selected').count(),4);
+ await check.reload({waitUntil:'networkidle'});await check.waitForFunction(()=>document.body.dataset.ready==='true');assert.equal(await check.locator('[data-map-channel]').count(),32);
+ const scripts=await check.locator('script[src*="channel-locator"]').evaluateAll(es=>es.map(e=>e.getAttribute('src')));assert(scripts.every(s=>/\?v=[a-f0-9]{64}$/.test(s)));
+ const response=await check.request.get('http://127.0.0.1:8016'+scripts[0]);assert(response.headers()['cache-control'].includes('no-store'));
+ await check.setViewportSize({width:390,height:900});assert.equal(await check.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+ await check.locator('#channelInput').fill('30,31');await check.locator('#applyChannels').click();await check.locator('[data-map-channel="31"]').click();await expect(check.locator('#channelPicker [data-channel="31"]')).toHaveAttribute('aria-pressed','false');
+ await check.setViewportSize({width:1536,height:1180});await check.locator('#channelInput').fill('14-17');await check.locator('#applyChannels').click();
+ await check.evaluate(()=>scrollTo(0,document.querySelector('#histogramPanel').getBoundingClientRect().top+scrollY-15));
+ globalThis.liveJob=jobId;
+ const screenshot=await check.screenshot({fullPage:false});
+ await check.goto('http://127.0.0.1:8016/system/scan/legacy',{waitUntil:'networkidle'});await check.waitForFunction(()=>document.body.dataset.ready==='true');assert.equal(await check.locator('#channelInput').count(),1);assert.equal(await check.locator('.hist-controls #channelPicker').count(),1);assert.equal(await check.locator('#channelLocator').innerHTML(),'');
+ return {jobId,positions,scripts,mobileOverflow:false,legacyReady:true,screenshot};
+}finally{if(storage)await check.evaluate(s=>{for(const [key,value] of [['spad-system-modular-v3',s.draft],['spad-system-modular-v3-open',s.open]]){if(value===null)localStorage.removeItem(key);else localStorage.setItem(key,value);}},storage);await check.close();}
