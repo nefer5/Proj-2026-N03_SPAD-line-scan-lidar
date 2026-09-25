@@ -4,8 +4,8 @@ import json
 import numpy as np
 from fastapi import APIRouter, HTTPException, Body
 from fastapi.responses import HTMLResponse,Response
-from pydantic import BaseModel, ConfigDict
-from typing import Literal
+from pydantic import BaseModel, ConfigDict, Field
+from typing import Literal, Annotated
 from ..models import SimulationConfig
 from ..configuration import read_yaml, Algorithms, parse_yaml
 from ..runtime.jobs import manager
@@ -37,7 +37,7 @@ def system_page():
 def workspace_page(kind):
     html=(WEB/'system.html').read_text(encoding='utf-8')
     html=html.replace('data-lab="system"',f'data-lab="{kind}"')
-    for name in ('system.css','system.js','shared/channel-locator.css','shared/channel-locator.js','shared/scan-workspace.js','shared/optical-panels.js','shared/plot-series.js','shared/histogram-window.js','curve-editor.js',
+    for name in ('system.css','system.js','shared/channel-locator.css','shared/channel-locator.js','shared/b-acquisition.css','shared/b-acquisition.js','shared/scan-workspace.js','shared/optical-panels.js','shared/plot-series.js','shared/histogram-window.js','curve-editor.js',
                  'vendor/katex/katex.min.js','vendor/katex/katex.min.css'):
         html=html.replace(f'/static/{name}"',f'/static/{name}?v={sha256((WEB/name).read_bytes()).hexdigest()}"')
     return HTMLResponse(html)
@@ -172,6 +172,11 @@ def system_result_view(job_id:str):
         result['readout_channel_values']=channel_display_values(result)
         result['formulas']['b_readout_channel_index']=read_yaml('formulas.yaml')['b_readout_channel_index']
         result['formula_notes']['b_readout_channel_index']=read_yaml('formula-notes.yaml')['b_readout_channel_index']
+        from ..reporting.b_acquisition import acquisition_context,spatial_scope_values
+        a=Algorithms.from_snapshot(result['configuration']['algorithms'])
+        cfg=SimulationConfig.for_experiment('system',result['configuration']['experiment'],a)
+        result['acquisition_context']=acquisition_context(cfg,a,result['optics'],result=result)
+        result['spatial_scopes']=spatial_scope_values(result['illumination'],cfg.timing.laser_shots)
         return result
     except (ValueError,KeyError,TypeError) as exc:
         raise HTTPException(422,str(exc)) from exc
@@ -180,6 +185,31 @@ def system_result_view(job_id:str):
 class ReplayRequest(BaseModel):
     model_config = ConfigDict(extra='forbid', allow_inf_nan=False)
     bin_ps: float
+
+
+class BHistogramViewRequest(BaseModel):
+    model_config=ConfigDict(extra='forbid',allow_inf_nan=False)
+    scope: Literal['slot','gate']
+    gate_index: Annotated[int,Field(ge=0,strict=True)]
+    bin_ps: Annotated[float,Field(gt=0)]
+    channels: list[Annotated[int,Field(ge=0,strict=True)]] = Field(min_length=1)
+
+
+@router.post('/api/jobs/{job_id}/system-histogram')
+def system_histogram_view(job_id:str,request:BHistogramViewRequest):
+    from ..runtime.result_views import cached_result
+    from ..reporting.b_acquisition import histogram_scope_view
+    try:
+        current=Algorithms.load()
+        result=cached_result(manager(),job_id,current.b_view_cache_entries)
+        if 'optics' not in result or 'scan' in result:raise ValueError('Expected a static B acquisition')
+        a=Algorithms.from_snapshot(result['configuration']['algorithms']).model_copy(update={
+            'b_timeline_max_points':current.b_timeline_max_points,'max_visible_channels':current.max_visible_channels})
+        cfg=SimulationConfig.for_experiment('system',result['configuration']['experiment'],a)
+        view=histogram_scope_view(result,cfg,a,request.scope,request.gate_index,request.bin_ps,request.channels)
+        view['view_policy'].update(result_cache_entries=current.b_view_cache_entries,max_visible_channels=current.max_visible_channels)
+        return view
+    except (ValueError,KeyError,TypeError,OSError) as exc:raise HTTPException(422,str(exc)) from exc
 
 
 @router.post('/api/jobs/{job_id}/replay')
@@ -301,6 +331,7 @@ def system_preview(config:dict):
     from ..experiments.lab import stamp_result
     from ..reporting.spatial_view import optical_view
     from ..reporting.readout_layout import channel_display_values
+    from ..reporting.b_acquisition import acquisition_context,spatial_scope_values
     try:
         a=Algorithms.load();cfg=SimulationConfig.for_experiment('system',config,a)
         light,groups,optics=project_illumination(cfg,a,lambda *args:None,lambda:False)
@@ -308,6 +339,8 @@ def system_preview(config:dict):
         view.update(optics=optics,illumination={'signal_photons_per_pixel_per_pulse':light.signal_photons_per_pulse.sum(axis=1).tolist(),
                                               'shape':optics['array_shape']})
         view['readout_channel_values']=channel_display_values(view)
+        view['acquisition_context']=acquisition_context(cfg,a,optics)
+        view['spatial_scopes']=spatial_scope_values(view['illumination'],cfg.timing.laser_shots)
         return stamp_result('B_parameter_preview_without_event_sampling',cfg,a,view)
     except (ValueError,KeyError,TypeError) as exc:
         raise HTTPException(422,str(exc)) from exc

@@ -45,3 +45,5 @@ column_record_assignment: 't为内部读出触发判定时刻；r为最近的名
 column_rx_return: 'd_a方向正比于(tan H,tan V,1)，Ry为绕垂直轴的旋转。分别在发射中心和回波中心查询姿态，Rx局部H/V由对应向量x/z、y/z的atan2计算；全局120deg扫描不作为Rx局部小角度输入。时间使用s、角量rad，代码显式换算ns/mrad。光学不包含电子标定延迟；有限脉宽/长拖尾内的连续扫描拖影尚未解析。'
 column_pulse_tail: 's0为归一化Gaussian或矩形基底，q为被指数延迟的能量占比，tau为正时间常数，*表示卷积。单发能量乘此完整分布；图窗或观测边界外尾部不重新归一化。基底FWHM不等于混合波形整体FWHM。时间抽样连续进入相同SPAD核心；光学仍采用中心姿态近似。'
 b_readout_channel_index: 'CH为读出通道编号，H/V为从0开始的二维通道索引，N_H为H方向通道数。H向右、V向上；每行H优先递增，再移至上一行V。不是光学角度单元编号或时间分箱编号。'
+b_gate_phase: 'k为一次曝光的gate索引，t_rel是相对该次Tx的记录时间；改变计时参考不表示SPAD死时间或TDC忙状态被重置。'
+b_slot_accumulation: 'N为本次slot内累计发数，j为读出通道，b为ToF时间分箱。不同曝光在相同相对ToF时间分箱中相加。统计重复次数M产生M份独立H_slot，蓝柱只取首次，误差棒比较它们，不把M份再次相加。'

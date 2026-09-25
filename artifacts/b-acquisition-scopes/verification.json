@@ -1,0 +1,24 @@
+{
+  "job_id": "2fcc73fbf6de469797b19d1ebdac9b57",
+  "N": 3,
+  "M": 5,
+  "slot_records": 29673,
+  "per_gate_selected_channel_counts": {
+    "3": [
+      4873,
+      4911,
+      4894
+    ],
+    "4": [
+      4975,
+      4992,
+      4992
+    ]
+  },
+  "slot_selected_channel_counts": {
+    "3": 14678,
+    "4": 14959
+  },
+  "source_sha256": "652424e8264f8c5d2811c4cd01f699e5d13435e60591aa7a7a39d542e8cee821",
+  "configuration_sha256": "d1f5251e525e5d45cdfb541abef138706a49b7726d528371c1ba848c400458ea"
+}

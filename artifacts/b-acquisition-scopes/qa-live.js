@@ -1,0 +1,16 @@
+await page.setViewportSize({width:1536,height:1160});const errors=[];page.on('pageerror',e=>errors.push(e.message));
+await page.goto('http://127.0.0.1:8016/system?job=2fcc73fbf6de469797b19d1ebdac9b57',{waitUntil:'networkidle'});await page.waitForFunction(()=>document.body.dataset.ready==='true');
+await expect(page.locator('#bMechanismPanel')).toBeVisible();await expect(page.locator('#bMechanismPanel .ba-facts')).toContainText('3 发');await expect(page.locator('#bMechanismPanel .ba-stat')).toContainText('5 次');await expect(page.locator('#bScopeRules')).toContainText('N=3');await expect(page.locator('#bScopeRules')).toContainText('M=5');
+assert.equal(await page.locator('#bMechanismPanel .katex').count(),2);
+await page.locator('#opticalTab').click();await expect(page.locator('#pipeline')).toBeVisible();await page.locator('#mechanismTab').click();
+await page.locator('#channelInput').fill('3,4');await page.locator('#applyChannels').click();await page.waitForFunction(()=>document.querySelectorAll('.hist-plot[data-scope="slot"]').length===2);
+await expect(page.locator('#statisticsNote')).toContainText('5 次完整 slot');
+const scope=page.locator('#bHistogramControls [data-scope]');await scope.selectOption('gate');await page.waitForFunction(()=>document.querySelectorAll('.hist-plot[data-scope="gate"]').length===2);
+await page.locator('#bHistogramControls [data-gate]').fill('1');await page.locator('#bHistogramControls [data-apply]').click();await expect(page.locator('#bHistogramControls [data-badge]')).toHaveText('单 gate · G1 的实际记录');
+await expect(page.locator('[data-series="error"]')).toBeDisabled();await expect(page.locator('#statisticsNote')).toContainText('未保存逐 gate');
+const labels=await page.locator('.hist-plot-head').allInnerTexts();assert.equal(await page.locator('[data-exposure]').count(),2);
+await page.locator('#replayBin').fill('2000');await page.locator('#replayRecords').click();await expect(page.locator('#replayState')).toContainText('当前采集范围重放');await expect(page.locator('#binNote')).toContainText('2000');
+await scope.selectOption('slot');await page.waitForFunction(()=>document.querySelectorAll('.hist-plot[data-scope="slot"]').length===2);await expect(page.locator('[data-series="error"]')).toBeEnabled();
+await page.locator('#spatialScope').selectOption('slot');await expect(page.locator('#sensorScopeTitle')).toContainText('3 发');await expect(page.locator('#sensorScopeUnit')).toHaveText('光子 / 像素 / slot');await page.locator('#spatialScope').selectOption('per_pulse');
+await page.evaluate(()=>scrollTo(0,0));await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));assert.equal(errors.length,0,errors.join('\n'));
+return {errors,singleGateLabels:labels,screenshot:await page.screenshot({fullPage:false})};

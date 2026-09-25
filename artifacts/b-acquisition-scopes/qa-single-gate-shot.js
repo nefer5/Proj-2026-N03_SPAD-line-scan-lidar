@@ -1,0 +1,7 @@
+await page.setViewportSize({width:1536,height:1160});
+await page.goto('http://127.0.0.1:8016/system?job=bb0ed04dd00f485b9c16856d7faa3d67',{waitUntil:'networkidle'});await page.waitForFunction(()=>document.body.dataset.ready==='true');
+await page.locator('#channelInput').fill('3,4');await page.locator('#applyChannels').click();await page.waitForFunction(()=>document.querySelectorAll('.hist-plot[data-scope="slot"]').length===2);
+await page.locator('#bHistogramControls [data-scope]').selectOption('gate');await page.waitForFunction(()=>document.querySelectorAll('.hist-plot[data-scope="gate"]').length===2);await page.locator('#bHistogramControls [data-gate]').fill('9');await page.locator('#bHistogramControls [data-apply]').click();await expect(page.locator('#bHistogramControls [data-badge]')).toHaveText('单 gate · G9 的实际记录');
+await page.evaluate(()=>scrollTo(0,document.querySelector('#bHistogramControls').getBoundingClientRect().top+scrollY-12));await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
+const shot=await page.screenshot({fullPage:false});await page.locator('#bHistogramControls [data-scope]').selectOption('slot');await page.waitForFunction(()=>document.querySelectorAll('.hist-plot[data-scope="slot"]').length===2);await page.evaluate(()=>scrollTo(0,0));
+return {screenshot:shot};

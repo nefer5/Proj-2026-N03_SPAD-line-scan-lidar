@@ -45,3 +45,5 @@ column_record_assignment: 'r(t)=\max\{j:t^{\mathrm{ref}}_j\leq t\},\qquad c_{\ma
 column_rx_return: '\begin{aligned}t_{\mathrm{return},ka}&=t_k+2R_{ka}/c\\\mathbf d_{\mathrm{world},ka}&=R_y(\theta_{\mathrm{Tx}}(t_k))\mathbf d_a\\\mathbf d_{\mathrm{Rx},ka}&=R_y(-\theta_{\mathrm{Rx\,axis}}(t_{\mathrm{return},ka}))\mathbf d_{\mathrm{world},ka}\end{aligned}'
 column_pulse_tail: 's(t)=(1-q)s_0(t)+q\left[s_0*\left(\tau^{-1}e^{-t/\tau}\mathbf{1}_{t\geq0}\right)\right](t),\qquad \int s(t)\,\mathrm dt=1'
 b_readout_channel_index: '\mathrm{CH}=V\,N_H+H'
+b_gate_phase: 't_{\mathrm{rel}}=t_{\mathrm{record}}-t_{\mathrm{Tx},k}'
+b_slot_accumulation: 'H_{\mathrm{slot},j}(b)=\sum_{k=0}^{N-1}H_{k,j}(b)'

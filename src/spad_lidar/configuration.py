@@ -88,6 +88,9 @@ class Algorithms(BaseModel):
     column_result_cache_entries: int = Field(ge=0)
     parameter_preview_debounce_ms: int = Field(ge=0)
     max_visible_channels: int = Field(ge=1)
+    b_mechanism_preview_gates: int = Field(ge=1)
+    b_timeline_max_points: int = Field(ge=1)
+    b_view_cache_entries: int = Field(ge=0)
     max_lab_analysis_events: int = Field(gt=0)
     b_initial_condition: Literal['fully_recovered', 'periodic_history']
     b_noise_reference: Literal['candidate_scalar', 'sampled_output_mean']
@@ -185,6 +188,7 @@ class Algorithms(BaseModel):
         Historical C replays do not use the newly introduced B-analysis policies.
         """
         additions=('parameter_preview_debounce_ms','max_visible_channels','max_lab_analysis_events',
+                   'b_mechanism_preview_gates','b_timeline_max_points','b_view_cache_entries',
                    'max_lab_analysis_histogram_cells','max_lab_reference_cells','max_channel_ratio_cells',
                    'lab_analysis_seed_streams','max_column_projection_work','max_column_pulses',
                    'max_column_count','max_column_histogram_work','max_column_selected_histogram_cells',

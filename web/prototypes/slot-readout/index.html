@@ -1,9 +1,10 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SPAD · 列内曝光与累积机制预览</title><link rel="stylesheet" href="preview.css?v=24ea5f465556dd07"><script defer src="preview.js?v=261adc1efacefc1f"></script></head>
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SPAD · 列内曝光与累积机制预览</title><link rel="stylesheet" href="preview.css?v=368dfced856b11b6"><script defer src="preview.js?v=261adc1efacefc1f"></script></head>
 <body data-snapshot="snapshot.json?v=d70a72453db696f3"><header><a href="/system">SPAD <small>LIDAR LAB</small></a><span>B / C 共用 · 采集机制说明</span><b>设计预览 · 待接入</b></header><main>
 <div class="title"><div><p class="kicker">ACQUISITION / ACCUMULATION / READOUT</p><h1>一列数据，经历了什么？</h1><p>slot 内多次曝光累积；列末锁存输出；列间完全复位，再开始下一列。</p></div><div class="mode">已确认的工作模式<strong>列内累积 · 列间复位</strong><span>初始化预热：此模式不需要</span></div></div>
 <div class="notice"><strong>这是机制说明预览。</strong>图中使用你指定的 slot 示例和已保存任务的曝光配置。B已接入10次重复、解析噪声标量和无预热初态；列间复位时序仍属设计预览，复位耗时待定。</div>
 <section><div class="section-head"><div><p class="kicker">01 / PARAMETER CONTEXT</p><h2>这些参数分别控制哪一层</h2></div><div class="fold"><button id="expandAll">全部展开</button><button id="collapseAll">全部折叠</button></div></div>
 <div class="cards" id="parameterCards"></div>
+<div class="repeat-explanation"><h3>累计发数 N 与统计重复 M：两层不同的循环</h3><p><strong>N</strong> 决定一份 slot 直方图累积多少发；<strong>M</strong> 决定独立重复多少份 slot 实验。两个值没有相等关系。</p><div class="repeat-example"><b>辨析示例 N＝3，M＝5<br><small>说明用示例，不修改当前工况</small></b><div class="repeat-samples"><span class="first">第1轮 · 3发 → H₁<br><b>蓝柱取这一份</b></span><span>第2轮 · 3发 → H₂</span><span>第3轮 · 3发 → H₃</span><span>第4轮 · 3发 → H₄</span><span>第5轮 · 3发 → H₅</span></div></div><p>误差棒比较 H₁…H₅ 在每个 ToF 时间分箱的最小值/最大值；<strong>不把这5份相加，不画成15发累积的蓝柱</strong>。也不能把 slot 直方图除以 N 就冒充某一个 gate 的真实记录。</p></div>
 <div class="chain" id="chain">
  <button data-concept="slot"><span>01</span><strong>开始本列</strong><small>分配 / 清零工作缓冲</small></button><i>→</i>
  <button data-concept="gate"><span>02</span><strong>Tx 发射 · 开门</strong><small>重复 N 次曝光</small></button><i>→</i>

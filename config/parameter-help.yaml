@@ -203,6 +203,30 @@ spectral_inputs:
   unit: 分组配置
   description: filter/other/pde/solar各自先选择basic、csv或manual模式；solar额外支持standard。基础特征量、CSV采样点和手动采样点独立保存，只使用当前模式；详细单位和特征量定义见curve-inputs.yaml。
 experiments:
+  view.histogram_scope:
+    label: B直方图采集范围
+    unit: 枚举
+    description: slot表示首次完整采集中全部N个gate按相对Tx时间折叠累积；gate表示按保存的cycle编号筛选某一次实际曝光。只改变显示，不重新采集；单gate没有保存的重复统计不显示误差棒。
+  view.gate_index:
+    label: 单gate索引
+    unit: 从0开始的编号
+    description: 只在单gate视图选择真实记录所属的曝光，合法范围为0至N-1。不是光子真实来源脉冲编号；迟到回波仍按硬件记录参考归属。
+  view.spatial_scope:
+    label: B空间光子图口径
+    unit: 单发或slot
+    description: per_pulse显示单发信号的完整物理像素光子期望，slot由同一B静态工况的N发求和，均在PDE/FF前；不包含背景或读出损失，不受M次统计重复影响。Tx归一化份额和PSF比值不随N累加。
+  algorithms.b_mechanism_preview_gates:
+    label: B机制图展示门数上限
+    unit: 个gate
+    description: 仅限制机制图中展开的前部曝光数；超过上限须明确标注，实际采集发数不变。结果区累计过程仍覆盖所有曝光。
+  algorithms.b_timeline_max_points:
+    label: B累计过程图最大点数
+    unit: 组
+    description: 超出时将相邻gate的真实记录数精确合并到显示组，保留整个slot总数与组末累计值，显式标为分组显示。不是仿真降采样，也不是丢弃gate。
+  algorithms.b_view_cache_entries:
+    label: B已保存结果视图缓存
+    unit: 份任务
+    description: 内存中保留最多此数量的只读原始结果以避免切换gate时反复读取JSON；0关闭缓存。由文件路径、大小及修改时间判定失效，不改写源结果。大结果占用更多内存。
   algorithms.b_initial_condition:
     label: B采集初始状态
     unit: 枚举
@@ -458,7 +482,7 @@ experiments:
   timing.monte_carlo_trials:
     label: 测距统计重复次数
     unit: 次
-    description: 完整含噪采集总次数，包含首次观测；0次不生成误差棒，1次上下限与观测重合。每次内部累计laser_shots发。样本范围不是置信区间。
+    description: 统计重复M是完整含噪实验的独立样本数，包含首次观测；每份样本内部累计laser_shots所设的N发，蓝柱只取第1份，不把M份再相加。0次不生成误差棒，1次上下限与观测重合。样本范围不是置信区间。
   tx.tx_model:
     label: Tx角分布模型
     unit: 枚举
@@ -686,7 +710,7 @@ experiments:
   acquisition.monte_carlo_trials:
     label: 测距统计重复次数
     unit: 次
-    description: 完整含噪采集总次数，包含首次观测；0次不生成误差棒，1次上下限与观测重合。每次内部累计laser_shots发。样本范围不是置信区间。
+    description: 统计重复M是完整含噪实验的独立样本数，包含首次观测；每份样本内部累计laser_shots所设的N发，蓝柱只取第1份，不把M份再相加。0次不生成误差棒，1次上下限与观测重合。样本范围不是置信区间。
   acquisition.rng_seed:
     label: 随机种子
     unit: 整数

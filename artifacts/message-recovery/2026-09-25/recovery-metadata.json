@@ -1,0 +1,20 @@
+{
+  "thread_id": "01a0cf26-473a-7b93-a285-a65fef58509b",
+  "recovered_at_utc": "2026-09-25T05:17:37.721104+00:00",
+  "source": "C:\\Users\\admin\\.codex\\.codex-global-state.json",
+  "backup": "C:\\Users\\admin\\.codex\\.codex-global-state.json.bak",
+  "json_key": "electron-persisted-atom-state.prompt-history.01a0cf26-473a-7b93-a285-a65fef58509b",
+  "list_index": 18,
+  "text_sha256": "64ac0ee336047de9b20b697d3a0d2d030027f1b74a9ea75bab22e30984c40b89",
+  "backup_exact_match": true,
+  "interrupted_turn_started_at_local": "2026-09-25 13:08:03 +08:00",
+  "timestamp_note": "Prompt-history has no per-message timestamp; interrupted turn timestamp is supporting context, not proof of exact send time.",
+  "status": "Recovered prompt text; not found as a user message in rollout or thread history. Attachments not recovered from this field.",
+  "screenshot_candidate": {
+    "source": "C:/Users/admin/AppData/Local/Temp/codex-clipboard-361a7bce-2044-4ae6-9ad9-905d62c228f1.png",
+    "original_modified_local": "2026-09-25 13:06:02 +08:00",
+    "sha256": "cfbcbb010a795b2143e07f1a2107b6ea1a367fabf66f2649db911552763e08de",
+    "content": "B platform metrics and spatial distribution, 98694 records, 10-pulse accumulation, 16x32 physical pixels and 1x8 channels",
+    "association": "Time and content match the recovered request; original message-to-attachment linkage was not present in checked caches."
+  }
+}

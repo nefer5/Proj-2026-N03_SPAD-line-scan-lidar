@@ -86,6 +86,9 @@ scan_preview_table_rows: 50
 scan_angle_boundary_tolerance_mrad: 1.0e-12
 parameter_preview_debounce_ms: 500
 max_visible_channels: 16
+b_mechanism_preview_gates: 50
+b_timeline_max_points: 2000
+b_view_cache_entries: 2
 max_lab_analysis_events: 20000000
 max_lab_analysis_histogram_cells: 8000000
 max_lab_reference_cells: 4000000

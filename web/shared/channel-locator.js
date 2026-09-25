@@ -25,7 +25,7 @@ class PhotonChannelLocator{
   this.view=view;this.layout=view.readout_layout;this.values=view.readout_channel_values;
   if(!this.layout||!this.values)throw Error('通道分布缺少服务端布局或光子汇总，请刷新重试。');
   const l=this.layout;this.root.classList.remove('hidden');this.root.dataset.configuration=view.provenance.configuration_sha256;
-  this.q('source').textContent=`布局 / 光斑 / 直方图均来自采集 ${jobId} · 配置 ${view.provenance.configuration_sha256.slice(0,12)}`;
+  this.q('source').textContent=`同一采集 ${jobId} · 光斑底图单发；详情记录数为slot累积 · 配置 ${view.provenance.configuration_sha256.slice(0,12)}`;
   this.q('metrics').innerHTML=[['读出通道 · H × V',`${l.channels_h} × ${l.channels_v}`,`${l.total_channels} 个通道`],['每通道 binning · H × V',`${l.binning_h} × ${l.binning_v}`,`${l.spads_per_channel} 个 SPAD / 通道`],['物理像素 · H × V',`${l.pixels_h} × ${l.pixels_v}`,`全阵列 ${fmt(l.total_pixels,0)} 个 SPAD`]].map(([label,value,note])=>`<div><span>${label}</span><strong>${value}</strong><small>${note}</small></div>`).join('');
   const cols=`26px repeat(${l.channels_h},minmax(${l.channels_h<=2?0:68}px,1fr))`;this.picker.style.gridTemplateColumns=cols;this.q('picker-heading').style.gridTemplateColumns=cols;
   this.q('picker-heading').innerHTML='<span>V</span>'+Array.from({length:l.channels_h},(_,h)=>`<span>H${h}</span>`).join('');
@@ -51,7 +51,7 @@ class PhotonChannelLocator{
  showDetail(channel){
   this.inspected=channel;const c=this.layout.channels.find(c=>c.id===channel),value=this.values.channels.find(c=>c.id===channel);
   this.q('detail-title').textContent=`CH ${id(channel)} · H${c.h} V${c.v}`;
-  const rows=[['选择状态',this.selected.includes(channel)?'已选择':'未选择'],['包含 SPAD',`${c.pixels_h} × ${c.pixels_v} = ${c.spad_count}`],['x 范围 / μm',c.x_um.map(v=>fmt(v,2)).join(' … ')],['y 范围 / μm',c.y_um.map(v=>fmt(v,2)).join(' … ')],['入射信号光子 / 发',number(value.signal_photons_per_pulse)],['最终记录数',value.record_count===undefined?'尚未采集':fmt(value.record_count,0)]];
+  const rows=[['选择状态',this.selected.includes(channel)?'已选择':'未选择'],['包含 SPAD',`${c.pixels_h} × ${c.pixels_v} = ${c.spad_count}`],['x 范围 / μm',c.x_um.map(v=>fmt(v,2)).join(' … ')],['y 范围 / μm',c.y_um.map(v=>fmt(v,2)).join(' … ')],['入射信号光子 / 发',number(value.signal_photons_per_pulse)],['slot 总记录数',value.record_count===undefined?'尚未采集':fmt(value.record_count,0)]];
   this.q('detail-values').innerHTML=rows.map(([name,value])=>`<div class="cl-detail-row"><span>${name}</span><strong>${escape(value)}</strong></div>`).join('');
  }
  drawSensor(){
