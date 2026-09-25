@@ -1,0 +1,1 @@
+return {scope:await page.locator(".hist-scope-badge").innerText(),axis:await page.locator('canvas[data-hist="4"]').evaluate(e=>({max:e.dataset.yMax,ticks:e.dataset.yTicks})),shared:await page.locator("#sharedScale").isChecked()};

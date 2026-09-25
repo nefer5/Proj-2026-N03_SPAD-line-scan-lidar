@@ -140,7 +140,8 @@ def histogram_scope_view(result,cfg,a,scope,gate_index,bin_ps,channels):
             'scope_label':f'slot 累积 · {n} 个 gate' if scope=='slot' else f'单 gate · G{gate_index} 的实际记录',
             'x_axis_label':'相对各次 Tx 的 ToF · ns' if scope=='slot' else f'相对 G{gate_index} Tx 的时间 · ns',
             'statistics_note':(f'{stats["trial_count"]} 次完整 slot 重复统计；误差棒不跨重复叠加计数。' if stats else '历史任务没有重复统计。') if scope=='slot' else '未保存逐 gate 重复统计，单 gate 不显示误差棒；没有重采样或用 slot 统计推造。',
-            'reference_note':'单 gate 青线仅为本次 Tx 的单发解析参考，不包含其他曝光的迟到回波，也不包含器件状态或读出损失。' if scope=='gate' else '青线为本次 N 发纯信号解析参考；橙线口径沿用该任务保存的定义。',
+            'reference_note':('单 gate 青线仅为本次 Tx 的单发解析参考，不包含其他曝光的迟到回波。' if scope=='gate' else f'青线为本次 {n} 发 slot 累积的纯信号解析参考。')
+                +' 青线位于 PDE/FF 之后、SPAD 死时间与读出损失之前，不是预计的最终输出；虚线为连续密度乘标称分箱宽度，散点为分箱积分，两者峰值可不同。',
             'configuration_sha256':result['provenance']['configuration_sha256'],
             'processing_bin_ps':bin_ps,'view_policy':{'timeline_point_limit':a.b_timeline_max_points,'max_reference_cells':a.max_lab_reference_cells},
             'note':'Views of saved immutable records; no new acquisition. Counts use true record cycle, not N-normalized estimates.'}

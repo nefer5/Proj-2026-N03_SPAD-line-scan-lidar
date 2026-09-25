@@ -1,0 +1,16 @@
+await page.setViewportSize({width:1600,height:1020});
+await page.reload({waitUntil:"domcontentloaded"});
+await expect(page.locator("#resultViewState")).toContainText("07814a948d114a18bcda2d666b84ca10",{timeout:30000});
+await page.locator('#channelInput').fill('3,4');await page.locator('#applyChannels').click();
+await expect(page.locator('#histogramPlots canvas[data-hist]')).toHaveCount(2,{timeout:30000});
+await page.locator('#sharedScale').check();await page.locator('#focusPeak').click();
+const readAxes=()=>page.locator('#histogramPlots canvas[data-hist]').evaluateAll(nodes=>nodes.map(e=>({channel:e.dataset.hist,max:+e.dataset.yMax,ticks:JSON.parse(e.dataset.yTicks)})));
+const peak=await readAxes();assert.equal(peak[0].max,peak[1].max);
+await page.locator('#timeMin').fill('792.25');await page.locator('#timeMax').fill('805.90');await page.locator('#applyWindow').click();
+const moved=await readAxes();assert.deepEqual(moved,peak);
+await page.locator('#sharedScale').uncheck();const local=await readAxes();assert(local[1].max<peak[1].max);
+assert(local.every(a=>a.ticks.every(Number.isInteger)));
+await page.locator('#sharedScale').check();await page.locator('#focusPeak').click();
+globalThis.scaleEvidence={peak,moved,local};
+await page.locator('#histogramPlots').scrollIntoViewIfNeeded();
+return await page.screenshot({fullPage:false});

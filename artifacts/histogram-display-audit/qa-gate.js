@@ -1,0 +1,16 @@
+await page.setViewportSize({width:1600,height:1020});
+await page.locator('#channelInput').fill('4');await page.locator('#applyChannels').click();
+await expect(page.locator('#histogramPlots canvas[data-hist]')).toHaveCount(1,{timeout:30000});
+await page.getByLabel('直方图采集范围',{exact:true}).selectOption('gate');
+await page.getByLabel('单gate索引',{exact:true}).fill('2');await page.getByRole('button',{name:'查看该 gate',exact:true}).click();
+await expect(page.locator('.hist-scope-badge')).toContainText('G2',{timeout:30000});
+await page.locator('#sharedScale').check();await page.locator('#focusPeak').click();
+const fixed=+(await page.locator('canvas[data-hist="4"]').getAttribute('data-y-max'));
+await page.locator('#timeMin').fill('792.25');await page.locator('#timeMax').fill('805.90');await page.locator('#applyWindow').click();
+assert.equal(+(await page.locator('canvas[data-hist="4"]').getAttribute('data-y-max')),fixed);
+await page.locator('#sharedScale').uncheck();
+const axis=await page.locator('canvas[data-hist="4"]').evaluate(e=>({max:+e.dataset.yMax,ticks:JSON.parse(e.dataset.yTicks)}));
+assert.equal(JSON.stringify(axis.ticks),'[0,1,2,3]');assert(fixed>axis.max);
+globalThis.gateEvidence={fixed,local:axis};
+await page.locator('#histogramPlots').scrollIntoViewIfNeeded();
+return await page.screenshot({fullPage:false});

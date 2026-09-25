@@ -4,11 +4,24 @@
 const fmt=(v,d=2)=>Number(v).toLocaleString('en-US',{maximumFractionDigits:d});
 function canvasSetup(canvas){const r=canvas.getBoundingClientRect(),d=window.devicePixelRatio||1;canvas.width=Math.round(r.width*d);canvas.height=Math.round(r.height*d);const c=canvas.getContext('2d');c.scale(d,d);return[c,r.width,r.height];}
 function histMaximum(data,ch,range,series){const h=data.histogram,mask=h.time_ns.map((t,i)=>h.edges_ns[i]<range[1]&&h.edges_ns[i+1]>range[0]);let max=series.noise&&data.noise_reference?data.noise_reference.counts_per_bin[ch]:0;for(let i=0;i<mask.length;i++)if(mask[i]){if(series.observed)max=Math.max(max,h.counts[ch][i]);if(series.error&&data.statistics?.upper)max=Math.max(max,data.statistics?.upper[ch][i]);if(series.ideal&&data.references?.[ch])max=Math.max(max,data.references[ch].counts[i]);if(series.noise&&data.statistics?.noise_mean)max=Math.max(max,data.statistics.noise_mean[ch][i]);}if(series.ideal&&data.references?.[ch]){const fine=data.references[ch].high_resolution;fine.time_ns.forEach((t,i)=>{if(t>=range[0]&&t<=range[1])max=Math.max(max,fine.counts_per_nominal_bin[i]);});}return Math.max(1,max)*1.15;}
+function countAxis(required){
+ const maximum=Math.max(1,required),raw=maximum/5,magnitude=10**Math.floor(Math.log10(Math.max(1,raw)));
+ const step=[1,2,5,10].map(n=>n*magnitude).find(n=>n>=raw),top=Math.ceil(maximum/step)*step;
+ return {max:top,step,ticks:Array.from({length:Math.round(top/step)+1},(_,i)=>i*step)};
+}
+function scales(data,channels,range,series,shared){
+ const full=[data.histogram.edges_ns[0],data.histogram.edges_ns.at(-1)];
+ const maxima=channels.map(ch=>histMaximum(data,ch,shared?full:range,series));
+ const common=Math.max(...maxima);
+ return maxima.map(max=>countAxis(shared?common:max));
+}
 function drawHistogram(canvas,data,ch,range,ymax,series,overview=false,windowRange=range){
  const [c,w,h]=canvasSetup(canvas),left=overview?43:43,right=15,top=overview?5:22,bottom=overview?16:32,pw=w-left-right,ph=h-top-bottom;
+ const axis=countAxis(ymax);if(!overview)ymax=axis.max;
+ canvas.dataset.yMax=String(ymax);canvas.dataset.yTicks=overview?'':JSON.stringify(axis.ticks);
  const sx=t=>left+(t-range[0])/(range[1]-range[0])*pw,sy=y=>top+ph-y/ymax*ph;
- c.clearRect(0,0,w,h);c.font='9px Consolas, monospace';c.lineWidth=1;
- if(!overview){for(let i=0;i<=4;i++){const y=top+ph*i/4;c.strokeStyle='#1b3041';c.beginPath();c.moveTo(left,y);c.lineTo(w-right,y);c.stroke();c.fillStyle='#68899f';c.textAlign='right';c.fillText(fmt(ymax*(1-i/4),1),left-9,y+3);}c.fillStyle='#85a3b6';c.textAlign='left';c.fillText('计数 / 时间分箱',left,11);}
+ c.clearRect(0,0,w,h);c.font='9px Consolas,"Microsoft YaHei",sans-serif';c.lineWidth=1;
+ if(!overview){for(const tick of axis.ticks){const y=sy(tick);c.strokeStyle='#1b3041';c.beginPath();c.moveTo(left,y);c.lineTo(w-right,y);c.stroke();c.fillStyle='#68899f';c.textAlign='right';c.fillText(fmt(tick,0),left-9,y+3);}c.fillStyle='#85a3b6';c.textAlign='left';c.fillText('计数 / 时间分箱',left,11);}
  for(let i=0;i<=4;i++){const t=range[0]+(range[1]-range[0])*i/4;c.fillStyle='#6f90a5';c.textAlign='center';c.fillText(fmt(t,1),sx(t),h-(overview?2:14));}if(!overview){c.textAlign='right';c.fillText(data.x_axis_label||'时间 · ns',w-right,h-1,pw);}
  c.save();c.beginPath();c.rect(left,top,pw,ph);c.clip();
  const counts=data.histogram.counts[ch],edges=data.histogram.edges_ns,centers=data.histogram.time_ns;
@@ -32,5 +45,5 @@ function bindOverview(canvas,gate,getRange,onChange){
  const end=e=>{if(drag&&drag.id===e.pointerId){drag=null;canvas.style.cursor='grab';if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);}};
  canvas.addEventListener('pointerup',end);canvas.addEventListener('pointercancel',end);canvas.addEventListener('lostpointercapture',()=>drag=null);
 }
-globalThis.PhotonHistogram={draw:drawHistogram,maximum:histMaximum,bindOverview};
+globalThis.PhotonHistogram={draw:drawHistogram,maximum:histMaximum,scales,countAxis,bindOverview};
 })();

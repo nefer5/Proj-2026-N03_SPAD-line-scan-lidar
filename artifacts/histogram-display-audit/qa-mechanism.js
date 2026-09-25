@@ -1,0 +1,12 @@
+await page.setViewportSize({width:1600,height:1020});
+globalThis.histogramErrors=[];page.on('pageerror',e=>globalThis.histogramErrors.push(e.message));
+await page.goto('http://127.0.0.1:8016/system?job=07814a948d114a18bcda2d666b84ca10',{waitUntil:'domcontentloaded'});
+await expect(page.locator('#resultViewState')).toContainText('07814a948d114a18bcda2d666b84ca10',{timeout:30000});
+await expect(page.locator('.ba-unit')).toHaveCount(4);
+await expect(page.locator('.ba-unit').first()).toHaveText('发');
+const fonts=await page.locator('.ba-unit').evaluateAll(nodes=>nodes.map(e=>({text:e.textContent,font:getComputedStyle(e).fontFamily,size:getComputedStyle(e).fontSize})));
+assert(fonts.every(f=>f.font.includes('Microsoft YaHei')));
+await page.reload({waitUntil:'domcontentloaded'});
+await expect(page.locator('.ba-unit')).toHaveCount(4,{timeout:30000});
+await page.locator('#bMechanismPanel').scrollIntoViewIfNeeded();
+return await page.screenshot({fullPage:false});

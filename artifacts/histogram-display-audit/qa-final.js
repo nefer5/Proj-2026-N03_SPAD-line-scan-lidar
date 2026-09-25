@@ -1,0 +1,1 @@
+await page.locator("#sharedScale").check();await page.locator("#focusPeak").click();return {scales:globalThis.scaleEvidence,gate:globalThis.gateEvidence,errors:globalThis.histogramErrors,fonts:await page.locator(".ba-unit").evaluateAll(nodes=>nodes.map(e=>({text:e.textContent,font:getComputedStyle(e).fontFamily,size:getComputedStyle(e).fontSize}))),url:page.url()};

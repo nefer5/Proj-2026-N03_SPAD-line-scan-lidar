@@ -4,3 +4,6 @@
 @media(max-width:570px){.overview-tabs{flex-wrap:wrap}.overview-tabs button{flex:1;padding:7px 4px;font-size:10px}.ba-facts{gap:7px}.ba-facts>div{padding:10px}.ba-facts strong{font-size:20px}.ba-flow button{flex-basis:40%}.ba-selection-scope{align-items:flex-start;flex-direction:column}.ba-selection-scope select{max-width:100%}.bh-controls{gap:10px}.bh-controls>label{font-size:10px}.bh-controls select{max-width:210px}.bh-controls .sample-label{margin-left:0}.ba-equations{font-size:11px}.ba-scope-rules .matrix-scroll{max-width:100%;overflow:auto}}
 
 .ba-source-picker{margin-left:auto;display:flex;align-items:center;gap:8px;color:var(--muted);font-size:10px}.ba-source-picker select{width:auto;font-size:10px;max-width:160px}@media(max-width:570px){.ba-source-picker{margin-left:0;width:100%}}
+
+/* Numeric values stay monospaced; Chinese labels and units use the UI font. */
+.ba-facts strong{display:flex;align-items:baseline;gap:7px}.ba-facts strong .ba-number{font:inherit;color:inherit}.ba-facts strong .ba-unit{font:500 12px/1.6 var(--ui);color:inherit}.ba-context{font-family:var(--ui);letter-spacing:0}.ba-timing text{font-family:var(--ui)}
