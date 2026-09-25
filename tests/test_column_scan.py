@@ -81,6 +81,10 @@ def test_column_energy_audit_sparse_histograms_and_state_trace():
     assert r['column_scan']['summary']['column_count']==4
     assert 'histogram_cube_counts' not in r['column_scan']
     assert abs(r['photon_flow']['values']['energy_balance_residual_j'])<1e-20
+    flow=r['photon_flow']['values']
+    assert flow['reference_tx_domain_output_j']==pytest.approx(flow['reference_tx_input_energy_j']*c.tx.tx_efficiency)
+    assert flow['target_incident_j']==pytest.approx(flow['reference_tx_domain_output_j']*c.scene.atmospheric_one_way_transmission)
+    assert r['optics']['tx_energy_normalization']['mode']=='within_configured_angular_domain'
     assert r['audit']['device_trace']
     assert r['column_scan']['transport']['summary']['delivered_columns']==4
     assert r['statistics']['trial_count']==1

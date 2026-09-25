@@ -1,4 +1,4 @@
-"""Tx far-field cell fractions; finite angular support is never renormalized."""
+"""Tx cell fractions normalized within the explicitly configured angular domain."""
 import numpy as np
 from scipy.special import ndtr
 from ..constants import FWHM_TO_SIGMA
@@ -6,6 +6,23 @@ from ..constants import FWHM_TO_SIGMA
 
 def transmit(energy_j, efficiency):
     return energy_j * efficiency
+
+
+def normalize_angular_weights(weights):
+    """The pulse energy belongs to this domain; weights describe only its shape."""
+    values = np.asarray(weights, dtype=float)
+    total = values.sum()
+    if not np.all(np.isfinite(values)) or np.any(values < 0) or not np.isfinite(total) or total <= 0:
+        raise ValueError('Tx angular domain must have finite nonnegative weights with a positive sum; cannot normalize')
+    return values / total
+
+
+def gaussian_axis_fractions(edges, center, sigma):
+    z = (edges-center)/sigma
+    # Reflect positive-tail intervals to avoid subtracting two CDF values of 1.
+    lower, upper = z[:-1], z[1:]
+    mass = np.where(lower >= 0, ndtr(-lower)-ndtr(-upper), ndtr(upper)-ndtr(lower))
+    return normalize_angular_weights(mass)
 
 
 def angular_profile(optics, algorithms):
@@ -16,7 +33,7 @@ def angular_profile(optics, algorithms):
     if optics.tx_model == 'uniform':
         fractions = np.outer(np.diff(v)/(v[-1]-v[0]), np.diff(h)/(h[-1]-h[0]))
     else:
-        fh = np.diff(ndtr((h-optics.tx_center_h_mrad)/(optics.tx_fwhm_h_mrad/FWHM_TO_SIGMA)))
-        fv = np.diff(ndtr((v-optics.tx_center_v_mrad)/(optics.tx_fwhm_v_mrad/FWHM_TO_SIGMA)))
+        fh = gaussian_axis_fractions(h, optics.tx_center_h_mrad, optics.tx_fwhm_h_mrad/FWHM_TO_SIGMA)
+        fv = gaussian_axis_fractions(v, optics.tx_center_v_mrad, optics.tx_fwhm_v_mrad/FWHM_TO_SIGMA)
         fractions = np.outer(fv, fh)
-    return h, v, fractions
+    return h, v, normalize_angular_weights(fractions)

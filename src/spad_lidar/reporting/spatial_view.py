@@ -52,7 +52,9 @@ def parameter_figures(base, cfg, interface, optics, psfs, algorithms):
         return dict(title=title, x_label=x_label, y_label=y_label, series=items, note=note, **extra)
     pulse = figure('Tx 时间脉冲 · 光学前', '相对发射时刻 / ps', '功率 / W',
         [series('Tx 光学前功率', derived['pulse']['time_ps'], derived['pulse']['power_w'], 'cyan')],
-        '曲线积分为全光斑单脉冲能量；峰值与平均功率由 Python 公共核心计算。',
+        ('曲线积分为配置 Tx 角域内、Tx 光学前的单脉冲能量；角域内份额归一化。'
+         if 'tx_energy_normalization' in optics else '曲线保留历史工况的Tx前全光斑单发能量与当时的角域截断定义。')
+        +' 峰值与平均功率由 Python 公共核心计算。',
         facts=[['峰值功率', derived['peak_power_w'], 'W'], ['平均功率', derived['average_power_w'], 'W'],
                ['单脉冲能量', cfg.optics.total_pulse_energy_nj, 'nJ'], ['时间 FWHM', cfg.optics.pulse_fwhm_ps, 'ps']])
     filt = derived['filter']
@@ -86,7 +88,11 @@ def parameter_figures(base, cfg, interface, optics, psfs, algorithms):
     tx_profile = figure('Tx 角分布 · H/V 边缘份额', '光学角 / mrad', '角单元能量份额',
         [series('H 剖面（沿 V 求和）', ((he[:-1]+he[1:])/2).tolist(), tx.sum(axis=0).tolist(), 'cyan'),
          series('V 剖面（沿 H 求和）', ((ve[:-1]+ve[1:])/2).tolist(), tx.sum(axis=1).tolist(), 'amber')],
-        '显示离散角单元的积分能量份额；H/V 单元宽度可不同，不将其误称为每 mrad 密度。', heatmap='tx')
+        ('角域内能量份额总和为 1；输入单发能量属于此角域，不额外扣除角域外高斯尾部。'
+         if 'tx_energy_normalization' in optics else '历史采集：保留当时的角域份额与截断口径；重新运行后使用域内归一化。')
+        +' H/V 曲线沿另一轴求和，显示积分份额，不是每 mrad 密度。', heatmap='tx',
+        facts=[['角域份额合计', float(tx.sum()), ''],
+               ['域内单发能量 · Tx前' if 'tx_energy_normalization' in optics else '历史全光斑能量 · Tx前', cfg.optics.total_pulse_energy_nj, 'nJ']])
     oh, ov = np.asarray(optics['angular_h_centers_mrad']), np.asarray(optics['angular_v_centers_mrad'])
     hu, vu = np.unique(oh), np.unique(ov)
     mapping = figure('Rx 几何映射 · 成像倒置', '入射光学角 / mrad', '像面中心 / μm',

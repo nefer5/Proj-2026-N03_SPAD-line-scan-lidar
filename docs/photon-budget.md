@@ -310,6 +310,22 @@ $$
 
 Tx全光斑按角度单元分配，Rx效率与PSF将能量映射到真实像素；光子预算由Python计算。构造光学样例不代表实测器件或实际光学系统。
 
+### Tx：配置角域内归一化与能量分配
+
+输入单发能量定义于配置Tx角域内、Tx光学之前。高斯、均匀及导入Tx份额在该角域内归一化；只乘一次Tx光学效率，不额外扣除角域外能量。
+
+$$
+\begin{aligned}w_a&=\frac{q_a}{\sum_{b\in\mathcal D}q_b},\qquad \sum_{a\in\mathcal D}w_a=1\\E_{a,\mathrm{Tx,out}}&=E_{\mathcal D,\mathrm{Tx,in}}\eta_{\mathrm{Tx}}w_a\end{aligned}
+$$
+
+**符号与单位：** D为配置Tx角域；q为角单元内的积分形状权重（无量纲，不能全部为零），w为域内归一化份额。E_D,Tx,in为用户输入的域内单发能量（公式用J，界面用nJ），η_Tx为Tx光学效率。域内Tx后能量合计等于输入能量乘效率，不再扣除角域外能量；Rx像面与时间门损失仍分别计算。
+
+| 中间量 | 单位 | Python结果字段 |
+|---|---|---|
+| 角域内Tx前单发能量 | J/pulse | `tx_input_j` |
+| 角域内份额合计 | 1 | `tx_angular_coverage_fraction` |
+| 角域内Tx后单发能量 | J/pulse | `tx_domain_output_j` |
+
 ### 回波：角度能量经过Rx映射到像素
 
 先计算各角度单元入瞳能量，再分别乘Rx效率、滤光片及PSF像素份额。入射信号光子仍未乘PDE/FF。
@@ -322,8 +338,7 @@ $$
 
 | 中间量 | 单位 | Python结果字段 |
 |---|---|---|
-| 全光斑Tx前能量 | J/pulse | `tx_input_j` |
-| Tx角范围外能量 | J/pulse | `tx_angular_truncation_j` |
+| 角域内Tx前能量 | J/pulse | `tx_input_j` |
 | 回波入瞳光子 | photons/pulse | `signal_rx_incident_photons_per_pulse` |
 | 回波探测面光子 | photons/pulse | `signal_sensor_incident_photons_per_pulse` |
 
@@ -386,7 +401,7 @@ $$
 E_{\mathrm{pupil}}=E_{\mathrm{sensor}}+E_{\mathrm{Rx\,loss}}+E_{\mathrm{filter\,loss}}+E_{\mathrm{edge\,loss}}
 $$
 
-**符号与单位：** 所有项单位J、按完整单脉冲计算。Rx损耗、滤光损耗、感光面边缘截断分别审计；Tx角范围外损耗位于此等式之前单独记录。
+**符号与单位：** 所有项单位J、按完整单脉冲计算。Rx损耗、滤光损耗、感光面边缘截断分别审计。Tx单发能量定义于配置角域内，角域份额归一化，不额外扣除角域外能量。
 
 | 中间量 | 单位 | Python结果字段 |
 |---|---|---|
@@ -403,7 +418,7 @@ $$
 
 ### 扫描与发射时序
 
-PRF生成名义触发时隙；帧预算决定时隙数。激光偏移/抖动改变实际发射时刻，机械角经倍率映射为光学角。
+单发能量定义于Tx角域内并按域内份额归一化。PRF生成名义触发时隙；帧预算决定时隙数。激光偏移/抖动改变实际发射时刻，机械角经倍率映射为光学角。
 
 $$
 t_k=kT_{\mathrm{PRF}}+\delta t+\epsilon_k,\qquad \theta_{\mathrm{opt}}(t)=g\,\theta_{\mathrm{mech}}(t)+\theta_0
@@ -417,7 +432,7 @@ $$
 | 名义触发时隙 | slots | `scheduled_slots` |
 | 实际启用发射的测量参考时隙 | pulses | `emitted_reference_slots` |
 | 测量参考时隙Tx前能量合计 | J | `reference_tx_input_energy_j` |
-| 测量参考时隙Tx角域外能量 | J | `reference_tx_angular_truncation_j` |
+| 测量参考时隙角域内Tx后能量 | J | `reference_tx_domain_output_j` |
 
 ### 有限测量时间窗内的Tx功率
 
@@ -524,7 +539,7 @@ $$
 E_{\mathrm{pupil}}=E_{\mathrm{sensor}}+E_{\mathrm{Rx\,loss}}+E_{\mathrm{filter\,loss}}+E_{\mathrm{edge\,loss}}
 $$
 
-**符号与单位：** 所有项单位J、按完整单脉冲计算。Rx损耗、滤光损耗、感光面边缘截断分别审计；Tx角范围外损耗位于此等式之前单独记录。
+**符号与单位：** 所有项单位J、按完整单脉冲计算。Rx损耗、滤光损耗、感光面边缘截断分别审计。Tx单发能量定义于配置角域内，角域份额归一化，不额外扣除角域外能量。
 
 | 中间量 | 单位 | Python结果字段 |
 |---|---|---|
@@ -558,11 +573,11 @@ $$
 | 列表触发次数（含暗触发） | triggers | `trigger_count` |
 | 实际启用发射的测量参考时隙 | pulses | `emitted_reference_slots` |
 | 测量参考时隙Tx前能量合计 | J | `reference_tx_input_energy_j` |
-| 测量参考时隙Tx角域外能量 | J | `reference_tx_angular_truncation_j` |
+| 测量参考时隙角域内Tx后能量 | J | `reference_tx_domain_output_j` |
 
 ### 有限测量时间窗内的Tx功率
 
-逐发能量允许不同；对包含可选归一化拖尾的完整时间分布积分。名义测量列的完整脉冲能量、实际中心计数与观测时间窗能量分别审计，不补回边界尾部。
+逐发能量允许不同，各发能量属于配置Tx角域，角度份额归一化且不扣角域外能量；对包含可选归一化拖尾的完整时间分布积分。名义测量列的完整脉冲能量、实际中心计数与观测时间窗能量分别审计，不补回边界尾部。
 
 $$
 \bar P_{\mathrm{Tx}}=\frac{1}{T_{\mathrm{obs}}}\sum_k E_{k,\mathrm{Tx}}\int_0^{T_{\mathrm{obs}}}s_k(t-t_k)\,\mathrm{d}t
@@ -665,7 +680,7 @@ $$
 E_{\mathrm{pupil}}=E_{\mathrm{sensor}}+E_{\mathrm{Rx\,loss}}+E_{\mathrm{filter\,loss}}+E_{\mathrm{edge\,loss}}
 $$
 
-**符号与单位：** 所有项单位J、按完整单脉冲计算。Rx损耗、滤光损耗、感光面边缘截断分别审计；Tx角范围外损耗位于此等式之前单独记录。
+**符号与单位：** 所有项单位J、按完整单脉冲计算。Rx损耗、滤光损耗、感光面边缘截断分别审计。Tx单发能量定义于配置角域内，角域份额归一化，不额外扣除角域外能量。
 
 | 中间量 | 单位 | Python结果字段 |
 |---|---|---|

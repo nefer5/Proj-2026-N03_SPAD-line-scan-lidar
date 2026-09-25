@@ -9,7 +9,7 @@ from ..spad.config import StrictConfig, DeviceConfig, ReadoutConfig
 from ..curves import SpectralInputs, Curve
 from ..constants import C, H
 from ..contracts import SensorIllumination
-from ..tx import angular_profile, transmit
+from ..tx import angular_profile, transmit, normalize_angular_weights
 from ..scene import lambertian_return
 from ..rx.budget import aperture_area
 from ..rx.spatial import synthetic_receiver
@@ -107,9 +107,17 @@ def optical_dataset(cfg,a):
     imported=validate_dataset(o.dataset,a) if o.tx_model=='dataset' or o.rx_model=='dataset' else None
     if o.tx_model=='dataset':
         tx=imported.tx.model_dump()
+        input_sum=float(np.asarray(tx['energy_fraction']).sum())
+        tx['energy_fraction']=normalize_angular_weights(tx['energy_fraction']).tolist()
     else:
         he,ve,f=angular_profile(o,a)
+        input_sum=1.  # The generated profile already represents the conditional domain distribution.
         tx={'reference_plane':'after_tx_optics','h_edges_mrad':he.tolist(),'v_edges_mrad':ve.tolist(),'energy_fraction':f.tolist()}
+    normalization={'mode':'within_configured_angular_domain',
+        'energy_reference':'configured_domain_before_tx_optics',
+        'source':'imported_fractions' if o.tx_model=='dataset' else 'generated_conditional_profile',
+        'input_fraction_sum':input_sum,'normalized_fraction_sum':float(np.asarray(tx['energy_fraction']).sum()),
+        'note':'Pulse energy is defined inside these Tx angular edges; no angular truncation energy is deducted. Rx PSF and temporal gate losses remain separate.'}
     if o.rx_model=='dataset':
         rx=imported.rx.model_dump()
     else:
@@ -120,7 +128,8 @@ def optical_dataset(cfg,a):
     doc={'schema_version':2,'coordinate_convention':'optical_H_right_V_up__image_x_right_y_up',
          'label':'构造光学样例 / Gaussian or uniform reference' if synthetic else imported.label,
          'synthetic':synthetic,'provenance':{'generator':'spad-spatial-v1','tx_model':o.tx_model,'rx_model':o.rx_model,
-         'parameters':o.model_dump(exclude={'dataset'}),'algorithms':{k:getattr(a,k) for k in ('spatial_angle_samples_h','spatial_angle_samples_v','rx_angle_samples_h','rx_angle_samples_v')},
+         'parameters':o.model_dump(exclude={'dataset'}),'tx_energy_normalization':normalization,
+         'algorithms':{k:getattr(a,k) for k in ('spatial_angle_samples_h','spatial_angle_samples_v','rx_angle_samples_h','rx_angle_samples_v')},
          'imported':imported.provenance if imported else None,
          'imported_label':imported.label if imported else None},'tx':tx,'rx':rx}
     data=validate_dataset(doc,a)
@@ -201,7 +210,8 @@ def project_illumination(cfg,a,progress,cancelled):
     detector_response=effective_pde(pde(wavelengths),cfg.device.fill_factor)
     budget={
         'tx_input_j':total_j,'tx_output_j':emitted,'tx_angular_coverage_fraction':float(fractions.sum()),
-        'tx_angular_truncation_j':float(emitted*(1-fractions.sum())),
+        'tx_domain_output_j':emitted,
+        'tx_angular_truncation_j':0.,  # Legacy export key: domain-defined energy has no angular truncation loss.
         'target_incident_j':float(target_incident.sum()),'target_reflected_j':float(target_reflected.sum()),
         'rx_pupil_signal_j':float(pupil.sum()),'after_rx_signal_j':float(after_rx.sum()),
         'after_filter_fullplane_signal_j':float(after_filter.sum()),'sensor_signal_j':float(pixel_j.sum()),
@@ -228,6 +238,7 @@ def project_illumination(cfg,a,progress,cancelled):
         mapping[:,channel]=psf[:,groups==channel].sum(axis=1)
     checksum=sha256(json.dumps(dataset.model_dump(),sort_keys=True,allow_nan=False).encode()).hexdigest()
     info={'budget':budget,'dataset':dataset.model_dump(),'dataset_sha256':checksum,
+          'tx_energy_normalization':dataset.provenance['tx_energy_normalization'],
           'array_shape':[ny,nx],'channel_shape':[o.channels_v,o.channels_h],
           'angular_h_centers_mrad':hh.ravel().tolist(),'angular_v_centers_mrad':vv.ravel().tolist(),
           'pixel_group_ids':groups.tolist(),'tx_h_edges_mrad':he.tolist(),'tx_v_edges_mrad':ve.tolist(),
@@ -241,7 +252,8 @@ def project_illumination(cfg,a,progress,cancelled):
                                   'other_radiance_w_m2_sr_nm':ambient.tolist(),
                                   'solar_sensor_photons_per_second_per_spectral_cell':solar.tolist(),
                                   'other_sensor_photons_per_second_per_spectral_cell':other.tolist()},
-          'assumptions':['Static extended Lambertian target with one range and reflectivity.',
+          'assumptions':['Tx pulse energy is defined within the configured angular domain before Tx efficiency; cell fractions sum to unity.',
+                         'Static extended Lambertian target with one range and reflectivity.',
                          'Small-angle solid angle dH*dV in radians; configured angular validity limit enforced.',
                          'Synthetic Rx is an achromatic Gaussian PSF or an explicitly uniform reference.',
                          'PSF fractions refer to full pixels before PDE/FF; no edge renormalization.',

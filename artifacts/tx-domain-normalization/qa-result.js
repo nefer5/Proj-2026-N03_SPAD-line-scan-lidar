@@ -1,0 +1,10 @@
+await page.setViewportSize({width:1600,height:1020});
+await expect(page.locator('#resultViewState')).toContainText('fdc0aa78c65d41dd99cd337721234826',{timeout:30000});
+await expect(page.locator('#txCoverage')).toContainText('域内归一化');
+const flow=page.locator('#rangesAndFlow details').filter({hasText:'Tx：配置角域内归一化与能量分配'});
+if(!await flow.evaluate(e=>e.open))await flow.locator('summary').click();
+await expect(flow.locator('.katex')).toHaveCount(1);
+assert.equal(await flow.locator('.katex-error').count(),0);
+await expect(flow).toContainText('9.60e-9');
+await flow.scrollIntoViewIfNeeded();
+return await page.screenshot({fullPage:false});

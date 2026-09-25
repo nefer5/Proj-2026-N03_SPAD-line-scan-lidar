@@ -22,6 +22,7 @@ budget_background_sensor: '\begin{aligned}P_{\mathrm{sensor},j}&=A_{\mathrm{Rx}}
 budget_background_candidate: '\begin{aligned}\mu_j&=A_{\mathrm{Rx}}\Omega\eta_{\mathrm{Rx}}T_{\mathrm{gate}}FF\\&\quad\cdot\int_B L_j(\lambda)T_f(\lambda)\mathrm{PDE}(\lambda)q(\lambda)\,d\lambda_{\mathrm{nm}}\\N_{j,\mathrm{ideal}}&=N_{\mathrm{shots}}\mu_j\end{aligned}'
 budget_readout: '\begin{aligned}\mu_{\mathrm{noise}}&=\mu_{\mathrm{sun}}+\mu_{\mathrm{other}}+\mu_{\mathrm{DCR}}+\mu_{\mathrm{electronic}}\\\mu_{\mathrm{DCR}}&=\mathrm{DCR}\,N_{\mathrm{SPAD}}T_{\mathrm{gate}}\\N_{\mathrm{recorded}}&=\sum_k H_k\end{aligned}'
 binning: 'N_{\mathrm{SPAD}}=H_{\mathrm{binning}}\times V_{\mathrm{binning}}'
+tx_domain_energy: '\begin{aligned}w_a&=\frac{q_a}{\sum_{b\in\mathcal D}q_b},\qquad \sum_{a\in\mathcal D}w_a=1\\E_{a,\mathrm{Tx,out}}&=E_{\mathcal D,\mathrm{Tx,in}}\eta_{\mathrm{Tx}}w_a\end{aligned}'
 spatial_signal: 'N_{i,\mathrm{sensor}}^{s}=\frac{1}{hc/\lambda_0}\sum_a E_{a,\mathrm{pupil}}\,\eta_{a}(\lambda_0)\,T_f(\lambda_0)\,p_{ai}(\lambda_0)'
 spatial_background: 'N_{i,\mathrm{sensor}}^{b}=T_{\mathrm{gate}}A_r\int_{\mathcal B}\sum_a L_{a,\lambda}^{b}\,\Delta\Omega_a\,\eta_a(\lambda)\,T_f(\lambda)\,p_{ai}(\lambda)\frac{\lambda}{hc}\,\mathrm{d}\lambda'
 spatial_candidates: '\mu_i=\int_{\mathcal B}N_{i,\lambda}\,\mathrm{PDE}(\lambda)\,FF\,\mathrm{d}\lambda'

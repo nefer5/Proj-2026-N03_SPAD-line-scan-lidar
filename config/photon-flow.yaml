@@ -308,12 +308,18 @@ spatial:
   title: 'B 全光斑：入瞳、探测面、候选雪崩与混合记录'
   intro: 'Tx全光斑按角度单元分配，Rx效率与PSF将能量映射到真实像素；光子预算由Python计算。构造光学样例不代表实测器件或实际光学系统。'
   steps:
+    - title: 'Tx：配置角域内归一化与能量分配'
+      formula_id: tx_domain_energy
+      logic: '输入单发能量定义于配置Tx角域内、Tx光学之前。高斯、均匀及导入Tx份额在该角域内归一化；只乘一次Tx光学效率，不额外扣除角域外能量。'
+      values:
+        - {key: tx_input_j, label: 角域内Tx前单发能量, unit: J/pulse}
+        - {key: tx_angular_coverage_fraction, label: 角域内份额合计, unit: '1'}
+        - {key: tx_domain_output_j, label: 角域内Tx后单发能量, unit: J/pulse}
     - title: '回波：角度能量经过Rx映射到像素'
       formula_id: spatial_signal
       logic: '先计算各角度单元入瞳能量，再分别乘Rx效率、滤光片及PSF像素份额。入射信号光子仍未乘PDE/FF。'
       values:
-        - {key: tx_input_j, label: 全光斑Tx前能量, unit: J/pulse}
-        - {key: tx_angular_truncation_j, label: Tx角范围外能量, unit: J/pulse}
+        - {key: tx_input_j, label: 角域内Tx前能量, unit: J/pulse}
         - {key: signal_rx_incident_photons_per_pulse, label: 回波入瞳光子, unit: photons/pulse}
         - {key: signal_sensor_incident_photons_per_pulse, label: 回波探测面光子, unit: photons/pulse}
     - title: '太阳：按明确波段积分并映射到像素'
@@ -356,13 +362,13 @@ scan:
   steps:
     - title: '扫描与发射时序'
       formula_id: scan_pulse_schedule
-      logic: 'PRF生成名义触发时隙；帧预算决定时隙数。激光偏移/抖动改变实际发射时刻，机械角经倍率映射为光学角。'
+      logic: '单发能量定义于Tx角域内并按域内份额归一化。PRF生成名义触发时隙；帧预算决定时隙数。激光偏移/抖动改变实际发射时刻，机械角经倍率映射为光学角。'
       values:
         - {key: duration_ns, label: 总测量帧时长, unit: ns}
         - {key: scheduled_slots, label: 名义触发时隙, unit: slots}
         - {key: emitted_reference_slots, label: 实际启用发射的测量参考时隙, unit: pulses}
         - {key: reference_tx_input_energy_j, label: 测量参考时隙Tx前能量合计, unit: J}
-        - {key: reference_tx_angular_truncation_j, label: 测量参考时隙Tx角域外能量, unit: J}
+        - {key: reference_tx_domain_output_j, label: 测量参考时隙角域内Tx后能量, unit: J}
     - title: '有限测量时间窗内的Tx功率'
       formula_id: scan_tx_window_power
       logic: '脉冲中心计数与实际时间积分分别记录。高斯/矩形波形在帧边界可能只有部分能量落入时间窗；这里积分时间波形，不补回边界能量。'
@@ -442,12 +448,12 @@ columns:
     - key: reference_tx_input_energy_j
       label: 测量参考时隙Tx前能量合计
       unit: J
-    - key: reference_tx_angular_truncation_j
-      label: 测量参考时隙Tx角域外能量
+    - key: reference_tx_domain_output_j
+      label: 测量参考时隙角域内Tx后能量
       unit: J
   - title: 有限测量时间窗内的Tx功率
     formula_id: scan_tx_window_power
-    logic: 逐发能量允许不同；对包含可选归一化拖尾的完整时间分布积分。名义测量列的完整脉冲能量、实际中心计数与观测时间窗能量分别审计，不补回边界尾部。
+    logic: 逐发能量允许不同，各发能量属于配置Tx角域，角度份额归一化且不扣角域外能量；对包含可选归一化拖尾的完整时间分布积分。名义测量列的完整脉冲能量、实际中心计数与观测时间窗能量分别审计，不补回边界尾部。
     values:
     - key: center_accounted_tx_output_energy_j
       label: 中心位于测量窗内的完整脉冲计账能量

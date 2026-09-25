@@ -1,4 +1,4 @@
-"""Versioned offline optical dataset. No implicit normalization or extrapolation."""
+"""Validate raw optical data; Tx domain normalization is explicit in the experiment."""
 from typing import Literal
 from pydantic import Field
 import numpy as np
@@ -74,6 +74,8 @@ def validate_dataset(document, algorithms):
     tol=algorithms.energy_conservation_rtol
     if fraction.sum() > 1+tol or np.any(eff > 1) or np.any(psf.sum(axis=(-2,-1)) > 1+tol):
         raise ValueError('Energy fractions exceed unity; data will not be clipped or renormalized')
+    if fraction.sum() <= 0:
+        raise ValueError('Tx angular domain must have a positive energy fraction sum; cannot normalize')
     return data
 
 

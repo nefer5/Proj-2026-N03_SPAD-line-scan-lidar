@@ -8,7 +8,7 @@ def build_scan_flow(cfg,info,projector,result,gate_exposure_s):
         'scheduled_slots':result['scan']['summary']['scheduled_slots'],
         'emitted_reference_slots':projector.emission_count,
         'reference_tx_input_energy_j':cfg.optics.total_pulse_energy_nj*1e-9*projector.emission_count,
-        'reference_tx_angular_truncation_j':info['budget']['tx_angular_truncation_j']*projector.emission_count,
+        'reference_tx_domain_output_j':b['tx_domain_output_j']*projector.emission_count,
         'actual_tx_average_power_w':result['scan']['frame_budget']['actual_tx_average_power_w'],
         'actual_tx_output_energy_j':result['scan']['frame_budget']['actual_tx_output_energy_j'],
         'center_accounted_tx_output_energy_j':result['scan']['frame_budget']['center_accounted_tx_output_energy_j'],

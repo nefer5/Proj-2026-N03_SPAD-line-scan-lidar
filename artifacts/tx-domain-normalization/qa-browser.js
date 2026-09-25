@@ -1,0 +1,24 @@
+await page.setViewportSize({width:1600,height:1020});
+globalThis.txDomainErrors=[];
+page.on('pageerror',e=>globalThis.txDomainErrors.push(e.message));
+await page.goto('http://127.0.0.1:8016/system?job=c46990d61353402682982a8487c13734',{waitUntil:'domcontentloaded'});
+await expect(page.locator('#txCoverage')).toContainText('历史结果',{timeout:30000});
+const historical=await page.locator('#txCoverage').innerText();
+await page.reload({waitUntil:'domcontentloaded'});
+await expect(page.locator('#txCoverage')).toContainText('历史结果',{timeout:30000});
+await expect(page.getByRole('spinbutton',{name:'角域内单发能量 · Tx前',exact:true})).toHaveValue('12');
+const field=page.locator('[data-path="optics.tx_fwhm_h_mrad"]');
+await field.fill('20');await field.press('Tab');
+await page.waitForFunction(()=>previewData?.form_configuration.optics.tx_fwhm_h_mrad===20 && previewData?.optics.tx_energy_normalization?.mode==='within_configured_angular_domain',null,{timeout:30000});
+const next=await page.evaluate(()=>({optics:{budget:previewData.optics.budget},provenance:previewData.provenance}));
+assert.equal(next.optics.budget.tx_angular_coverage_fraction,1);
+assert.equal(next.optics.budget.tx_angular_truncation_j,0);
+assert.equal(next.provenance.model_version,'0.6.1.dev0');
+await field.fill('16');await field.press('Tab');
+await page.waitForFunction(()=>previewData?.form_configuration.optics.tx_fwhm_h_mrad===16 && previewData?.optics.tx_energy_normalization?.mode==='within_configured_angular_domain',null,{timeout:30000});
+const original=await page.evaluate(()=>({optics:{budget:previewData.optics.budget},provenance:previewData.provenance}));
+assert.equal(original.optics.budget.tx_domain_output_j,next.optics.budget.tx_domain_output_j);
+assert.equal(original.optics.budget.solar_candidate_avalanches_per_gate,next.optics.budget.solar_candidate_avalanches_per_gate);
+await expect(page.locator('#previewState')).toContainText('当前配置预览');
+return {historical,newVersion:original.provenance.model_version,budget:original.optics.budget,errors:globalThis.txDomainErrors,
+  controls:await page.getByRole('tab').allTextContents()};

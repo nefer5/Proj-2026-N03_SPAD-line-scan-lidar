@@ -12,7 +12,7 @@ def build_column_flow(cfg,result):
     gates=fb['gate_union_exposure_ns']*1e-9;gate_s=cfg.timing.gate_width_ns*1e-9
     values={'scheduled_slots':len(s['schedule']),'column_count':fb['measured_column_count'],'trigger_count':fb['trigger_count'],'emitted_reference_slots':fb['emission_count'],
         'reference_tx_input_energy_j':fb['input_energy_of_measured_sources_j'],
-        'reference_tx_angular_truncation_j':fb['input_energy_of_measured_sources_j']*cfg.tx.tx_efficiency*(1-b['tx_angular_coverage_fraction']),
+        'reference_tx_domain_output_j':fb['input_energy_of_measured_sources_j']*cfg.tx.tx_efficiency,
         'actual_tx_average_power_w':fb['tx_average_power_w'],'actual_tx_output_energy_j':fb['tx_output_energy_in_observation_j'],
         'center_accounted_tx_output_energy_j':fb['center_accounted_tx_output_energy_j'],
         'target_incident_j':t['target_incident_j'],'target_reflected_j':t['target_reflected_j'],

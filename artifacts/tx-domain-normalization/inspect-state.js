@@ -1,0 +1,1 @@
+return {url:page.url(),state:await page.locator("#resultViewState").innerText(),error:await page.locator("#systemError").innerText(),preview:await page.locator("#previewState").innerText(),width:await page.locator('[data-path="optics.tx_fwhm_h_mrad"]').inputValue(),coverage:await page.locator("#txCoverage").innerText(),tabs:await page.getByRole("tab").allTextContents()};

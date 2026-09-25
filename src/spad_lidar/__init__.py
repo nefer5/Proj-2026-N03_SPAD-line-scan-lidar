@@ -1,7 +1,7 @@
 """SPAD line-scanning LiDAR system model."""
 
 __all__ = ["SimulationConfig", "simulate"]
-__version__ = '0.6.0.dev0'
+__version__ = '0.6.1.dev0'
 
 
 def __getattr__(name):

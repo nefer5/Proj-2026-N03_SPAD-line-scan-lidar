@@ -1,0 +1,11 @@
+await page.setViewportSize({width:1600,height:1020});
+const details=page.locator('#parameterVizDetails');
+if(!await details.evaluate(e=>e.open))await details.locator('summary').click();
+await page.getByRole('tab',{name:'Tx 角分布',exact:true}).click();
+const field=page.locator('[data-path="optics.tx_fwhm_h_mrad"]');
+await field.fill('16');await field.press('Tab');
+await expect(page.locator('#parameterVizContent .figure-note')).toContainText('角域内能量份额总和为 1',{timeout:30000});
+await expect(page.locator('#parameterVizContent .figure-facts')).toContainText('域内单发能量 · Tx前');
+await expect(page.locator('#parameterVizContent .figure-facts')).toContainText('12');
+await page.locator('#parameterVizPanel').scrollIntoViewIfNeeded();
+return await page.screenshot({fullPage:false});

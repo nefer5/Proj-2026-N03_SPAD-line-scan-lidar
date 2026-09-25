@@ -1,0 +1,1 @@
+const pending=page.waitForResponse(r=>r.url().endsWith("/api/jobs")&&r.request().method()==="POST"); await page.locator("#runPreview").click(); const r=await pending; assert.equal(r.status(),200); return await r.json();

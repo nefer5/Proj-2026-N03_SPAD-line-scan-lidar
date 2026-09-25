@@ -282,7 +282,7 @@ experiments:
   optics.dataset:
     label: 光学数据库（JSON）
     unit: 版本化数据
-    description: 仅Tx或Rx选择dataset时使用；包含明确角度/波长/像素轴、能量参考面和来源；数据不自动归一化。
+    description: 仅Tx或Rx选择dataset时使用；包含明确角度/波长/像素轴、能量参考面和来源；Tx份额在导入角域内显式归一化并保留原始总和；Rx PSF不归一化补偿边缘损失。
   optics.channels_h:
     label: 水平读出通道数
     unit: 通道
@@ -310,11 +310,11 @@ experiments:
   optics.tx_fwhm_h_mrad:
     label: Tx水平角FWHM
     unit: mrad
-    description: 仅gaussian Tx生效。角域外高斯尾部明确记录为损失，不重新归一化。
+    description: 仅gaussian Tx生效。在配置Tx角域内按高斯形状归一化；FWHM描述归一化前的形状，角域外尾部不额外扣除能量。
   optics.tx_fwhm_v_mrad:
     label: Tx垂直角FWHM
     unit: mrad
-    description: 仅gaussian Tx生效。角分布为H/V可分离的二维高斯。
+    description: 仅gaussian Tx生效。角分布为H/V可分离的二维高斯，在配置角域内归一化；角域内单发能量不随FWHM改变。
   optics.tx_center_h_mrad:
     label: Tx水平角中心
     unit: mrad
@@ -336,9 +336,9 @@ experiments:
     unit: μm
     description: 仅gaussian_psf生效；移动质心而不补偿移出阵列的能量。
   optics.total_pulse_energy_nj:
-    label: 全光斑脉冲能量 · Tx前
+    label: 角域内单发能量 · Tx前
     unit: nJ
-    description: 整个Tx光斑的单脉冲能量，不是A单角通道能量。先乘Tx效率，再按角度单元份额分配。实际生效。
+    description: 配置Tx角域内、Tx光学前的单脉冲能量。角单元份额在该域内归一化后合计为1，再乘一次Tx效率；不额外扣除角域外能量。实际生效。
   optics.rx_efficiency:
     label: 构造Rx收光效率
     unit: '1'
@@ -346,19 +346,19 @@ experiments:
   optics.angle_h_min_mrad:
     label: 构造Tx角域 H min
     unit: mrad
-    description: 仅构造Tx使用；Rx覆盖独立配置。背景角积分使用实际Tx网格定义的接收局部场景域，C假设该背景随接收机局部视场均匀平稳。
+    description: 仅构造Tx使用；限定单发能量的归一化角域，Rx覆盖独立配置。背景角积分使用实际Tx网格定义的接收局部场景域，C假设该背景随接收机局部视场均匀平稳。
   optics.angle_h_max_mrad:
     label: 构造Tx角域 H max
     unit: mrad
-    description: 仅构造Tx使用；Rx覆盖独立配置。背景角积分使用实际Tx网格定义的接收局部场景域，C假设该背景随接收机局部视场均匀平稳。
+    description: 仅构造Tx使用；限定单发能量的归一化角域，Rx覆盖独立配置。背景角积分使用实际Tx网格定义的接收局部场景域，C假设该背景随接收机局部视场均匀平稳。
   optics.angle_v_min_mrad:
     label: 构造Tx角域 V min
     unit: mrad
-    description: 仅构造Tx使用；Rx覆盖独立配置。背景角积分使用实际Tx网格定义的接收局部场景域，C假设该背景随接收机局部视场均匀平稳。
+    description: 仅构造Tx使用；限定单发能量的归一化角域，Rx覆盖独立配置。背景角积分使用实际Tx网格定义的接收局部场景域，C假设该背景随接收机局部视场均匀平稳。
   optics.angle_v_max_mrad:
     label: 构造Tx角域 V max
     unit: mrad
-    description: 仅构造Tx使用；Rx覆盖独立配置。背景角积分使用实际Tx网格定义的接收局部场景域，C假设该背景随接收机局部视场均匀平稳。
+    description: 仅构造Tx使用；限定单发能量的归一化角域，Rx覆盖独立配置。背景角积分使用实际Tx网格定义的接收局部场景域，C假设该背景随接收机局部视场均匀平稳。
   scan.trajectory:
     label: 扫描轨迹
     unit: 枚举
@@ -492,9 +492,9 @@ experiments:
     unit: nm
     description: 用于单光子能量 hc/λ 和滤光片激光波长处透过率；背景换算采用窄带近似。
   tx.total_pulse_energy_nj:
-    label: 全光斑脉冲能量 · Tx前
+    label: 角域内单发能量 · Tx前
     unit: nJ
-    description: 整个Tx光斑的单脉冲能量，不是A单角通道能量。先乘Tx效率，再按角度单元份额分配。实际生效。
+    description: 配置Tx角域内、Tx光学前的单脉冲能量。角单元份额在该域内归一化后合计为1，再乘一次Tx效率；不额外扣除角域外能量。实际生效。
   tx.pulse_shape:
     label: 时间脉冲形状
     unit: 枚举
@@ -510,11 +510,11 @@ experiments:
   tx.tx_fwhm_h_mrad:
     label: Tx水平角FWHM
     unit: mrad
-    description: 仅gaussian Tx生效。角域外高斯尾部明确记录为损失，不重新归一化。
+    description: 仅gaussian Tx生效。在配置Tx角域内按高斯形状归一化；FWHM描述归一化前的形状，角域外尾部不额外扣除能量。
   tx.tx_fwhm_v_mrad:
     label: Tx垂直角FWHM
     unit: mrad
-    description: 仅gaussian Tx生效。角分布为H/V可分离的二维高斯。
+    description: 仅gaussian Tx生效。角分布为H/V可分离的二维高斯，在配置角域内归一化；角域内单发能量不随FWHM改变。
   tx.tx_center_h_mrad:
     label: Tx水平角中心
     unit: mrad
@@ -526,19 +526,19 @@ experiments:
   tx.angle_h_min_mrad:
     label: 构造Tx角域 H min
     unit: mrad
-    description: 仅构造Tx使用；Rx覆盖独立配置。背景角积分使用实际Tx网格定义的接收局部场景域，C假设该背景随接收机局部视场均匀平稳。
+    description: 仅构造Tx使用；限定单发能量的归一化角域，Rx覆盖独立配置。背景角积分使用实际Tx网格定义的接收局部场景域，C假设该背景随接收机局部视场均匀平稳。
   tx.angle_h_max_mrad:
     label: 构造Tx角域 H max
     unit: mrad
-    description: 仅构造Tx使用；Rx覆盖独立配置。背景角积分使用实际Tx网格定义的接收局部场景域，C假设该背景随接收机局部视场均匀平稳。
+    description: 仅构造Tx使用；限定单发能量的归一化角域，Rx覆盖独立配置。背景角积分使用实际Tx网格定义的接收局部场景域，C假设该背景随接收机局部视场均匀平稳。
   tx.angle_v_min_mrad:
     label: 构造Tx角域 V min
     unit: mrad
-    description: 仅构造Tx使用；Rx覆盖独立配置。背景角积分使用实际Tx网格定义的接收局部场景域，C假设该背景随接收机局部视场均匀平稳。
+    description: 仅构造Tx使用；限定单发能量的归一化角域，Rx覆盖独立配置。背景角积分使用实际Tx网格定义的接收局部场景域，C假设该背景随接收机局部视场均匀平稳。
   tx.angle_v_max_mrad:
     label: 构造Tx角域 V max
     unit: mrad
-    description: 仅构造Tx使用；Rx覆盖独立配置。背景角积分使用实际Tx网格定义的接收局部场景域，C假设该背景随接收机局部视场均匀平稳。
+    description: 仅构造Tx使用；限定单发能量的归一化角域，Rx覆盖独立配置。背景角积分使用实际Tx网格定义的接收局部场景域，C假设该背景随接收机局部视场均匀平稳。
   scene.range_m:
     label: 目标距离
     unit: m
@@ -622,7 +622,7 @@ experiments:
   rx.dataset:
     label: 光学数据库（JSON）
     unit: 版本化数据
-    description: 仅Tx或Rx选择dataset时使用；包含明确角度/波长/像素轴、能量参考面和来源；数据不自动归一化。
+    description: 仅Tx或Rx选择dataset时使用；包含明确角度/波长/像素轴、能量参考面和来源；Tx份额在导入角域内显式归一化并保留原始总和；Rx PSF不归一化补偿边缘损失。
   spad.channels_h:
     label: 水平读出通道数
     unit: 通道
@@ -753,7 +753,7 @@ experiments:
     tx.pulse_plan.energy_nj:
       label: 逐发能量
       unit: nJ
-      description: Tx光学前的全光斑单发能量，非负有限值；零表示暗触发。波形暂继承Tx形状/宽度。草案能量不用于现有回波和角度参考计算。
+      description: 配置Tx角域内、Tx光学前的单发能量，非负有限值；零表示暗触发。波形暂继承Tx形状/宽度。草案能量不用于现有回波和角度参考计算。
     transport.dsp_start_us:
       label: DSP起点
       unit: μs
@@ -899,7 +899,7 @@ experiments:
     exposure.pulses.energy_nj:
       label: 本发Tx前能量
       unit: nJ
-      description: 全光斑完整单发能量；null显式继承tx.total_pulse_energy_nj，数值覆盖本发，0为暗触发。所有损耗参考面同B。
+      description: 配置Tx角域内、Tx光学前的完整单发能量；null显式继承tx.total_pulse_energy_nj，数值覆盖本发，0为暗触发。角域内份额归一化，不额外扣除角域外能量；Tx效率及Rx和时间边界损耗同B。
     exposure.tail_fraction:
       label: 指数拖尾能量占比
       unit: 0–1
