@@ -61,7 +61,7 @@ def parameter_figures(base, cfg, interface, optics, psfs, algorithms):
     filter_fig = figure('滤光片透过率', '波长 / nm', '透过率',
         [series('透过率', filt['wavelength_nm'], filt['transmission'], 'cyan',
                 points_x=filt['original_wavelength_nm'], points_y=filt['original_transmission'])],
-        '原始点与插值曲线分别显示；范围外为 0。加权带宽是透过率的波长积分。', marker_x=base.wavelength_nm,
+        filt['note'], marker_x=base.wavelength_nm,
         facts=[['激光处透过率', filt['laser_transmission'], ''], ['加权带宽', filt['weighted_bandwidth_nm'], 'nm']])
     solar = figure('太阳光谱 · 目标面辐照度', '波长 / nm', 'W / (m² · nm)',
         [series('太阳辐照度', wavelength.tolist(), curves['solar_irradiance'], 'amber',
@@ -139,7 +139,7 @@ def optical_view(cfg, algorithms, optics, laser_shots=None):
     _,psfs=RxTable(rx).evaluate(cfg.optics.wavelength_nm,optics['angular_h_centers_mrad'],optics['angular_v_centers_mrad'])
     if len(optics['angle_to_channel_fraction'])*len(optics['angle_to_channel_fraction'][0])**2>algorithms.max_channel_ratio_cells:
         raise ValueError('Channel ratio matrices exceed max_channel_ratio_cells')
-    parameters={**cfg.optics.model_dump(exclude={'dataset'}),**cfg.device.model_dump(),**cfg.readout.model_dump(),
+    parameters={**cfg.optics.model_dump(exclude={'dataset'}),'dataset':cfg.optics.dataset,**cfg.device.model_dump(),**cfg.readout.model_dump(),
                 **cfg.timing.model_dump(),'spectral_inputs':cfg.spectral_inputs,
                 'pulse_energy_nj':cfg.optics.total_pulse_energy_nj,'laser_prf_hz':1e9/cfg.timing.period_ns}
     shots=getattr(cfg.timing,'laser_shots',laser_shots)

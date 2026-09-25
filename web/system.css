@@ -50,3 +50,6 @@
 @media(max-width:570px){.mapping-layout{grid-template-columns:1fr}.hist-plot canvas[data-hist]{height:300px}.mapping-left{gap:16px}}
 
 .psf-projection .heatmap svg{max-height:none}
+
+/* Collapsible section titles should remain easy to discover. */
+details>summary{font-weight:700}.subdetails>summary,.explanation>summary,.wave-detail>summary{font-weight:700}

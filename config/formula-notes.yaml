@@ -19,7 +19,7 @@ budget_solar_reflection: "ρsun是太阳背景灰反射率，与激光目标反�
 budget_other_input: "Linput是用户基础函数或CSV/手动点插值得到的接收方向谱辐亮度（W/m²/sr/nm）；u_other为开关0/1，m_other为强度倍率。输入已代表场景朝Rx的亮度，不再乘目标反射率、1/R²或太阳lux换算。"
 budget_background_rx: "j代表当前来源sun或other；Lj为该来源的谱辐亮度。B是本次明确声明的比较波段（取滤光片配置有效域），q(λ)=10⁻⁹λnm/(hc)。P_Rx,in为进入入瞳的带内功率（W），N_Rx,in为一个记录门内进入入瞳的原始光子数；均未计光学、滤光片、PDE或FF。不代表全光谱总量。"
 budget_background_sensor: "同一波段B上，ηRx和Tf分别描述接收光学及滤光片。P_sensor为探测面光功率（W）；N_sensor为每门到达探测面的光子数，尚未乘PDE和FF。Tgate须以s代入。"
-budget_background_candidate: "PDE(λ)在积分内逐波长参与计算；FF在积分外乘一次。μj是当前背景来源的每门期望雪崩候选数，Nj,ideal是累计Nshots发的候选总数。实际输出还会受到SPAD恢复、OR/符合逻辑和TDC限制。"
+budget_background_candidate: "PDE(λ)在积分内逐波长参与计算；FF在积分外乘一次。μj是当前背景来源的每门期望雪崩候选数，Nj,ideal是累计Nshots发的候选总数。实际输出还会受到SPAD恢复、OR/符合逻辑和TDC限制。 每time_bin解析值直接由PDE/FF后的候选计数率乘分箱时长得到，不进行随机统计。"
 budget_readout: "μsun/μother分别为太阳和其他环境光候选数；μDCR和μelectronic为器件暗计数及其他电子随机噪声（它们不乘PDE/FF）。N_SPAD为物理SPAD数。Hk为实际观测直方图第k个bin计数，Nrecorded为混合记录总数；不同来源会竞争，不能按线性比例拆分最终记录。"
 binning: "H_binning/V_binning分别为水平/垂直聚合的SPAD数；乘积是每角通道总数N_SPAD，不能再独立编辑。A版只用总数均匀分配信号和光学背景，暗计数按总数增长；不自动改变通道IFOV，尚未模拟像素间距、PSF或空间非均匀照明。"
 spatial_signal: 'a为角度单元，i为物理像素；入瞳能量E单位J，η为入瞳到无限像面的收光效率，Tf为滤光透过率，p为完整像素截获无限PSF的能量份额。p按像素积分，边缘截断后不再归一化。λ使用m，输出为每完整脉冲、PDE/FF前的光子数。'
@@ -51,3 +51,6 @@ b_slot_accumulation: 'N为本次slot内累计发数，j为读出通道，b为ToF
 
 spatial_super_gaussian: 'm为无量纲阶数，指数p=2m，m=1为高斯。a为正形状尺度；u和a同单位，g为该单位的倒数。P为H/V可分离二维密度，不含旋转或交叉项；Rx坐标用μm，密度用μm⁻²。'
 spatial_profile_widths: '各式分别对H、V应用。Tx的W为角分布FWHM（mrad），域内归一化后仍使用该未截断形状的FWHM参数；Rx的σ是实际边缘标准差（μm），不是指数尺度a。改变m时保持所配置的宽度定义。'
+
+filter_with_leakage: 'F为所选基础类型的单位峰值母函数，在配置形状范围之外为0。常量母函数在范围内为1，矩形/高斯/cosine沿用形状定义；T_peak为原幅值，T_out为带外透过率，均在0–1内且T_out≤T_peak。峰值保持T_peak；高斯FWHM描述扣除T_out后的母函数宽度。背景积分另按所提供光谱和已知Rx范围确定；CSV/手动模式不叠加此基底。'
+background_time_bin: '候选计数率已包含滤光片、空间分配、波长相关PDE和FF；乘time_bin持续时间即得解析值。计数率单位s⁻¹，分箱宽度公式用s、界面用ps；不包含死时间、电子读出损失或统计重复，也不乘gate/曝光次数。'

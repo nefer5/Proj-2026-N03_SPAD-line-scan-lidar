@@ -55,6 +55,9 @@ def build_photon_flow(cfg,budget,spectral,gate_fraction):
         "readout_mode":cfg.readout_mode,
     }
     definition=read_yaml("photon-flow.yaml")
+    from .reporting.background_bins import background_bin_values
+    values.update(background_bin_values(spectral['solar_detectable_photons_s_m2_sr']*b.aperture_area_m2*b.channel_solid_angle_sr*cfg.rx_efficiency*cfg.fill_factor,
+        spectral['other_detectable_photons_s_m2_sr']*b.aperture_area_m2*b.channel_solid_angle_sr*cfg.rx_efficiency*cfg.fill_factor,cfg.tdc_bin_ps))
     formulas=read_yaml("formulas.yaml")
     notes=read_yaml("formula-notes.yaml")
     def bind(step):

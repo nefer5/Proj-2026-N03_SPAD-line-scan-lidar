@@ -1,0 +1,1 @@
+const response=page.waitForResponse(r=>r.url().endsWith("/api/jobs")&&r.request().method()==="POST");await page.locator("#runPreview").click();const r=await response;assert.equal(r.status(),200);globalThis.leakJob=(await r.json()).id;return {job:globalThis.leakJob,preview:globalThis.leakPreview,errors:globalThis.leakErrors};

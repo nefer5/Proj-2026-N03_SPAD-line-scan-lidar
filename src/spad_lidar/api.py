@@ -78,9 +78,13 @@ def derived(config: SimulationConfig):
 
 
 @app.post('/api/curve/validate')
-def validate_curve(curve: CurveSpec, kind: str):
+def validate_curve(curve: dict, kind: str):
     if kind not in ('filter','other','pde','solar'):
         raise HTTPException(422,detail='Unknown spectral kind')
+    from .curves import FilterCurveSpec
+    from .legacy_config import migrate_filter_curve
+    try:curve=FilterCurveSpec.model_validate(migrate_filter_curve(curve)) if kind=='filter' else CurveSpec.model_validate(curve)
+    except ValueError as exc:raise HTTPException(422,detail=str(exc)) from exc
     if kind!='solar' and curve.mode=='standard':
         raise HTTPException(422,detail='Standard mode is only available for solar')
     if kind in ('filter','pde') and (curve.basic.amplitude>1 or any(p.value>1 for p in curve.csv_points+curve.manual_points)):

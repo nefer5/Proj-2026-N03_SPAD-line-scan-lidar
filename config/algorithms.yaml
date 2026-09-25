@@ -20,6 +20,8 @@ pulse_preview_half_widths: 3.0
 filter_plot_padding_fraction: 0.1
 filter_plot_samples: 601
 spectral_quadrature_order: 6
+filter_leakage_domain: source_coverage
+factorize_achromatic_leakage: true
 spectral_plot_min_nm: 350.0
 spectral_plot_max_nm: 1200.0
 spectral_plot_samples: 851

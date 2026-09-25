@@ -7,6 +7,7 @@ from .lab import run_illumination
 from .system_config import BSystemConfig
 from ..curves import Curve
 from ..spad.device import effective_pde
+from ..contracts.spectral_product import zero_spectral
 from ..processing.statistics import histogram_sample_range
 from ..reporting.a_view import signal_ground_truth
 from ..reporting.spatial_view import optical_view
@@ -63,7 +64,7 @@ def run_system_analysis(cfg,a,progress,cancelled):
     for i,sequence in enumerate(seeds,1):
         seed=int(sequence.generate_state(1)[0]);out=acquire(with_seed(cfg,seed),light,i,'重复采集与误差棒')
         trials.append(out['histogram']['counts']);trial_seeds.append(seed)
-    noise_source=replace(light,signal_photons_per_pulse=np.zeros_like(light.signal_photons_per_pulse))
+    noise_source=replace(light,signal_photons_per_pulse=zero_spectral(light.signal_photons_per_pulse))
     noise=[];noise_seeds=[]
     sequences=np.random.SeedSequence(cfg.rng_seed,spawn_key=(streams['noise'],)).spawn(noise_trials)
     for i,sequence in enumerate(sequences):

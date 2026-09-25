@@ -1,0 +1,11 @@
+await page.setViewportSize({width:1720,height:1140});
+await expect(page.locator('#resultViewState')).toContainText(globalThis.leakJob,{timeout:30000});
+const source=keyword=>page.locator('#rangesAndFlow details').filter({hasText:keyword});
+const sun=source('太阳：按明确波段积分并映射到像素'),other=source('其他环境光：独立输入谱的空间积分');
+for(const section of [sun,other])if(!await section.evaluate(e=>e.open))await section.locator(':scope>summary').click();
+await expect(sun.locator('tr').last()).toContainText('每time_bin平均探测候选数');
+await expect(sun.locator('tr').last()).toContainText('1.857');
+await expect(other.locator('tr').last()).toContainText('0.074');
+await expect(page.locator('#rangesAndFlow')).toContainText('280–4000');
+await sun.scrollIntoViewIfNeeded();
+return await page.screenshot({fullPage:false});

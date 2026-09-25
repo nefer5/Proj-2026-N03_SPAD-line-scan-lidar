@@ -183,6 +183,8 @@ def system_result_view(job_id:str):
         from ..reporting.b_acquisition import acquisition_context,spatial_scope_values
         result['acquisition_context']=acquisition_context(cfg,a,result['optics'],result=result)
         result['spatial_scopes']=spatial_scope_values(result['illumination'],cfg.timing.laser_shots)
+        from ..reporting.background_bins import decorate_saved_flow
+        result['photon_flow']=decorate_saved_flow(result.get('photon_flow'),o['budget'],cfg.timing.gate_width_ns,cfg.readout.tdc_bin_ps,'spatial')
         return result
     except (ValueError,KeyError,TypeError) as exc:
         raise HTTPException(422,str(exc)) from exc
@@ -400,5 +402,7 @@ def scan_result_view(job_id:str):
         result['display_summary']={'mean_sensor_photons_per_emitted_pulse':float(np.asarray(result['illumination']['signal_photons_per_pixel_per_pulse']).sum()) if emitted else None,
                                    'normalization':'Actual measured emitted reference slots; no value when none were emitted.'}
         result['parameter_figures']['pulse']['facts'][1][0]='连续PRF平均功率参考'
+        from ..reporting.background_bins import decorate_saved_flow
+        result['photon_flow']=decorate_saved_flow(result.get('photon_flow'),result['optics']['budget'],cfg.timing.gate_width_ns,cfg.readout.tdc_bin_ps,'scan')
         return result
     except (ValueError,KeyError,TypeError) as exc:raise HTTPException(422,str(exc)) from exc

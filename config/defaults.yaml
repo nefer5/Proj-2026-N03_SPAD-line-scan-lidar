@@ -58,6 +58,7 @@ simulation:
       basic:
         shape: rectangle
         amplitude: 0.95
+        out_of_band_transmission: 0
         min_nm: 855
         max_nm: 955
         center_nm: 905

@@ -15,7 +15,8 @@ from ..rx.budget import aperture_area
 from ..rx.spatial import synthetic_receiver
 from ..rx.projection import project_return
 from ..adapters.optical_data import validate_dataset, RxTable
-from ..spectra import spectral_components
+from ..spectra import spectral_components, background_spectral_domain
+from ..contracts.spectral_product import SpectralProduct,export_spectral
 from ..spad.device import effective_pde
 from .configuration import TimingConfig
 from .lab import run_illumination, stamp_result
@@ -129,7 +130,9 @@ def optical_dataset(cfg,a):
         rx=imported.rx.model_dump()
     else:
         filt=Curve(cfg.spectral_inputs.filter)
-        rx=synthetic_receiver(o,cfg.device,[filt.x[0],o.wavelength_nm,filt.x[-1]],a)
+        domain=background_spectral_domain(SimpleNamespace(**o.model_dump(exclude={'dataset'}),dataset=o.dataset,spectral_inputs=cfg.spectral_inputs),a)
+        band=domain['band_nm']
+        rx=synthetic_receiver(o,cfg.device,[band[0],o.wavelength_nm,band[-1]],a)
     # Metadata explicitly distinguishes generated models from imported measurements.
     synthetic=(o.tx_model!='dataset' or o.rx_model!='dataset' or imported.synthetic)
     doc={'schema_version':2,'coordinate_convention':'optical_H_right_V_up__image_x_right_y_up',
@@ -175,40 +178,61 @@ def project_illumination(cfg,a,progress,cancelled):
     after_rx,after_filter,pixel_j=projection.after_rx,projection.after_filter,projection.pixel_energy
     photon_j=H*C/(o.wavelength_nm*1e-9)
     signal_photons=pixel_j/photon_j
-    proxy=SimpleNamespace(**o.model_dump(exclude={'dataset'}),spectral_inputs=cfg.spectral_inputs,fill_factor=cfg.device.fill_factor)
+    proxy=SimpleNamespace(**o.model_dump(exclude={'dataset'}),dataset=o.dataset,spectral_inputs=cfg.spectral_inputs,fill_factor=cfg.device.fill_factor)
     spectral=spectral_components(proxy,a,plot=True)
     integration=spectral['integration']
     wavelengths=np.array(integration['wavelength_nm'])
     weights=np.array(integration['weights_nm'])
     transmission=np.array(integration['filter_transmission'])
     sun=np.array(integration['solar_radiance']);ambient=np.array(integration['other_radiance'])
-    if len(wavelengths)*len(fractions)*nx*ny>a.max_spatial_integration_work:
+    factorized=a.factorize_achromatic_leakage and filt.has_out_of_band and o.rx_model!='dataset'
+    work=(len(fractions)*nx*ny+len(wavelengths)) if factorized else len(wavelengths)*len(fractions)*nx*ny
+    if work>a.max_spatial_integration_work:
         raise ValueError('Spatial/spectral integration exceeds configured work limit')
-    if nx*ny*(len(wavelengths)+1)>a.max_optical_cells:
+    stored_cells=nx*ny+len(wavelengths)+1 if factorized else nx*ny*(len(wavelengths)+1)
+    if stored_cells>a.max_optical_cells:
         raise ValueError('Detector spectral measures exceed configured array limit')
-    solar=np.zeros((nx*ny,len(wavelengths)));other=np.zeros_like(solar)
-    pupil_solar_rate=0.;pupil_other_rate=0.
-    rx_solar_rate=0.;rx_other_rate=0.
-    filter_solar_rate=0.;filter_other_rate=0.
-    for j,(wl,weight,t,ls,lo) in enumerate(zip(wavelengths,weights,transmission,sun,ambient)):
-        photon_factor=wl*1e-9/(H*C)
-        sun_input=area*omega*ls*weight*photon_factor
-        other_input=area*omega*lo*weight*photon_factor
-        pupil_solar_rate+=sun_input.sum();pupil_other_rate+=other_input.sum()
-        if ls!=0 or lo!=0:
-            e,p=table.evaluate(wl,hh,vv)
-            p=p.reshape(len(fractions),-1)
-            rx_solar_rate+=(sun_input*e).sum();rx_other_rate+=(other_input*e).sum()
-            filter_solar_rate+=(sun_input*e*t).sum();filter_other_rate+=(other_input*e*t).sum()
-            solar[:,j]=(sun_input*e*t)@p
-            other[:,j]=(other_input*e*t)@p
-        if (j+1)%a.spatial_wavelength_chunk_size==0 or j+1==len(wavelengths):
-            progress(j+1,len(wavelengths),'空间与光谱积分')
-            if cancelled():
-                raise InterruptedError('Cancelled during optical projection')
+    if factorized:
+        # Generated Rx is explicitly achromatic. Separate exactly, without
+        # coarsening the wavelength quadrature or dropping zero-PDE photons.
+        q=weights*wavelengths*1e-9/(H*C)
+        sun_spectral=sun*q;other_spectral=ambient*q
+        pupil_factor=area*omega.sum();rx_factor=area*np.dot(omega,eff)
+        pixel_factor=area*((omega*eff)@psf)
+        pupil_solar_rate=pupil_factor*sun_spectral.sum();pupil_other_rate=pupil_factor*other_spectral.sum()
+        rx_solar_rate=rx_factor*sun_spectral.sum();rx_other_rate=rx_factor*other_spectral.sum()
+        filter_solar_rate=rx_factor*np.dot(sun_spectral,transmission);filter_other_rate=rx_factor*np.dot(other_spectral,transmission)
+        solar=SpectralProduct(pixel_factor,sun_spectral*transmission)
+        other=SpectralProduct(pixel_factor,other_spectral*transmission)
+        progress(len(wavelengths),len(wavelengths),'无色差Rx：精确分离空间与全波段积分')
+        if cancelled():raise InterruptedError('Cancelled during optical projection')
+    else:
+        solar=np.zeros((nx*ny,len(wavelengths)));other=np.zeros_like(solar)
+        pupil_solar_rate=0.;pupil_other_rate=0.
+        rx_solar_rate=0.;rx_other_rate=0.
+        filter_solar_rate=0.;filter_other_rate=0.
+        for j,(wl,weight,t,ls,lo) in enumerate(zip(wavelengths,weights,transmission,sun,ambient)):
+            photon_factor=wl*1e-9/(H*C)
+            sun_input=area*omega*ls*weight*photon_factor
+            other_input=area*omega*lo*weight*photon_factor
+            pupil_solar_rate+=sun_input.sum();pupil_other_rate+=other_input.sum()
+            if ls!=0 or lo!=0:
+                e,p=table.evaluate(wl,hh,vv)
+                p=p.reshape(len(fractions),-1)
+                rx_solar_rate+=(sun_input*e).sum();rx_other_rate+=(other_input*e).sum()
+                filter_solar_rate+=(sun_input*e*t).sum();filter_other_rate+=(other_input*e*t).sum()
+                solar[:,j]=(sun_input*e*t)@p
+                other[:,j]=(other_input*e*t)@p
+            if (j+1)%a.spatial_wavelength_chunk_size==0 or j+1==len(wavelengths):
+                progress(j+1,len(wavelengths),'空间与光谱积分')
+                if cancelled():raise InterruptedError('Cancelled during optical projection')
     wl_all=np.r_[o.wavelength_nm,wavelengths]
-    signal=np.zeros((nx*ny,len(wl_all)));signal[:,0]=signal_photons
-    background=np.column_stack((np.zeros(nx*ny),solar+other))
+    if factorized:
+        signal=SpectralProduct(signal_photons,np.r_[1.,np.zeros_like(wavelengths)])
+        background=SpectralProduct(pixel_factor,np.r_[0.,solar.spectral+other.spectral])
+    else:
+        signal=np.zeros((nx*ny,len(wl_all)));signal[:,0]=signal_photons
+        background=np.column_stack((np.zeros(nx*ny),solar+other))
     light=SensorIllumination(wl_all,signal,background,o.pulse_shape,o.pulse_fwhm_ps,2*o.range_m/C*1e9+o.calibration_delay_ns,
         {'kind':'spatial_optical_projection','reference_plane':'full_pixel_before_PDE_FF','dataset_label':dataset.label,'synthetic':dataset.synthetic})
     capture=psf.sum(axis=1)
@@ -236,10 +260,15 @@ def project_illumination(cfg,a,progress,cancelled):
         'other_sensor_incident_photons_per_gate':float(other.sum()*gate_s),
         'solar_candidate_avalanches_per_gate':float((solar@detector_response).sum()*gate_s),
         'other_candidate_avalanches_per_gate':float((other@detector_response).sum()*gate_s),
+        'solar_candidate_rate_cps':float((solar@detector_response).sum()),
+        'other_candidate_rate_cps':float((other@detector_response).sum()),
         'aperture_area_m2':area,'angular_solid_angle_sr':float(omega.sum()),
         'background_integration_band_nm':spectral['budget_band_nm'],
+        'background_integration_domain':spectral['integration_domain'],
         'energy_balance_residual_j':float(pupil.sum()-(pixel_j.sum()+(pupil.sum()-after_rx.sum())+(after_rx.sum()-after_filter.sum())+(after_filter.sum()-pixel_j.sum()))),
     }
+    from ..reporting.background_bins import spatial_background_bin_values
+    budget.update(spatial_background_bin_values(budget,cfg.readout.tdc_bin_ps))
     mapping=np.zeros((len(fractions),o.channels_h*o.channels_v))
     for channel in range(mapping.shape[1]):
         mapping[:,channel]=psf[:,groups==channel].sum(axis=1)
@@ -254,11 +283,14 @@ def project_illumination(cfg,a,progress,cancelled):
           'signal_energy_per_pixel_j':pixel_j.reshape(ny,nx).tolist(),
           'solar_photons_per_pixel_per_gate':(solar.sum(axis=1)*gate_s).reshape(ny,nx).tolist(),
           'other_photons_per_pixel_per_gate':(other.sum(axis=1)*gate_s).reshape(ny,nx).tolist(),
-          'spectral_integration':{'wavelength_nm':wavelengths.tolist(),'weights_nm':weights.tolist(),
+          'spectral_integration':{'storage':'outer_product' if factorized else 'dense',
+                                  'domain':spectral['integration_domain'],'integration_work':work,
+                                  'logical_cells':nx*ny*len(wavelengths),'stored_cells_per_measure':stored_cells,
+                                  'wavelength_nm':wavelengths.tolist(),'weights_nm':weights.tolist(),
                                   'filter_transmission':transmission.tolist(),'solar_radiance_w_m2_sr_nm':sun.tolist(),
                                   'other_radiance_w_m2_sr_nm':ambient.tolist(),
-                                  'solar_sensor_photons_per_second_per_spectral_cell':solar.tolist(),
-                                  'other_sensor_photons_per_second_per_spectral_cell':other.tolist()},
+                                  'solar_sensor_photons_per_second_per_spectral_cell':export_spectral(solar),
+                                  'other_sensor_photons_per_second_per_spectral_cell':export_spectral(other)},
           'assumptions':['Tx pulse energy is defined within the configured angular domain before Tx efficiency; cell fractions sum to unity.',
                          'Static extended Lambertian target with one range and reflectivity.',
                          'Small-angle solid angle dH*dV in radians; configured angular validity limit enforced.',

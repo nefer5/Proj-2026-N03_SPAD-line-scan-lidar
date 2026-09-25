@@ -70,11 +70,15 @@ def default_values():
         raise ValueError("defaults.yaml requires schema_version: 1, simulation and experiments")
     if not isinstance(doc["simulation"], dict):
         raise ValueError("simulation must be a mapping")
+    from .numerics.curves import SpectralInputs
+    SpectralInputs.model_validate(doc['simulation']['spectral_inputs'])
     return doc["simulation"]
 
 
 class Algorithms(BaseModel):
     model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    filter_leakage_domain: Literal['source_coverage']
+    factorize_achromatic_leakage: bool
     max_column_projection_work: int = Field(gt=0)
     max_column_pulses: int = Field(gt=0)
     max_column_count: int = Field(gt=0)
@@ -198,7 +202,8 @@ class Algorithms(BaseModel):
                    'max_column_count','max_column_histogram_work','max_column_selected_histogram_cells',
                    'max_column_sampling_work','column_projection_cache_entries','max_column_analysis_events',
                    'max_column_reference_work','max_column_analysis_candidates','column_result_cache_entries',
-                   'max_super_gaussian_order','psf_preview_samples','psf_preview_extent_sigma','psf_preview_retained_fraction')
+                   'max_super_gaussian_order','psf_preview_samples','psf_preview_extent_sigma','psf_preview_retained_fraction',
+                   'filter_leakage_domain','factorize_achromatic_leakage')
         current=read_yaml('algorithms.yaml')
         merged=dict(values)
         # Explicit historical semantics, not current numerical defaults. Old B

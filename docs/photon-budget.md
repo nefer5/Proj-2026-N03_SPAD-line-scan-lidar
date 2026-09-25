@@ -9,7 +9,7 @@
 ## 参考面与统计口径
 
 - 回波按完整单脉冲计算；背景按单个记录门计算。进入入瞳、到达探测面、候选雪崩和最终记录是不同层次。
-- 背景原始光子数限定在比较波段B：采用当前滤光片配置有效域/采样范围，不是全光谱总量，也不一定等于滤光片FWHM。
+- 背景原始光子数限定在比较波段B：零漏光基础模型或采样模式采用滤光片形状域/采样范围；非零基础带外值扩展到提供的源光谱并受已知Rx响应范围约束。实际B明确记录，不一定是全光谱或滤光片FWHM。
 - 信号使用目标激光反射率；太阳使用独立的太阳灰反射率；其他环境光已经是接收方向辐亮度，不再乘反射率或1/R²。
 - 最终直方图是回波、太阳、其他光和器件噪声共同竞争后的混合记录，不按各来源的候选比例线性拆分。
 - 数据随有效输入实时更新；实际观测直方图仍需点击运行。专家调试采用该次仿真的参数快照。
@@ -207,10 +207,10 @@ $$
 PDE按波长放在积分内，FF只乘一次。候选事件随后进入SPAD与读出模型；这些候选数不是最终时间戳数。
 
 $$
-\begin{aligned}\mu_j&=A_{\mathrm{Rx}}\Omega\eta_{\mathrm{Rx}}T_{\mathrm{gate}}FF\\&\quad\cdot\int_B L_j(\lambda)T_f(\lambda)\mathrm{PDE}(\lambda)q(\lambda)\,d\lambda_{\mathrm{nm}}\\N_{j,\mathrm{ideal}}&=N_{\mathrm{shots}}\mu_j\end{aligned}
+\begin{aligned}\mu_j&=A_{\mathrm{Rx}}\Omega\eta_{\mathrm{Rx}}T_{\mathrm{gate}}FF\\&\quad\cdot\int_B L_j(\lambda)T_f(\lambda)\mathrm{PDE}(\lambda)q(\lambda)\,d\lambda_{\mathrm{nm}}\\N_{j,\mathrm{ideal}}&=N_{\mathrm{shots}}\mu_j\\\bar n_{j,\mathrm{bin}}&=\dot N_{j,\mathrm{candidate}}\Delta t_{\mathrm{bin}}\end{aligned}
 $$
 
-**符号与单位：** PDE(λ)在积分内逐波长参与计算；FF在积分外乘一次。μj是当前背景来源的每门期望雪崩候选数，Nj,ideal是累计Nshots发的候选总数。实际输出还会受到SPAD恢复、OR/符合逻辑和TDC限制。
+**符号与单位：** PDE(λ)在积分内逐波长参与计算；FF在积分外乘一次。μj是当前背景来源的每门期望雪崩候选数，Nj,ideal是累计Nshots发的候选总数。实际输出还会受到SPAD恢复、OR/符合逻辑和TDC限制。 每time_bin解析值直接由PDE/FF后的候选计数率乘分箱时长得到，不进行随机统计。
 
 | 中间量 | 单位 | Python结果字段 |
 |---|---|---|
@@ -218,6 +218,7 @@ $$
 | 每门期望雪崩候选数 | events/gate | `solar_candidates_gate` |
 | 本次累计的理想候选数 | events | `solar_candidates_acquisition` |
 | 累计脉冲数 | shots | `shots` |
+| 每time_bin平均探测候选数（单角通道） | candidates/bin | `solar_mean_candidates_per_time_bin` |
 
 ## 其他环境光
 
@@ -274,10 +275,10 @@ $$
 PDE按波长放在积分内，FF只乘一次。候选事件随后进入SPAD与读出模型；这些候选数不是最终时间戳数。
 
 $$
-\begin{aligned}\mu_j&=A_{\mathrm{Rx}}\Omega\eta_{\mathrm{Rx}}T_{\mathrm{gate}}FF\\&\quad\cdot\int_B L_j(\lambda)T_f(\lambda)\mathrm{PDE}(\lambda)q(\lambda)\,d\lambda_{\mathrm{nm}}\\N_{j,\mathrm{ideal}}&=N_{\mathrm{shots}}\mu_j\end{aligned}
+\begin{aligned}\mu_j&=A_{\mathrm{Rx}}\Omega\eta_{\mathrm{Rx}}T_{\mathrm{gate}}FF\\&\quad\cdot\int_B L_j(\lambda)T_f(\lambda)\mathrm{PDE}(\lambda)q(\lambda)\,d\lambda_{\mathrm{nm}}\\N_{j,\mathrm{ideal}}&=N_{\mathrm{shots}}\mu_j\\\bar n_{j,\mathrm{bin}}&=\dot N_{j,\mathrm{candidate}}\Delta t_{\mathrm{bin}}\end{aligned}
 $$
 
-**符号与单位：** PDE(λ)在积分内逐波长参与计算；FF在积分外乘一次。μj是当前背景来源的每门期望雪崩候选数，Nj,ideal是累计Nshots发的候选总数。实际输出还会受到SPAD恢复、OR/符合逻辑和TDC限制。
+**符号与单位：** PDE(λ)在积分内逐波长参与计算；FF在积分外乘一次。μj是当前背景来源的每门期望雪崩候选数，Nj,ideal是累计Nshots发的候选总数。实际输出还会受到SPAD恢复、OR/符合逻辑和TDC限制。 每time_bin解析值直接由PDE/FF后的候选计数率乘分箱时长得到，不进行随机统计。
 
 | 中间量 | 单位 | Python结果字段 |
 |---|---|---|
@@ -285,6 +286,7 @@ $$
 | 每门期望雪崩候选数 | events/gate | `other_candidates_gate` |
 | 本次累计的理想候选数 | events | `other_candidates_acquisition` |
 | 累计脉冲数 | shots | `shots` |
+| 每time_bin平均探测候选数（单角通道） | candidates/bin | `other_mean_candidates_per_time_bin` |
 
 ## 候选输入到实际读出
 
@@ -358,6 +360,7 @@ $$
 | 太阳Rx效率后光子 | photons/gate | `solar_after_rx_photons_per_gate` |
 | 太阳滤光后无限像面光子 | photons/gate | `solar_after_filter_fullplane_photons_per_gate` |
 | 太阳探测面光子 | photons/gate | `solar_sensor_incident_photons_per_gate` |
+| 太阳每time_bin平均探测候选数（全阵列，含PDE/FF） | candidates/bin | `solar_mean_candidates_per_time_bin` |
 
 ### 其他环境光：独立输入谱的空间积分
 
@@ -375,6 +378,7 @@ $$
 | 其他光Rx效率后光子 | photons/gate | `other_after_rx_photons_per_gate` |
 | 其他光滤光后无限像面光子 | photons/gate | `other_after_filter_fullplane_photons_per_gate` |
 | 其他光探测面光子 | photons/gate | `other_sensor_incident_photons_per_gate` |
+| 其他环境光每time_bin平均探测候选数（全阵列，含PDE/FF） | candidates/bin | `other_mean_candidates_per_time_bin` |
 
 ### 器件转换与最终混合记录
 
@@ -514,6 +518,7 @@ $$
 | 太阳入瞳光子（限定波段） | photons/acquisition | `solar_rx_incident_photons_total` |
 | 太阳探测面光子 | photons/acquisition | `solar_sensor_incident_photons_total` |
 | 太阳门内候选雪崩期望 | candidates/acquisition | `solar_candidate_avalanches_total` |
+| 太阳每time_bin平均探测候选数（全阵列） | candidates/bin | `solar_mean_candidates_per_time_bin` |
 
 ### 其他环境光：独立积分
 
@@ -530,6 +535,7 @@ $$
 | 其他光入瞳光子（限定波段） | photons/acquisition | `other_rx_incident_photons_total` |
 | 其他光探测面光子 | photons/acquisition | `other_sensor_incident_photons_total` |
 | 其他光门内候选雪崩期望 | candidates/acquisition | `other_candidate_avalanches_total` |
+| 其他环境光每time_bin平均探测候选数（全阵列） | candidates/bin | `other_mean_candidates_per_time_bin` |
 
 ### 整次接收能量与最终混合记录
 
@@ -655,6 +661,7 @@ $$
 | 太阳入瞳光子（限定波段） | photons/acquisition | `solar_rx_incident_photons_total` |
 | 太阳探测面光子 | photons/acquisition | `solar_sensor_incident_photons_total` |
 | 太阳门内候选雪崩期望 | candidates/acquisition | `solar_candidate_avalanches_total` |
+| 太阳每time_bin平均探测候选数（全阵列） | candidates/bin | `solar_mean_candidates_per_time_bin` |
 
 ### 其他环境光：独立积分
 
@@ -671,6 +678,7 @@ $$
 | 其他光入瞳光子（限定波段） | photons/acquisition | `other_rx_incident_photons_total` |
 | 其他光探测面光子 | photons/acquisition | `other_sensor_incident_photons_total` |
 | 其他光门内候选雪崩期望 | candidates/acquisition | `other_candidate_avalanches_total` |
+| 其他环境光每time_bin平均探测候选数（全阵列） | candidates/bin | `other_mean_candidates_per_time_bin` |
 
 ### 整次接收能量与最终混合记录
 

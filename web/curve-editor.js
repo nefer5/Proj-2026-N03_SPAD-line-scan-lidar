@@ -26,6 +26,7 @@ globalThis.CurveEditors = class {
       const fields=create("div");fields.className="field-grid";
       const inputs={};
       for(const [key,item] of Object.entries(catalog.fields)) {
+        if(item.kinds&&!item.kinds.includes(kind))continue;
         const fieldLabel=create("label",item.label+" ("+(key==="amplitude"?meta.unit:item.unit)+")");
         fieldLabel.title=item.description;
         const input=create("input");input.type="number";input.step="any";input.id=kind+"Basic_"+key;
@@ -37,7 +38,7 @@ globalThis.CurveEditors = class {
       panels.basic.append(fields);
       const formula=create("div");formula.className="formula";
       const formulaNote=create("p");formulaNote.className="formula-note";
-      const domainNote=create("p","所有基础波形仅在有效波段内使用，波段外为0。");
+      const domainNote=create("p",kind==="filter"?"带外透过率在通带以外生效。非零时背景积分覆盖已提供的源光谱，并明确受导入Rx波段约束；不会自动外推PDE或光学数据库。":"所有基础波形仅在有效波段内使用，波段外为0。");
       domainNote.className="editor-note";panels.basic.append(formula,formulaNote,domainNote);
       const inputFile=create("input");inputFile.type="file";inputFile.accept=".csv,text/csv";inputFile.id=kind+"CurveFile";
       const fileLabel=create("label","CSV表头：wavelength_nm,"+meta.column);fileLabel.append(inputFile);
@@ -70,15 +71,17 @@ globalThis.CurveEditors = class {
       });
     }
   }
+  activeFields(e){return [...this.catalog.shapes[e.shape.value].fields,...(e.kind==="filter"?this.catalog.filter_basic_fields:[])];}
   visibility(e) {
     for(const [mode,panel] of Object.entries(e.panels))panel.classList.toggle("hidden",e.spec.mode!==mode);
     e.methodLabel.classList.toggle("hidden",!["csv","manual"].includes(e.spec.mode));
-    const active=this.catalog.shapes[e.shape.value].fields;
+    const active=this.activeFields(e);
     for(const [key,input] of Object.entries(e.inputs))input.closest("label").classList.toggle("hidden",!active.includes(key));
-    e.inputs.width_nm.closest("label").firstChild.textContent=e.shape.value==="gaussian"?"半高全宽 W · FWHM (nm)":"矩形全宽 W (nm)";
+    e.inputs.width_nm.closest("label").firstChild.textContent=e.shape.value==="gaussian"?(e.kind==="filter"?"扣除带外基底后的 FWHM (nm)":"半高全宽 W · FWHM (nm)"):"矩形全宽 W (nm)";
     e.inputs.amplitude.closest("label").firstChild.textContent=(e.shape.value==="constant"?"常量 A":"峰值 A")+" ("+e.meta.unit+")";
     e.formulaNote.textContent=this.catalog.formula_notes["basic_"+e.shape.value];
-    const latex=this.catalog.formulas["basic_"+e.shape.value];
+    const latex=e.kind==="filter"?this.catalog.formulas["filter_with_leakage"]:this.catalog.formulas["basic_"+e.shape.value];
+    if(e.kind==="filter")e.formulaNote.textContent=this.catalog.formula_notes["filter_with_leakage"]+" "+this.catalog.formula_notes["basic_"+e.shape.value];
     try {katex.render(latex,e.formula,{displayMode:true,throwOnError:true});}
     catch(error){e.formula.textContent="公式渲染失败："+error.message+"\n"+latex;}
     e.status.textContent=e.spec.mode==="manual"&&e.dirty?"手动数据尚未应用":this.catalog.modes[e.spec.mode]+"模式；仅当前模式的数据参与计算。";
@@ -104,7 +107,7 @@ globalThis.CurveEditors = class {
       const spec=structuredClone(e.spec);
       if(spec.mode==="basic") {
         spec.basic.shape=e.shape.value;
-        for(const key of this.catalog.shapes[spec.basic.shape].fields) {
+        for(const key of this.activeFields(e)) {
           const input=e.inputs[key];
           if(input.value.trim()==="" || !Number.isFinite(Number(input.value)))throw new Error(e.meta.label+"："+this.catalog.fields[key].label+"需要有效数字。");
           spec.basic[key]=Number(input.value);

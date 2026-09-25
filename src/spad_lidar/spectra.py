@@ -51,6 +51,33 @@ def solar_normalization(order):
     return float(K_PHOTOPIC*np.dot(w,irradiance*vision)), float(np.dot(w,irradiance))
 
 
+def background_spectral_domain(cfg,algorithms):
+    filt=FilterResponse(cfg)
+    bounds=[float(filt.x[0]),float(filt.x[-1])]
+    info={'band_nm':bounds,'requested_band_nm':bounds.copy(),'mode':'filter_input_domain',
+          'out_of_band_transmission':0.,'rx_coverage_limited':False}
+    if not filt.has_out_of_band:return info
+    info['out_of_band_transmission']=cfg.spectral_inputs.filter.basic.out_of_band_transmission
+    ranges=[bounds]
+    if cfg.solar_enabled:
+        solar=reference_data()[0] if cfg.spectral_inputs.solar.mode=='standard' else None
+        values=solar[:,0] if solar is not None else Curve(cfg.spectral_inputs.solar).x
+        ranges.append([float(values[0]),float(values[-1])])
+    if cfg.other_light_enabled:
+        values=Curve(cfg.spectral_inputs.other).x;ranges.append([float(values[0]),float(values[-1])])
+    lo=min(r[0] for r in ranges);hi=max(r[1] for r in ranges)
+    info.update(requested_band_nm=[lo,hi],mode=algorithms.filter_leakage_domain)
+    active_background=(cfg.solar_enabled and cfg.solar_illuminance_lux>0) or (cfg.other_light_enabled and cfg.other_light_scale>0)
+    if active_background and getattr(cfg,'rx_model',None)=='dataset':
+        wl=cfg.dataset['rx']['wavelength_nm'];info['rx_wavelength_coverage_nm']=[wl[0],wl[-1]]
+        lo=max(lo,wl[0]);hi=min(hi,wl[-1])
+        if hi<=lo:raise ValueError('Background source and Rx wavelength coverage do not overlap')
+        info['rx_coverage_limited']=[lo,hi]!=info['requested_band_nm']
+    info['band_nm']=[lo,hi]
+    info['note']='Nonzero basic-filter leakage covers the provided source spectra; imported Rx coverage explicitly limits the modeled band. No response is extrapolated beyond the Rx table.'
+    return info
+
+
 def spectral_components(cfg, algorithms=None, plot=False):
     a = algorithms or Algorithms.load()
     solar, _, manifest = reference_data()
@@ -58,6 +85,7 @@ def spectral_components(cfg, algorithms=None, plot=False):
     other = Curve(cfg.spectral_inputs.other)
     pde = Curve(cfg.spectral_inputs.pde)
     filt = FilterResponse(cfg)
+    domain=background_spectral_domain(cfg,a);band=domain['band_nm']
     if solar_custom is None:
         reference_lux, reference_w_m2 = solar_normalization(a.spectral_quadrature_order)
         solar_knots=solar[:,0]
@@ -87,8 +115,8 @@ def spectral_components(cfg, algorithms=None, plot=False):
     # Split at every interpolation knot and basic-waveform feature. Polynomial
     # products are integrated exactly by order 6; Gaussian/cosine shapes receive
     # local refinement from Curve.knots, independently of plot sampling density.
-    knots = np.unique(np.r_[filt.knots(a), solar_knots, other.knots(a), pde.knots(a)])
-    knots = knots[(knots>=filt.wavelength[0]) & (knots<=filt.wavelength[-1])]
+    knots = np.unique(np.r_[filt.knots(a), solar_knots, other.knots(a), pde.knots(a),band])
+    knots = knots[(knots>=band[0]) & (knots<=band[-1])]
     x,w = quadrature(knots,a.spectral_quadrature_order)
     sun_l = solar_e(x)*cfg.solar_reflectivity/np.pi
     ambient_l = other_l(x)
@@ -101,7 +129,8 @@ def spectral_components(cfg, algorithms=None, plot=False):
         "solar_irradiance_w_m2": scale*reference_w_m2,
         "solar_scale": scale,
         "solar_reference_irradiance_w_m2": reference_w_m2,
-        "budget_band_nm": [float(filt.wavelength[0]),float(filt.wavelength[-1])],
+        "budget_band_nm": band,
+        "integration_domain":domain,
         "solar_irradiance_at_laser_w_m2_nm": float(solar_e(np.array(cfg.wavelength_nm))),
         "solar_radiance_at_laser_w_m2_sr_nm": float(solar_e(np.array(cfg.wavelength_nm))*cfg.solar_reflectivity/np.pi),
         "other_raw_radiance_at_laser_w_m2_sr_nm": float(other(np.array(cfg.wavelength_nm))),

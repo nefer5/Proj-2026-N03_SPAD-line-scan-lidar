@@ -140,3 +140,6 @@ input[type=checkbox] { accent-color:var(--cyan); }
 #photonBudgetPanel .table-scroll { max-height:none; }
 #photonBudgetPanel th { position:static; }
 #photonBudgetPanel td:nth-child(2) { font-family:Consolas,monospace; color:var(--cyan); }
+
+/* Collapsible section titles should remain easy to discover. */
+details>summary{font-weight:700}.subdetails>summary,.explanation>summary,.wave-detail>summary{font-weight:700}

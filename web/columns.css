@@ -5,3 +5,6 @@
 .hv-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;border:1px solid var(--line,#28414e);border-radius:6px;padding:10px;min-width:0;margin:0}.hv-pair legend{color:var(--cyan,#58d9cf);font-size:11px;padding:0 6px}canvas[data-hist]{height:360px}
 
 @media(max-width:570px){canvas[data-hist]{height:300px}}
+
+/* Collapsible section titles should remain easy to discover. */
+details>summary{font-weight:700}.subdetails>summary,.explanation>summary,.wave-detail>summary{font-weight:700}

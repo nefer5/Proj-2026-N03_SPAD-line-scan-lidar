@@ -54,22 +54,22 @@ def aperture_area(cfg: SimulationConfig) -> float:
     return area * pi / 4 if cfg.rx_aperture_shape == "ellipse" else area
 
 
-def _filter_properties(cfg):
+def _filter_properties(cfg,band):
     response = FilterResponse(cfg)
-    return response.integral_nm(), response.evaluate(cfg.wavelength_nm)
+    return response.integral_nm(band) if response.has_out_of_band else response.integral_nm(), response.evaluate(cfg.wavelength_nm)
 
 
 def photon_budget(cfg: SimulationConfig, range_m=None, spectral=None) -> Budget:
     r = cfg.range_m if range_m is None else range_m
     photon_energy = H * C / (cfg.wavelength_nm * 1e-9)
     area = aperture_area(cfg)
-    enbw, transmission = _filter_properties(cfg)
+    spectral = spectral if spectral is not None else spectral_components(cfg)
+    enbw, transmission = _filter_properties(cfg,spectral['budget_band_nm'])
     # Input reference plane is BEFORE Tx optics, for this angular channel.
     energy = cfg.pulse_energy_nj * 1e-9
     tx_output=transmit(energy,cfg.tx_efficiency)
     target_incident,target_reflected,rx_incident,geometry=lambertian_return(tx_output,cfg.atmospheric_one_way_transmission,cfg.target_reflectivity,area,r,cfg.overlap_factor)
     received=rx_incident*cfg.rx_efficiency*transmission
-    spectral = spectral if spectral is not None else spectral_components(cfg)
     effective_pdp = effective_pde(spectral["pde_at_laser"], cfg.fill_factor)
     omega = cfg.channel_ifov_h_mrad * cfg.channel_ifov_v_mrad * 1e-6
     geometry_bg = area*omega*cfg.rx_efficiency
@@ -96,4 +96,3 @@ def photon_budget(cfg: SimulationConfig, range_m=None, spectral=None) -> Budget:
         spectral['solar_incident_radiance_w_m2_sr']*area*omega,
         spectral['other_incident_radiance_w_m2_sr']*area*omega,
     )
-

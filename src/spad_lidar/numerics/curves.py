@@ -53,9 +53,23 @@ class CurveSpec(BaseModel):
         return self
 
 
+class FilterBasicCurve(BasicCurve):
+    out_of_band_transmission: float = Field(ge=0,le=1)
+
+    @model_validator(mode='after')
+    def transmission_bounds(self):
+        if self.amplitude>1 or self.out_of_band_transmission>self.amplitude:
+            raise ValueError('Filter requires 0 <= out_of_band_transmission <= amplitude <= 1')
+        return self
+
+
+class FilterCurveSpec(CurveSpec):
+    basic: FilterBasicCurve
+
+
 class SpectralInputs(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    filter: CurveSpec
+    filter: FilterCurveSpec
     other: CurveSpec
     pde: CurveSpec
     solar: CurveSpec
@@ -115,6 +129,10 @@ class Curve:
             else:
                 u=np.clip((distance-b.flat_width_nm/2)/b.edge_width_nm,0,1)
                 y=(1+np.cos(np.pi*u))/2
+            if isinstance(b,FilterBasicCurve):
+                shape=np.where((x>=self.x[0])&(x<=self.x[-1]),y,0)
+                result=b.out_of_band_transmission+(b.amplitude-b.out_of_band_transmission)*shape
+                return float(result) if result.ndim==0 else result
             y=y*b.amplitude
         result=np.where((x>=self.x[0])&(x<=self.x[-1]),y,0)
         return float(result) if result.ndim==0 else result
@@ -137,7 +155,28 @@ class Curve:
         values=np.unique(parts)
         return values[(values>=self.x[0])&(values<=self.x[-1])]
 
-    def integral_nm(self):
+    @property
+    def has_out_of_band(self):
+        return self.spec.mode=='basic' and isinstance(self.spec.basic,FilterBasicCurve) and self.spec.basic.out_of_band_transmission>0
+
+    def integral_nm(self,bounds=None):
+        if bounds is None and not self.has_out_of_band:return self._base_integral_nm()
+        lo,hi=self.x if bounds is None else bounds
+        if not np.isfinite(lo) or not np.isfinite(hi) or hi<=lo:raise ValueError('Integration bounds must be finite and increasing')
+        lower,upper=max(lo,self.x[0]),min(hi,self.x[-1]);base=0.
+        if lower<upper:
+            if self.polynomial is not None:base=float(self.polynomial.integrate(lower,upper))
+            elif self.has_samples:
+                nodes=np.unique(np.r_[lower,self.x[(self.x>lower)&(self.x<upper)],upper])
+                base=float(np.trapezoid(self.evaluate(nodes),nodes))
+            else:
+                basic=self.spec.basic.model_copy(update={'min_nm':lower,'max_nm':upper})
+                base=Curve(self.spec.model_copy(update={'basic':basic}))._base_integral_nm()
+        if not self.has_out_of_band:return base
+        b=self.spec.basic
+        return b.out_of_band_transmission*(hi-lo)+(1-b.out_of_band_transmission/b.amplitude)*base
+
+    def _base_integral_nm(self):
         if self.polynomial is not None:
             return float(self.polynomial.integrate(*self.x[[0,-1]]))
         if self.has_samples:

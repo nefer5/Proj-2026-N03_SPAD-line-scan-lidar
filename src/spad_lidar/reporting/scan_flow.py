@@ -32,7 +32,9 @@ def build_scan_flow(cfg,info,projector,result,gate_exposure_s):
         for plane in ('rx_incident_photons','sensor_incident_photons','candidate_avalanches'):
             values[f'{name}_{plane}_total']=b[f'{name}_{plane}_per_gate']/gate_s*gate_exposure_s
     definition=read_yaml('photon-flow.yaml')['scan'];formulas=read_yaml('formulas.yaml');notes=read_yaml('formula-notes.yaml')
-    return {'title':definition['title'],'intro':definition['intro'],
+    from .background_bins import spatial_background_bin_values,bin_scope_note,spectral_domain_note
+    values.update(spatial_background_bin_values(b,cfg.readout.tdc_bin_ps))
+    return {'title':definition['title'],'intro':definition['intro']+bin_scope_note(cfg.readout.tdc_bin_ps)+spectral_domain_note(b),
         'background_integration_band_nm':b['background_integration_band_nm'],'values':values,
         'steps':[{**step,'latex':formulas[step['formula_id']],'symbols':notes[step['formula_id']],
                   'values':[{**v,'value':values[v['key']]} for v in step['values']]} for step in definition['steps']]}

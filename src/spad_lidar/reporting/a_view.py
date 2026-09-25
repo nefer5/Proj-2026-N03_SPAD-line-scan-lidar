@@ -62,6 +62,20 @@ def filter_profile(cfg, algorithms=None):
     a = algorithms or Algorithms.load()
     response = FilterResponse(cfg)
     wl, tr = response.wavelength, response.transmission
+    if response.has_out_of_band:
+        from ..spectra import background_spectral_domain
+        domain=background_spectral_domain(cfg,a);lo,hi=domain['band_nm']
+        lower,upper=min(wl[0],cfg.wavelength_nm),max(wl[-1],cfg.wavelength_nm)
+        padding=(upper-lower)*a.filter_plot_padding_fraction
+        plot_wl=np.unique(np.r_[max(0.,lower-padding),np.linspace(wl[0],wl[-1],a.filter_plot_samples),response.plot_knots(a),upper+padding])
+        return {'source':'basic_filter','input_mode':'basic','basic_shape':cfg.spectral_inputs.filter.basic.shape,
+            'interpolation':response.method,'original_wavelength_nm':[],'original_transmission':[],
+            'wavelength_nm':plot_wl.tolist(),'transmission':response.evaluate(plot_wl).tolist(),
+            'polynomial_coefficients':None,'laser_wavelength_nm':cfg.wavelength_nm,
+            'laser_transmission':response.evaluate(cfg.wavelength_nm),'weighted_bandwidth_nm':response.integral_nm([lo,hi]),
+            'support_nm':[float(wl[0]),float(wl[-1])],'integration_domain':domain,
+            'out_of_band_transmission':cfg.spectral_inputs.filter.basic.out_of_band_transmission,
+            'note':f'图中聚焦基础形状范围；其外仍使用带外透过率。加权带宽按完整背景积分波段{lo:g}–{hi:g} nm计算，不能只用当前绘图窗口面积代替。'}
     lower, upper = min(wl[0], cfg.wavelength_nm), max(wl[-1], cfg.wavelength_nm)
     padding = (upper-lower)*a.filter_plot_padding_fraction
     enbw, transmission = response.integral_nm(), response.evaluate(cfg.wavelength_nm)

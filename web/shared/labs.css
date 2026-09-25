@@ -5,3 +5,6 @@
 .scan-toolbar{margin-top:18px;gap:12px}.scan-table{max-width:100%;overflow:auto;max-height:440px}.scan-table table{min-width:850px}.scan-wide-plot{width:100%;height:220px;background:var(--bg);border-radius:8px}#scanPanel h3{font-size:14px;color:var(--muted)}#scanNotes{margin-top:16px}#scanPanel{min-width:0}.scan-toolbar input{max-width:170px}.scan-toolbar label{max-width:100%}
 
 .controls details>summary{color:var(--cyan)}.controls .section-actions button{font-size:11px;padding:5px 8px}
+
+/* Collapsible section titles should remain easy to discover. */
+details>summary{font-weight:700}.subdetails>summary,.explanation>summary,.wave-detail>summary{font-weight:700}

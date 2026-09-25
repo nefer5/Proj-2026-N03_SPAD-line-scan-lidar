@@ -2,7 +2,7 @@ title: "回波、太阳光与其他环境光：光子预算计算链路"
 intro: "文档、评估页和专家调试页共用此定义。所有中间值由Python计算；公式用于解释，不从展示字符串执行模型。"
 conventions:
   - "回波按完整单脉冲计算；背景按单个记录门计算。进入入瞳、到达探测面、候选雪崩和最终记录是不同层次。"
-  - "背景原始光子数限定在比较波段B：采用当前滤光片配置有效域/采样范围，不是全光谱总量，也不一定等于滤光片FWHM。"
+  - "背景原始光子数限定在比较波段B：零漏光基础模型或采样模式采用滤光片形状域/采样范围；非零基础带外值扩展到提供的源光谱并受已知Rx响应范围约束。实际B明确记录，不一定是全光谱或滤光片FWHM。"
   - "信号使用目标激光反射率；太阳使用独立的太阳灰反射率；其他环境光已经是接收方向辐亮度，不再乘反射率或1/R²。"
   - "最终直方图是回波、太阳、其他光和器件噪声共同竞争后的混合记录，不按各来源的候选比例线性拆分。"
   - "数据随有效输入实时更新；实际观测直方图仍需点击运行。专家调试采用该次仿真的参数快照。"
@@ -226,6 +226,9 @@ chains:
           - key: shots
             label: "累计脉冲数"
             unit: "shots"
+          - key: solar_mean_candidates_per_time_bin
+            label: "每time_bin平均探测候选数（单角通道）"
+            unit: "candidates/bin"
   - id: other
     title: "其他环境光"
     steps:
@@ -284,6 +287,9 @@ chains:
           - key: shots
             label: "累计脉冲数"
             unit: "shots"
+          - key: other_mean_candidates_per_time_bin
+            label: "每time_bin平均探测候选数（单角通道）"
+            unit: "candidates/bin"
 readout:
   - title: "合并候选输入，再经过读出"
     formula_id: budget_readout
@@ -330,6 +336,7 @@ spatial:
         - {key: solar_after_rx_photons_per_gate, label: 太阳Rx效率后光子, unit: photons/gate}
         - {key: solar_after_filter_fullplane_photons_per_gate, label: 太阳滤光后无限像面光子, unit: photons/gate}
         - {key: solar_sensor_incident_photons_per_gate, label: 太阳探测面光子, unit: photons/gate}
+        - {key: solar_mean_candidates_per_time_bin, label: 太阳每time_bin平均探测候选数（全阵列，含PDE/FF）, unit: candidates/bin}
     - title: '其他环境光：独立输入谱的空间积分'
       formula_id: spatial_background
       logic: '其他光输入已经是接收方向谱辐亮度；不再额外乘目标反射率。背景原始光子数同样限定当前积分波段。'
@@ -338,6 +345,7 @@ spatial:
         - {key: other_after_rx_photons_per_gate, label: 其他光Rx效率后光子, unit: photons/gate}
         - {key: other_after_filter_fullplane_photons_per_gate, label: 其他光滤光后无限像面光子, unit: photons/gate}
         - {key: other_sensor_incident_photons_per_gate, label: 其他光探测面光子, unit: photons/gate}
+        - {key: other_mean_candidates_per_time_bin, label: 其他环境光每time_bin平均探测候选数（全阵列，含PDE/FF）, unit: candidates/bin}
     - title: '器件转换与最终混合记录'
       formula_id: spatial_candidates
       logic: 'PDE/FF转换后再由共用SPAD及读出核心处理DCR、恢复和竞争。最终记录是所有来源混合的结果，不能按候选比例线性拆分。'
@@ -405,6 +413,7 @@ scan:
         - {key: solar_rx_incident_photons_total, label: 太阳入瞳光子（限定波段）, unit: photons/acquisition}
         - {key: solar_sensor_incident_photons_total, label: 太阳探测面光子, unit: photons/acquisition}
         - {key: solar_candidate_avalanches_total, label: 太阳门内候选雪崩期望, unit: candidates/acquisition}
+        - {key: solar_mean_candidates_per_time_bin, label: 太阳每time_bin平均探测候选数（全阵列）, unit: candidates/bin}
     - title: '其他环境光：独立积分'
       formula_id: scan_background_total
       logic: '只使用当前环境光谱输入模式。原始光子数限定显示波段；不随Tx能量份额缩放。'
@@ -412,6 +421,7 @@ scan:
         - {key: other_rx_incident_photons_total, label: 其他光入瞳光子（限定波段）, unit: photons/acquisition}
         - {key: other_sensor_incident_photons_total, label: 其他光探测面光子, unit: photons/acquisition}
         - {key: other_candidate_avalanches_total, label: 其他光门内候选雪崩期望, unit: candidates/acquisition}
+        - {key: other_mean_candidates_per_time_bin, label: 其他环境光每time_bin平均探测候选数（全阵列）, unit: candidates/bin}
     - title: '整次接收能量与最终混合记录'
       formula_id: spatial_energy_balance
       logic: '能量等式对测量参考时隙中启用发射的脉冲求和。最终记录包含源间竞争；角bin重建可以进一步排除回扫或域外记录。'
@@ -519,6 +529,9 @@ columns:
     - key: solar_candidate_avalanches_total
       label: 太阳门内候选雪崩期望
       unit: candidates/acquisition
+    - key: solar_mean_candidates_per_time_bin
+      label: 太阳每time_bin平均探测候选数（全阵列）
+      unit: candidates/bin
   - title: 其他环境光：独立积分
     formula_id: scan_background_total
     logic: 只使用当前环境光谱输入模式。原始光子数限定显示波段；不随Tx能量份额缩放。
@@ -532,6 +545,9 @@ columns:
     - key: other_candidate_avalanches_total
       label: 其他光门内候选雪崩期望
       unit: candidates/acquisition
+    - key: other_mean_candidates_per_time_bin
+      label: 其他环境光每time_bin平均探测候选数（全阵列）
+      unit: candidates/bin
   - title: 整次接收能量与最终混合记录
     formula_id: spatial_energy_balance
     logic: 接收能量等式对测量列源脉冲求和；器件输出保留全部混合记录，分析时间窗口可再排除区间外记录。DSP/MIPI丢列另报，不更改离线探测记录。

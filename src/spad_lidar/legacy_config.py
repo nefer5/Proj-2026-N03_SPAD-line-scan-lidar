@@ -26,7 +26,7 @@ def migrate_optical_dataset(document):
 
 def migrate_experiment_overrides(kind,values):
     """Migrate legacy B/C groups through one explicit domain conversion."""
-    values=deepcopy(values)
+    values=migrate_filter_leakage(values)
     if kind=='system':
         return migrate_b_domains(values)
     if kind=='scan':
@@ -86,7 +86,7 @@ def migrate_b_domains(values):
 
 def migrate_psf_axes(values):
     """A scalar historical PSF sigma explicitly meant equal H/V widths."""
-    values=deepcopy(values)
+    values=migrate_filter_leakage(values)
     for name in ('optics','rx'):
         section=values.get(name)
         if isinstance(section,dict) and 'psf_sigma_um' in section:
@@ -98,7 +98,7 @@ def migrate_psf_axes(values):
 
 
 def migrate(values, defaults):
-    values=deepcopy(values)
+    values=migrate_filter_leakage(values)
     if 'spads_per_channel' in values:
         if 'H_binning' in values or 'V_binning' in values:
             raise ValueError('Do not mix spads_per_channel with H_binning/V_binning')
@@ -152,3 +152,21 @@ def migrate(values, defaults):
         spectra[name]=spec
     if spectra:values["spectral_inputs"]=spectra
     return merge_config(defaults,values)
+
+
+def migrate_filter_curve(spec):
+    """A complete old basic schema explicitly implied zero out-of-band light."""
+    from .numerics.curves import BasicCurve
+    spec=deepcopy(spec)
+    basic=spec.get('basic') if isinstance(spec,dict) else None
+    if isinstance(basic,dict) and 'out_of_band_transmission' not in basic and set(BasicCurve.model_fields)<=set(basic):
+        basic['out_of_band_transmission']=0  # Historical model semantics, not a new default.
+    return spec
+
+
+def migrate_filter_leakage(values):
+    values=deepcopy(values)
+    spectra=values.get('spectral_inputs')
+    if isinstance(spectra,dict) and isinstance(spectra.get('filter'),dict):
+        spectra['filter']=migrate_filter_curve(spectra['filter'])
+    return values

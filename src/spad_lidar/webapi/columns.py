@@ -126,12 +126,14 @@ def result_view(job_id:str,frame:int|None=None):
         audit={k:v for k,v in result['audit'].items() if k!='source'}
         audit['source']={k:v for k,v in result['audit']['source'].items() if k!='expected_signal_candidates_by_cycle'}
         statistics={k:v for k,v in result['statistics'].items() if k not in ('trial_records','noise_records')}
+        from ..reporting.background_bins import decorate_saved_flow
+        flow=decorate_saved_flow(result['photon_flow'],result['optics']['budget'],cfg.timing.gate_width_ns,cfg.readout.tdc_bin_ps,'columns')
         return {'configuration':result['configuration'],'form_configuration':cfg.model_dump(),'provenance':result['provenance'],'audit':audit,
             'summary':scan['summary'],'transport':scan['transport'],'frame_budget':scan['frame_budget'],
             'counts':counts,'ranges':ranges,'point_cloud':[p for p in scan['point_cloud'] if p['frame']==frame],
             'statistics':statistics,'frame':frame,'measured_column_ids':scan['measured_column_ids'],
             'first_column':next((c['column'] for c in scan['columns'] if c['frame']==frame),None),
-            'photon_flow':result['photon_flow'],'limitations':result['limitations']}
+            'photon_flow':flow,'limitations':result['limitations']}
     except (ValueError,KeyError) as exc:raise HTTPException(422,str(exc)) from exc
 
 

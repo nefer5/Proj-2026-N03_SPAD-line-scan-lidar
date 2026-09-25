@@ -13,10 +13,12 @@ shapes:
   rectangle: {label: 矩形, fields: [amplitude, min_nm, max_nm, center_nm, width_nm]}
   gaussian: {label: 高斯, fields: [amplitude, min_nm, max_nm, center_nm, width_nm]}
   cosine_flat: {label: cosine平顶, fields: [amplitude, min_nm, max_nm, center_nm, flat_width_nm, edge_width_nm]}
+filter_basic_fields: [out_of_band_transmission]
 fields:
+  out_of_band_transmission: {label: 带外透过率, unit: '0–1', kinds: [filter], description: '仅滤光片基础类型生效。通带形状降到零及其定义范围之外使用此值；要求0≤带外值≤带内峰值≤1。非零时背景积分覆盖已提供源光谱，导入Rx时受其已知波段约束；PDE/其他光范围外定义仍为0。CSV/手动模式只用采样曲线。'}
   amplitude: {label: 幅值, unit: 依谱类型, description: '未经过lux归一化的峰值/常量值；滤光片和PDE必须0–1。'}
-  min_nm: {label: 有效波段起点, unit: nm, description: '基础波形只在该波段内有效，区间外为0；也可截断波形尾部。'}
-  max_nm: {label: 有效波段终点, unit: nm, description: '必须大于起点；所有基础波形均在这两个边界截断。'}
+  min_nm: {label: 基础形状范围起点, unit: nm, description: '母函数只在该范围内有效。滤光片范围外使用带外透过率；其他谱类型范围外仍为0。非零漏光时，背景积分波段可宽于此范围。'}
+  max_nm: {label: 基础形状范围终点, unit: nm, description: '必须大于起点；滤光片母函数在边界外为0，透过率回到配置带外值。其他谱类型边界外为0。'}
   center_nm: {label: 中心波长 λc, unit: nm, description: '独立于激光波长，不会随激光波长自动平移。'}
   width_nm: {label: 宽度, unit: nm, description: '矩形为全宽；高斯为半高全宽FWHM。'}
   flat_width_nm: {label: 平顶全宽 F, unit: nm, description: '中心平坦区域的完整宽度。'}

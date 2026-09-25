@@ -1041,3 +1041,16 @@ experiments:
     label: 导入PSF显示区能量分位范围
     unit: '1'
     description: 在已采样有限像面中按边缘累积分布选择中央显示区；不改变原数组、不外推、不补偿阵列外能量，未被显示的份额仍在完整导出中。
+
+  spectral_inputs.filter.basic.out_of_band_transmission:
+    label: 基础滤光片带外透过率
+    unit: '0–1'
+    description: 仅filter基础模式有效，所有基础类型共用；T=T_out+(T_peak-T_out)F，T_out≤T_peak。非零时在所提供太阳/环境光光谱范围计入漏光，导入Rx限定已知响应波段；不外推其他谱或Rx响应。旧完整配置显式迁移为零漏光。
+  algorithms.filter_leakage_domain:
+    label: 滤光片漏光积分域策略
+    unit: 枚举
+    description: source_coverage按提供且开启的背景源光谱确定有限积分域；导入Rx限制到其覆盖范围并写入审计，不能将未建模区视为已完全阻断。
+  algorithms.factorize_achromatic_leakage:
+    label: 无色差Rx带外积分精确分离
+    unit: bool
+    description: 非零带外透过率及构造无色差Rx时，使用空间因子与完整光谱因子的外积表示，保留全部波长节点和光子；不是近似降采样。导入Rx仍逐波长计算，所有因子及逻辑数组尺寸可导出。
