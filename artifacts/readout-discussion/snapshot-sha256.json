@@ -1,0 +1,8 @@
+{
+  "artifacts/readout-discussion/mechanism-preview-initial.png": "3bfb2cd82b7809423aaf352e5292fe4a73ac22d32266e53f668c65edc3b86c7e",
+  "artifacts/readout-discussion/mechanism-preview.png": "ed93a41a83420db31d0f76424451cd1a5e95919c758c66099e0e328fc16ba508",
+  "artifacts/readout-discussion/scalar-noise-live.png": "c2cd5f8b78760a01d9312420d668de018ced1093c6231075d4322ce27c7fb095",
+  "artifacts/readout-discussion/optimized-result-summary.json": "b289973b253fd54f17f32226c4d9620791067228d260eae3a08634a69dcda730",
+  "web/prototypes/slot-readout/snapshot.json": "d70a72453db696f3f0454673bc2e0b2b941d3eb10f8d609520170bd6a4de8a4e",
+  "artifacts/runs/2df4628cf5524ab39fdef12de95cc607/result.json": "398c7f4d60bee52b084f1e80763e74af2d302f509d09493c0586337e98d5d469"
+}

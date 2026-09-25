@@ -25,10 +25,11 @@ def lab_illumination(cfg):
         {'kind': 'direct_detector_illumination', 'reference_plane': 'full_pixel_before_PDE_FF'})
 
 
-def run_illumination(cfg, a, light, pixel_groups, progress, cancelled):
+def run_illumination(cfg, a, light, pixel_groups, progress, cancelled, *, program=None):
     timing = cfg.timing
-    program = periodic_program(timing.period_ns, timing.gate_start_ns, timing.gate_width_ns,
-                               -a.readout_warmup_cycles, timing.laser_shots, timing.laser_shots)
+    if program is None:
+        program = periodic_program(timing.period_ns, timing.gate_start_ns, timing.gate_width_ns,
+                                   -a.readout_warmup_cycles, timing.laser_shots, timing.laser_shots)
     streams = np.random.SeedSequence(cfg.rng_seed).spawn(2)
     candidates, source_audit = sample_candidates(light, cfg.device, Curve(cfg.spectral_inputs.pde), program,
                                                  np.random.default_rng(streams[0]), a.max_readout_events_per_run)

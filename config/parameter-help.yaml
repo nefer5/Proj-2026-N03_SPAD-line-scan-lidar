@@ -203,6 +203,14 @@ spectral_inputs:
   unit: 分组配置
   description: filter/other/pde/solar各自先选择basic、csv或manual模式；solar额外支持standard。基础特征量、CSV采样点和手动采样点独立保存，只使用当前模式；详细单位和特征量定义见curve-inputs.yaml。
 experiments:
+  algorithms.b_initial_condition:
+    label: B采集初始状态
+    unit: 枚举
+    description: fully_recovered表示本次独立B采集从完全恢复状态开始，不生成预热周期；同次采集内死时间连续。periodic_history仅用于显式历史兼容，使用readout_warmup_cycles。此参数不实现C的逐列复位。
+  algorithms.b_noise_reference:
+    label: B噪声参考口径
+    unit: 枚举
+    description: candidate_scalar由PDE/FF后光学背景候选率加DCR及其他器件噪声率，按通道汇总，再按累计发数和标准时间分箱宽度计算标量；不计SPAD/TDC、首事件/符合/容量损失，不代表混合记录中的噪声分量或检测阈值，无额外采集。sampled_output_mean为历史关激光重复采集输出均值，使用readout_expected_trials。
   timing.period_ns:
     label: 采集周期
     unit: ns

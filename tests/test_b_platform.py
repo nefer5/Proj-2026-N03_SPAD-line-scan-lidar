@@ -20,7 +20,7 @@ def test_domain_defaults_and_roundtrip_are_shared_with_a():
     a=SimulationConfig();b=SimulationConfig.for_experiment('system',{})
     assert set(b.model_dump())=={'tx','scene','rx','spad','readout','background','acquisition','spectral_inputs'}
     assert b.acquisition.laser_shots==a.laser_shots
-    assert b.acquisition.monte_carlo_trials==a.monte_carlo_trials
+    assert b.acquisition.monte_carlo_trials==read_yaml('defaults.yaml')['experiments']['system']['acquisition']['monte_carlo_trials']
     assert b.background.solar_enabled==a.solar_enabled
     assert b.background.other_light_enabled==a.other_light_enabled
     assert b.tx.total_pulse_energy_nj==a.pulse_energy_nj
@@ -132,9 +132,33 @@ def test_repeats_use_shared_records_and_independent_roles(analysis):
     assert len(r['statistics']['trial_histograms'])==3
     assert set(r['statistics']['trial_seeds']).isdisjoint(r['statistics']['noise_seeds'])
     assert r['statistics']['trial_seeds'][0]==cfg.rng_seed
+    assert r['statistics']['noise_trial_count']==0 and r['statistics']['noise_mean'] is None
+    assert r['statistics']['noise_histograms']==[] and r['statistics']['noise_seeds']==[]
+    assert r['noise_reference']['extra_acquisitions']==0
+    assert r['audit']['initialization']['warmup_cycles']==0
     again=run_system_analysis(cfg,a,quiet,never)
     assert r['records']==again['records'] and r['statistics']==again['statistics']
     assert sum(x['full_signal_total'] for x in r['references'])==pytest.approx(cfg.timing.laser_shots*r['optics']['budget']['signal_candidate_avalanches_per_pulse'])
+
+
+def test_scalar_noise_units_and_no_change_to_mixed_records(analysis):
+    from spad_lidar.reporting.noise_reference import candidate_noise_reference,rebin_noise_reference
+    source={'expected_optical_background_candidates_per_pixel_per_second':[10,20,30,40],
+            'expected_dark_candidates_per_pixel_per_second':5,'expected_other_candidates_per_pixel_per_second':1}
+    ref=candidate_noise_reference(source,[0,0,1,1],4,2000,1000)
+    assert ref['rate_cps_per_channel']==[42,82]
+    assert ref['counts_per_bin']==pytest.approx([42*4e-9,82*4e-9])
+    assert ref['gate_counts_per_channel']==pytest.approx([42*4*2000e-9,82*4*2000e-9])
+    assert rebin_noise_reference(ref,2000)['counts_per_bin']==pytest.approx(np.array(ref['counts_per_bin'])*2)
+    cfg,a,scalar=analysis
+    sampled=run_system_analysis(cfg,a.model_copy(update={'b_noise_reference':'sampled_output_mean'}),quiet,never)
+    assert scalar['records']==sampled['records']
+    assert scalar['statistics']['trial_histograms']==sampled['statistics']['trial_histograms']
+    assert sampled['statistics']['noise_trial_count']==a.readout_expected_trials
+    assert 'noise_reference' not in sampled
+    legacy=a.model_dump();legacy.pop('b_initial_condition');legacy.pop('b_noise_reference')
+    restored=Algorithms.from_snapshot(legacy)
+    assert restored.b_initial_condition=='periodic_history' and restored.b_noise_reference=='sampled_output_mean'
 
 
 def test_channel_locator_values_conserve_sensor_photons_and_preserve_old_result(analysis,monkeypatch):
@@ -171,6 +195,8 @@ def test_replay_rebins_every_replicate_and_keeps_original(analysis):
     assert coarse['statistics']['trial_histograms']==expected.tolist()
     assert coarse['statistics']['lower']==expected.min(axis=0).tolist()
     assert np.sum(coarse['histogram']['counts'])==len(r['records'])
+    assert coarse['noise_reference']['counts_per_bin']==pytest.approx(np.asarray(r['noise_reference']['counts_per_bin'])*2)
+    assert coarse['statistics']['noise_mean'] is None
     assert r==before
     with pytest.raises(ValueError):replay_analysis(r,cfg,a,cfg.readout.tdc_bin_ps/2)
 

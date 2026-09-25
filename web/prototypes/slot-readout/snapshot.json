@@ -1,0 +1,157 @@
+{
+  "source_job": "965250a72c614ded835a515dc8f7a91d",
+  "slot_ns": 20000.0,
+  "gate_width_ns": 2048.0,
+  "period_ns": 2048.0,
+  "gate_start_ns": 0.0,
+  "reset_time_ns": null,
+  "reset_placement": "between_slots",
+  "cases": [
+    {
+      "label": "当前配置",
+      "shots": 10,
+      "windows": [
+        {
+          "index": 0,
+          "trigger_ns": 0.0,
+          "open_ns": 0.0,
+          "close_ns": 2048.0
+        },
+        {
+          "index": 1,
+          "trigger_ns": 2048.0,
+          "open_ns": 2048.0,
+          "close_ns": 4096.0
+        },
+        {
+          "index": 2,
+          "trigger_ns": 4096.0,
+          "open_ns": 4096.0,
+          "close_ns": 6144.0
+        },
+        {
+          "index": 3,
+          "trigger_ns": 6144.0,
+          "open_ns": 6144.0,
+          "close_ns": 8192.0
+        },
+        {
+          "index": 4,
+          "trigger_ns": 8192.0,
+          "open_ns": 8192.0,
+          "close_ns": 10240.0
+        },
+        {
+          "index": 5,
+          "trigger_ns": 10240.0,
+          "open_ns": 10240.0,
+          "close_ns": 12288.0
+        },
+        {
+          "index": 6,
+          "trigger_ns": 12288.0,
+          "open_ns": 12288.0,
+          "close_ns": 14336.0
+        },
+        {
+          "index": 7,
+          "trigger_ns": 14336.0,
+          "open_ns": 14336.0,
+          "close_ns": 16384.0
+        },
+        {
+          "index": 8,
+          "trigger_ns": 16384.0,
+          "open_ns": 16384.0,
+          "close_ns": 18432.0
+        },
+        {
+          "index": 9,
+          "trigger_ns": 18432.0,
+          "open_ns": 18432.0,
+          "close_ns": 20480.0
+        }
+      ],
+      "last_gate_close_ns": 20480.0,
+      "overrun_ns": 480.0,
+      "remaining_ns": 0
+    },
+    {
+      "label": "时长可容纳示例",
+      "shots": 9,
+      "windows": [
+        {
+          "index": 0,
+          "trigger_ns": 0.0,
+          "open_ns": 0.0,
+          "close_ns": 2048.0
+        },
+        {
+          "index": 1,
+          "trigger_ns": 2048.0,
+          "open_ns": 2048.0,
+          "close_ns": 4096.0
+        },
+        {
+          "index": 2,
+          "trigger_ns": 4096.0,
+          "open_ns": 4096.0,
+          "close_ns": 6144.0
+        },
+        {
+          "index": 3,
+          "trigger_ns": 6144.0,
+          "open_ns": 6144.0,
+          "close_ns": 8192.0
+        },
+        {
+          "index": 4,
+          "trigger_ns": 8192.0,
+          "open_ns": 8192.0,
+          "close_ns": 10240.0
+        },
+        {
+          "index": 5,
+          "trigger_ns": 10240.0,
+          "open_ns": 10240.0,
+          "close_ns": 12288.0
+        },
+        {
+          "index": 6,
+          "trigger_ns": 12288.0,
+          "open_ns": 12288.0,
+          "close_ns": 14336.0
+        },
+        {
+          "index": 7,
+          "trigger_ns": 14336.0,
+          "open_ns": 14336.0,
+          "close_ns": 16384.0
+        },
+        {
+          "index": 8,
+          "trigger_ns": 16384.0,
+          "open_ns": 16384.0,
+          "close_ns": 18432.0
+        }
+      ],
+      "last_gate_close_ns": 18432.0,
+      "overrun_ns": 0,
+      "remaining_ns": 1568.0
+    }
+  ],
+  "readout_mode": "independent_multi",
+  "hit_capacity_per_exposure": 1000,
+  "spad_dead_time_ns": 6.0,
+  "tdc_dead_time_ns": 0.0,
+  "trial_count": 40,
+  "noise_trials": 24,
+  "probe": {
+    "expected_candidates": 147144.25263177222,
+    "sampled_candidates": 147125,
+    "records": 98694,
+    "elapsed_s": 1.4558671999257058,
+    "event_limit": 200000
+  },
+  "notice": "slot时长由用户显式指定；其余时序来自保存的失败任务。复位耗时待定，不据此计算绝对帧率。"
+}

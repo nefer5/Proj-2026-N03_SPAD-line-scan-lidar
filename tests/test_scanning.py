@@ -48,9 +48,14 @@ def test_frame_budget_real_dwell_and_blanked_flyback():
 
 
 @pytest.mark.parametrize('mode',[m for m in read_yaml('readout-modes.yaml') if m!='analytic_reference'])
-def test_static_scan_reduces_exactly_to_b_records_and_histogram(mode):
+@pytest.mark.parametrize('initial_condition',['fully_recovered','periodic_history'])
+def test_static_scan_reduces_exactly_to_b_records_and_histogram(mode,initial_condition):
     c=cfg({'scan':{'trajectory':'static'},'readout':{'readout_mode':mode}})
-    a=Algorithms.load();out=run_scan(c,a,noop,never)
+    # Compare the same initial condition, not new cold-start B against historical
+    # continuous-scan prehistory. Both conditions must preserve exact core parity.
+    a=Algorithms.load().model_copy(update={'b_initial_condition':initial_condition})
+    if initial_condition=='fully_recovered':a=a.model_copy(update={'readout_warmup_cycles':0})
+    out=run_scan(c,a,noop,never)
     from spad_lidar.experiments.system_config import form_values
     same=form_values(c);same.pop('scan');same.pop('scene_motion');same['timing']['laser_shots']=sum(r['measured'] for r in out['scan']['schedule']) if 'measured' in out['scan']['schedule'][0] else len(out['scan']['schedule'])
     b=SimulationConfig.for_experiment('system',same)

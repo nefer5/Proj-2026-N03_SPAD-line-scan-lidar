@@ -250,13 +250,23 @@ def project_illumination(cfg,a,progress,cancelled):
     return light,groups,info
 
 
+def system_program(cfg,a):
+    from ..timing import periodic_program
+    t=cfg.timing
+    first=0 if a.b_initial_condition=='fully_recovered' else -a.readout_warmup_cycles
+    return periodic_program(t.period_ns,t.gate_start_ns,t.gate_width_ns,first,t.laser_shots,t.laser_shots)
+
+
 def run_system(cfg,a,progress,cancelled):
     light,groups,optics=project_illumination(cfg,a,progress,cancelled)
-    result=run_illumination(cfg,a,light,groups,progress,cancelled)
+    result=run_illumination(cfg,a,light,groups,progress,cancelled,program=system_program(cfg,a))
     return finish_system(cfg,a,result,light,groups,optics)
 
 
 def finish_system(cfg,a,result,light,groups,optics):
+    result['audit']['initialization']={'mode':a.b_initial_condition,
+        'warmup_cycles':0 if a.b_initial_condition=='fully_recovered' else a.readout_warmup_cycles,
+        'scope':'This independent static acquisition only; not a C inter-column reset implementation.'}
     result['illumination']={'signal_photons_per_pixel_per_pulse':light.signal_photons_per_pulse.sum(axis=1).tolist(),
                             'background_photons_per_pixel_per_second':light.background_photons_per_second.sum(axis=1).tolist(),
                             'shape':optics['array_shape'],'provenance':light.provenance}
@@ -266,4 +276,8 @@ def finish_system(cfg,a,result,light,groups,optics):
     result['photon_flow']=build_spatial_flow(optics['budget'],result['audit'])
     from ..processing.spatial_ranges import estimate_channels
     result['channel_ranges']=estimate_channels(cfg,a,result['histogram'])
-    return stamp_result('B_full_spot_static',cfg,a,result)
+    stamped=stamp_result('B_full_spot_static',cfg,a,result)
+    if a.b_initial_condition=='fully_recovered':
+        stamped['provenance']['limitations']=[s for s in stamped['provenance']['limitations'] if s!='Finite warmup, step recovery.']
+        stamped['provenance']['limitations'].append('Independent B acquisition starts fully recovered, without prehistory; step recovery within the acquisition.')
+    return stamped

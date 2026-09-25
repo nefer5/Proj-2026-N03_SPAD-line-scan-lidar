@@ -142,7 +142,8 @@ def resolve_experiment(kind, overrides, algorithms=None):
             raise ValueError('Frame × angle × channel histograms exceed max_scan_histogram_cells')
     else:
         shots=cfg.timing.laser_shots
-    if shots > a.max_laser_shots or shots+a.readout_warmup_cycles > a.max_readout_cycles:
+    warmup=0 if kind=='system' and a.b_initial_condition=='fully_recovered' else a.readout_warmup_cycles
+    if shots > a.max_laser_shots or shots+warmup > a.max_readout_cycles:
         raise ValueError('Acquisition cycles exceed configured resource limit')
     if np.ceil(cfg.timing.gate_width_ns*1000/cfg.readout.tdc_bin_ps) > a.max_histogram_bins:
         raise ValueError('Histogram exceeds configured resource limit')
@@ -151,6 +152,6 @@ def resolve_experiment(kind, overrides, algorithms=None):
     channels=pixels//cfg.device.spads_per_channel
     if channels*np.ceil(cfg.timing.gate_width_ns*1000/cfg.readout.tdc_bin_ps)>a.max_lab_histogram_cells:
         raise ValueError('Combined channel histograms exceed max_lab_histogram_cells')
-    if pixels*(shots+a.readout_warmup_cycles)>a.max_detector_sampling_work:
+    if pixels*(shots+warmup)>a.max_detector_sampling_work:
         raise ValueError('Pixel-cycle sampling work exceeds max_detector_sampling_work')
     return cfg

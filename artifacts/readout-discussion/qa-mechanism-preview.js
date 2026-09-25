@@ -1,0 +1,10 @@
+await page.setViewportSize({width:1536,height:1120});const errors=[];page.on('pageerror',e=>errors.push(e.message));
+await page.goto('http://127.0.0.1:8016/static/prototypes/slot-readout/index.html',{waitUntil:'networkidle'});await page.waitForFunction(()=>document.body.dataset.ready==='true');
+await expect(page.locator('#timingStatus')).toContainText('0.48');assert.equal(await page.locator('[data-gate]').count(),10);
+await page.locator('[data-case="1"]').click();await expect(page.locator('#timingStatus')).toContainText('1.568');assert.equal(await page.locator('[data-gate]').count(),9);
+await page.locator('#chain [data-concept="device"]').click();await expect(page.locator('#conceptDetail')).toContainText('SPAD 死时间 6 ns');
+await page.locator('#chain [data-concept="reset"]').click();await expect(page.locator('#conceptDetail')).toContainText('两个 slot 之间');
+await page.locator('#collapseAll').click();assert.equal(await page.locator('details[open]').count(),0);await page.locator('#expandAll').click();assert.equal(await page.locator('details[open]').count(),3);
+await page.setViewportSize({width:390,height:900});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+await page.setViewportSize({width:1536,height:1120});await page.locator('[data-case="0"]').click();await page.locator('#chain [data-concept="slot"]').click();await page.evaluate(()=>scrollTo(0,0));
+assert.equal(errors.length,0);return {errors,screenshot:await page.screenshot({fullPage:true})};

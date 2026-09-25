@@ -5,6 +5,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from contextvars import ContextVar
 from contextlib import contextmanager
 from copy import deepcopy
+from typing import Literal
 
 CONFIG_DIR = Path(__file__).resolve().parents[2] / "config"
 _SNAPSHOT = ContextVar('configuration_snapshot', default=None)
@@ -88,6 +89,8 @@ class Algorithms(BaseModel):
     parameter_preview_debounce_ms: int = Field(ge=0)
     max_visible_channels: int = Field(ge=1)
     max_lab_analysis_events: int = Field(gt=0)
+    b_initial_condition: Literal['fully_recovered', 'periodic_history']
+    b_noise_reference: Literal['candidate_scalar', 'sampled_output_mean']
     max_lab_analysis_histogram_cells: int = Field(gt=0)
     max_lab_reference_cells: int = Field(gt=0)
     max_channel_ratio_cells: int = Field(gt=0)
@@ -189,6 +192,10 @@ class Algorithms(BaseModel):
                    'max_column_reference_work','max_column_analysis_candidates','column_result_cache_entries')
         current=read_yaml('algorithms.yaml')
         merged=dict(values)
+        # Explicit historical semantics, not current numerical defaults. Old B
+        # snapshots had periodic warmup and sampled laser-off output references.
+        merged.setdefault('b_initial_condition','periodic_history')
+        merged.setdefault('b_noise_reference','sampled_output_mean')
         for key in additions:
             if key not in merged:merged[key]=current[key]
         return cls.model_validate(merged)

@@ -2,7 +2,7 @@
 from dataclasses import replace
 from types import SimpleNamespace
 import numpy as np
-from .spatial import project_illumination, finish_system
+from .spatial import project_illumination, finish_system, system_program
 from .lab import run_illumination
 from .system_config import BSystemConfig
 from ..curves import Curve
@@ -40,16 +40,18 @@ def channel_references(cfg,a,light,groups,edges,bin_ps):
 def run_system_analysis(cfg,a,progress,cancelled):
     repeats=cfg.acquisition.monte_carlo_trials
     actual=max(1,repeats)
+    noise_trials=a.readout_expected_trials if a.b_noise_reference=='sampled_output_mean' else 0
     channels=cfg.spad.channels_h*cfg.spad.channels_v
     bins=int(np.ceil(cfg.timing.gate_width_ns*1000/cfg.readout.tdc_bin_ps))
-    if (actual+a.readout_expected_trials)*channels*bins>a.max_lab_analysis_histogram_cells:
+    if (actual+noise_trials)*channels*bins>a.max_lab_analysis_histogram_cells:
         raise ValueError('Repeated histogram arrays exceed max_lab_analysis_histogram_cells')
     light,groups,optics=project_illumination(cfg,a,progress,cancelled)
-    total=actual+a.readout_expected_trials
+    total=actual+noise_trials
+    program=system_program(cfg,a)
     def acquire(c,source,index,label):
         if cancelled():raise InterruptedError('Cancelled between repeated acquisitions')
         progress(index,total,label)
-        return run_illumination(c,a,source,groups,lambda done,count,_:progress(index+done/count,total,label),cancelled)
+        return run_illumination(c,a,source,groups,lambda done,count,_:progress(index+done/count,total,label),cancelled,program=program)
     first=acquire(cfg,light,0,'首次采集')
     expected=first['audit']['source']['expected_work']*total
     if expected>a.max_lab_analysis_events:
@@ -63,17 +65,21 @@ def run_system_analysis(cfg,a,progress,cancelled):
         trials.append(out['histogram']['counts']);trial_seeds.append(seed)
     noise_source=replace(light,signal_photons_per_pulse=np.zeros_like(light.signal_photons_per_pulse))
     noise=[];noise_seeds=[]
-    sequences=np.random.SeedSequence(cfg.rng_seed,spawn_key=(streams['noise'],)).spawn(a.readout_expected_trials)
+    sequences=np.random.SeedSequence(cfg.rng_seed,spawn_key=(streams['noise'],)).spawn(noise_trials)
     for i,sequence in enumerate(sequences):
         seed=int(sequence.generate_state(1)[0]);out=acquire(with_seed(cfg,seed),noise_source,actual+i,'纯噪声期望')
         noise.append(out['histogram']['counts']);noise_seeds.append(seed)
     result=finish_system(cfg,a,first,light,groups,optics)
     bounds=histogram_sample_range(trials)
-    result['statistics']={'trial_count':repeats,'noise_trial_count':a.readout_expected_trials,
-        'lower':bounds['lower_counts'],'upper':bounds['upper_counts'],'noise_mean':np.mean(noise,axis=0).tolist(),
+    result['statistics']={'trial_count':repeats,'noise_trial_count':noise_trials,
+        'lower':bounds['lower_counts'],'upper':bounds['upper_counts'],'noise_mean':np.mean(noise,axis=0).tolist() if noise else None,
         'trial_histograms':trials,'noise_histograms':noise,'trial_seeds':trial_seeds,'noise_seeds':noise_seeds,
         'method':bounds['method'],'note':bounds['note'],'estimated_event_work':expected,
+        'noise_reference_mode':a.b_noise_reference,
         'sampling_protocol':'B-analysis-role-separated-v1; first observation retains original acquisition seed'}
+    if a.b_noise_reference=='candidate_scalar':
+        from ..reporting.noise_reference import candidate_noise_reference
+        result['noise_reference']=candidate_noise_reference(first['audit']['source'],groups,cfg.timing.laser_shots,cfg.timing.gate_width_ns,cfg.readout.tdc_bin_ps)
     result['references']=channel_references(cfg,a,light,groups,result['histogram']['edges_ns'],cfg.readout.tdc_bin_ps)
     result.update(optical_view(cfg,a,optics))
     progress(total,total,'统计完成')
@@ -110,6 +116,8 @@ def replay_analysis(result,cfg,a,bin_ps):
                                signal_sensor_incident_photons_per_pulse=incident_total)
         refs.append(signal_ground_truth(proxy,budget,edges,a))
     from ..processing.spatial_ranges import estimate_channels
-    return {'histogram':histogram,'references':refs,'channel_ranges':estimate_channels(cfg,a,histogram),'statistics':{**stats,'lower':bounds['lower_counts'],'upper':bounds['upper_counts'],
-             'trial_histograms':trials,'noise_histograms':noise,'noise_mean':np.mean(noise,axis=0).tolist()},
+    from ..reporting.noise_reference import rebin_noise_reference
+    return {**({'noise_reference':rebin_noise_reference(result['noise_reference'],bin_ps)} if 'noise_reference' in result else {}),
+            'histogram':histogram,'references':refs,'channel_ranges':estimate_channels(cfg,a,histogram),'statistics':{**stats,'lower':bounds['lower_counts'],'upper':bounds['upper_counts'],
+             'trial_histograms':trials,'noise_histograms':noise,'noise_mean':np.mean(noise,axis=0).tolist() if noise else None},
             'processing_bin_ps':bin_ps,'note':'Rebinned original records and each saved replicate; no new random sampling.'}

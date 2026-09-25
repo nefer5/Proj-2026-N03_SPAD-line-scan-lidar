@@ -1,0 +1,26 @@
+{
+  "job_id": "2df4628cf5524ab39fdef12de95cc607",
+  "status": "completed",
+  "trials": 10,
+  "noise_trials": 0,
+  "initialization": {
+    "mode": "fully_recovered",
+    "warmup_cycles": 0,
+    "scope": "This independent static acquisition only; not a C inter-column reset implementation."
+  },
+  "expected_candidates": 147144.25263177222,
+  "sampled_candidates": 147125,
+  "final_records": 98694,
+  "noise_method": "ideal_candidate_scalar",
+  "noise_levels": [
+    0.00128448,
+    0.00128448,
+    0.028843594812771038,
+    35.84989290152762,
+    35.84989290152762,
+    0.02884359481277106,
+    0.00128448,
+    0.00128448
+  ],
+  "configuration_sha256": "2df0843e68bcd0baa00595f0ba7a137b8651732c24a521a0d434445bf388a49e"
+}

@@ -269,6 +269,8 @@ experiments:
       spatial_mode: uniform
       pixel_weights: []
   system:
+    acquisition:
+      monte_carlo_trials: 10
     tx:
       tx_model: gaussian
       tx_fwhm_h_mrad: 8

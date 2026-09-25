@@ -1,0 +1,33 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SPAD · 列内曝光与累积机制预览</title><link rel="stylesheet" href="preview.css?v=24ea5f465556dd07"><script defer src="preview.js?v=261adc1efacefc1f"></script></head>
+<body data-snapshot="snapshot.json?v=d70a72453db696f3"><header><a href="/system">SPAD <small>LIDAR LAB</small></a><span>B / C 共用 · 采集机制说明</span><b>设计预览 · 待接入</b></header><main>
+<div class="title"><div><p class="kicker">ACQUISITION / ACCUMULATION / READOUT</p><h1>一列数据，经历了什么？</h1><p>slot 内多次曝光累积；列末锁存输出；列间完全复位，再开始下一列。</p></div><div class="mode">已确认的工作模式<strong>列内累积 · 列间复位</strong><span>初始化预热：此模式不需要</span></div></div>
+<div class="notice"><strong>这是机制说明预览。</strong>图中使用你指定的 slot 示例和已保存任务的曝光配置。B已接入10次重复、解析噪声标量和无预热初态；列间复位时序仍属设计预览，复位耗时待定。</div>
+<section><div class="section-head"><div><p class="kicker">01 / PARAMETER CONTEXT</p><h2>这些参数分别控制哪一层</h2></div><div class="fold"><button id="expandAll">全部展开</button><button id="collapseAll">全部折叠</button></div></div>
+<div class="cards" id="parameterCards"></div>
+<div class="chain" id="chain">
+ <button data-concept="slot"><span>01</span><strong>开始本列</strong><small>分配 / 清零工作缓冲</small></button><i>→</i>
+ <button data-concept="gate"><span>02</span><strong>Tx 发射 · 开门</strong><small>重复 N 次曝光</small></button><i>→</i>
+ <button data-concept="device"><span>03</span><strong>SPAD → TDC</strong><small>死时间 / 命中额度</small></button><i>→</i>
+ <button data-concept="accumulate"><span>04</span><strong>同一列直方图</strong><small>按相对 ToF 逐次累加</small></button><i>→</i>
+ <button data-concept="output"><span>05</span><strong>锁存整列 · 输出</strong><small>交给 DSP → MIPI</small></button><i>→</i>
+ <button data-concept="reset"><span>06</span><strong>列间完全复位</strong><small>耗时另计入帧时间</small></button>
+</div><div id="conceptDetail" class="concept-detail" aria-live="polite"></div>
+</section>
+<section><div class="section-head"><div><p class="kicker">02 / ONE SLOT IN DETAIL</p><h2>同一 slot 内，重复曝光怎样累积</h2></div><div id="caseButtons" class="case-buttons"></div></div><p class="hint">按钮仅切换说明示例，不修改正式参数。每个门的 ToF 计时归零，整列直方图持续保留。</p>
+<div class="status" id="timingStatus" role="status"></div><div id="timingPlot" class="timing-plot" role="img" aria-label="单列发射、接收门和累积时间关系"></div><p class="hint">Tx 竖线表示触发时刻，不表示实际脉宽。图中不伪造随机雪崩、TDC 忙时段或直方图计数。</p>
+<details open><summary>“清零 / 复位”发生在哪里？</summary><div class="table-wrap"><table><thead><tr><th>状态</th><th>下一次曝光开始</th><th>当前列结束 → 下一列</th></tr></thead><tbody>
+<tr><td>ToF 计时参考</td><td>更新为本次 Tx 触发</td><td>从下一列的触发开始</td></tr>
+<tr><td>首事件锁定 / 命中额度</td><td>重新开放本次曝光额度</td><td>完全复位</td></tr>
+<tr><td>SPAD 恢复 / TDC 忙状态</td><td>沿真实时间延续</td><td>在列间复位段完成复位</td></tr>
+<tr><td>本列直方图</td><td><b>继续累积，不清零</b></td><td>先锁存；下一列工作缓冲清零</td></tr>
+<tr><td>已经在传播的回波 / 拖尾</td><td>按真实到达时间处理</td><td><b>不随电子学复位消失</b></td></tr>
+</tbody></table></div></details></section>
+<section><div class="section-head"><div><p class="kicker">03 / TWO COLUMNS & PIPELINE</p><h2>列间的空隙，必须进入系统预算</h2></div><span class="pill">复位时长：待填写</span></div>
+<div class="two-slots"><div class="slot-block"><strong>slot n · 采集并累积</strong><span>本列工作缓冲 A</span><small><span id="slotDurationNote"></span></small></div><div class="reset-block"><strong>完全复位</strong><span>T_reset 待定</span><small>不计入 slot，另计帧时间</small></div><div class="slot-block"><strong>slot n+1 · 采集并累积</strong><span>下一列工作缓冲 B</span><small>从复位完成后开始</small></div></div>
+<div class="processing"><span>slot n 的整列结果<br><small>在独立输出 / DSP 缓冲中保留</small></span><i>→</i><b>DSP 处理</b><i>→</i><b>MIPI 传输处理结果</b><small>与下一列采集流水重叠<br>耗时和争用另行校验</small></div>
+<div class="budget-notes"><p><b>slot 时长 ≠ 相邻列启动间隔。</b>启动间隔还需要包含列间复位。上图是顺序示意；复位区宽度不代表实际耗时。</p><p>固定目标帧率时，高层应核算所有 slot、列间复位及其他开销能否装入帧预算；若不能，应提示冲突。帧末复位与回扫是否重叠需明确，避免重复扣时间。</p><p>“完全复位”不能抹掉尚未交付的上一列结果：应先完成锁存或转入独立输出缓冲，再清理下一列工作状态。</p></div>
+</section>
+<section><div class="section-head"><div><p class="kicker">04 / COMPUTATION COST</p><h2>物理采集预算与软件计算预算，分别看清</h2></div><span class="pill">诊断实测 · 单次采集</span></div><div id="resourceCards" class="resource-cards"></div><p class="hint">此诊断只验证“初始完全恢复、不添加预热”的一次 10 发采集。没有实施 slot 复位硬件模型，也不代表 10 发能装进 20 μs。耗时包含性能分析器开销。</p>
+<details open id="statisticsPolicy"><summary>保留误差棒，B默认10次；噪声参考只计算标量</summary><p class="hint"><span id="repeatCostNote"></span>。这些是整套工况的重复次数，不是 slot 内累计发数。下表是用户最新确认的B口径，已经接入。</p><div class="table-wrap"><table><thead><tr><th>结果内容</th><th>用途</th><th>B的新计算行为</th></tr></thead><tbody><tr><td>蓝色探测直方图</td><td>一次实际采集结果</td><td>蓝柱保留首次观测；每轮仍累计 N 发</td></tr><tr><td>青色理想信号曲线</td><td>对照期望信号形状和能量</td><td>保留解析计算，不为它重复采集</td></tr><tr><td>样本最小—最大误差棒</td><td>观察不同随机实现的波动</td><td>默认共10次含噪重复，包含首次观测</td></tr><tr><td>橙色理想噪声基线</td><td>每通道一个标量参考</td><td>解析计算，未计读出损失；不做额外关激光采集</td></tr></tbody></table></div><p class="hint">噪声标量包含PDE/FF后的背景候选、暗计数等，按累计发数和当前标准时间分箱宽度归一；它不是经过死时间/读出损失后的输出均值。正常采集中的背景与暗计数仍照常模拟。Pd/PFA、精度置信度等问题另用专门统计任务。</p></details>
+<details open><summary>进一步减少资源消耗的实施方向</summary><ol><li><b>优化逐事件窗口查找和读出热路径。</b>对已排序事件使用窗口游标或批量归属；保持死时间、门边界、命中额度和随机协议一致。</li><li><b>事件分块生成、处理后即时累积。</b>降低峰值内存；边界回波和器件状态必须正确衔接，完整事件导出仍按明确的保存模式支持。</li><li><b>缓存相同背景条件的纯噪声结果，复用公共时间轴。</b>缓存键覆盖全部影响因素、种子与版本；避免每个通道重复保存相同高分辨率横轴。</li></ol></details>
+</section><footer>参数与时序数值由 Python 生成；本页仅用于机制和界面审核。<a href="/system">返回正式 B 平台 ↗</a></footer></main><div id="error" hidden></div></body></html>
