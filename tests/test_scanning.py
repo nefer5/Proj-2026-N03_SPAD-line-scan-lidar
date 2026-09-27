@@ -37,8 +37,8 @@ def test_frame_budget_real_dwell_and_blanked_flyback():
     assert s['summary']['emitted_reference_slots']==80
     assert s['summary']['blanked_slots']==20
     assert s['frame_budget']['actual_emissions_in_time_window']==80
-    assert s['frame_budget']['center_accounted_tx_output_energy_j']==pytest.approx(80*9.6e-9)
-    assert s['frame_budget']['actual_tx_average_power_w']==pytest.approx(79.5*9.6e-9/.001)
+    assert s['frame_budget']['center_accounted_tx_output_energy_j']==pytest.approx(80*c.optics.total_pulse_energy_nj*1e-9*c.optics.tx_efficiency)
+    assert s['frame_budget']['actual_tx_average_power_w']==pytest.approx(79.5*c.optics.total_pulse_energy_nj*1e-9*c.optics.tx_efficiency/.001)
     assert s['assigned_pulses_per_frame_bin']==[[4]*20]
     assert s['true_useful_pulses_per_frame_bin']==[[4]*20]
     assert s['uniform_forward_dwell_reference_per_bin']==pytest.approx([4]*20)
@@ -153,11 +153,11 @@ def test_scene_motion_interception_and_gradient_components():
         assert np.linalg.norm([point['x_m'],point['y_m'],point['z_m']])==pytest.approx(point['raw_distance_m'])
 
 
-def test_no_extrapolation_when_fixed_rx_has_insufficient_coverage():
-    with pytest.raises(ValueError,match='extrapolation'):
-        run({'scan':{'rx_scan_scale':0}})
+def test_fixed_rx_rejects_directions_outside_acceptance():
+    narrow=run({'scan':{'rx_scan_scale':0}})
+    assert narrow['scan']['pulse_optical_audit']
     r=run({'scan':{'rx_scan_scale':0},'optics':{'rx_angle_h_min_mrad':-30,'rx_angle_h_max_mrad':30}})
-    assert r['scan']['pulse_optical_audit']
+    assert sum(x['sensor_j'] for x in r['scan']['pulse_optical_audit']) > sum(x['sensor_j'] for x in narrow['scan']['pulse_optical_audit'])
 
 
 def test_seed_reproducibility_block_invariance_and_replay():

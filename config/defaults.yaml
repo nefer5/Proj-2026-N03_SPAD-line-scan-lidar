@@ -217,6 +217,18 @@ simulation:
 experiments:
   # High-level system requirements; independent of the existing small-angle
   # detector reference. These targets do not silently replace a scan program.
+  budget:
+    reset_time_ns: null
+    wall_plug_efficiency: null
+    max_average_optical_power_w: null
+    max_peak_optical_power_w: null
+    prbs_enabled: false
+    prbs_chip_count: null
+    prbs_chip_ns: null
+    prbs_on_count: null
+  budget_geometry:
+    vfov_deg: null  # 未指定时从当前B默认Tx的V全角折算；解析后显式保存，非硬件实测值。
+    tx_h_width_mrad: 2
   system_targets:
     frame_rate_hz: 10
     hfov_deg: 120
@@ -273,6 +285,7 @@ experiments:
     acquisition:
       monte_carlo_trials: 10
     tx:
+      pulse_average_power_w: 280  # 全Tx角域、VCSEL出光/Tx光学前；E=P×FWHM等效时长。
       tx_model: gaussian
       tx_fwhm_h_mrad: 8
       tx_fwhm_v_mrad: 3

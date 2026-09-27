@@ -11,6 +11,7 @@ from ..scan.trajectory import mirror_pose
 from ..scene.scan_target import reflection_range
 from ..rx.budget import aperture_area
 from ..rx.projection import project_return
+from ..rx.response import ReceiverResponse
 from ..adapters.optical_data import RxTable,RxData
 from ..tx import transmit
 from ..numerics.temporal import pulse_interval_fractions
@@ -59,7 +60,7 @@ class PulseProjection:
         sampling_work=(emitted_count*components+(len(schedule)-emitted_count)+len(schedule))*len(groups)
         if sampling_work>a.max_scan_sampling_work:
             raise ValueError('Estimated photon component/pixel sampling exceeds max_scan_sampling_work')
-        self.table=RxTable(RxData.model_validate(info['dataset']['rx']))
+        self.table=ReceiverResponse(RxData.model_validate(info['dataset']['rx']),cfg.optics,a)
         self.area=aperture_area(cfg.optics)
         self.emitted=transmit(cfg.optics.total_pulse_energy_nj*1e-9,cfg.optics.tx_efficiency)
         self.filter_at=Curve(cfg.spectral_inputs.filter)(cfg.optics.wavelength_nm)
@@ -134,16 +135,18 @@ class PulseProjection:
         return IncidentPulseGroup(signal,np.full(len(centers),o.wavelength_nm),centers,o.pulse_shape,o.pulse_fwhm_ps)
 
 
-def channel_directions(cfg,info):
+def channel_directions(cfg,info,algorithms):
     if cfg.scan.channel_direction_mode=='explicit':
         return list(zip(cfg.scan.channel_h_mrad,cfg.scan.channel_v_mrad))
     from ..adapters.optical_data import RxData
-    rx=RxTable(RxData.model_validate(info['dataset']['rx']))
-    h=np.array(info['angular_h_centers_mrad']);v=np.array(info['angular_v_centers_mrad'])
-    eff,_=rx.evaluate(cfg.optics.wavelength_nm,h,v)
-    he=np.array(info['tx_h_edges_mrad']);ve=np.array(info['tx_v_edges_mrad'])
+    rx=ReceiverResponse(RxData.model_validate(info['dataset']['rx']),cfg.optics,algorithms)
+    he=np.array(info['rx_background_h_edges_mrad']);ve=np.array(info['rx_background_v_edges_mrad'])
+    h,v=np.meshgrid((he[:-1]+he[1:])/2,(ve[:-1]+ve[1:])/2);h=h.ravel();v=v.ravel()
+    eff,psf=rx.evaluate(cfg.optics.wavelength_nm,h,v)
+    groups=np.asarray(info['pixel_group_ids']);psf=psf.reshape(len(h),-1)
+    mapping=np.stack([psf[:,groups==i].sum(axis=1) for i in range(cfg.spad.channels_h*cfg.spad.channels_v)],axis=1)
     omega=np.outer(np.diff(ve),np.diff(he)).ravel()*1e-6
-    weights=np.asarray(info['angle_to_channel_fraction'])*(eff*omega)[:,None]
+    weights=mapping*(eff*omega)[:,None]
     output=[]
     for w in weights.T:
         output.append((float(h@w/w.sum()),float(v@w/w.sum())) if w.sum()>0 else (None,None))
@@ -159,7 +162,7 @@ def run_scan(cfg,a,progress,cancelled):
         np.random.default_rng(streams[0]),a.max_readout_events_per_run,a.max_scan_sampling_work,progress,cancelled)
     result=acquire_candidates(cfg,a,candidates,source_audit,groups,program,streams[1],progress,cancelled)
     measured=[r for r in schedule if r['measured']]
-    directions=channel_directions(cfg,info)
+    directions=channel_directions(cfg,info,a)
     from ..processing.scan_reconstruction import reconstruct_scan
     reconstruction=reconstruct_scan(cfg,a,result['records'],schedule,edges,directions,projector.truth)
     average=projector.accumulated_pixels/projector.emission_count if projector.emission_count else np.zeros(len(groups))

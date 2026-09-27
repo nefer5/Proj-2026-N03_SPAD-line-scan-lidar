@@ -136,7 +136,8 @@ def optical_view(cfg, algorithms, optics, laser_shots=None):
     from .readout_layout import readout_layout
     interface=form_values(cfg)
     rx=RxData.model_validate(optics['dataset']['rx'])
-    _,psfs=RxTable(rx).evaluate(cfg.optics.wavelength_nm,optics['angular_h_centers_mrad'],optics['angular_v_centers_mrad'])
+    from ..rx.response import ReceiverResponse
+    _,psfs=ReceiverResponse(rx,cfg.optics,algorithms).evaluate(cfg.optics.wavelength_nm,optics['angular_h_centers_mrad'],optics['angular_v_centers_mrad'])
     if len(optics['angle_to_channel_fraction'])*len(optics['angle_to_channel_fraction'][0])**2>algorithms.max_channel_ratio_cells:
         raise ValueError('Channel ratio matrices exceed max_channel_ratio_cells')
     parameters={**cfg.optics.model_dump(exclude={'dataset'}),'dataset':cfg.optics.dataset,**cfg.device.model_dump(),**cfg.readout.model_dump(),

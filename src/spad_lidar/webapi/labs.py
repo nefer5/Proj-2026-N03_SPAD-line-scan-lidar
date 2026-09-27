@@ -17,7 +17,7 @@ WEB = Path(__file__).resolve().parents[3]/'web'
 
 def lab_page(kind):
     html = (WEB/'labs.html').read_text(encoding='utf-8').replace('__KIND__', kind)
-    for name in ('styles.css', 'shared/labs.css', 'shared/labs.js', 'shared/spatial.js', 'shared/scan.js', 'curve-editor.js',
+    for name in ('shared/theme.css', 'shared/theme.js', 'styles.css', 'shared/labs.css', 'shared/labs.js', 'shared/spatial.js', 'shared/scan.js', 'curve-editor.js',
                  'vendor/katex/katex.min.js', 'vendor/katex/katex.min.css'):
         digest = sha256((WEB/name).read_bytes()).hexdigest()
         html = html.replace(f'/static/{name}"', f'/static/{name}?v={digest}"')
@@ -37,7 +37,7 @@ def system_page():
 def workspace_page(kind):
     html=(WEB/'system.html').read_text(encoding='utf-8')
     html=html.replace('data-lab="system"',f'data-lab="{kind}"')
-    for name in ('system.css','system.js','shared/channel-locator.css','shared/channel-locator.js','shared/b-acquisition.css','shared/b-acquisition.js','shared/scan-workspace.js','shared/optical-panels.js','shared/plot-series.js','shared/histogram-window.js','curve-editor.js',
+    for name in ('shared/theme.css', 'shared/theme.js', 'system.css','system.js','shared/channel-locator.css','shared/channel-locator.js','shared/b-acquisition.css','shared/b-acquisition.js','shared/scan-workspace.js','shared/optical-panels.js','shared/plot-series.js','shared/histogram-window.js','curve-editor.js',
                  'vendor/katex/katex.min.js','vendor/katex/katex.min.css'):
         html=html.replace(f'/static/{name}"',f'/static/{name}?v={sha256((WEB/name).read_bytes()).hexdigest()}"')
     return HTMLResponse(html)

@@ -86,12 +86,12 @@ function drawLines(canvas, x, series, opts={}) {
   const sy=v=>pad.t+ph-(v-ymin)/(ymax-ymin||1)*ph;
   ctx.clearRect(0,0,w,h);
   ctx.font="11px ui-monospace, Consolas";
-  ctx.fillStyle=colors.muted; ctx.strokeStyle=colors.grid; ctx.lineWidth=1;
+  ctx.fillStyle=(globalThis.LidarTheme?.color(colors.muted) ?? (colors.muted)); ctx.strokeStyle=(globalThis.LidarTheme?.color(colors.grid) ?? (colors.grid)); ctx.lineWidth=1;
   niceTicks(xmin,xmax,6).forEach(v=>{ const px=sx(v); ctx.beginPath();ctx.moveTo(px,pad.t);ctx.lineTo(px,pad.t+ph);ctx.stroke();ctx.fillText(fmt(v, opts.xDigits??1),px-12,h-18); });
   niceTicks(ymin,ymax,5).forEach(v=>{ const py=sy(v);ctx.beginPath();ctx.moveTo(pad.l,py);ctx.lineTo(w-pad.r,py);ctx.stroke();ctx.fillText(fmt(v, opts.yDigits ?? (v<10?2:0)),6,py+4); });
   sliced.forEach(s=>{
     if (s.bars) {
-      ctx.fillStyle=s.color; ctx.globalAlpha=0.75;
+      ctx.fillStyle=(globalThis.LidarTheme?.color(s.color) ?? (s.color)); ctx.globalAlpha=0.75;
       const width = opts.binWidth || (xx.length > 1 ? xx[1]-xx[0] : 1);
       ctx.save(); ctx.beginPath(); ctx.rect(pad.l,pad.t,pw,ph); ctx.clip();
       for(let i=0;i<xx.length;i++) {
@@ -102,7 +102,7 @@ function drawLines(canvas, x, series, opts={}) {
       ctx.restore(); ctx.globalAlpha=1; return;
     }
     ctx.save();ctx.beginPath();ctx.rect(pad.l,pad.t,pw,ph);ctx.clip();
-    ctx.strokeStyle=s.color;ctx.fillStyle=s.color;ctx.lineWidth=s.width||1.5;ctx.globalAlpha=s.alpha||1;
+    ctx.strokeStyle=(globalThis.LidarTheme?.color(s.color) ?? (s.color));ctx.fillStyle=(globalThis.LidarTheme?.color(s.color) ?? (s.color));ctx.lineWidth=s.width||1.5;ctx.globalAlpha=s.alpha||1;
     if(s.errorBars){
       ctx.lineWidth=1.2;
       s.x.forEach((v,i)=>{
@@ -121,14 +121,14 @@ function drawLines(canvas, x, series, opts={}) {
     }
     ctx.restore();
   });
-  ctx.fillStyle=colors.muted; ctx.textAlign="center"; ctx.fillText(opts.xLabel||"",pad.l+pw/2,h-4);ctx.textAlign="left";
+  ctx.fillStyle=(globalThis.LidarTheme?.color(colors.muted) ?? (colors.muted)); ctx.textAlign="center"; ctx.fillText(opts.xLabel||"",pad.l+pw/2,h-4);ctx.textAlign="left";
   let lx=pad.l+6;
   sliced.forEach(s=>{
-    ctx.save();ctx.fillStyle=s.color;ctx.strokeStyle=s.color;
+    ctx.save();ctx.fillStyle=(globalThis.LidarTheme?.color(s.color) ?? (s.color));ctx.strokeStyle=(globalThis.LidarTheme?.color(s.color) ?? (s.color));
     if(s.errorBars){ctx.beginPath();ctx.moveTo(lx+6,pad.t);ctx.lineTo(lx+6,pad.t+8);ctx.moveTo(lx+2,pad.t);ctx.lineTo(lx+10,pad.t);ctx.moveTo(lx+2,pad.t+8);ctx.lineTo(lx+10,pad.t+8);ctx.stroke();}
     else if(s.points){ctx.beginPath();ctx.arc(lx+6,pad.t+4,3,0,2*Math.PI);ctx.fill();}
     else{ctx.setLineDash(s.dash||[]);ctx.beginPath();ctx.moveTo(lx,pad.t+4);ctx.lineTo(lx+13,pad.t+4);ctx.stroke();}
-    ctx.restore();ctx.fillStyle=colors.muted;ctx.fillText(s.name,lx+18,pad.t+7);lx+=ctx.measureText(s.name).width+34;
+    ctx.restore();ctx.fillStyle=(globalThis.LidarTheme?.color(colors.muted) ?? (colors.muted));ctx.fillText(s.name,lx+18,pad.t+7);lx+=ctx.measureText(s.name).width+34;
   });
   const scatterGroups=opts.scatterGroups || (opts.scatter ? [opts.scatter] : []);
   scatterGroups.filter(group=>group.x.length).forEach(group=>{
@@ -136,15 +136,15 @@ function drawLines(canvas, x, series, opts={}) {
     ctx.save();ctx.beginPath();ctx.rect(pad.l,pad.t,pw,ph);ctx.clip();
     group.x.forEach((v,i)=>{
       ctx.beginPath();ctx.arc(sx(v),sy(group.y[i]),5,0,2*Math.PI);
-      ctx.fillStyle=color;ctx.fill();ctx.strokeStyle="#eef6ff";ctx.lineWidth=1;ctx.stroke();
+      ctx.fillStyle=(globalThis.LidarTheme?.color(color) ?? (color));ctx.fill();ctx.strokeStyle=(globalThis.LidarTheme?.color("#eef6ff") ?? ("#eef6ff"));ctx.lineWidth=1;ctx.stroke();
     });
-    ctx.restore();ctx.fillStyle=color;ctx.beginPath();ctx.arc(lx+6,pad.t+4,4,0,2*Math.PI);ctx.fill();
-    ctx.fillStyle=colors.muted;ctx.fillText(label,lx+18,pad.t+7);lx+=ctx.measureText(label).width+48;
+    ctx.restore();ctx.fillStyle=(globalThis.LidarTheme?.color(color) ?? (color));ctx.beginPath();ctx.arc(lx+6,pad.t+4,4,0,2*Math.PI);ctx.fill();
+    ctx.fillStyle=(globalThis.LidarTheme?.color(colors.muted) ?? (colors.muted));ctx.fillText(label,lx+18,pad.t+7);lx+=ctx.measureText(label).width+48;
   });
   if (opts.marker) {
     const px=sx(opts.marker.x),py=sy(opts.marker.y);
-    ctx.save();ctx.strokeStyle=colors.orange;ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(px,pad.t+20);ctx.lineTo(px,pad.t+ph);ctx.stroke();ctx.setLineDash([]);
-    ctx.fillStyle=colors.orange;ctx.beginPath();ctx.arc(px,py,4,0,2*Math.PI);ctx.fill();
+    ctx.save();ctx.strokeStyle=(globalThis.LidarTheme?.color(colors.orange) ?? (colors.orange));ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(px,pad.t+20);ctx.lineTo(px,pad.t+ph);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle=(globalThis.LidarTheme?.color(colors.orange) ?? (colors.orange));ctx.beginPath();ctx.arc(px,py,4,0,2*Math.PI);ctx.fill();
     ctx.textAlign="center";ctx.fillText(opts.marker.label,Math.max(pad.l+70,Math.min(w-pad.r-70,px)),pad.t+18);ctx.restore();
   }
 }
@@ -154,13 +154,13 @@ function drawRange(canvas, points) {
   const {ctx,w,h}=setupCanvas(canvas); const pad={l:58,r:55,t:22,b:40}; const pw=w-pad.l-pad.r,ph=h-pad.t-pad.b;
   const xmin=Math.min(...x),xmax=Math.max(...x),ymax=Math.max(...counts)*1.08,smax=Math.max(...snr)*1.08;
   const sx=v=>pad.l+(v-xmin)/(xmax-xmin||1)*pw, sy=v=>pad.t+ph-v/(ymax||1)*ph, ss=v=>pad.t+ph-v/(smax||1)*ph;
-  ctx.clearRect(0,0,w,h);ctx.font="11px ui-monospace, Consolas";ctx.strokeStyle=colors.grid;ctx.fillStyle=colors.muted;
+  ctx.clearRect(0,0,w,h);ctx.font="11px ui-monospace, Consolas";ctx.strokeStyle=(globalThis.LidarTheme?.color(colors.grid) ?? (colors.grid));ctx.fillStyle=(globalThis.LidarTheme?.color(colors.muted) ?? (colors.muted));
   niceTicks(xmin,xmax,5).forEach(v=>{let px=sx(v);ctx.beginPath();ctx.moveTo(px,pad.t);ctx.lineTo(px,pad.t+ph);ctx.stroke();ctx.fillText(fmt(v,0),px-10,h-18)});
   niceTicks(0,ymax,5).forEach(v=>{let py=sy(v);ctx.beginPath();ctx.moveTo(pad.l,py);ctx.lineTo(w-pad.r,py);ctx.stroke();ctx.fillText(fmt(v,0),5,py+4)});
-  const line=(arr,map,color)=>{ctx.beginPath();ctx.strokeStyle=color;ctx.lineWidth=2;arr.forEach((v,i)=>i?ctx.lineTo(sx(x[i]),map(v)):ctx.moveTo(sx(x[i]),map(v)));ctx.stroke();};
+  const line=(arr,map,color)=>{ctx.beginPath();ctx.strokeStyle=(globalThis.LidarTheme?.color(color) ?? (color));ctx.lineWidth=2;arr.forEach((v,i)=>i?ctx.lineTo(sx(x[i]),map(v)):ctx.moveTo(sx(x[i]),map(v)));ctx.stroke();};
   line(counts,sy,colors.cyan);line(snr,ss,colors.orange);
-  ctx.fillStyle=colors.muted;ctx.textAlign="center";ctx.fillText("距离 (m)",pad.l+pw/2,h-4);ctx.textAlign="left";
-  ctx.fillStyle=colors.cyan;ctx.fillText("信号累计计数",pad.l+6,pad.t+8);ctx.fillStyle=colors.orange;ctx.fillText("SNR（右轴）",pad.l+98,pad.t+8);ctx.fillStyle=colors.muted;ctx.fillText(fmt(smax,1),w-pad.r+8,pad.t+4);ctx.fillText("0",w-pad.r+8,pad.t+ph+4);
+  ctx.fillStyle=(globalThis.LidarTheme?.color(colors.muted) ?? (colors.muted));ctx.textAlign="center";ctx.fillText("距离 (m)",pad.l+pw/2,h-4);ctx.textAlign="left";
+  ctx.fillStyle=(globalThis.LidarTheme?.color(colors.cyan) ?? (colors.cyan));ctx.fillText("信号累计计数",pad.l+6,pad.t+8);ctx.fillStyle=(globalThis.LidarTheme?.color(colors.orange) ?? (colors.orange));ctx.fillText("SNR（右轴）",pad.l+98,pad.t+8);ctx.fillStyle=(globalThis.LidarTheme?.color(colors.muted) ?? (colors.muted));ctx.fillText(fmt(smax,1),w-pad.r+8,pad.t+4);ctx.fillText("0",w-pad.r+8,pad.t+ph+4);
 }
 
 function drawHeatmap(canvas, matrix) {
@@ -169,9 +169,9 @@ function drawHeatmap(canvas, matrix) {
   ctx.clearRect(0,0,w,h);
   for(let row=0;row<n;row++)for(let col=0;col<n;col++){
     const t=Math.sqrt(matrix[row][col]/max); const r=Math.round(20+45*t),g=Math.round(31+186*t),b=Math.round(44+164*t);
-    ctx.fillStyle=`rgb(${r},${g},${b})`;ctx.fillRect(pad.l+col*cw,pad.t+row*cw,cw+.4,cw+.4);
+    ctx.fillStyle=(globalThis.LidarTheme?.color(`rgb(${r},${g},${b})`) ?? (`rgb(${r},${g},${b})`));ctx.fillRect(pad.l+col*cw,pad.t+row*cw,cw+.4,cw+.4);
   }
-  ctx.fillStyle=colors.muted;ctx.font="11px ui-monospace, Consolas";ctx.fillText("受扰",4,pad.t+side/2);ctx.textAlign="center";ctx.fillText("源通道",pad.l+side/2,h-6);ctx.textAlign="left";
+  ctx.fillStyle=(globalThis.LidarTheme?.color(colors.muted) ?? (colors.muted));ctx.font="11px ui-monospace, Consolas";ctx.fillText("受扰",4,pad.t+side/2);ctx.textAlign="center";ctx.fillText("源通道",pad.l+side/2,h-6);ctx.textAlign="left";
   const step=Math.max(1,Math.ceil(n/8));for(let i=0;i<n;i+=step){ctx.fillText(String(i),pad.l+i*cw,pad.t+side+15);ctx.fillText(String(i),pad.l-25,pad.t+(i+.7)*cw);}
 }
 

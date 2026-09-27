@@ -8,7 +8,7 @@ from .configuration import TimingConfig
 from .spatial import OpticalConfig
 
 OPTICAL_GROUPS = {
-    'tx': ('tx_model','wavelength_nm','total_pulse_energy_nj','pulse_shape','pulse_fwhm_ps',
+    'tx': ('tx_model','wavelength_nm','pulse_average_power_w','pulse_shape','pulse_fwhm_ps',
            'tx_efficiency','tx_fwhm_h_mrad','tx_fwhm_v_mrad','tx_center_h_mrad','tx_center_v_mrad','tx_order_h','tx_order_v',
            'angle_h_min_mrad','angle_h_max_mrad','angle_v_min_mrad','angle_v_max_mrad'),
     'scene': ('range_m','target_reflectivity','atmospheric_one_way_transmission','overlap_factor'),
@@ -27,7 +27,14 @@ def optical_fields(group):
             for key in OPTICAL_GROUPS[group]}
 
 
-TxConfig = create_model('TxConfig', __base__=StrictConfig, **optical_fields('tx'))
+_TxFields = create_model('TxFields', __base__=StrictConfig, **optical_fields('tx'))
+
+
+class TxConfig(_TxFields):
+    @property
+    def total_pulse_energy_nj(self):
+        from ..tx.power import pulse_energy_nj
+        return pulse_energy_nj(self.pulse_average_power_w,self.pulse_fwhm_ps)
 SceneConfig = create_model('SceneConfig', __base__=StrictConfig, **optical_fields('scene'))
 RxConfig = create_model('RxConfig', __base__=StrictConfig, **optical_fields('rx'))
 SpadArrayConfig = create_model('SpadArrayConfig', __base__=DeviceConfig, **optical_fields('spad'))
@@ -89,7 +96,6 @@ def domain_defaults(base, additions):
     """Only references to the unique YAML defaults; no physical fallback values."""
     from ..curves import merge_config
     values = {group:{key:base[key] for key in keys if key in base} for group,keys in OPTICAL_GROUPS.items()}
-    values['tx']['total_pulse_energy_nj'] = base['pulse_energy_nj']
     values['spad'].update({key:base[key] for key in DeviceConfig.model_fields})
     values['readout'] = {key:base[key] for key in ReadoutConfig.model_fields}
     values['acquisition'].update({key:base[key] for key in TimingConfig.model_fields if key!='period_ns'})

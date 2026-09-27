@@ -316,7 +316,7 @@ spatial:
   steps:
     - title: 'Tx：配置角域内归一化与能量分配'
       formula_id: tx_domain_energy
-      logic: '输入单发能量定义于配置Tx角域内、Tx光学之前。高斯、均匀及导入Tx份额在该角域内归一化；只乘一次Tx光学效率，不额外扣除角域外能量。'
+      logic: '单发能量由全Tx角域等效平均功率×脉宽派生，高斯以FWHM为等效时长，参考面在Tx光学之前。高斯、均匀及导入Tx份额在该角域内归一化；只乘一次Tx光学效率，不额外扣除角域外能量。'
       values:
         - {key: tx_input_j, label: 角域内Tx前单发能量, unit: J/pulse}
         - {key: tx_angular_coverage_fraction, label: 角域内份额合计, unit: '1'}
@@ -330,7 +330,7 @@ spatial:
         - {key: signal_sensor_incident_photons_per_pulse, label: 回波探测面光子, unit: photons/pulse}
     - title: '太阳：按明确波段积分并映射到像素'
       formula_id: spatial_background
-      logic: '太阳光谱沿用标准谱或选定输入模式及lux归一化；背景角域由当前Tx角单元网格覆盖范围明确限定，不乘Tx能量权重。'
+      logic: '太阳光谱沿用标准谱或选定输入模式及lux归一化；背景仅在配置Rx接收角域上积分，与Tx归一化角域独立，不乘Tx能量权重；响应表必须覆盖Rx域内。'
       values:
         - {key: solar_rx_incident_photons_per_gate, label: 太阳入瞳光子（限定积分波段）, unit: photons/gate}
         - {key: solar_after_rx_photons_per_gate, label: 太阳Rx效率后光子, unit: photons/gate}

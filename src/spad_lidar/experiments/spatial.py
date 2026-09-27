@@ -13,6 +13,7 @@ from ..tx import angular_profile, transmit, normalize_angular_weights
 from ..scene import lambertian_return
 from ..rx.budget import aperture_area
 from ..rx.spatial import synthetic_receiver
+from ..rx.response import ReceiverResponse
 from ..rx.projection import project_return
 from ..adapters.optical_data import validate_dataset, RxTable
 from ..spectra import spectral_components, background_spectral_domain
@@ -52,7 +53,7 @@ class OpticalConfig(StrictConfig):
     rx_angle_h_max_mrad: float
     rx_angle_v_min_mrad: float
     rx_angle_v_max_mrad: float
-    total_pulse_energy_nj: float = Field(ge=0)
+    pulse_average_power_w: float = Field(ge=0)
     range_m: float = Field(gt=0)
     target_reflectivity: float = Field(ge=0,le=1)
     wavelength_nm: float = Field(gt=0)
@@ -72,6 +73,11 @@ class OpticalConfig(StrictConfig):
     other_light_enabled: bool
     other_light_scale: float = Field(ge=0)
     calibration_delay_ns: float
+
+    @property
+    def total_pulse_energy_nj(self):
+        from ..tx.power import pulse_energy_nj
+        return pulse_energy_nj(self.pulse_average_power_w,self.pulse_fwhm_ps)
 
     @model_validator(mode='after')
     def valid(self):
@@ -158,12 +164,19 @@ def project_illumination(cfg,a,progress,cancelled):
     he=np.array(tx.h_edges_mrad);ve=np.array(tx.v_edges_mrad)
     hh,vv=np.meshgrid((he[:-1]+he[1:])/2,(ve[:-1]+ve[1:])/2)
     fractions=np.asarray(tx.energy_fraction).ravel()
-    omega=np.outer(np.diff(ve),np.diff(he)).ravel()*1e-6
+    # Tx cells normalize signal energy only. Background has its own Rx grid.
+    if a.background_angular_domain=='legacy_tx':
+        rhe,rve=he,ve
+    else:
+        rhe=np.linspace(o.rx_angle_h_min_mrad,o.rx_angle_h_max_mrad,a.spatial_angle_samples_h+1)
+        rve=np.linspace(o.rx_angle_v_min_mrad,o.rx_angle_v_max_mrad,a.spatial_angle_samples_v+1)
+    rhh,rvv=np.meshgrid((rhe[:-1]+rhe[1:])/2,(rve[:-1]+rve[1:])/2)
+    omega=np.outer(np.diff(rve),np.diff(rhe)).ravel()*1e-6
     nx=o.channels_h*cfg.device.H_binning;ny=o.channels_v*cfg.device.V_binning
     yy,xx=np.indices((ny,nx))
     groups=((yy//cfg.device.V_binning)*o.channels_h+xx//cfg.device.H_binning).ravel()
-    table=RxTable(dataset.rx)
-    if len(fractions)*nx*ny>a.max_optical_cells:
+    table=ReceiverResponse(dataset.rx,o,a)
+    if max(len(fractions),len(omega))*nx*ny>a.max_optical_cells:
         raise ValueError('Angle-to-pixel mapping exceeds max_optical_cells before allocation')
     eff,psf=table.evaluate(o.wavelength_nm,hh,vv)
     psf=psf.reshape(len(fractions),-1)
@@ -186,7 +199,7 @@ def project_illumination(cfg,a,progress,cancelled):
     transmission=np.array(integration['filter_transmission'])
     sun=np.array(integration['solar_radiance']);ambient=np.array(integration['other_radiance'])
     factorized=a.factorize_achromatic_leakage and filt.has_out_of_band and o.rx_model!='dataset'
-    work=(len(fractions)*nx*ny+len(wavelengths)) if factorized else len(wavelengths)*len(fractions)*nx*ny
+    work=(len(omega)*nx*ny+len(wavelengths)) if factorized else len(wavelengths)*len(omega)*nx*ny
     if work>a.max_spatial_integration_work:
         raise ValueError('Spatial/spectral integration exceeds configured work limit')
     stored_cells=nx*ny+len(wavelengths)+1 if factorized else nx*ny*(len(wavelengths)+1)
@@ -197,8 +210,10 @@ def project_illumination(cfg,a,progress,cancelled):
         # coarsening the wavelength quadrature or dropping zero-PDE photons.
         q=weights*wavelengths*1e-9/(H*C)
         sun_spectral=sun*q;other_spectral=ambient*q
-        pupil_factor=area*omega.sum();rx_factor=area*np.dot(omega,eff)
-        pixel_factor=area*((omega*eff)@psf)
+        bg_eff,bg_psf=table.evaluate(o.wavelength_nm,rhh,rvv)
+        bg_psf=bg_psf.reshape(len(omega),-1)
+        pupil_factor=area*omega.sum();rx_factor=area*np.dot(omega,bg_eff)
+        pixel_factor=area*((omega*bg_eff)@bg_psf)
         pupil_solar_rate=pupil_factor*sun_spectral.sum();pupil_other_rate=pupil_factor*other_spectral.sum()
         rx_solar_rate=rx_factor*sun_spectral.sum();rx_other_rate=rx_factor*other_spectral.sum()
         filter_solar_rate=rx_factor*np.dot(sun_spectral,transmission);filter_other_rate=rx_factor*np.dot(other_spectral,transmission)
@@ -217,8 +232,8 @@ def project_illumination(cfg,a,progress,cancelled):
             other_input=area*omega*lo*weight*photon_factor
             pupil_solar_rate+=sun_input.sum();pupil_other_rate+=other_input.sum()
             if ls!=0 or lo!=0:
-                e,p=table.evaluate(wl,hh,vv)
-                p=p.reshape(len(fractions),-1)
+                e,p=table.evaluate(wl,rhh,rvv)
+                p=p.reshape(len(omega),-1)
                 rx_solar_rate+=(sun_input*e).sum();rx_other_rate+=(other_input*e).sum()
                 filter_solar_rate+=(sun_input*e*t).sum();filter_other_rate+=(other_input*e*t).sum()
                 solar[:,j]=(sun_input*e*t)@p
@@ -265,6 +280,9 @@ def project_illumination(cfg,a,progress,cancelled):
         'aperture_area_m2':area,'angular_solid_angle_sr':float(omega.sum()),
         'background_integration_band_nm':spectral['budget_band_nm'],
         'background_integration_domain':spectral['integration_domain'],
+        'background_angular_domain':{'mode':a.background_angular_domain,
+            'h_edges_mrad':rhe.tolist(),'v_edges_mrad':rve.tolist(),
+            'solid_angle_sr':float(omega.sum())},
         'energy_balance_residual_j':float(pupil.sum()-(pixel_j.sum()+(pupil.sum()-after_rx.sum())+(after_rx.sum()-after_filter.sum())+(after_filter.sum()-pixel_j.sum()))),
     }
     from ..reporting.background_bins import spatial_background_bin_values
@@ -279,6 +297,7 @@ def project_illumination(cfg,a,progress,cancelled):
           'angular_h_centers_mrad':hh.ravel().tolist(),'angular_v_centers_mrad':vv.ravel().tolist(),
           'pixel_group_ids':groups.tolist(),'tx_h_edges_mrad':he.tolist(),'tx_v_edges_mrad':ve.tolist(),
           'tx_energy_fraction':np.asarray(tx.energy_fraction).tolist(),
+          'rx_background_h_edges_mrad':rhe.tolist(),'rx_background_v_edges_mrad':rve.tolist(),
           'angle_to_channel_fraction':mapping.tolist(),'psf_capture_fraction':capture.reshape(hh.shape).tolist(),
           'signal_energy_per_pixel_j':pixel_j.reshape(ny,nx).tolist(),
           'solar_photons_per_pixel_per_gate':(solar.sum(axis=1)*gate_s).reshape(ny,nx).tolist(),

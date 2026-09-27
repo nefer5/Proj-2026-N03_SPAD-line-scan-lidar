@@ -74,7 +74,7 @@ def _single(cfg,a,progress,cancelled,*,optical_inputs=None,reconstruct=True):
         'device_trace_selected_events':device.selected_events,'device_trace_truncated':device.selected_events>len(device.trace),
         'trace_truncated':session.stats['logic_triggers']>len(session.readout.trace)}
     if not reconstruct:return {'records':records,'audit':audit,'seed':cfg.rng_seed}
-    directions=channel_directions(cfg,info)
+    directions=channel_directions(cfg,info,a)
     reconstruction=reconstruct_columns(cfg,a,records,schedule,columns,directions,projection.truth)
     complete=len(columns)==len(all_columns)
     transport=transport_plan(cfg,all_columns,record_counts=reconstruction['record_counts_by_column'] if complete else None)

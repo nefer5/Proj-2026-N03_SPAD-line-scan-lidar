@@ -32,6 +32,9 @@ class SimulationConfig(BaseModel):
     @classmethod
     def for_experiment(cls, kind, overrides, algorithms=None):
         """Unified config entry without constructing irrelevant A optical fields."""
+        if kind=='budget':
+            from .system_budget import resolve_budget
+            return resolve_budget(overrides, Algorithms.load() if algorithms is None else algorithms)
         if kind=='columns':
             from .scan.column_config import resolve_columns
             return resolve_columns(overrides,Algorithms.load() if algorithms is None else algorithms)

@@ -5,6 +5,38 @@ from pydantic import TypeAdapter, PositiveInt
 import numpy as np
 
 
+def migrate_pulse_energy(values):
+    """Old full-domain energy becomes equivalent power; do not change saved energy."""
+    values=deepcopy(values)
+    from .experiments.configuration import experiment_defaults
+    for group in ('tx','optics'):
+        section=values.get(group)
+        if not isinstance(section,dict) or 'total_pulse_energy_nj' not in section:continue
+        if 'pulse_average_power_w' in section:
+            raise ValueError('Do not mix legacy pulse energy and equivalent average power')
+        width=section.get('pulse_fwhm_ps',experiment_defaults('system')['tx']['pulse_fwhm_ps'])
+        energy=section.pop('total_pulse_energy_nj')
+        if not np.isfinite(width) or width<=0 or not np.isfinite(energy) or energy<0:
+            raise ValueError('Legacy pulse energy and duration must be finite and nonnegative/positive')
+        section['pulse_average_power_w']=energy/(width*1e-3)
+    return values
+
+
+def migrate_budget(values):
+    """Budget v1 had explicit Tx edges; retain its energy and angular domain."""
+    from math import degrees
+    values=deepcopy(values)
+    system=values.get('system',{})
+    tx=system.get('tx',{})
+    if 'geometry' not in values:
+        if not all(k in tx for k in ('angle_h_min_mrad','angle_h_max_mrad','angle_v_min_mrad','angle_v_max_mrad')):
+            raise ValueError('旧预算缺少完整Tx角域，不能猜测VFOV')
+        values['geometry']={'tx_h_width_mrad':tx['angle_h_max_mrad']-tx['angle_h_min_mrad'],
+                            'vfov_deg':degrees((tx['angle_v_max_mrad']-tx['angle_v_min_mrad'])*1e-3)}
+    values['system']=migrate_pulse_energy(system)
+    return values
+
+
 def migrate_optical_dataset(document):
     """Preserve physical directions when converting legacy V/y-down data to up."""
     doc=deepcopy(document)
@@ -54,7 +86,7 @@ def migrate_focal_lengths(optical):
 
 def migrate_b_domains(values):
     from .experiments.system_config import LEGACY_PATHS
-    values=migrate_psf_axes(values)
+    values=migrate_pulse_energy(migrate_psf_axes(values))
     if not any(k in values for k in ('optics','device','timing','rng_seed')):
         if isinstance(values.get('rx'),dict) and values['rx'].get('dataset') is not None:
             values['rx']['dataset']=migrate_optical_dataset(values['rx']['dataset'])

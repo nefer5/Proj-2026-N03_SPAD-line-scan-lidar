@@ -20,7 +20,7 @@ _results=OrderedDict();_result_lock=Lock()
 
 def column_page():
     html=(WEB/'columns.html').read_text(encoding='utf8')
-    for name in ('columns.css','columns.js','shared/column-layout.css','shared/plot-series.js',
+    for name in ('shared/theme.css', 'shared/theme.js', 'columns.css','columns.js','shared/column-layout.css','shared/plot-series.js',
                  'shared/histogram-window.js','curve-editor.js','vendor/katex/katex.min.js','vendor/katex/katex.min.css'):
         html=html.replace(f'/static/{name}"',f'/static/{name}?v={sha256((WEB/name).read_bytes()).hexdigest()}"')
     return HTMLResponse(html)

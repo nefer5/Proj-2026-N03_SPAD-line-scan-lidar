@@ -102,3 +102,5 @@ max_channel_ratio_cells: 1000000
 lab_analysis_seed_streams:
   trials: 1
   noise: 2
+budget_timeline_max_pulses: 128
+background_angular_domain: independent_rx

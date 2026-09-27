@@ -7,6 +7,7 @@ from ..contracts.pulses import IncidentPulseGroup
 from ..adapters.optical_data import RxTable,RxData
 from ..rx.budget import aperture_area
 from ..rx.projection import project_return
+from ..rx.response import ReceiverResponse
 from ..scene.scan_target import reflection_range
 from ..tx import transmit
 from .trajectory import mirror_pose
@@ -30,7 +31,7 @@ class ColumnPulseProjection:
         self.shape=np.array(info['tx_energy_fraction']).shape
         count=sum(r['emitted'] for r in schedule)
         if count*len(self.h)*len(groups)>a.max_column_projection_work:raise ValueError('Column optical projection exceeds configured work limit')
-        self.table=RxTable(RxData.model_validate(info['dataset']['rx']))
+        self.table=ReceiverResponse(RxData.model_validate(info['dataset']['rx']),cfg.optics,a)
         self.area=aperture_area(cfg.optics);self.filter_at=Curve(cfg.spectral_inputs.filter)(cfg.tx.wavelength_nm)
         self.photon_j=H*C/(cfg.tx.wavelength_nm*1e-9)
         self.channels=cfg.spad.channels_h*cfg.spad.channels_v

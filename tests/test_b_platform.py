@@ -23,7 +23,8 @@ def test_domain_defaults_and_roundtrip_are_shared_with_a():
     assert b.acquisition.monte_carlo_trials==read_yaml('defaults.yaml')['experiments']['system']['acquisition']['monte_carlo_trials']
     assert b.background.solar_enabled==a.solar_enabled
     assert b.background.other_light_enabled==a.other_light_enabled
-    assert b.tx.total_pulse_energy_nj==a.pulse_energy_nj
+    assert b.tx.pulse_average_power_w==read_yaml('defaults.yaml')['experiments']['system']['tx']['pulse_average_power_w']
+    assert b.tx.total_pulse_energy_nj==pytest.approx(b.tx.pulse_average_power_w*b.tx.pulse_fwhm_ps*1e-3)
     assert b.spectral_inputs==a.spectral_inputs
     assert SimulationConfig.for_experiment('system',form_values(b)).model_dump()==b.model_dump()
     assert SimulationConfig.for_experiment('system',b.model_dump()).model_dump()==b.model_dump()

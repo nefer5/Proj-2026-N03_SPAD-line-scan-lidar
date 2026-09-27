@@ -46,6 +46,7 @@ def test_spatial_energy_conservation_and_explicit_edge_loss():
 def test_single_channel_uniform_receiver_matches_a_all_reference_planes(tx_model):
     a=SimulationConfig()
     c=cfg({'optics':{'tx_model':tx_model,'rx_model':'uniform_pixel','channels_h':1,'channels_v':1,
+        'total_pulse_energy_nj':a.pulse_energy_nj,
         'angle_h_min_mrad':-a.channel_ifov_h_mrad/2,'angle_h_max_mrad':a.channel_ifov_h_mrad/2,
         'angle_v_min_mrad':-a.channel_ifov_v_mrad/2,'angle_v_max_mrad':a.channel_ifov_v_mrad/2,
         'solar_enabled':True,'other_light_enabled':True}})

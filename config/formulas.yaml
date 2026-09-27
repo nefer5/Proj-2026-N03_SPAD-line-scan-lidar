@@ -54,3 +54,9 @@ spatial_profile_widths: '\begin{aligned}a_{\mathrm{Tx}}&=\frac{W_{\mathrm{FWHM}}
 
 filter_with_leakage: 'T_f(\lambda)=T_{\mathrm{out}}+(T_{\mathrm{peak}}-T_{\mathrm{out}})F(\lambda),\quad 0\leq F\leq1'
 background_time_bin: '\bar n_{j,\mathrm{bin}}=\dot N_{j,\mathrm{candidate}}\,\Delta t_{\mathrm{bin}}'
+hardware_budget_time: 'T_{\mathrm{env}}=(N-1)T_{\mathrm{rep}}+\max(t_{\mathrm{gate}}+T_{\mathrm{gate}},T_{\mathrm{FWHM}}/2),\quad M=T_{\mathrm{slot}}-T_{\mathrm{env}}-T_{\mathrm{reset}}'
+hardware_budget_power: 'E_{\mathrm{col}}=N E_{\mathrm{pulse}},\quad P_{\mathrm{avg}}=E_{\mathrm{col}}N_{\mathrm{col}}f_{\mathrm{frame}},\quad P_{\mathrm{elec}}=P_{\mathrm{avg}}/\eta_{\mathrm{WPE}}'
+hardware_budget_histogram: 'B_{\mathrm{col}}=\left\lceil N_{\mathrm{ch}}N_{\mathrm{bin}}b/8\right\rceil+B_{\mathrm{header}},\quad R=8B_{\mathrm{col}}N_{\mathrm{col}}f_{\mathrm{frame}}'
+hardware_budget_prbs: 'T_{\mathrm{code}}=L T_{\mathrm{chip}},\quad E_{\mathrm{code}}=N_{\mathrm{on}}E_{\mathrm{pulse}},\quad R_{\mathrm{period}}=cT_{\mathrm{code}}/2'
+
+pulse_equivalent_power: 'E_{\mathrm{pulse}}=P_{\mathrm{eq}}\,\tau,\quad E_{\mathrm{Tx,out}}=\eta_{\mathrm{Tx}}E_{\mathrm{pulse}}'

@@ -9,6 +9,15 @@ def transmit(energy_j, efficiency):
     return energy_j * efficiency
 
 
+def vertical_partition(source_edges_mrad, source_fractions, channel_count):
+    """Conservative rebin of Tx cell energies to equal-angle V budget sectors."""
+    src=np.asarray(source_edges_mrad);fraction=np.asarray(source_fractions)
+    edges=np.linspace(src[0],src[-1],channel_count+1)
+    overlap=np.maximum(0,np.minimum(edges[1:,None],src[None,1:])-np.maximum(edges[:-1,None],src[None,:-1]))
+    values=(overlap/np.diff(src)[None,:])@fraction
+    return {'edges_mrad':edges.tolist(),'fractions':values.tolist()}
+
+
 def normalize_angular_weights(weights):
     """The pulse energy belongs to this domain; weights describe only its shape."""
     values = np.asarray(weights, dtype=float)

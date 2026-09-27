@@ -383,6 +383,14 @@ experiments:
     label: 像面垂直偏移
     unit: μm
     description: gaussian_psf及super_gaussian_psf生效；移动质心而不补偿移出阵列的能量。
+  optics.pulse_fwhm_ps:
+    label: 等效脉宽 · 高斯FWHM
+    unit: ps
+    description: 高斯用FWHM、矩形用实际持续时间；固定等效平均功率输入时，单发能量随脉宽线性变化。峰值另由波形计算。
+  optics.pulse_average_power_w:
+    label: 单脉冲等效平均功率 · Tx前
+    unit: W
+    description: 全Tx角域、VCSEL出光/Tx光学前。单发能量=功率×脉宽，高斯用FWHM作等效时长；不是FWHM窗内严格平均、峰值或整帧平均功率。默认280W，效率只乘一次。
   optics.total_pulse_energy_nj:
     label: 角域内单发能量 · Tx前
     unit: nJ
@@ -510,19 +518,19 @@ experiments:
   optics.rx_angle_h_min_mrad:
     label: 构造Rx覆盖 H min
     unit: mrad
-    description: 仅构造Rx模型生效，与Tx角域独立；Rx使用此角域采样数据库，禁止超域外推。导入Rx时使用文件轴。
+    description: Rx独立接收角域边界，单位mrad；域内用于信号接收及背景积分，域外不接收。与Tx发光归一化域独立；导入响应表必须完整覆盖该域，缺数据报错，禁止外推。
   optics.rx_angle_h_max_mrad:
     label: 构造Rx覆盖 H max
     unit: mrad
-    description: 仅构造Rx模型生效，与Tx角域独立；Rx使用此角域采样数据库，禁止超域外推。导入Rx时使用文件轴。
+    description: Rx独立接收角域边界，单位mrad；域内用于信号接收及背景积分，域外不接收。与Tx发光归一化域独立；导入响应表必须完整覆盖该域，缺数据报错，禁止外推。
   optics.rx_angle_v_min_mrad:
     label: 构造Rx覆盖 V min
     unit: mrad
-    description: 仅构造Rx模型生效，与Tx角域独立；Rx使用此角域采样数据库，禁止超域外推。导入Rx时使用文件轴。
+    description: Rx独立接收角域边界，单位mrad；域内用于信号接收及背景积分，域外不接收。与Tx发光归一化域独立；导入响应表必须完整覆盖该域，缺数据报错，禁止外推。
   optics.rx_angle_v_max_mrad:
     label: 构造Rx覆盖 V max
     unit: mrad
-    description: 仅构造Rx模型生效，与Tx角域独立；Rx使用此角域采样数据库，禁止超域外推。导入Rx时使用文件轴。
+    description: Rx独立接收角域边界，单位mrad；域内用于信号接收及背景积分，域外不接收。与Tx发光归一化域独立；导入响应表必须完整覆盖该域，缺数据报错，禁止外推。
   optics.mapping_mode:
     label: 几何映射方向
     unit: ''
@@ -654,19 +662,19 @@ experiments:
   rx.rx_angle_h_min_mrad:
     label: 构造Rx覆盖 H min
     unit: mrad
-    description: 仅构造Rx模型生效，与Tx角域独立；Rx使用此角域采样数据库，禁止超域外推。导入Rx时使用文件轴。
+    description: Rx独立接收角域边界，单位mrad；域内用于信号接收及背景积分，域外不接收。与Tx发光归一化域独立；导入响应表必须完整覆盖该域，缺数据报错，禁止外推。
   rx.rx_angle_h_max_mrad:
     label: 构造Rx覆盖 H max
     unit: mrad
-    description: 仅构造Rx模型生效，与Tx角域独立；Rx使用此角域采样数据库，禁止超域外推。导入Rx时使用文件轴。
+    description: Rx独立接收角域边界，单位mrad；域内用于信号接收及背景积分，域外不接收。与Tx发光归一化域独立；导入响应表必须完整覆盖该域，缺数据报错，禁止外推。
   rx.rx_angle_v_min_mrad:
     label: 构造Rx覆盖 V min
     unit: mrad
-    description: 仅构造Rx模型生效，与Tx角域独立；Rx使用此角域采样数据库，禁止超域外推。导入Rx时使用文件轴。
+    description: Rx独立接收角域边界，单位mrad；域内用于信号接收及背景积分，域外不接收。与Tx发光归一化域独立；导入响应表必须完整覆盖该域，缺数据报错，禁止外推。
   rx.rx_angle_v_max_mrad:
     label: 构造Rx覆盖 V max
     unit: mrad
-    description: 仅构造Rx模型生效，与Tx角域独立；Rx使用此角域采样数据库，禁止超域外推。导入Rx时使用文件轴。
+    description: Rx独立接收角域边界，单位mrad；域内用于信号接收及背景积分，域外不接收。与Tx发光归一化域独立；导入响应表必须完整覆盖该域，缺数据报错，禁止外推。
   rx.dataset:
     label: 光学数据库（JSON）
     unit: 版本化数据
@@ -1054,3 +1062,101 @@ experiments:
     label: 无色差Rx带外积分精确分离
     unit: bool
     description: 非零带外透过率及构造无色差Rx时，使用空间因子与完整光谱因子的外积表示，保留全部波长节点和光子；不是近似降采样。导入Rx仍逐波长计算，所有因子及逻辑数组尺寸可导出。
+reset_time_ns:
+  label: 列间复位耗时
+  unit: ns
+  description: 仅用于系统预算的列间额外开销；空值为未知，零表示用户显式理想假设。不代表C已实现复位，不含锁存或驱动建立时间。
+wall_plug_efficiency:
+  label: VCSEL电光效率
+  unit: '1'
+  description: 电输入到Tx光学前光能的效率，范围(0,1]。仅估算发光器件电功率与非光损耗；空值不计算，不推断结温。
+max_average_optical_power_w:
+  label: 平均光功率限额 · Tx前
+  unit: W
+  description: 用户提供的整帧平均光功率上限，仅系统预算比较；空值为未知，不作为眼安全结论。
+max_peak_optical_power_w:
+  label: 峰值光功率限额 · Tx前
+  unit: W
+  description: 用户提供的总光斑峰值光功率上限；按时间波形真实归一化求峰值，仅系统预算比较。
+prbs_enabled:
+  label: 启用PRBS独立预算
+  unit: 布尔
+  description: 开启独立的短脉冲开关编码候选预算；不替换等间隔多发，不生成码、不计算相关增益或最终记录。
+prbs_chip_count:
+  label: 总码片数
+  unit: chip
+  description: PRBS预算开启时必填正整数；仅计算周期，无LFSR或码族合法性验证，关闭时不生效。
+prbs_chip_ns:
+  label: 码片时长
+  unit: ns
+  description: PRBS预算开启时必填正数；与码长决定周期和扫描位移，关闭时不生效。
+prbs_on_count:
+  label: 开码片数
+  unit: chip
+  description: 每个开码片发一个与主方案同能量的短脉冲；正整数且不超过总码片数，不假设固定占空比，关闭时不生效。
+hardware_budget_fields:
+  system.tx.pulse_fwhm_ps:
+    label: 等效脉宽 · 高斯FWHM
+    unit: ps
+    description: 高斯用FWHM、矩形用实际持续时间；保持等效平均功率输入不变时，单发能量随脉宽线性变化。不是保持能量不变。
+  geometry.vfov_deg:
+    label: 垂直视场 VFOV · Tx全宽
+    unit: deg
+    description: 控制预算页Tx归一化域的V全宽，以Tx角中心为中心展开；不改变Rx收光边界、焦距或阵列尺寸。默认从现有B的V全宽6mrad折算。空值按继承Tx边界显式解析，结果中保存数值。
+  geometry.tx_h_width_mrad:
+    label: Tx水平归一化域全宽
+    unit: mrad
+    description: 默认2mrad，以Tx水平角中心为中心展开；不是高斯FWHM或Rx IFOV。只约束发光功率归一化范围，未改变Rx背景积分域。
+  system.tx.pulse_average_power_w:
+    label: 单脉冲等效平均功率 · Tx前
+    unit: W
+    description: 全Tx角域、VCSEL出光/Tx光学前功率。总单发能量=功率×脉宽，高斯用FWHM作等效时长，不是FWHM窗内的严格平均值；矩形为实际持续时间。不是峰值或整帧平均功率。默认280W，Tx效率另乘一次。
+  transport.histogram_count_bits:
+    label: 直方图计数位宽
+    unit: bit/bin
+    description: 系统预算页用于原始直方图载荷估算，独立于C的transport启用开关和输出格式；不模拟计数饱和。空值不计算字节数。
+  transport.column_header_bytes:
+    label: 每列头部字节
+    unit: byte/列
+    description: 系统预算页与原始直方图计数区相加形成净载荷；不含未知协议开销。空值表示未知，零须显式填写。
+  transport.mipi_net_mbps:
+    label: 接口净载荷速率
+    unit: Mbps
+    description: 系统预算页按完整原始直方图载荷计算传输时间并与列周期比较；独立于C的transport开关，不模拟缓冲和DSP。空值不评估传输。
+  system.spad.spad_dead_time_ns:
+    label: SPAD死时间 · 待事件验证
+    unit: ns
+    description: 保存在预算工况并传递给B。本页不执行器件状态演化，因此不改变候选光子预算或预测最终记录。
+  system.readout.tdc_dead_time_ns:
+    label: TDC死时间 · 待事件验证
+    unit: ns
+    description: 保留并传递给B，当前预算未执行读出竞争；零为平台现有理想假设，不是芯片实测值。
+  system.readout.readout_mode:
+    label: 读出模式 · 待事件验证
+    unit: 枚举
+    description: 保存并用于送入B的事件采集；本页不运行该模式，不用候选雪崩替代对应读出记录。
+  targets.scan_time_utilization:
+    label: 扫描时间利用率
+    unit: '1（0–1）'
+    description: 每帧分配给所有有效列的时间比例；系统预算页直接输入比例，不作百分数换算。复位须占用分配到的列时间。
+  system.acquisition.laser_shots:
+    label: 每列发数
+    unit: 发/列
+    description: 同一列内等间隔发射并累计的次数，取自B采集发数；不是Monte Carlo重复次数。该页按相同静态光学响应累计。
+  system.acquisition.period_ns:
+    label: 列内发射间隔
+    unit: ns
+    description: 等间隔多发的中心间隔，复用B采集周期；门结束不得超过间隔。整帧平均发射率还受列数、发数和帧率约束。
+  system.acquisition.gate_start_ns:
+    label: 接收门延迟
+    unit: ns
+    description: 每发相对发射中心的接收门起点；静态信号按本发脉冲门内份额计算，未解析其他发跨门尾部。
+  system.acquisition.gate_width_ns:
+    label: 单发接收门宽
+    unit: ns
+    description: 每次接收门时长；背景候选按门内开放时间累计，未计算自由运行门外背景对恢复状态的影响。
+
+pulse_average_power_w:
+  label: 单脉冲等效平均功率 · Tx前
+  unit: W
+  description: 全Tx角域VCSEL出光，E=P×脉宽；高斯以FWHM为等效时长，矩形为实际持续时间。不是峰值或整帧平均功率。默认280W，Tx效率另计一次。

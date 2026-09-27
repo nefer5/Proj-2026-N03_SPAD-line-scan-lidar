@@ -16,7 +16,7 @@ function envelope(cfg){return {schema_version:2,kind,experiment:cfg};}
 function saveDraft(){try{localStorage.setItem(storageKey,JSON.stringify(envelope(collect())));if(lastResult){$('resultStatus').textContent='参数已修改；下方仍为任务 '+lastJob.slice(0,8)+' 的结果。';if(lastResult.scan)$('scanViewStatus').textContent='参数已修改；显示的是原任务采集结果。';}updateVisibility();}catch(e){$('formStatus').textContent='草稿未保存：'+e.message;}}
 function download(name,data){const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'})),a=node('a');a.href=url;a.download=name;a.click();URL.revokeObjectURL(url);}
 function setup(canvas){const box=canvas.getBoundingClientRect(),d=window.devicePixelRatio||1;canvas.width=box.width*d;canvas.height=box.height*d;const c=canvas.getContext('2d');c.scale(d,d);c.clearRect(0,0,box.width,box.height);return [c,box.width,box.height];}
-function heatmap(values,shape){const [c,w,h]=setup($('illuminationPlot')),[rows,cols]=shape,max=Math.max(...values,0);const left=40,top=15,cw=(w-left-15)/cols,ch=(h-top-35)/rows;c.font='11px Segoe UI';for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){const v=values[y*cols+x],f=max?v/max:0;c.fillStyle=`hsl(${180-30*f} 65% ${12+48*f}%)`;c.fillRect(left+x*cw,top+y*ch,cw-1,ch-1);}c.fillStyle='#8da0b3';c.fillText('物理像素 x →',left,h-8);c.fillText('y',10,top+15);c.fillText('峰值 '+max.toPrecision(4)+' photons/pulse',left+100,h-8);}
+function heatmap(values,shape){const [c,w,h]=setup($('illuminationPlot')),[rows,cols]=shape,max=Math.max(...values,0);const left=40,top=15,cw=(w-left-15)/cols,ch=(h-top-35)/rows;c.font='11px Segoe UI';for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){const v=values[y*cols+x],f=max?v/max:0;c.fillStyle=(globalThis.LidarTheme?.color(`hsl(${180-30*f} 65% ${12+48*f}%)`) ?? (`hsl(${180-30*f} 65% ${12+48*f}%)`));c.fillRect(left+x*cw,top+y*ch,cw-1,ch-1);}c.fillStyle=(globalThis.LidarTheme?.color('#8da0b3') ?? ('#8da0b3'));c.fillText('物理像素 x →',left,h-8);c.fillText('y',10,top+15);c.fillText('峰值 '+max.toPrecision(4)+' photons/pulse',left+100,h-8);}
 let displayedHistogram;
 function histogram(h){
  displayedHistogram=h;const [c,w,height]=setup($('histogramPlot')),left=45,top=15,plotW=w-left-15,plotH=height-50;
@@ -24,10 +24,10 @@ function histogram(h){
  if(!Number.isFinite(lo)||!Number.isFinite(hi)||hi<=lo)throw new Error('图形显示终点必须大于起点');
  const indices=h.time_ns.map((t,i)=>t>=lo&&t<=hi?i:-1).filter(i=>i>=0);let max=0;
  for(const row of h.counts)for(const i of indices)max=Math.max(max,row[i]);
- c.strokeStyle='#263547';c.beginPath();c.moveTo(left,top);c.lineTo(left,top+plotH);c.lineTo(left+plotW,top+plotH);c.stroke();
+ c.strokeStyle=(globalThis.LidarTheme?.color('#263547') ?? ('#263547'));c.beginPath();c.moveTo(left,top);c.lineTo(left,top+plotH);c.lineTo(left+plotW,top+plotH);c.stroke();
  const colors=['#41d9d0','#659cff','#ffb55b','#d291ff','#f77a91','#b8df77'];$('histogramLegend').replaceChildren();
- h.counts.forEach((row,ch)=>{c.strokeStyle=colors[ch%colors.length];c.beginPath();indices.forEach((i,j)=>{const x=left+(h.time_ns[i]-lo)/(hi-lo)*plotW,y=top+plotH-(max?row[i]/max:0)*plotH;if(j===0)c.moveTo(x,y);else c.lineTo(x,y);});c.stroke();const label=node('span','通道 '+ch);label.style.color=colors[ch%colors.length];label.style.marginRight='12px';$('histogramLegend').append(label);});
- c.fillStyle='#8da0b3';c.font='11px Segoe UI';c.fillText(lo.toFixed(2),left,height-12);c.fillText(hi.toFixed(2)+' ns',Math.max(left,w-100),height-12);c.fillText(String(max),8,top+10);
+ h.counts.forEach((row,ch)=>{c.strokeStyle=(globalThis.LidarTheme?.color(colors[ch%colors.length]) ?? (colors[ch%colors.length]));c.beginPath();indices.forEach((i,j)=>{const x=left+(h.time_ns[i]-lo)/(hi-lo)*plotW,y=top+plotH-(max?row[i]/max:0)*plotH;if(j===0)c.moveTo(x,y);else c.lineTo(x,y);});c.stroke();const label=node('span','通道 '+ch);label.style.color=colors[ch%colors.length];label.style.marginRight='12px';$('histogramLegend').append(label);});
+ c.fillStyle=(globalThis.LidarTheme?.color('#8da0b3') ?? ('#8da0b3'));c.font='11px Segoe UI';c.fillText(lo.toFixed(2),left,height-12);c.fillText(hi.toFixed(2)+' ns',Math.max(left,w-100),height-12);c.fillText(String(max),8,top+10);
  $('histogramNote').textContent=h.counts.length+' 个读出通道 · 分箱 '+h.bin_ps+' ps · 显示缩放不改变采集或统计';
 }
 

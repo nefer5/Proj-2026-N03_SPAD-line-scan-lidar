@@ -5,8 +5,9 @@ def build_spatial_flow(budget,audit):
     from .background_bins import bin_scope_note,spectral_domain_note
     definition=read_yaml('photon-flow.yaml')['spatial']
     formulas=read_yaml('formulas.yaml');notes=read_yaml('formula-notes.yaml')
-    values={**budget,'final_mixed_records':audit['final_records'],'spad_dead_losses':audit['spad_dead_losses'],
-            'tdc_capacity_losses':audit['tdc_dead_losses']+audit['capacity_losses']}
+    values={**budget,'final_mixed_records':None if audit is None else audit['final_records'],
+            'spad_dead_losses':None if audit is None else audit['spad_dead_losses'],
+            'tdc_capacity_losses':None if audit is None else audit['tdc_dead_losses']+audit['capacity_losses']}
     steps=[]
     for step in definition['steps']:
         fid=step['formula_id']

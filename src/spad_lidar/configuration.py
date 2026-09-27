@@ -77,6 +77,8 @@ def default_values():
 
 class Algorithms(BaseModel):
     model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    budget_timeline_max_pulses: int = Field(ge=1)
+    background_angular_domain: Literal['independent_rx', 'legacy_tx']
     filter_leakage_domain: Literal['source_coverage']
     factorize_achromatic_leakage: bool
     max_column_projection_work: int = Field(gt=0)
@@ -195,7 +197,7 @@ class Algorithms(BaseModel):
         Existing numerical policies are never replaced or silently filled.
         Historical C replays do not use the newly introduced B-analysis policies.
         """
-        additions=('parameter_preview_debounce_ms','max_visible_channels','max_lab_analysis_events',
+        additions=('budget_timeline_max_pulses','parameter_preview_debounce_ms','max_visible_channels','max_lab_analysis_events',
                    'b_mechanism_preview_gates','b_timeline_max_points','b_view_cache_entries',
                    'max_lab_analysis_histogram_cells','max_lab_reference_cells','max_channel_ratio_cells',
                    'lab_analysis_seed_streams','max_column_projection_work','max_column_pulses',
@@ -210,6 +212,7 @@ class Algorithms(BaseModel):
         # snapshots had periodic warmup and sampled laser-off output references.
         merged.setdefault('b_initial_condition','periodic_history')
         merged.setdefault('b_noise_reference','sampled_output_mean')
+        merged.setdefault('background_angular_domain','legacy_tx')
         for key in additions:
             if key not in merged:merged[key]=current[key]
         return cls.model_validate(merged)

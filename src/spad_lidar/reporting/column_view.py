@@ -36,8 +36,8 @@ def motion_view(cfg,a,rows,column_id):
     output=[];previous={};table=None
     if cfg.rx.rx_model not in ('gaussian_psf','super_gaussian_psf'):
         from ..experiments.spatial import optical_dataset
-        from ..adapters.optical_data import RxTable
-        rx=optical_dataset(cfg,a).rx;table=RxTable(rx)
+        from ..rx.response import ReceiverResponse
+        rx=optical_dataset(cfg,a).rx;table=ReceiverResponse(rx,cfg.optics,a)
         xc=(np.asarray(rx.x_edges_um[:-1])+rx.x_edges_um[1:])/2
     for row in selected:
         comparisons=[]

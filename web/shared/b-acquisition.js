@@ -60,12 +60,12 @@ function drawExposureTimeline(canvas,timeline,channel,selectedGate){
  const[c,w,h]=PhotonPlots.canvasSetup(canvas),left=46,right=49,top=25,bottom=28,pw=w-left-right,ph=h-top-bottom;
  const bars=timeline.counts[index],cum=timeline.cumulative_counts[index],last=timeline.sequence_duration_ns;
  const maxBar=Math.max(1,...bars),maxCum=Math.max(1,...cum),sx=t=>left+t/last*pw;
- c.clearRect(0,0,w,h);c.font='9px Consolas,monospace';c.fillStyle='#88a6bc';c.textAlign='left';c.fillText(timeline.grouped?'每组记录':'每门记录',left,12);c.fillStyle='#5bdbcf';c.textAlign='right';c.fillText('slot 累计',w-right,12);
- for(let i=0;i<=2;i++){const y=top+ph*(1-i/2);c.strokeStyle='#28404f';c.beginPath();c.moveTo(left,y);c.lineTo(w-right,y);c.stroke();c.fillStyle='#88a6bc';c.textAlign='right';c.fillText(fmt(maxBar*i/2,0),left-6,y+3);c.fillStyle='#5bdbcf';c.textAlign='left';c.fillText(fmt(maxCum*i/2,0),w-right+6,y+3);}
- for(let i=0;i<bars.length;i++){const x=left+i/bars.length*pw,bw=pw/bars.length;const active=selectedGate!==null&&selectedGate>=timeline.start_gate[i]&&selectedGate<=timeline.end_gate[i];c.fillStyle=active?'#dfb172':'#507fae';c.fillRect(x+1,top+ph*(1-bars[i]/maxBar),Math.max(.5,bw-2),ph*bars[i]/maxBar);}
- c.strokeStyle='#62decb';c.lineWidth=1.7;c.beginPath();c.moveTo(left,top+ph);let previous=0;
+ c.clearRect(0,0,w,h);c.font='9px Consolas,monospace';c.fillStyle=(globalThis.LidarTheme?.color('#88a6bc') ?? ('#88a6bc'));c.textAlign='left';c.fillText(timeline.grouped?'每组记录':'每门记录',left,12);c.fillStyle=(globalThis.LidarTheme?.color('#5bdbcf') ?? ('#5bdbcf'));c.textAlign='right';c.fillText('slot 累计',w-right,12);
+ for(let i=0;i<=2;i++){const y=top+ph*(1-i/2);c.strokeStyle=(globalThis.LidarTheme?.color('#28404f') ?? ('#28404f'));c.beginPath();c.moveTo(left,y);c.lineTo(w-right,y);c.stroke();c.fillStyle=(globalThis.LidarTheme?.color('#88a6bc') ?? ('#88a6bc'));c.textAlign='right';c.fillText(fmt(maxBar*i/2,0),left-6,y+3);c.fillStyle=(globalThis.LidarTheme?.color('#5bdbcf') ?? ('#5bdbcf'));c.textAlign='left';c.fillText(fmt(maxCum*i/2,0),w-right+6,y+3);}
+ for(let i=0;i<bars.length;i++){const x=left+i/bars.length*pw,bw=pw/bars.length;const active=selectedGate!==null&&selectedGate>=timeline.start_gate[i]&&selectedGate<=timeline.end_gate[i];c.fillStyle=(globalThis.LidarTheme?.color(active?'#dfb172':'#507fae') ?? (active?'#dfb172':'#507fae'));c.fillRect(x+1,top+ph*(1-bars[i]/maxBar),Math.max(.5,bw-2),ph*bars[i]/maxBar);}
+ c.strokeStyle=(globalThis.LidarTheme?.color('#62decb') ?? ('#62decb'));c.lineWidth=1.7;c.beginPath();c.moveTo(left,top+ph);let previous=0;
  timeline.gate_end_time_ns.forEach((t,i)=>{c.lineTo(sx(t),top+ph*(1-previous/maxCum));c.lineTo(sx(t),top+ph*(1-cum[i]/maxCum));previous=cum[i];});c.lineTo(sx(last),top+ph*(1-previous/maxCum));c.stroke();
- c.fillStyle='#85a4ba';for(let i=0;i<=4;i++){c.textAlign='center';c.fillText(fmt(last/1000*i/4,2),left+pw*i/4,h-12);}c.textAlign='right';c.fillText('slot 内时间 · μs',w-right,h-1);
+ c.fillStyle=(globalThis.LidarTheme?.color('#85a4ba') ?? ('#85a4ba'));for(let i=0;i<=4;i++){c.textAlign='center';c.fillText(fmt(last/1000*i/4,2),left+pw*i/4,h-12);}c.textAlign='right';c.fillText('slot 内时间 · μs',w-right,h-1);
 }
 globalThis.BAcquisitionMechanism=BAcquisitionMechanism;globalThis.BHistogramViews=BHistogramViews;globalThis.drawExposureTimeline=drawExposureTimeline;
 })();

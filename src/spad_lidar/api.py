@@ -24,6 +24,8 @@ from .webapi.labs import router as labs_router
 app.include_router(labs_router)
 from .webapi.columns import router as columns_router
 app.include_router(columns_router)
+from .webapi.budget import router as budget_router
+app.include_router(budget_router)
 app.mount("/static", StaticFiles(directory=WEB), name="static")
 
 
@@ -50,7 +52,7 @@ def index():
     html = (WEB / "index.html").read_text(encoding="utf-8")
     # Content-addressed URLs bypass already cached unversioned JS/CSS as well.
     # Recompute on every navigation so editable source requires no release step.
-    for name in ("app.js", "curve-editor.js", "photon-flow.js", "styles.css", "shared/histogram-window.js", "vendor/katex/katex.min.js", "vendor/katex/katex.min.css"):
+    for name in ('shared/theme.css', 'shared/theme.js', "app.js", "curve-editor.js", "photon-flow.js", "styles.css", "shared/histogram-window.js", "vendor/katex/katex.min.js", "vendor/katex/katex.min.css"):
         digest = sha256((WEB / name).read_bytes()).hexdigest()
         html = html.replace(f'/static/{name}"', f'/static/{name}?v={digest}"')
     return HTMLResponse(html)

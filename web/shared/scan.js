@@ -3,13 +3,13 @@ let scanData=null,scanTablePage=0;
 const scanColors=['#41d9d0','#659cff','#ffb55b','#d291ff','#f77a91','#b8df77'];
 function scanPlot(id,series,xLabel,yLabel,scatter=false){
  const [c,w,h]=setup($(id));const pairs=series.flatMap(s=>s.points.filter(p=>p&&p.every(Number.isFinite)));
- if(!pairs.length){c.fillStyle='#8da0b3';c.font='13px Segoe UI';c.fillText('暂无可绘制数据',30,45);return;}
+ if(!pairs.length){c.fillStyle=(globalThis.LidarTheme?.color('#8da0b3') ?? ('#8da0b3'));c.font='13px Segoe UI';c.fillText('暂无可绘制数据',30,45);return;}
  let xmin=Infinity,xmax=-Infinity,ymin=Infinity,ymax=-Infinity;for(const [x,y]of pairs){xmin=Math.min(xmin,x);xmax=Math.max(xmax,x);ymin=Math.min(ymin,y);ymax=Math.max(ymax,y);}
  const dx=xmax-xmin||1,dy=ymax-ymin||1;xmin-=dx*.04;xmax+=dx*.04;ymin-=dy*.08;ymax+=dy*.08;if(id==='scanDwellPlot'){ymin=0;ymax=Math.max(1,Math.ceil(ymax));}
  const left=58,top=16,pw=w-left-15,ph=h-top-40;const px=x=>left+(x-xmin)/(xmax-xmin)*pw,py=y=>top+ph-(y-ymin)/(ymax-ymin)*ph;
- c.strokeStyle='#263547';c.beginPath();c.moveTo(left,top);c.lineTo(left,top+ph);c.lineTo(left+pw,top+ph);c.stroke();
- for(const s of series){c.strokeStyle=s.color;c.fillStyle=s.color;c.lineWidth=1.5;let started=false;c.beginPath();for(const point of s.points){if(!point||!point.every(Number.isFinite)){started=false;continue;}const [x,y]=point;if(scatter){c.moveTo(px(x)+2,py(y));c.arc(px(x),py(y),2,0,2*Math.PI);}else{if(!started)c.moveTo(px(x),py(y));else c.lineTo(px(x),py(y));started=true;}}if(scatter)c.fill();else c.stroke();}
- c.fillStyle='#8da0b3';c.font='10px Segoe UI';c.fillText(xmin.toPrecision(4),left,h-15);c.fillText(xmax.toPrecision(4),Math.max(left,w-90),h-15);c.fillText(ymax.toPrecision(4),2,top+8);c.fillText(ymin.toPrecision(4),2,top+ph);c.fillText(xLabel,left+pw/2-25,h-1);c.fillText(yLabel,left+4,top+8);
+ c.strokeStyle=(globalThis.LidarTheme?.color('#263547') ?? ('#263547'));c.beginPath();c.moveTo(left,top);c.lineTo(left,top+ph);c.lineTo(left+pw,top+ph);c.stroke();
+ for(const s of series){c.strokeStyle=(globalThis.LidarTheme?.color(s.color) ?? (s.color));c.fillStyle=(globalThis.LidarTheme?.color(s.color) ?? (s.color));c.lineWidth=1.5;let started=false;c.beginPath();for(const point of s.points){if(!point||!point.every(Number.isFinite)){started=false;continue;}const [x,y]=point;if(scatter){c.moveTo(px(x)+2,py(y));c.arc(px(x),py(y),2,0,2*Math.PI);}else{if(!started)c.moveTo(px(x),py(y));else c.lineTo(px(x),py(y));started=true;}}if(scatter)c.fill();else c.stroke();}
+ c.fillStyle=(globalThis.LidarTheme?.color('#8da0b3') ?? ('#8da0b3'));c.font='10px Segoe UI';c.fillText(xmin.toPrecision(4),left,h-15);c.fillText(xmax.toPrecision(4),Math.max(left,w-90),h-15);c.fillText(ymax.toPrecision(4),2,top+8);c.fillText(ymin.toPrecision(4),2,top+ph);c.fillText(xLabel,left+pw/2-25,h-1);c.fillText(yLabel,left+4,top+8);
 }
 function scanSelect(id,options,previous){const select=$(id);select.replaceChildren();for(const [value,label]of options){const option=node('option',label);option.value=String(value);select.append(option);}if(options.some(o=>String(o[0])===previous))select.value=previous;}
 globalThis.renderScan=function(data,preview=false){
