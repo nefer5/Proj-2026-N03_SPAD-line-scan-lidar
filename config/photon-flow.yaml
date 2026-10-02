@@ -576,3 +576,54 @@ columns:
     - key: angle_assigned_records
       label: 进入列内时间分析窗口的记录
       unit: records
+
+budget_window:
+  title: 单通道时间窗口的光子与能量
+  steps:
+    - title: 信号 · 入瞳 → 探测面 → 候选雪崩
+      logic: 对同一单通道全脉冲光学预算按窗口时间份额积分，逐一显示各参考面与候选数。
+      formula_id: hardware_budget_signal_window
+      values:
+        - {key: signal_fraction, label: 窗口内单发能量份额, unit: '1'}
+        - {key: signal_pupil_photons, label: 窗口内入瞳光子, unit: photons/channel/window}
+        - {key: signal_sensor_photons, label: 窗口内探测面光子, unit: photons/channel/window}
+        - {key: signal_candidates, label: 窗口内候选雪崩, unit: candidates/channel/window}
+        - {key: final_mixed_records, label: 最终混合记录, unit: 未仿真}
+    - title: 背景与器件噪声 · 同一时间窗口
+      logic: 稳态背景和器件噪声率分别乘当前窗口时长，不能混作最终读出记录。
+      formula_id: hardware_budget_background_window
+      values:
+        - {key: solar_pupil_photons, label: 太阳入瞳原始光子, unit: photons/channel/window}
+        - {key: other_pupil_photons, label: 其他环境光入瞳原始光子, unit: photons/channel/window}
+        - {key: solar_sensor_photons, label: 太阳探测面光子, unit: photons/channel/window}
+        - {key: other_sensor_photons, label: 其他环境光探测面光子, unit: photons/channel/window}
+        - {key: background_candidates, label: 背景候选雪崩, unit: candidates/channel/window}
+        - {key: device_noise_candidates, label: 器件噪声候选, unit: candidates/channel/window}
+    - title: 回波光能 · 同一时间窗口
+      logic: 回波入瞳及探测面能量按同一时间窗口积分，保持光学参考面一致。
+      formula_id: hardware_budget_energy_window
+      values:
+        - {key: signal_pupil_energy_nj, label: 入瞳回波能量, unit: nJ/channel/window}
+        - {key: signal_sensor_energy_nj, label: 探测面回波能量, unit: nJ/channel/window}
+
+budget_signal_chain:
+  title: 单通道全脉冲信号链路
+  intro: 阶段柱状图不是时间直方图；光学阶段以同一波长的能量和光子数计，候选雪崩含PDE/FF但不是最终混合记录。
+  stages:
+    - {key: tx_input_j, label: VCSEL出光 / Tx光学前, short: Tx前, kind: optical}
+    - {key: tx_output_j, label: Tx光学后出射, short: Tx出射, kind: optical}
+    - {key: target_incident_j, label: 大气去程后目标入射, short: 目标入射, kind: optical}
+    - {key: target_reflected_j, label: 目标反射光能, short: 目标反射, kind: optical}
+    - {key: rx_pupil_signal_j, label: 回程大气与收光几何后Rx入瞳, short: Rx入瞳, kind: optical}
+    - {key: after_rx_signal_j, label: Rx光学效率后, short: Rx后, kind: optical}
+    - {key: after_filter_fullplane_signal_j, label: 滤光片后 / 无限像面, short: 滤光后, kind: optical}
+    - {key: sensor_signal_j, label: PSF与阵列边缘截获后探测面, short: 探测面, kind: optical}
+    - {key: signal_candidate_avalanches_per_pulse, label: 含PDE与FF的候选雪崩, short: 候选雪崩, kind: candidate}
+  steps:
+    - title: 光学能量与同波长光子数
+      logic: 各阶段光学能量由公共B核给出，只做hc/λ单位换算；不把候选雪崩赋予光学能量。
+      formula_id: budget_signal_energy_photons
+      values:
+        - {key: tx_input_j, label: 单通道Tx光学前全脉冲能量, unit: J/pulse/channel}
+        - {key: sensor_signal_j, label: 单通道探测面全脉冲光学能量, unit: J/pulse/channel}
+        - {key: signal_candidate_avalanches_per_pulse, label: 单通道候选雪崩期望, unit: candidates/pulse/channel}

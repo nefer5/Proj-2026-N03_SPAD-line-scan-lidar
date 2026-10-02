@@ -45,3 +45,4 @@ artifacts/b-noise-audit/optical_background_off.json
 # Local cross-project research clients / attachment inventories are not simulator sources.
 artifacts/spad-research-archive/
 artifacts/zotero-connector-test/
+node_modules/

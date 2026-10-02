@@ -32,7 +32,7 @@ globalThis.CurveEditors = class {
         const input=create("input");input.type="number";input.step="any";input.id=kind+"Basic_"+key;
         fieldLabel.append(input);fields.append(fieldLabel);inputs[key]=input;
         input.addEventListener("input",()=>{
-          onChange();
+          input.dataset.edited="true";onChange();
         });
       }
       panels.basic.append(fields);
@@ -90,7 +90,7 @@ globalThis.CurveEditors = class {
     for(const [kind,e] of Object.entries(this.editors)) {
       e.spec=structuredClone(specs[kind]);e.dirty=false;e.revision++;
       e.mode.value=e.spec.mode;e.shape.value=e.spec.basic.shape;e.method.value=e.spec.interpolation;
-      for(const [key,input] of Object.entries(e.inputs))input.value=e.spec.basic[key];
+      for(const [key,input] of Object.entries(e.inputs)){input.value=globalThis.BudgetNumbers?BudgetNumbers.input(e.spec.basic[key]):e.spec.basic[key];input.dataset.displayOriginal=input.value;input.dataset.edited="false";}
       e.textarea.value=e.spec.manual_points.map(p=>p.wavelength_nm+","+p.value).join("\n");
       e.inputFile.value="";this.fileInfo(e);this.visibility(e);
     }
@@ -110,7 +110,7 @@ globalThis.CurveEditors = class {
         for(const key of this.activeFields(e)) {
           const input=e.inputs[key];
           if(input.value.trim()==="" || !Number.isFinite(Number(input.value)))throw new Error(e.meta.label+"："+this.catalog.fields[key].label+"需要有效数字。");
-          spec.basic[key]=Number(input.value);
+          spec.basic[key]=globalThis.BudgetNumbers&&input.value===input.dataset.displayOriginal&&input.dataset.edited!=="true"?e.spec.basic[key]:Number(input.value);
         }
       }
       result[kind]=spec;

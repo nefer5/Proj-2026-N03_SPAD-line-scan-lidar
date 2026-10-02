@@ -24,7 +24,9 @@ def run(values,a):
 def test_default_sources_and_unknowns(base):
     cfg,a,r=base
     reference=SimulationConfig.for_experiment('system',{},a)
-    assert cfg.system.rx==reference.rx and cfg.system.spad==reference.spad
+    assert cfg.system.spad.channels_v==reference.spad.channels_v
+    assert cfg.system.spad.channels_h==1
+    assert cfg.system.rx.rx_aperture_width_mm==reference.rx.rx_aperture_width_mm
     assert cfg.system.tx.pulse_average_power_w==reference.tx.pulse_average_power_w
     assert cfg.system.tx.angle_h_max_mrad-cfg.system.tx.angle_h_min_mrad==2
     assert cfg.targets==SimulationConfig.system_targets({})
@@ -39,8 +41,10 @@ def test_default_sources_and_unknowns(base):
 
 def test_shared_b_optics_and_energy_conservation(base):
     cfg,a,r=base
-    _,_,b=project_illumination(cfg.system,a,lambda *args:None,lambda:False)
-    assert r['optical_budget']==b['budget']
+    single=SimulationConfig.for_experiment('system',r['single_channel']['configuration'],a)
+    _,_,b=project_illumination(single,a,lambda *args:None,lambda:False)
+    assert r['single_channel']['optical_budget']==b['budget']
+    assert r['optical_budget']['signal_candidate_avalanches_per_pulse']==pytest.approx(b['budget']['signal_candidate_avalanches_per_pulse']*cfg.system.spad.channels_v)
     budget=r['optical_budget']
     assert budget['rx_pupil_signal_j']==pytest.approx(sum(budget[k] for k in ('sensor_signal_j','rx_loss_j','filter_loss_j','psf_edge_loss_j')))
     assert sum(r['channel_sensor_photons_per_pulse'])==pytest.approx(budget['signal_sensor_incident_photons_per_pulse'])
@@ -64,7 +68,7 @@ def test_multishot_and_power_dimensional_scaling(base):
 def test_oversubscribed_column_and_hardware_link(base):
     _,a,_=base
     r=run({'system':{'acquisition':{'laser_shots':8}},'assumptions':{'reset_time_ns':0},
-        'transport':{'histogram_count_bits':16,'column_header_bytes':0,'mipi_net_mbps':1}},a)
+        'transport':{'histogram_count_bits':16,'column_header_bytes':0,'mipi_net_mbps':1},'electrical':{'capacity_mode':'aggregate_net','chip_header_bytes':0}},a)
     states={c['id']:c['status'] for c in r['constraints']}
     assert states['timing']=='fail' and states['link']=='fail'
     m=r['metrics']

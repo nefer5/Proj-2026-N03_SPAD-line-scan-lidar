@@ -202,3 +202,19 @@ def migrate_filter_leakage(values):
     if isinstance(spectra,dict) and isinstance(spectra.get('filter'),dict):
         spectra['filter']=migrate_filter_curve(spectra['filter'])
     return values
+
+
+def migrate_budget_v3(values):
+    """Preserve original input in the caller; explicitly adopt approved line model."""
+    values=migrate_budget(values)
+    system=values['system'];spad=system['spad'];rx=system['rx'];n=spad['channels_v']
+    if 'rx_channel' not in values:
+        values['rx_channel']={'h_width_mrad':rx['rx_angle_h_max_mrad']-rx['rx_angle_h_min_mrad'],
+            'v_width_deg':degrees_budget((rx['rx_angle_v_max_mrad']-rx['rx_angle_v_min_mrad'])/n)}
+    spad['channels_h']=1;system['tx']['tx_model']='uniform'
+    return values
+
+
+def degrees_budget(mrad):
+    from math import degrees
+    return degrees(mrad*1e-3)

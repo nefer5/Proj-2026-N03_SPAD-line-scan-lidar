@@ -72,7 +72,7 @@ def test_vfov_links_tx_only_and_v_rows_sum_to_total():
     c=SimulationConfig.for_experiment('budget',{'geometry':{'vfov_deg':1}})
     assert c.system.tx.angle_h_max_mrad-c.system.tx.angle_h_min_mrad==2
     assert c.system.tx.angle_v_max_mrad-c.system.tx.angle_v_min_mrad==pytest.approx(np.deg2rad(1)*1000)
-    assert c.system.rx.rx_angle_v_max_mrad==SimulationConfig.for_experiment('system',{}).rx.rx_angle_v_max_mrad
+    assert c.system.rx.rx_angle_v_max_mrad==pytest.approx(np.deg2rad(1)*1000/2)  # blank per-channel V follows Tx
     r=calculate_budget(c,a);rows=r['vertical_budget']['rows']
     assert sum(row['tx_energy_nj'] for row in rows)==pytest.approx(560)
     assert sum(row['tx_pulse_average_power_w'] for row in rows)==pytest.approx(280)

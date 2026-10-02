@@ -1,0 +1,17 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>Three.js 本地依赖自检</title>
+<style>body{margin:0;background:#101b27;color:#e5edf6;font:16px sans-serif}h1,p{margin:20px}canvas{display:block;max-width:100%}</style>
+<h1>Three.js 本地依赖自检</h1><p id="status">正在加载本地模块…</p>
+<script type="importmap">{"imports":{"three":"./three.module.js"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from './OrbitControls.js';
+const status=document.querySelector('#status');
+try {
+ const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setSize(720,400);renderer.setClearColor(0x101b27);document.body.append(renderer.domElement);
+ const scene=new THREE.Scene();const camera=new THREE.PerspectiveCamera(45,720/400,.1,100);camera.position.set(3,2,4);
+ const cube=new THREE.Mesh(new THREE.BoxGeometry(1,1,1),new THREE.MeshNormalMaterial());scene.add(cube,new THREE.AxesHelper(2));
+ const controls=new OrbitControls(camera,renderer.domElement);controls.update();
+ const render=()=>renderer.render(scene,camera);controls.addEventListener('change',render);render();
+ status.textContent='已验证：Three.js r'+THREE.REVISION+' / WebGL2 / OrbitControls（可拖动旋转、滚轮缩放）';document.body.dataset.status='passed';
+} catch(error) {status.textContent='WebGL验证失败：'+error.message;document.body.dataset.status='failed';}
+</script></html>

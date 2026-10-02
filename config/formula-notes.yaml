@@ -60,3 +60,15 @@ hardware_budget_histogram: 'N_ch为H/V读出通道乘积，N_bin为接收门宽�
 hardware_budget_prbs: 'L为总码片数，N_on为开码片数，每个开码片发一个同能量短脉冲。周期距离仅为周期相关的名义尺度，不保证唯一峰或消歧能力；未生成码与解码，不计最后回波、复位和同步开销。'
 
 pulse_equivalent_power: 'P_eq为全Tx角域VCSEL出光/Tx光学前的单脉冲等效平均功率；tau为等效脉宽，高斯用FWHM，矩形用实际持续时间。E=P_eq tau是整个波形的总能量，不是仅FWHM窗内能量。Tx效率只在后续乘一次。'
+
+hardware_budget_channel: 全线阵空间均匀，H方向一路；N_V为V角通道数，与每通道H/V binning分开。功率和能量参考面为Tx光学前，V角使用与VFOV相同单位。Rx单通道V留空跟随派生Tx角，显式填写时独立。
+
+hardware_budget_signal_window: 单个角通道、一次发射；p为公共脉冲核心的归一化时间密度，t_r为回波中心，窗口积分不含抖动。入瞳、探测面、候选雪崩分开，候选含PDE/FF，最终记录未仿真。
+hardware_budget_background_window: 背景候选率来自公共光学/光谱积分，窗口时长以s换算。器件噪声为该通道H_binning×V_binning个SPAD的DCR和其他噪声，未计读出损失。
+hardware_budget_energy_window: 单通道回波能量在同一时间窗口积分；高斯FWHM窗仅包含部分总脉冲能量，矩形实际持续时间窗包含全部能量。输入等效功率仍以总能量=P_eq×脉宽定义。
+
+budget_signal_energy_photons: 光学阶段E_i单位J，h和c取公共SI常数，λ为信号激光波长。所有值为一个角通道一次发射的全脉冲；候选雪崩是概率加权计数，不是光学能量或最终读出记录。
+
+budget_mipi_payload: b为计数位宽，N_hist为列内累计输出1或每发输出的发数；range格式改用每chip通道数×每点记录数×记录字节。chip包头和下游总列头分别定义。B_link为汇聚chip包长度，单位B；需求R单位bit/s。
+budget_mipi_capacity: lane速率为bit/s，不是PHY时钟；η为明确输入的净效率，aggregate_net模式直接用总净带宽分配，不再乘效率。T_wire以s计，显示层换算μs。
+budget_range_fisher: 独立泊松候选计数，A为未知信号幅值，背景视为已知；p_j由激光/器件IRF的TDC/gate积分得出。t_r用s时精度单位m；Python信息矩阵内部用ns，转换mm时显式乘时间单位。无信号或信息不正时不输出有限精度，不含死时间/pile-up/时钟系统误差。

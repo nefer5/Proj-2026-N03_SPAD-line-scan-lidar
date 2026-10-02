@@ -104,3 +104,19 @@ lab_analysis_seed_streams:
   noise: 2
 budget_timeline_max_pulses: 128
 background_angular_domain: independent_rx
+budget_schematic_max_cells: 2048
+budget_schematic_scan_samples: 65
+
+budget_temporal_plot_samples: 201
+budget_pulse_plot_half_widths: 3.0
+budget_frame_preview_slots: 8
+
+budget_reference_min_range_m: 10
+budget_reference_max_range_m: 300
+budget_reference_points: 41
+budget_reference_max_points: 201
+budget_reference_sigma_extent: 8
+budget_reference_max_bins: 20000
+budget_reference_max_measurements: 5000
+
+budget_max_histogram_bins: 10000000  # 预算只估计存储/带宽，不分配全直方图；A/B/C仿真仍用max_histogram_bins。

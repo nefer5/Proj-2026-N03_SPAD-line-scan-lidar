@@ -1,6 +1,7 @@
 """System budget page and stateless, auditable calculator API."""
 from pathlib import Path
 from hashlib import sha256
+import json
 from fastapi import APIRouter, HTTPException, Body
 from fastapi.responses import HTMLResponse
 from ..configuration import Algorithms, read_yaml, parse_yaml, frozen_yaml, yaml_snapshot
@@ -12,25 +13,36 @@ WEB=Path(__file__).resolve().parents[3]/'web'
 
 # Form layout only; values and constraints come from the canonical models/YAML.
 GROUPS=[
-    ('系统目标','targets',['frame_rate_hz','hfov_deg','scan_time_utilization','slot_count']),
-    ('Tx发光归一化角域','geometry',['vfov_deg','tx_h_width_mrad']),
-    ('多发与接收门','system.acquisition',['laser_shots','period_ns','gate_start_ns','gate_width_ns','calibration_delay_ns']),
-    ('VCSEL与场景','system.tx',['pulse_average_power_w','wavelength_nm','pulse_shape','pulse_fwhm_ps','tx_efficiency','tx_fwhm_h_mrad','tx_fwhm_v_mrad']),
-    ('目标与传播','system.scene',['range_m','target_reflectivity','atmospheric_one_way_transmission','overlap_factor']),
-    ('Rx光学','system.rx',['rx_aperture_shape','rx_aperture_mm','rx_aperture_width_mm','rx_aperture_height_mm','rx_efficiency','focal_length_h_mm','focal_length_v_mm','psf_sigma_h_um','psf_sigma_v_um']),
-    ('Rx独立收光角域','system.rx',['rx_angle_h_min_mrad','rx_angle_h_max_mrad','rx_angle_v_min_mrad','rx_angle_v_max_mrad']),
-    ('SPAD与读出','system.spad',['channels_h','channels_v','H_binning','V_binning','pixel_pitch_um','fill_factor','spad_dead_time_ns']),
-    ('时间量化','system.readout',['tdc_bin_ps','readout_mode','tdc_dead_time_ns']),
-    ('环境光','system.background',['solar_enabled','solar_illuminance_lux','solar_reflectivity','other_light_enabled','other_light_scale']),
-    ('复位、电热与限额','assumptions',['reset_time_ns','wall_plug_efficiency','max_average_optical_power_w','max_peak_optical_power_w']),
-    ('直方图输出预算','transport',['histogram_count_bits','column_header_bytes','mipi_net_mbps']),
-    ('PRBS候选方案 · 独立预算','assumptions',['prbs_enabled','prbs_chip_count','prbs_chip_ns','prbs_on_count'])]
+ ('系统目标','targets',['frame_rate_hz','hfov_deg','scan_time_utilization','slot_count']),
+ ('系统垂直覆盖','geometry',['vfov_deg']),
+ ('LiDAR线数','system.spad',['channels_v']),
+ ('Tx · 光源与脉冲','system.tx',['pulse_average_power_w','wavelength_nm','pulse_shape','pulse_fwhm_ps','tx_efficiency']),
+ ('Tx · 单通道角域','geometry',['tx_h_width_mrad']),
+ ('Tx · 列内多发','system.acquisition',['laser_shots','period_ns']),
+ ('场景','system.scene',['range_m','target_reflectivity','atmospheric_one_way_transmission','overlap_factor']),
+ ('Rx · 单通道收光角域','rx_channel',['h_width_mrad','v_width_deg']),
+ ('Rx · 接收光学','system.rx',['rx_aperture_shape','rx_aperture_mm','rx_aperture_width_mm','rx_aperture_height_mm','rx_efficiency','focal_length_h_mm','focal_length_v_mm','psf_sigma_h_um','psf_sigma_v_um']),
+ ('Rx · 门控与标定','system.acquisition',['gate_start_ns','gate_width_ns','calibration_delay_ns']),
+ ('SPAD · 通道内像素','system.spad',['H_binning','V_binning','pixel_pitch_um','fill_factor','spad_dead_time_ns']),
+ ('SPAD · 数字读出','system.readout',['tdc_bin_ps','readout_mode','tdc_dead_time_ns']),
+ ('环境光','system.background',['solar_enabled','solar_illuminance_lux','solar_reflectivity','other_light_enabled','other_light_scale']),
+ ('高级 · 电热与限额','assumptions',['reset_time_ns','wall_plug_efficiency','max_average_optical_power_w','max_peak_optical_power_w']),
+ ('电学 · 输出格式','transport',['payload_format','histogram_count_bits','point_bytes','column_header_bytes','mipi_net_mbps']),
+ ('电学 · 芯片与MIPI','electrical',['capacity_mode','channels_per_chip','chips_per_link','data_lanes_per_link','lane_rate_mbps','payload_efficiency','available_links','buffer_bytes_per_link','chip_header_bytes','histogram_mode','returns_per_point','ready_delay_us']),
+ ('距离参考 · 理想扫参','range_reference',['enabled','min_range_m','max_range_m','points','area_kind']),
+ ('高级 · PRBS预算','assumptions',['prbs_enabled','prbs_chip_count','prbs_chip_ns','prbs_on_count'])]
 
 
 @router.get('/system/budget')
 def page():
     html=(WEB/'budget.html').read_text(encoding='utf8')
-    for name in ('shared/theme.css', 'shared/theme.js', 'budget.css','budget.js','curve-editor.js','vendor/katex/katex.min.js','vendor/katex/katex.min.css'):
+    try:
+        manifest=json.loads((WEB/'vendor/three/manifest.json').read_text(encoding='utf8'))
+    except (OSError,ValueError):
+        # Keep the budget usable. The module script displays an explicit load error.
+        manifest={'imports':{}}
+    html=html.replace('__THREE_IMPORT_MAP__',json.dumps({'imports':manifest['imports']}).replace('<','\\u003c'))
+    for name in ('budget-hardware.js','budget-charts.js','shared/number-format.js','budget-scene.js','budget-scene.css','shared/theme.css', 'shared/theme.js', 'budget.css','budget.js','curve-editor.js','vendor/katex/katex.min.js','vendor/katex/katex.min.css'):
         html=html.replace(f'/static/{name}"',f'/static/{name}?v={sha256((WEB/name).read_bytes()).hexdigest()}"')
     return HTMLResponse(html)
 
@@ -42,7 +54,7 @@ def catalog():
         curves=read_yaml('curve-inputs.yaml')
         curves.update(formulas=read_yaml('formulas.yaml'),formula_notes=read_yaml('formula-notes.yaml'))
         return dict(defaults=cfg.model_dump(),schema=type(cfg).model_json_schema(),groups=GROUPS,
-                    help=read_yaml('parameter-help.yaml'),curves=curves,algorithms=a.model_dump(),schema_version=2)
+                    help=read_yaml('parameter-help.yaml'),curves=curves,algorithms=a.model_dump(),schema_version=4)
 
 
 @router.post('/api/system-budget/calculate')
@@ -61,11 +73,31 @@ def import_budget(document:str=Body(media_type='text/plain')):
         import yaml
         with frozen_yaml(yaml_snapshot()):
             doc=parse_yaml(document)
-            if set(doc)!={'schema_version','kind','experiment'} or doc['schema_version'] not in (1,2) or doc['kind']!='hardware-budget':
-                raise ValueError('需要 schema_version: 1或2、kind: hardware-budget、experiment；旧缓存已保留，未静默迁移。')
-            if doc['schema_version']==1:
-                from ..legacy_config import migrate_budget
-                doc['experiment']=migrate_budget(doc['experiment'])
+            if set(doc)!={'schema_version','kind','experiment'} or doc['schema_version'] not in (1,2,3,4) or doc['kind']!='hardware-budget':
+                raise ValueError('需要 schema_version: 1、2、3或4、kind: hardware-budget、experiment；旧缓存已保留，未静默迁移。')
+            if doc['schema_version']<3:
+                from ..legacy_config import migrate_budget_v3
+                doc['experiment']=migrate_budget_v3(doc['experiment'])
             return SimulationConfig.for_experiment('budget',doc['experiment']).model_dump()
     except (ValueError,KeyError,yaml.YAMLError) as exc:
         raise HTTPException(422,str(exc)) from exc
+
+
+@router.post('/api/system-budget/measurements')
+def measurements(document:str=Body(media_type='text/plain')):
+    import csv,io
+    from ..budget_extensions import RangeMeasurement
+    try:
+        if not document.strip():return []
+        data=csv.DictReader(io.StringIO(document.lstrip('\ufeff')))
+        allowed=set(RangeMeasurement.model_fields)
+        if not data.fieldnames or 'distance_m' not in data.fieldnames or len(set(data.fieldnames))!=len(data.fieldnames) or set(data.fieldnames)-allowed:
+            raise ValueError('CSV需要distance_m；可选area_counts,peak_counts,fwhm_ns,range_std_mm,range_bias_mm，禁止未知或重复表头')
+        out=[];limit=Algorithms.load().budget_reference_max_measurements
+        for row in data:
+            if len(out)>=limit:raise ValueError('Measurement count exceeds algorithm limit')
+            if None in row:raise ValueError('CSV行列数不匹配')
+            item={key:float(row[key]) if row.get(key) is not None and row[key].strip() else None for key in allowed}
+            out.append(RangeMeasurement.model_validate(item).model_dump())
+        return out
+    except (ValueError,TypeError) as exc:raise HTTPException(422,str(exc)) from exc

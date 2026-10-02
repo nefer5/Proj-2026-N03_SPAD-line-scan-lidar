@@ -76,8 +76,27 @@ def default_values():
 
 
 class Algorithms(BaseModel):
+    @model_validator(mode='after')
+    def budget_reference_limits(self):
+        if self.budget_reference_min_range_m>=self.budget_reference_max_range_m:raise ValueError('Invalid default reference range')
+        if self.budget_reference_points>self.budget_reference_max_points:raise ValueError('Default reference points exceed limit')
+        return self
+
     model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
+    budget_max_histogram_bins: int = Field(ge=1)
+    budget_reference_min_range_m: float = Field(gt=0)
+    budget_reference_max_range_m: float = Field(gt=0)
+    budget_reference_points: int = Field(ge=3)
+    budget_reference_max_points: int = Field(ge=3)
+    budget_reference_sigma_extent: float = Field(ge=6,le=20)
+    budget_reference_max_bins: int = Field(ge=10)
+    budget_reference_max_measurements: int = Field(ge=1)
     budget_timeline_max_pulses: int = Field(ge=1)
+    budget_temporal_plot_samples: int = Field(ge=21,le=2001)
+    budget_pulse_plot_half_widths: float = Field(gt=.5,le=20)
+    budget_frame_preview_slots: int = Field(ge=2,le=32)
+    budget_schematic_max_cells: int = Field(ge=1)
+    budget_schematic_scan_samples: int = Field(ge=3,le=1000)
     background_angular_domain: Literal['independent_rx', 'legacy_tx']
     filter_leakage_domain: Literal['source_coverage']
     factorize_achromatic_leakage: bool
@@ -197,7 +216,7 @@ class Algorithms(BaseModel):
         Existing numerical policies are never replaced or silently filled.
         Historical C replays do not use the newly introduced B-analysis policies.
         """
-        additions=('budget_timeline_max_pulses','parameter_preview_debounce_ms','max_visible_channels','max_lab_analysis_events',
+        additions=('budget_max_histogram_bins','budget_reference_min_range_m','budget_reference_max_range_m','budget_reference_points','budget_reference_max_points','budget_reference_sigma_extent','budget_reference_max_bins','budget_reference_max_measurements','budget_temporal_plot_samples','budget_pulse_plot_half_widths','budget_frame_preview_slots','budget_schematic_scan_samples','budget_schematic_max_cells','budget_timeline_max_pulses','parameter_preview_debounce_ms','max_visible_channels','max_lab_analysis_events',
                    'b_mechanism_preview_gates','b_timeline_max_points','b_view_cache_entries',
                    'max_lab_analysis_histogram_cells','max_lab_reference_cells','max_channel_ratio_cells',
                    'lab_analysis_seed_streams','max_column_projection_work','max_column_pulses',

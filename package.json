@@ -1,0 +1,11 @@
+{
+  "name": "spad-line-lidar-web",
+  "private": true,
+  "scripts": {
+    "vendor:three": "node scripts/vendor-three.mjs",
+    "postinstall": "npm run vendor:three"
+  },
+  "dependencies": {
+    "three": "0.186.1"
+  }
+}

@@ -35,6 +35,8 @@ def render():
     lines.extend(["## 候选输入到实际读出",""]);steps(definition["readout"])
     lines.extend(["## "+definition["spatial"]["title"],"",definition["spatial"]["intro"],""])
     steps(definition["spatial"]["steps"])
+    lines.extend(["## "+definition["budget_window"]["title"],"", "单角通道的一次发射，分接收gate、回波中心等效脉宽窗口与交集三种口径。", ""]);steps(definition["budget_window"]["steps"])
+    lines.extend(["## "+definition["budget_signal_chain"]["title"],"",definition["budget_signal_chain"]["intro"],""]);steps(definition["budget_signal_chain"]["steps"])
     lines.extend(["## "+definition["scan"]["title"],"",definition["scan"]["intro"],""])
     steps(definition["scan"]["steps"])
     lines.extend(["## "+definition["columns"]["title"],"",definition["columns"]["intro"],""])

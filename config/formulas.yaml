@@ -60,3 +60,15 @@ hardware_budget_histogram: 'B_{\mathrm{col}}=\left\lceil N_{\mathrm{ch}}N_{\math
 hardware_budget_prbs: 'T_{\mathrm{code}}=L T_{\mathrm{chip}},\quad E_{\mathrm{code}}=N_{\mathrm{on}}E_{\mathrm{pulse}},\quad R_{\mathrm{period}}=cT_{\mathrm{code}}/2'
 
 pulse_equivalent_power: 'E_{\mathrm{pulse}}=P_{\mathrm{eq}}\,\tau,\quad E_{\mathrm{Tx,out}}=\eta_{\mathrm{Tx}}E_{\mathrm{pulse}}'
+
+hardware_budget_channel: 'P_{\mathrm{ch}}=P_{\mathrm{Tx}}/N_V,\quad E_{\mathrm{ch}}=E_{\mathrm{Tx}}/N_V,\quad \Delta\theta_{V,\mathrm{Tx}}=\mathrm{VFOV}/N_V'
+
+hardware_budget_signal_window: 'N_{\mathrm{signal},W}=N_{\mathrm{signal,pulse}}\int_{t_0}^{t_1}p(t-t_r)\,dt'
+hardware_budget_background_window: 'N_{\mathrm{background},W}=r_{\mathrm{background}}\Delta t_W,\quad N_{\mathrm{noise},W}=N_{\mathrm{SPAD/ch}}r_{\mathrm{noise/SPAD}}\Delta t_W'
+hardware_budget_energy_window: 'E_{\mathrm{signal},W}=E_{\mathrm{signal,pulse}}\int_{t_0}^{t_1}p(t-t_r)\,dt'
+
+budget_signal_energy_photons: 'N_{\mathrm{photons},i}=E_i/(hc/\lambda),\quad N_{\mathrm{cand}}=N_{\mathrm{sensor}}\,\mathrm{PDE}\,\mathrm{FF}'
+
+budget_mipi_payload: 'B_{\mathrm{chip}}=\lceil N_{\mathrm{ch/chip}}N_{\mathrm{bin}}b/8\rceil N_{\mathrm{hist}}+B_{\mathrm{chip,header}},\quad R_{\mathrm{req,link}}=8B_{\mathrm{link}}N_{\mathrm{slot}}f_{\mathrm{frame}}'
+budget_mipi_capacity: 'C_{\mathrm{link}}=N_{\mathrm{lane}}r_{\mathrm{lane}}\eta,\quad T_{\mathrm{wire}}=8B_{\mathrm{link}}/C_{\mathrm{link}}'
+budget_range_fisher: '\mu_j=A p_j(t_r)+b_j,\quad I_{ab}=\sum_j\frac{(\partial_a\mu_j)(\partial_b\mu_j)}{\mu_j},\quad \sigma_R\ge\frac{c}{2}\left(I_{tt}-\frac{I_{tA}^2}{I_{AA}}\right)^{-1/2}'

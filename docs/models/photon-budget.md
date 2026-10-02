@@ -416,6 +416,82 @@ $$
 | PSF感光面边缘损失 | J/pulse | `psf_edge_loss_j` |
 | 能量平衡残差 | J/pulse | `energy_balance_residual_j` |
 
+## 单通道时间窗口的光子与能量
+
+单角通道的一次发射，分接收gate、回波中心等效脉宽窗口与交集三种口径。
+
+### 信号 · 入瞳 → 探测面 → 候选雪崩
+
+对同一单通道全脉冲光学预算按窗口时间份额积分，逐一显示各参考面与候选数。
+
+$$
+N_{\mathrm{signal},W}=N_{\mathrm{signal,pulse}}\int_{t_0}^{t_1}p(t-t_r)\,dt
+$$
+
+**符号与单位：** 单个角通道、一次发射；p为公共脉冲核心的归一化时间密度，t_r为回波中心，窗口积分不含抖动。入瞳、探测面、候选雪崩分开，候选含PDE/FF，最终记录未仿真。
+
+| 中间量 | 单位 | Python结果字段 |
+|---|---|---|
+| 窗口内单发能量份额 | 1 | `signal_fraction` |
+| 窗口内入瞳光子 | photons/channel/window | `signal_pupil_photons` |
+| 窗口内探测面光子 | photons/channel/window | `signal_sensor_photons` |
+| 窗口内候选雪崩 | candidates/channel/window | `signal_candidates` |
+| 最终混合记录 | 未仿真 | `final_mixed_records` |
+
+### 背景与器件噪声 · 同一时间窗口
+
+稳态背景和器件噪声率分别乘当前窗口时长，不能混作最终读出记录。
+
+$$
+N_{\mathrm{background},W}=r_{\mathrm{background}}\Delta t_W,\quad N_{\mathrm{noise},W}=N_{\mathrm{SPAD/ch}}r_{\mathrm{noise/SPAD}}\Delta t_W
+$$
+
+**符号与单位：** 背景候选率来自公共光学/光谱积分，窗口时长以s换算。器件噪声为该通道H_binning×V_binning个SPAD的DCR和其他噪声，未计读出损失。
+
+| 中间量 | 单位 | Python结果字段 |
+|---|---|---|
+| 太阳入瞳原始光子 | photons/channel/window | `solar_pupil_photons` |
+| 其他环境光入瞳原始光子 | photons/channel/window | `other_pupil_photons` |
+| 太阳探测面光子 | photons/channel/window | `solar_sensor_photons` |
+| 其他环境光探测面光子 | photons/channel/window | `other_sensor_photons` |
+| 背景候选雪崩 | candidates/channel/window | `background_candidates` |
+| 器件噪声候选 | candidates/channel/window | `device_noise_candidates` |
+
+### 回波光能 · 同一时间窗口
+
+回波入瞳及探测面能量按同一时间窗口积分，保持光学参考面一致。
+
+$$
+E_{\mathrm{signal},W}=E_{\mathrm{signal,pulse}}\int_{t_0}^{t_1}p(t-t_r)\,dt
+$$
+
+**符号与单位：** 单通道回波能量在同一时间窗口积分；高斯FWHM窗仅包含部分总脉冲能量，矩形实际持续时间窗包含全部能量。输入等效功率仍以总能量=P_eq×脉宽定义。
+
+| 中间量 | 单位 | Python结果字段 |
+|---|---|---|
+| 入瞳回波能量 | nJ/channel/window | `signal_pupil_energy_nj` |
+| 探测面回波能量 | nJ/channel/window | `signal_sensor_energy_nj` |
+
+## 单通道全脉冲信号链路
+
+阶段柱状图不是时间直方图；光学阶段以同一波长的能量和光子数计，候选雪崩含PDE/FF但不是最终混合记录。
+
+### 光学能量与同波长光子数
+
+各阶段光学能量由公共B核给出，只做hc/λ单位换算；不把候选雪崩赋予光学能量。
+
+$$
+N_{\mathrm{photons},i}=E_i/(hc/\lambda),\quad N_{\mathrm{cand}}=N_{\mathrm{sensor}}\,\mathrm{PDE}\,\mathrm{FF}
+$$
+
+**符号与单位：** 光学阶段E_i单位J，h和c取公共SI常数，λ为信号激光波长。所有值为一个角通道一次发射的全脉冲；候选雪崩是概率加权计数，不是光学能量或最终读出记录。
+
+| 中间量 | 单位 | Python结果字段 |
+|---|---|---|
+| 单通道Tx光学前全脉冲能量 | J/pulse/channel | `tx_input_j` |
+| 单通道探测面全脉冲光学能量 | J/pulse/channel | `sensor_signal_j` |
+| 单通道候选雪崩期望 | candidates/pulse/channel | `signal_candidate_avalanches_per_pulse` |
+
 ## C 逐脉冲扫描：时序、实际发数与光子审计
 
 扫描只组装逐发光学输入和控制时序；所有脉冲共享同一SPAD/读出状态。下列总量按完整测量帧的参考时隙统计，不代表检测成功率。

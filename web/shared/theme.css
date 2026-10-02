@@ -201,7 +201,6 @@ html[data-theme="light"] { color-scheme:light;
   --theme-color-2b4556: #e5eaed;
   --theme-color-2b4654: #e5ebee;
   --theme-color-2c261e: #f4f2ef;
-  --theme-color-2c3d4b: #e7ebef;
   --theme-color-2c4354: #e5eaee;
   --theme-color-2c6668: #e1ebeb;
   --theme-color-2d271d: #f5f3ef;
@@ -219,6 +218,7 @@ html[data-theme="light"] { color-scheme:light;
   --theme-color-315b64: #e1e9eb;
   --theme-color-316172: #dee6e9;
   --theme-color-321c23: #f4eef0;
+  --theme-color-32689b: #d6dde4;
   --theme-color-344554: #e3e8ed;
   --theme-color-34485e: #e1e6eb;
   --theme-color-344a5c: #e2e7ec;
@@ -232,6 +232,7 @@ html[data-theme="light"] { color-scheme:light;
   --theme-color-365064: #e0e6ea;
   --theme-color-365160: #e1e7eb;
   --theme-color-365161: #e0e7eb;
+  --theme-color-377e69: #dbe7e3;
   --theme-color-378d91: #d7e4e4;
   --theme-color-385266: #dfe5ea;
   --theme-color-385468: #dfe5ea;
@@ -311,6 +312,7 @@ html[data-theme="light"] { color-scheme:light;
   --theme-color-678ca0: #466170;
   --theme-color-68899f: #475f70;
   --theme-color-68aab7: #386b75;
+  --theme-color-68b5a2: #397566;
   --theme-color-68d9c9: #207f72;
   --theme-color-69899f: #475f6f;
   --theme-color-698ba0: #46606f;
@@ -335,7 +337,6 @@ html[data-theme="light"] { color-scheme:light;
   --theme-color-7295ac: #405b6d;
   --theme-color-72c2c3: #317273;
   --theme-color-7395a9: #425c6c;
-  --theme-color-748393: #505b67;
   --theme-color-75a9f6: #0b3b84;
   --theme-color-7695a9: #435b6a;
   --theme-color-76b5ad: #3b6d67;
@@ -355,6 +356,7 @@ html[data-theme="light"] { color-scheme:light;
   --theme-color-79e8dc: #157d72;
   --theme-color-7ad9bc: #22765c;
   --theme-color-7b5932: #e8e2dc;
+  --theme-color-7baff0: #0f4180;
   --theme-color-7bcac1: #2d7069;
   --theme-color-7c92a5: #465766;
   --theme-color-7c96aa: #435767;
@@ -515,6 +517,7 @@ html[data-theme="light"] { color-scheme:light;
   --theme-color-b1c8d8: #2b4557;
   --theme-color-b38c5d: #7a5c39;
   --theme-color-b3d0da: #2a4b57;
+  --theme-color-b44750: #86353c;
   --theme-color-b4ab91: #5e5640;
   --theme-color-b4cad7: #2d4655;
   --theme-color-b4d4d8: #2c5055;
@@ -526,7 +529,6 @@ html[data-theme="light"] { color-scheme:light;
   --theme-color-b6e2dd: #235953;
   --theme-color-b6e6c9: #1f5c37;
   --theme-color-b6e9df: #1c5d51;
-  --theme-color-b7cad8: #2d4353;
   --theme-color-b7eee5: #176054;
   --theme-color-b8d7df: #274c56;
   --theme-color-b8df77: #577a1d;
@@ -534,7 +536,6 @@ html[data-theme="light"] { color-scheme:light;
   --theme-color-bad9da: #2c5152;
   --theme-color-bba982: #685939;
   --theme-color-bcd4df: #284653;
-  --theme-color-bdcddd: #2a3e52;
   --theme-color-beb695: #5e573a;
   --theme-color-becdd9: #2e404f;
   --theme-color-bf96ec: #401471;
@@ -576,6 +577,7 @@ html[data-theme="light"] { color-scheme:light;
   --theme-color-e2ebf4: #1b3248;
   --theme-color-e2f0f7: #153b4d;
   --theme-color-e3ebe5: #2b3c2f;
+  --theme-color-e58386: #77191c;
   --theme-color-e5fffa: #075748;
   --theme-color-e6d78c: #736419;
   --theme-color-e7bf88: #754e18;
@@ -821,7 +823,6 @@ html[data-theme="light"] {
   --theme-ink-2b4556: #3b5f77;
   --theme-ink-2b4654: #3c6276;
   --theme-ink-2c261e: #6a5c48;
-  --theme-ink-2c3d4b: #425c70;
   --theme-ink-2c4354: #3d5d75;
   --theme-ink-2c6668: #357b7d;
   --theme-ink-2d271d: #6d5e46;
@@ -839,6 +840,7 @@ html[data-theme="light"] {
   --theme-ink-315b64: #3b6d78;
   --theme-ink-316172: #366a7d;
   --theme-ink-321c23: #724050;
+  --theme-ink-32689b: #2c5b87;
   --theme-ink-344554: #445b6e;
   --theme-ink-34485e: #405873;
   --theme-ink-344a5c: #405c72;
@@ -852,6 +854,7 @@ html[data-theme="light"] {
   --theme-ink-365064: #3f5d74;
   --theme-ink-365160: #406072;
   --theme-ink-365161: #406073;
+  --theme-ink-377e69: #367c68;
   --theme-ink-378d91: #317e81;
   --theme-ink-385266: #3f5d73;
   --theme-ink-385468: #3e5e74;
@@ -931,6 +934,7 @@ html[data-theme="light"] {
   --theme-ink-678ca0: #466170;
   --theme-ink-68899f: #475f70;
   --theme-ink-68aab7: #386b75;
+  --theme-ink-68b5a2: #397566;
   --theme-ink-68d9c9: #207f72;
   --theme-ink-69899f: #475f6f;
   --theme-ink-698ba0: #46606f;
@@ -955,7 +959,6 @@ html[data-theme="light"] {
   --theme-ink-7295ac: #405b6d;
   --theme-ink-72c2c3: #317273;
   --theme-ink-7395a9: #425c6c;
-  --theme-ink-748393: #505b67;
   --theme-ink-75a9f6: #0b3b84;
   --theme-ink-7695a9: #435b6a;
   --theme-ink-76b5ad: #3b6d67;
@@ -975,6 +978,7 @@ html[data-theme="light"] {
   --theme-ink-79e8dc: #157d72;
   --theme-ink-7ad9bc: #22765c;
   --theme-ink-7b5932: #7f5c34;
+  --theme-ink-7baff0: #0f4180;
   --theme-ink-7bcac1: #2d7069;
   --theme-ink-7c92a5: #465766;
   --theme-ink-7c96aa: #435767;
@@ -1135,6 +1139,7 @@ html[data-theme="light"] {
   --theme-ink-b1c8d8: #2b4557;
   --theme-ink-b38c5d: #7a5c39;
   --theme-ink-b3d0da: #2a4b57;
+  --theme-ink-b44750: #86353c;
   --theme-ink-b4ab91: #5e5640;
   --theme-ink-b4cad7: #2d4655;
   --theme-ink-b4d4d8: #2c5055;
@@ -1146,7 +1151,6 @@ html[data-theme="light"] {
   --theme-ink-b6e2dd: #235953;
   --theme-ink-b6e6c9: #1f5c37;
   --theme-ink-b6e9df: #1c5d51;
-  --theme-ink-b7cad8: #2d4353;
   --theme-ink-b7eee5: #176054;
   --theme-ink-b8d7df: #274c56;
   --theme-ink-b8df77: #577a1d;
@@ -1154,7 +1158,6 @@ html[data-theme="light"] {
   --theme-ink-bad9da: #2c5152;
   --theme-ink-bba982: #685939;
   --theme-ink-bcd4df: #284653;
-  --theme-ink-bdcddd: #2a3e52;
   --theme-ink-beb695: #5e573a;
   --theme-ink-becdd9: #2e404f;
   --theme-ink-bf96ec: #401471;
@@ -1196,6 +1199,7 @@ html[data-theme="light"] {
   --theme-ink-e2ebf4: #1b3248;
   --theme-ink-e2f0f7: #153b4d;
   --theme-ink-e3ebe5: #2b3c2f;
+  --theme-ink-e58386: #77191c;
   --theme-ink-e5fffa: #075748;
   --theme-ink-e6d78c: #736419;
   --theme-ink-e7bf88: #754e18;
@@ -1843,9 +1847,6 @@ html[data-theme="light"] svg text[fill="#2b4654"] {fill:#3c6276;}
 html[data-theme="light"] svg [fill="#2c261e"] {fill:#f4f2ef;}
 html[data-theme="light"] svg [stroke="#2c261e"] {stroke:#f4f2ef;}
 html[data-theme="light"] svg text[fill="#2c261e"] {fill:#6a5c48;}
-html[data-theme="light"] svg [fill="#2c3d4b"] {fill:#e7ebef;}
-html[data-theme="light"] svg [stroke="#2c3d4b"] {stroke:#e7ebef;}
-html[data-theme="light"] svg text[fill="#2c3d4b"] {fill:#425c70;}
 html[data-theme="light"] svg [fill="#2c4354"] {fill:#e5eaee;}
 html[data-theme="light"] svg [stroke="#2c4354"] {stroke:#e5eaee;}
 html[data-theme="light"] svg text[fill="#2c4354"] {fill:#3d5d75;}
@@ -1897,6 +1898,9 @@ html[data-theme="light"] svg text[fill="#316172"] {fill:#366a7d;}
 html[data-theme="light"] svg [fill="#321c23"] {fill:#f4eef0;}
 html[data-theme="light"] svg [stroke="#321c23"] {stroke:#f4eef0;}
 html[data-theme="light"] svg text[fill="#321c23"] {fill:#724050;}
+html[data-theme="light"] svg [fill="#32689b"] {fill:#d6dde4;}
+html[data-theme="light"] svg [stroke="#32689b"] {stroke:#d6dde4;}
+html[data-theme="light"] svg text[fill="#32689b"] {fill:#2c5b87;}
 html[data-theme="light"] svg [fill="#344554"] {fill:#e3e8ed;}
 html[data-theme="light"] svg [stroke="#344554"] {stroke:#e3e8ed;}
 html[data-theme="light"] svg text[fill="#344554"] {fill:#445b6e;}
@@ -1936,6 +1940,9 @@ html[data-theme="light"] svg text[fill="#365160"] {fill:#406072;}
 html[data-theme="light"] svg [fill="#365161"] {fill:#e0e7eb;}
 html[data-theme="light"] svg [stroke="#365161"] {stroke:#e0e7eb;}
 html[data-theme="light"] svg text[fill="#365161"] {fill:#406073;}
+html[data-theme="light"] svg [fill="#377e69"] {fill:#dbe7e3;}
+html[data-theme="light"] svg [stroke="#377e69"] {stroke:#dbe7e3;}
+html[data-theme="light"] svg text[fill="#377e69"] {fill:#367c68;}
 html[data-theme="light"] svg [fill="#378d91"] {fill:#d7e4e4;}
 html[data-theme="light"] svg [stroke="#378d91"] {stroke:#d7e4e4;}
 html[data-theme="light"] svg text[fill="#378d91"] {fill:#317e81;}
@@ -2173,6 +2180,9 @@ html[data-theme="light"] svg text[fill="#68899f"] {fill:#475f70;}
 html[data-theme="light"] svg [fill="#68aab7"] {fill:#386b75;}
 html[data-theme="light"] svg [stroke="#68aab7"] {stroke:#386b75;}
 html[data-theme="light"] svg text[fill="#68aab7"] {fill:#386b75;}
+html[data-theme="light"] svg [fill="#68b5a2"] {fill:#397566;}
+html[data-theme="light"] svg [stroke="#68b5a2"] {stroke:#397566;}
+html[data-theme="light"] svg text[fill="#68b5a2"] {fill:#397566;}
 html[data-theme="light"] svg [fill="#68d9c9"] {fill:#207f72;}
 html[data-theme="light"] svg [stroke="#68d9c9"] {stroke:#207f72;}
 html[data-theme="light"] svg text[fill="#68d9c9"] {fill:#207f72;}
@@ -2245,9 +2255,6 @@ html[data-theme="light"] svg text[fill="#72c2c3"] {fill:#317273;}
 html[data-theme="light"] svg [fill="#7395a9"] {fill:#425c6c;}
 html[data-theme="light"] svg [stroke="#7395a9"] {stroke:#425c6c;}
 html[data-theme="light"] svg text[fill="#7395a9"] {fill:#425c6c;}
-html[data-theme="light"] svg [fill="#748393"] {fill:#505b67;}
-html[data-theme="light"] svg [stroke="#748393"] {stroke:#505b67;}
-html[data-theme="light"] svg text[fill="#748393"] {fill:#505b67;}
 html[data-theme="light"] svg [fill="#75a9f6"] {fill:#0b3b84;}
 html[data-theme="light"] svg [stroke="#75a9f6"] {stroke:#0b3b84;}
 html[data-theme="light"] svg text[fill="#75a9f6"] {fill:#0b3b84;}
@@ -2305,6 +2312,9 @@ html[data-theme="light"] svg text[fill="#7ad9bc"] {fill:#22765c;}
 html[data-theme="light"] svg [fill="#7b5932"] {fill:#e8e2dc;}
 html[data-theme="light"] svg [stroke="#7b5932"] {stroke:#e8e2dc;}
 html[data-theme="light"] svg text[fill="#7b5932"] {fill:#7f5c34;}
+html[data-theme="light"] svg [fill="#7baff0"] {fill:#0f4180;}
+html[data-theme="light"] svg [stroke="#7baff0"] {stroke:#0f4180;}
+html[data-theme="light"] svg text[fill="#7baff0"] {fill:#0f4180;}
 html[data-theme="light"] svg [fill="#7bcac1"] {fill:#2d7069;}
 html[data-theme="light"] svg [stroke="#7bcac1"] {stroke:#2d7069;}
 html[data-theme="light"] svg text[fill="#7bcac1"] {fill:#2d7069;}
@@ -2785,6 +2795,9 @@ html[data-theme="light"] svg text[fill="#b38c5d"] {fill:#7a5c39;}
 html[data-theme="light"] svg [fill="#b3d0da"] {fill:#2a4b57;}
 html[data-theme="light"] svg [stroke="#b3d0da"] {stroke:#2a4b57;}
 html[data-theme="light"] svg text[fill="#b3d0da"] {fill:#2a4b57;}
+html[data-theme="light"] svg [fill="#b44750"] {fill:#86353c;}
+html[data-theme="light"] svg [stroke="#b44750"] {stroke:#86353c;}
+html[data-theme="light"] svg text[fill="#b44750"] {fill:#86353c;}
 html[data-theme="light"] svg [fill="#b4ab91"] {fill:#5e5640;}
 html[data-theme="light"] svg [stroke="#b4ab91"] {stroke:#5e5640;}
 html[data-theme="light"] svg text[fill="#b4ab91"] {fill:#5e5640;}
@@ -2818,9 +2831,6 @@ html[data-theme="light"] svg text[fill="#b6e6c9"] {fill:#1f5c37;}
 html[data-theme="light"] svg [fill="#b6e9df"] {fill:#1c5d51;}
 html[data-theme="light"] svg [stroke="#b6e9df"] {stroke:#1c5d51;}
 html[data-theme="light"] svg text[fill="#b6e9df"] {fill:#1c5d51;}
-html[data-theme="light"] svg [fill="#b7cad8"] {fill:#2d4353;}
-html[data-theme="light"] svg [stroke="#b7cad8"] {stroke:#2d4353;}
-html[data-theme="light"] svg text[fill="#b7cad8"] {fill:#2d4353;}
 html[data-theme="light"] svg [fill="#b7eee5"] {fill:#176054;}
 html[data-theme="light"] svg [stroke="#b7eee5"] {stroke:#176054;}
 html[data-theme="light"] svg text[fill="#b7eee5"] {fill:#176054;}
@@ -2842,9 +2852,6 @@ html[data-theme="light"] svg text[fill="#bba982"] {fill:#685939;}
 html[data-theme="light"] svg [fill="#bcd4df"] {fill:#284653;}
 html[data-theme="light"] svg [stroke="#bcd4df"] {stroke:#284653;}
 html[data-theme="light"] svg text[fill="#bcd4df"] {fill:#284653;}
-html[data-theme="light"] svg [fill="#bdcddd"] {fill:#2a3e52;}
-html[data-theme="light"] svg [stroke="#bdcddd"] {stroke:#2a3e52;}
-html[data-theme="light"] svg text[fill="#bdcddd"] {fill:#2a3e52;}
 html[data-theme="light"] svg [fill="#beb695"] {fill:#5e573a;}
 html[data-theme="light"] svg [stroke="#beb695"] {stroke:#5e573a;}
 html[data-theme="light"] svg text[fill="#beb695"] {fill:#5e573a;}
@@ -2968,6 +2975,9 @@ html[data-theme="light"] svg text[fill="#e2f0f7"] {fill:#153b4d;}
 html[data-theme="light"] svg [fill="#e3ebe5"] {fill:#2b3c2f;}
 html[data-theme="light"] svg [stroke="#e3ebe5"] {stroke:#2b3c2f;}
 html[data-theme="light"] svg text[fill="#e3ebe5"] {fill:#2b3c2f;}
+html[data-theme="light"] svg [fill="#e58386"] {fill:#77191c;}
+html[data-theme="light"] svg [stroke="#e58386"] {stroke:#77191c;}
+html[data-theme="light"] svg text[fill="#e58386"] {fill:#77191c;}
 html[data-theme="light"] svg [fill="#e5fffa"] {fill:#075748;}
 html[data-theme="light"] svg [stroke="#e5fffa"] {stroke:#075748;}
 html[data-theme="light"] svg text[fill="#e5fffa"] {fill:#075748;}

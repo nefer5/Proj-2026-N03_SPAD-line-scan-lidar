@@ -1095,16 +1095,35 @@ prbs_on_count:
   unit: chip
   description: 每个开码片发一个与主方案同能量的短脉冲；正整数且不超过总码片数，不假设固定占空比，关闭时不生效。
 hardware_budget_fields:
+  rx_channel.h_width_mrad:
+    label: H 收光全角
+    unit: mrad
+    description: 单个角通道的水平接收范围；与Tx H全角独立，独立角通道预算中用于公共B光学核。不是整帧HFOV。
+  rx_channel.v_width_deg:
+    label: V 收光全角
+    unit: deg
+    ui_unit: mrad
+    description: 单个角通道的垂直接收范围；空值跟随VFOV/线数，填值后独立。阵列覆盖由通道中心间隔及此角宽派生，不简单乘线数。
+    # 配置保留deg兼容，页面只作mrad/deg单位换算，预算核心不变。
+    ui_note: 留空：跟随单通道Tx V全角；填写后独立设置。
+  system.spad.channels_v:
+    label: 线数 / V通道数
+    unit: 线
+    description: 垂直角通道数；本页H方向固定一路。全线阵功率按该线数均分，单通道V全角=系统VFOV/线数。与通道内部H/V binning不同。
   system.tx.pulse_fwhm_ps:
     label: 等效脉宽 · 高斯FWHM
     unit: ps
     description: 高斯用FWHM、矩形用实际持续时间；保持等效平均功率输入不变时，单发能量随脉宽线性变化。不是保持能量不变。
   geometry.vfov_deg:
-    label: 垂直视场 VFOV · Tx全宽
+    label: 垂直视场 VFOV
     unit: deg
-    description: 控制预算页Tx归一化域的V全宽，以Tx角中心为中心展开；不改变Rx收光边界、焦距或阵列尺寸。默认从现有B的V全宽6mrad折算。空值按继承Tx边界显式解析，结果中保存数值。
+    description: 系统目标中的垂直全视场，与HFOV成组；单通道Tx V全角由VFOV除以V通道数派生，不是B样例边界或高斯FWHM。Rx单通道V留空时跟随Tx，显式填写后独立。焦距与物理像素尺寸不随之修改。
+  tx_channel_v_mrad:
+    label: 单通道 V 全角
+    unit: mrad
+    description: 只读派生量，VFOV除以V通道数；公共Python核心输出mrad及等价deg。空间均匀线阵/H方向一路下为单通道Tx发光全角，与Rx显式角域独立。
   geometry.tx_h_width_mrad:
-    label: Tx水平归一化域全宽
+    label: H 发光全角
     unit: mrad
     description: 默认2mrad，以Tx水平角中心为中心展开；不是高斯FWHM或Rx IFOV。只约束发光功率归一化范围，未改变Rx背景积分域。
   system.tx.pulse_average_power_w:
@@ -1160,3 +1179,94 @@ pulse_average_power_w:
   label: 单脉冲等效平均功率 · Tx前
   unit: W
   description: 全Tx角域VCSEL出光，E=P×脉宽；高斯以FWHM为等效时长，矩形为实际持续时间。不是峰值或整帧平均功率。默认280W，Tx效率另计一次。
+
+budget_extended_fields:
+  horizontal_angle_step_mrad:
+    label: H采样角间距
+    unit: mrad
+    description: 只读；HFOV除以每帧slot数量，公共Python核心同时输出等价deg。它是点云角采样步距，不是Tx发光全角或已经验证的物理分辨能力。
+
+  electrical.capacity_mode:
+    label: MIPI容量口径
+    unit: 枚举
+    description: 逐链路data lane线速和效率，或旧总净带宽；只使用当前模式，不重复乘效率。
+
+  electrical.channels_per_chip:
+    label: 每芯片角通道数
+    unit: channel/chip
+    description: 默认每条V线一芯片，与每通道H/V binning分开。
+
+  electrical.chips_per_link:
+    label: 每MIPI链路汇聚芯片数
+    unit: chip/link
+    description: 大于1假设有实际桥接/汇聚器，不可把多个发送器直接并联。
+
+  electrical.data_lanes_per_link:
+    label: 每链路data lane数
+    unit: lane/link
+    description: 按D-PHY数据lane预算；clock lane不计载荷。不是MIPI链路/端口数。
+
+  electrical.lane_rate_mbps:
+    label: 每data lane线速上限
+    unit: Mbit/s/lane
+    description: 输入实际器件比特率，不是时钟MHz，也不再次乘DDR倍率；1500只作示例。
+
+  electrical.payload_efficiency:
+    label: MIPI净载荷效率
+    unit: 1
+    description: 明确效率假设，包含协议和切换间隙，不重复扣应用包头；0.8只是可改的初始示例。
+
+  electrical.available_links:
+    label: 实际可用MIPI端口数
+    unit: link
+    description: 空值未知，不宣称端口可实装；与data lane数分开。
+
+  electrical.buffer_bytes_per_link:
+    label: 每链路可用缓存
+    unit: B
+    description: 含等待和正在发送的整列包；空值仅显示所需峰值，不判缓存可行。
+
+  electrical.histogram_mode:
+    label: 直方图打包策略
+    unit: 枚举
+    description: 一列累计一次，或每发独立直方图合成一个列包。列头按每chip每列一次计，不另外猜逐发头。
+
+  electrical.returns_per_point:
+    label: 每点range记录数
+    unit: return/point
+    description: 固定声明数量，不根据候选数、检出率或算法收益删记录。
+
+  electrical.ready_delay_us:
+    label: 列采集后输出就绪延时
+    unit: μs
+    description: 在接收包络结束后附加。默认0是理想示例；实际range/DSP或芯片搬运耗时需输入。
+
+  range_reference.enabled:
+    label: 启用理想距离参考
+    unit: 枚举
+    description: 单通道候选直方图、固定大气/反射率，独立泊松Fisher参考界；不替代实测标定。
+
+  range_reference.min_range_m:
+    label: 参考距离下限
+    unit: m
+    description: 空值明确跟随algorithms.yaml范围策略，解析后存完整工况。
+
+  range_reference.max_range_m:
+    label: 参考距离上限
+    unit: m
+    description: 应大于下限；门外无信号时不伪造有限精度。
+
+  range_reference.points:
+    label: 距离参考采样点数
+    unit: point
+    description: 算法YAML控制默认及资源上限；确定性扫参，不运行Monte Carlo。
+
+  range_reference.area_kind:
+    label: 实测面积/峰值口径
+    unit: 枚举
+    description: 选择扣背景信号或原始总计数，与理论对应曲线比较；实测点仅作对照。
+
+  electrical.chip_header_bytes:
+    label: 每chip每列应用包头
+    unit: B/chip/column
+    description: MIPI链路中每chip列包的用户头部，和下游全阵列列头分开；不是CSI-2固定包头或CRC，协议/间隙另以效率输入。
