@@ -5,23 +5,6 @@
   const svg=(body,height,label)=>`<svg viewBox="0 0 920 ${height}" role="img" aria-label="${label}">${body}</svg>`;
   const text=(x,y,value,kind='',anchor='start')=>`<text x="${x}" y="${y}" class="plot-label ${kind}" text-anchor="${anchor}">${value}</text>`;
   function axis(low,high,y,unit){let b='';for(let i=0;i<=4;i++){const v=low+(high-low)*i/4,x=120+i*187.5;b+=`<path d="M${x} ${(unit==='μs'?22:y-135)}V${y+5}" class="plot-grid"/>`+text(x,y+23,f(v)+' '+unit,'plot-muted','middle');}return b;}
-  function lanes(result,end,zoom){const t=result.timing,rows=t.rows,e=result.electrical?.selected,mipi=e?.wire_ns!==null&&e?.wire_ns!==undefined&&e?.ready_ns!==null&&e?.ready_ns!==undefined;if(mipi&&!zoom)end=Math.max(end,e.ready_ns+e.wire_ns);const x=v=>120+v/end*750;let b=axis(0,end/1000,mipi?255:215,'μs');
-    b+=text(15,65,'Tx发射')+text(15,110,'接收gate')+text(15,155,'回波中心')+(zoom?'':text(15,mipi?235:195,'列余量'));if(mipi){b+=text(15,192,'MIPI输出');const start=x(e.ready_ns),right=x(Math.min(end,e.ready_ns+e.wire_ns));b+=`<rect x="${start}" y="178" width="${Math.max(1,right-start)}" height="23" class="plot-gate"/>`;if(e.ready_ns+e.wire_ns>end)b+=text(870,195,'→续','plot-muted','end');}
-    for(const y of [60,105,150])b+=`<path d="M120 ${y}H870" class="plot-baseline"/>`;
-    for(const [i,r]of rows.entries()){const active=i===pulseIndex;
-      b+=`<path d="M${x(r.emission_ns)} 61v-18h4v18" class="plot-tx ${active?'selected':''}"/>`;
-      b+=`<rect x="${x(r.gate_start_ns)}" y="92" width="${Math.max(1,x(r.gate_end_ns)-x(r.gate_start_ns))}" height="25" rx="3" class="plot-gate"/>`;
-      b+=`<path d="M${x(r.return_ns)} 143l6 7-6 7-6-7z" class="plot-echo"/>`;
-      if(rows.length<=6||i<2||i>=rows.length-2)b+=text(x(r.emission_ns)+5,35,'发'+r.pulse,active?'plot-accent':'');
-    }
-    if(!zoom){b+=`<path d="M${x(t.envelope_ns)} 24V211" class="plot-boundary"/>`;const start=t.envelope_ns+(t.reset_ns||0);
-      if(t.reset_ns!==null)b+=`<rect x="${x(t.envelope_ns)}" y="${mipi?220:180}" width="${Math.max(0,x(start)-x(t.envelope_ns))}" height="22" class="plot-reset"/>`;
-      if(start<t.slot_max_ns)b+=`<rect x="${x(start)}" y="${mipi?220:180}" width="${x(t.slot_max_ns)-x(start)}" height="22" rx="3" class="plot-spare"/>`;
-      b+=text(125,mipi?238:198,t.reset_ns===null?'未计复位的空余时间':'复位后空余时间','plot-muted');
-      b+=`<path d="M${x(t.slot_max_ns)} 24V212" class="plot-boundary end"/>`;
-    }
-    return svg(b,mipi?295:255,zoom?'slot内有效收发段展开，横轴微秒':'完整slot中的Tx、gate、回波与余量');
-  }
   function profile(result,source=false){const p=result.channel_photons,q=p.profile,a=q.offset_ns,lo=a[0],hi=a[a.length-1],x=v=>120+(v-lo)/(hi-lo)*750;
     const values=source?q.power_w:q.normalized_density,max=Math.max(...values),y=v=>153-(max? v/max:0)*104;
     let b=axis(lo,hi,178,'ns');
@@ -34,13 +17,13 @@
     return svg(b,218,source?'单通道光源真实时间功率分布':'回波中心附近的脉宽和gate局部放大');
   }
   function timing(result){const t=result.timing,scale=v=>120+v/t.frame_period_ns*750;let frame=axis(0,t.frame_period_ns/1e6,155,'ms');
-    frame+=`<rect x="120" y="30" width="${scale(t.scan_allocatable_ns)-120}" height="32" rx="5" class="plot-active"/><rect x="${scale(t.scan_allocatable_ns)}" y="30" width="${870-scale(t.scan_allocatable_ns)}" height="32" rx="5" class="plot-inactive"/>`;
+    frame+=`<rect x="120" y="30" width="${scale(t.scan_allocatable_ns)-120}" height="32" class="plot-active"/><rect x="${scale(t.scan_allocatable_ns)}" y="30" width="${870-scale(t.scan_allocatable_ns)}" height="32" class="plot-inactive"/>`;
     frame+=text(130,51,'有效扫描 '+f(t.scan_allocatable_ns/1e6)+' ms','plot-accent')+text(scale(t.scan_allocatable_ns)+10,51,'其他开销 '+f(t.non_scan_ns/1e6)+' ms','plot-muted');
     frame+=`<rect x="120" y="90" width="${scale(t.scan_allocatable_ns)-120}" height="24" class="plot-spare"/>`;for(const row of (t.frame_preview_slots||[])){const left=scale(row.start_ns),right=scale(row.end_ns);frame+=`<rect x="${left}" y="90" width="${Math.max(1,right-left)}" height="24" class="plot-slot" data-slot="${row.index}" data-start-ns="${row.start_ns}" data-end-ns="${row.end_ns}"/>`+text((left+right)/2,84,'slot '+row.index,'plot-muted','middle');}frame+=`<path d="M${scale(t.scan_allocatable_ns)} 26V120" class="plot-boundary end"/>`;
     frame+=text(120,134,'两排共用帧时间轴；只显示抽样slot位置（共'+result.configuration.experiment.targets.slot_count+'列）。非扫描段不分配slot。','plot-muted');
     pulseIndex=Math.min(pulseIndex,t.rows.length-1);
-    $('timeline').innerHTML=`<div class="timing-level"><h3><span>01</span> 一帧 · 扫描与slot分配</h3>${svg(frame,195,'一帧有效扫描、其他开销和slot索引抽样')}${result.electrical?BudgetHardwareViews.networkTimeline(result):''}</div><div class="timing-level"><h3><span>02</span> 一个slot · 完整时间预算</h3>${lanes(result,t.plot_end_ns,false)}</div><details class="timing-level" open><summary>展开有效收发段 · 排除长空余区间</summary>${lanes(result,Math.max(t.envelope_ns,t.rows[t.rows.length-1].return_ns),true)}</details><div class="timing-level"><h3><span>03</span> 单发 · 回波中心附近的纳秒细节 <select id="timingPulse" aria-label="选择展开的发射脉冲">${t.rows.map((r,i)=>`<option value="${i}" ${i===pulseIndex?'selected':''}>第${r.pulse}发</option>`).join('')}</select></h3><p class="note">该发Tx中心 ${f(t.rows[pulseIndex].emission_ns)} ns；回波中心 ${f(t.rows[pulseIndex].return_ns)} ns。下图横轴为相对回波中心时间，gate只显示与局部视窗的交集。</p>${profile(result)}</div>`;
-    $('timingPulse').onchange=()=>{pulseIndex=Number($('timingPulse').value);timing(result);};
+    $('timeline').innerHTML=`<div class="timing-level"><h3><span>01</span> 一帧 · 目标扫描与slot分配</h3>${svg(frame,195,'一帧目标扫描和slot分配')}</div><div class="timing-level"><h3><span>02</span> 三个slot · 数据处理与输出依赖</h3>${BudgetPipelineViews.render(result)}</div><details class="timing-level"><summary>单发 · 纳秒接收细节（第1发）</summary><p class="note">横轴相对回波中心；完整曝光、多发事件见上图。</p>${profile(result)}</details>`;
+    BudgetPipelineViews.activate();
     $('timingNote').textContent='Tx脉冲在微秒图上用事件标记表示；纳秒宽度见局部图。'+(t.reset_ns===null?'复位未知，余量不是最终可行性结论。':'')+(t.truncated?'只展示前'+t.rows.length+'发，预算包含全部发数。':'')+'匀速扫描未用于修正静态光子数。';
   }
   function photons(result,renderFormulas){const p=result.channel_photons,w=p.windows.find(w=>w.key===windowKey),band=result.single_channel.optical_budget.background_integration_band_nm;

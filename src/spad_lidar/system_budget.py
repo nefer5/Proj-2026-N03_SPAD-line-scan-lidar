@@ -13,11 +13,10 @@ from .spad.config import StrictConfig
 from .experiments.system_config import BSystemConfig
 from .experiments.spatial import project_illumination
 from .scan.planning import SystemTargets, uniform_column_budget
-from .scan.column_config import TransportSpec
 from .numerics.temporal import temporal_pdf, pulse_interval_fractions
 from .constants import C
 from .reporting.spatial_flow import build_spatial_flow
-from .budget_extensions import ElectricalBudgetConfig,RangeReferenceConfig
+from .budget_extensions import ElectricalBudgetConfig,RangeReferenceConfig,BudgetTransportSpec
 
 
 class BudgetAssumptions(StrictConfig):
@@ -44,7 +43,7 @@ class HardwareBudgetConfig(StrictConfig):
     system: BSystemConfig
     targets: SystemTargets
     assumptions: BudgetAssumptions
-    transport: TransportSpec
+    transport: BudgetTransportSpec
     geometry: 'BudgetGeometry'
     rx_channel: 'BudgetRxChannel'
     electrical: ElectricalBudgetConfig
@@ -64,11 +63,30 @@ class BudgetGeometry(StrictConfig):
 HardwareBudgetConfig.model_rebuild()
 
 
+def budget_channel_config(cfg,algorithms):
+    """Validate the actual independent optical reference, using the common B core."""
+    s=cfg.system;count=s.spad.channels_v;local=s.model_dump()
+    dv=math.radians(cfg.geometry.vfov_deg)*1000/count
+    rv=dv if cfg.rx_channel.v_width_deg is None else math.radians(cfg.rx_channel.v_width_deg)*1000
+    if s.rx.rx_model=='dataset':raise ValueError('独立角通道预算需构造Rx，实测全阵列数据请在B页面使用')
+    local['spad']['channels_v']=1
+    local['tx'].update(pulse_average_power_w=s.tx.pulse_average_power_w/count,tx_center_h_mrad=0,tx_center_v_mrad=0,
+        angle_h_min_mrad=-cfg.geometry.tx_h_width_mrad/2,angle_h_max_mrad=cfg.geometry.tx_h_width_mrad/2,
+        angle_v_min_mrad=-dv/2,angle_v_max_mrad=dv/2)
+    local['rx'].update(rx_angle_h_min_mrad=-cfg.rx_channel.h_width_mrad/2,rx_angle_h_max_mrad=cfg.rx_channel.h_width_mrad/2,
+        rx_angle_v_min_mrad=-rv/2,rx_angle_v_max_mrad=rv/2)
+    return SimulationConfig.for_experiment('system',local,algorithms.model_copy(update={
+        'max_histogram_bins':algorithms.budget_max_histogram_bins,
+        'max_lab_histogram_cells':algorithms.budget_max_histogram_bins}))
+
+
 def resolve_budget(overrides, algorithms):
     sections = read_yaml('defaults.yaml')['experiments']
-    values = dict(system=merge_config(SimulationConfig.for_experiment('system', {}, algorithms).model_dump(),sections['budget_system']),
+    from .experiments.configuration import experiment_defaults
+    default_system=BSystemConfig.model_validate(experiment_defaults('system'))
+    values = dict(system=merge_config(default_system.model_dump(),sections['budget_system']),
                   targets=SimulationConfig.system_targets({}).model_dump(),
-                  assumptions=sections['budget'], transport=merge_config(sections['columns']['transport'],sections['budget_transport']),geometry=sections['budget_geometry'],rx_channel=sections['budget_rx_channel'],electrical=sections['budget_electrical'],range_reference=sections['budget_range_reference'])
+                  assumptions=sections['budget'], transport=sections['budget_transport'],geometry=sections['budget_geometry'],rx_channel=sections['budget_rx_channel'],electrical=sections['budget_electrical'],range_reference=sections['budget_range_reference'])
     HardwareBudgetConfig.model_validate(values)  # Validate defaults before applying any overrides.
     from .legacy_config import migrate_pulse_energy
     overrides=dict(overrides)
@@ -92,7 +110,13 @@ def resolve_budget(overrides, algorithms):
         raise ValueError('系统预算的VFOV联动当前适用于构造Tx；数据库Tx请使用B页面按文件角域分析')
     cfg=HardwareBudgetConfig.model_validate({**cfg.model_dump(),'system':system,
         'geometry':{'vfov_deg':vfov,'tx_h_width_mrad':hw}})
-    SimulationConfig.for_experiment('system', cfg.system.model_dump(), algorithms.model_copy(update={'max_histogram_bins':algorithms.budget_max_histogram_bins,'max_lab_histogram_cells':algorithms.budget_max_histogram_bins*cfg.system.spad.channels_v}))
+    channels=cfg.system.spad.channels_h*cfg.system.spad.channels_v
+    pixels=channels*cfg.system.spad.spads_per_channel
+    if channels>algorithms.budget_max_channels:
+        raise ValueError(f'系统预算角通道数量 {channels} 超过 budget_max_channels={algorithms.budget_max_channels} 软件资源保护限额')
+    if pixels>algorithms.budget_max_physical_pixels:
+        raise ValueError(f'系统预算物理像元总数 {pixels} 超过 budget_max_physical_pixels={algorithms.budget_max_physical_pixels} 软件资源保护限额')
+    budget_channel_config(cfg,algorithms)
     if cfg.targets.slot_count > algorithms.max_column_count:
         raise ValueError('Column count exceeds max_column_count')
     return cfg
@@ -104,16 +128,10 @@ def calculate_budget(cfg, algorithms):
     time = uniform_column_budget(cfg.targets)
     # One uniform angular channel uses the shared B optical kernel. Identical
     # independent V channels are then accumulated without inventing a second model.
-    count=s.spad.channels_v;local=s.model_dump();dv=math.radians(cfg.geometry.vfov_deg)*1000/count
-    rv=dv if cfg.rx_channel.v_width_deg is None else math.radians(cfg.rx_channel.v_width_deg)*1000
-    local['spad']['channels_v']=1
-    local['tx'].update(pulse_average_power_w=s.tx.pulse_average_power_w/count,tx_center_h_mrad=0,tx_center_v_mrad=0,
-        angle_h_min_mrad=-cfg.geometry.tx_h_width_mrad/2,angle_h_max_mrad=cfg.geometry.tx_h_width_mrad/2,
-        angle_v_min_mrad=-dv/2,angle_v_max_mrad=dv/2)
-    local['rx'].update(rx_angle_h_min_mrad=-cfg.rx_channel.h_width_mrad/2,rx_angle_h_max_mrad=cfg.rx_channel.h_width_mrad/2,
-        rx_angle_v_min_mrad=-rv/2,rx_angle_v_max_mrad=rv/2)
-    if s.rx.rx_model=='dataset':raise ValueError('独立角通道预算需构造Rx，实测全阵列数据请在B页面使用')
-    channel_cfg=SimulationConfig.for_experiment('system',local,algorithms.model_copy(update={'max_histogram_bins':algorithms.budget_max_histogram_bins,'max_lab_histogram_cells':algorithms.budget_max_histogram_bins}))
+    count=s.spad.channels_v
+    channel_cfg=budget_channel_config(cfg,algorithms)
+    dv=channel_cfg.tx.angle_v_max_mrad-channel_cfg.tx.angle_v_min_mrad
+    rv=channel_cfg.rx.rx_angle_v_max_mrad-channel_cfg.rx.rx_angle_v_min_mrad
     light, groups, optics = project_illumination(channel_cfg, algorithms, lambda *args: None, lambda: False)
     single_budget=dict(optics['budget'])
     fixed={'aperture_area_m2','angular_solid_angle_sr','tx_angular_coverage_fraction','reference_time_bin_ps'}
@@ -146,7 +164,7 @@ def calculate_budget(cfg, algorithms):
     bins = math.ceil(t.gate_width_ns * 1000 / s.readout.tdc_bin_ps)
     from .electrical_budget import electrical_budget
     preview=sorted(set(np.linspace(0,cfg.targets.slot_count-1,min(cfg.targets.slot_count,algorithms.budget_frame_preview_slots),dtype=int).tolist()))
-    electrical=electrical_budget(cfg,{**time,'frame_preview_indices':preview},duration)
+    electrical=electrical_budget(cfg,{**time,'frame_preview_indices':preview},duration,algorithms)
     selected=electrical['selected'];histogram=electrical['formats']['histogram']
     body_bytes=histogram.get('body_bytes_per_column');payload=histogram.get('total_bytes_per_column')
     mbps=selected.get('total_required_mbps');wire_ns=selected.get('wire_ns')
@@ -176,8 +194,13 @@ def calculate_budget(cfg, algorithms):
     for key,label,value,limit in (('average','平均光功率',avg,x.max_average_optical_power_w),('peak','峰值光功率',peak,x.max_peak_optical_power_w)):
         check(key,label,'unknown' if limit is None else 'pass' if value<=limit else 'fail',
               'Tx光学前限额待提供。' if limit is None else f'需求 {fnum(value)} W / 限额 {fnum(limit)} W；余量 {fnum(limit-value)} W。')
-    check('link','SPAD输出 / MIPI链路','unknown' if wire_ns is None or selected.get('frame_ok') is None else 'pass' if selected.get('frame_ok') else 'fail',
-          '输出字宽/记录长度、包头和链路容量齐备后计算。' if wire_ns is None else f'最忙链路单列传输 {fnum(wire_ns/1000)} μs / slot {fnum(slot/1000)} μs；帧内完成状态 {selected.get("frame_ok")}，端口/缓存容量仍需核对。')
+    pipeline=selected.get('pipeline',{})
+    link_flags=(selected.get('average_bandwidth_ok'),electrical.get('ports_ok'),pipeline.get('sustained_ok'))
+    link_state='fail' if False in link_flags else 'unknown' if None in link_flags else 'pass'
+    check('link','SPAD处理 / MIPI目标节拍',link_state,
+          pipeline.get('note','载荷或时序规格未完整。')+('' if wire_ns is None else f' 最忙link单列发送 {fnum(wire_ns/1000)} μs / 目标slot {fnum(slot/1000)} μs；端口未知时不判整机满足。'))
+    check('output_deadline','严格帧内发送截止','unknown' if selected.get('frame_ok') is None else 'pass' if selected['frame_ok'] else 'review',
+          '固定流水延迟可以跨帧；严格帧截止与持续吞吐分开判断，积压及slot延后见电学板块。')
     check('readout','SPAD / TDC记录能力','unknown','候选雪崩不等于最终记录；此页未执行死时间、符合、容量竞争或计数器饱和仿真。')
     check('background','Rx背景角域','pass' if algorithms.background_angular_domain=='independent_rx' else 'review',
           '背景按独立Rx角域积分，固定Rx和环境时不随Tx角域变化；Rx外设为不接收，仍需用实测覆盖验证边界。' if algorithms.background_angular_domain=='independent_rx' else '历史算法快照：背景沿用Tx角域。')
@@ -230,7 +253,7 @@ def calculate_budget(cfg, algorithms):
         photon_flow=build_spatial_flow(single_budget,None), optical_budget=b,
         channel_sensor_photons_per_pulse=per_channel.tolist(), prbs=prbs,
         configuration=snapshot, definitions=definitions,
-        formulas=[dict(id=k,latex=formulas[k],note=notes[k]) for k in ('pulse_equivalent_power','hardware_budget_channel','c_high_level_frame','c_high_level_slot','c_high_level_angle','hardware_budget_time','hardware_budget_power','hardware_budget_histogram','hardware_budget_prbs','budget_mipi_payload','budget_mipi_capacity','budget_range_fisher')],
+        formulas=[dict(id=k,latex=formulas[k],note=notes[k]) for k in ('pulse_equivalent_power','hardware_budget_channel','c_high_level_frame','c_high_level_slot','c_high_level_angle','hardware_budget_time','hardware_budget_power','hardware_budget_histogram','hardware_budget_prbs','budget_hist_copy_rate','budget_mipi_payload','budget_mipi_capacity','budget_range_fisher')],
         limitations=limitations,
         provenance=dict(utc=datetime.now(timezone.utc).isoformat(),model_version=__version__,
             configuration_sha256=sha256(json.dumps(snapshot,sort_keys=True,allow_nan=False).encode()).hexdigest(),
@@ -246,8 +269,13 @@ def calculate_budget(cfg, algorithms):
     result['timing']['frame_preview_slots']=[{'index':i,'start_ns':time['scan_allocatable_ns']*(i/cfg.targets.slot_count),'end_ns':time['scan_allocatable_ns']*((i+1)/cfg.targets.slot_count)} for i in result['timing']['frame_preview_indices']]
     result['schematic']=budget_schematic(cfg,optics,algorithms,result['single_channel'])
     from .electrical_budget import electrical_budget
-    result['b_simulation_runnable']=bins<=algorithms.max_histogram_bins and bins*channels<=algorithms.max_lab_histogram_cells
-    if not result['b_simulation_runnable']:result['limitations'].append('预算未分配全直方图，时间bin数在预算容量限额内，但超过当前B实际仿真资源限额；送入B前须显式调整仿真资源。')
+    try:
+        SimulationConfig.for_experiment('system',cfg.system.model_dump(),algorithms)
+        result['b_simulation_runnable']=True;result['b_simulation_blocker']=None
+    except ValueError as exc:
+        result['b_simulation_runnable']=False
+        result['b_simulation_blocker']='完整B事件仿真暂不可运行：'+str(exc)
+        result['limitations'].append('系统预算仅计算代表通道静态光学并汇总，未运行整阵列事件仿真。'+result['b_simulation_blocker'])
     result['electrical']=electrical
     from .range_reference import range_reference
     result['range_reference']=range_reference(cfg,single_budget,algorithms) if cfg.range_reference.enabled else None

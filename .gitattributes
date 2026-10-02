@@ -2,3 +2,8 @@
 data/reference/** -text -whitespace
 # Vendored upstream files retain their original formatting.
 web/vendor/** -whitespace
+# Archived originals and hashed acceptance inputs retain their exact bytes.
+artifacts/design-library/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+artifacts/canvas-backups/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+artifacts/budget-closeout-2026-10-03/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+artifacts/budget-spad-design/*.excalidraw -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

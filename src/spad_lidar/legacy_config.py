@@ -37,6 +37,60 @@ def migrate_budget(values):
     return values
 
 
+def migrate_budget_v5(values):
+    """Explicit import-only conversion of v1-v4 budget transport semantics."""
+    from .scan.column_config import TransportSpec
+    from .budget_extensions import BudgetTransportSpec
+    values=deepcopy(values)
+    old=values.get('transport',{})
+    unknown=set(old)-set(TransportSpec.model_fields)-set(BudgetTransportSpec.model_fields)
+    if unknown:raise ValueError('Unknown legacy transport keys: '+', '.join(sorted(unknown)))
+    e=values.setdefault('electrical',{})
+    returns=e.pop('returns_per_point',None)
+    if returns is not None:
+        if not isinstance(returns,int) or isinstance(returns,bool) or returns<1:raise ValueError('Invalid legacy returns_per_point')
+        width=old.get('point_bytes')
+        if width is not None:old['point_bytes']=width*returns
+    if old.get('dsp_time_us') is not None:e['dsp_time_us']=old['dsp_time_us']
+    if old.get('buffer_count')==1:e['buffer_architecture']='single'
+    elif old.get('buffer_count') not in (None,2):raise ValueError('Legacy buffer_count cannot be represented by single/fixed A-B budget')
+    values['transport']={k:v for k,v in old.items() if k in BudgetTransportSpec.model_fields}
+    # New architecture defaults are merged from defaults.yaml. Existing nullable
+    # capacities remain explicitly unknown. A v5 export records all assumptions.
+    return values
+
+
+def migrate_budget_v6(values):
+    """User-confirmed automatic memory budgeting replaces former capacity inputs."""
+    values=deepcopy(values)
+    e=values.get('electrical',{})
+    for key in ('bank_bytes_per_chip','buffer_bytes_per_link'):
+        if key in e:
+            old=e.pop(key)
+            if old is not None and (type(old) is not int or old<0):
+                raise ValueError('Invalid legacy memory capacity: '+key)
+    return values
+
+
+def migrate_budget_v7(values):
+    """Convert declared chip copy rate to duration without changing its timing."""
+    import math
+    from .models import SimulationConfig
+    from .electrical_budget import histogram_storage
+    values=deepcopy(values);e=values.get('electrical',{})
+    if 'hist_copy_mbps' not in e:return values
+    if 'hist_copy_us' in e:raise ValueError('Do not mix legacy Hist copy rate and copy duration')
+    rate=e.pop('hist_copy_mbps')
+    if rate is None:e['hist_copy_us']=None;return values
+    if isinstance(rate,bool) or not isinstance(rate,(int,float)) or not math.isfinite(rate) or rate<=0:
+        raise ValueError('Invalid legacy Hist copy rate')
+    cfg=SimulationConfig.for_experiment('budget',values)
+    raw=histogram_storage(cfg,cfg.transport.payload_format)['bytes_per_chip']
+    if any(v is None for v in raw):raise ValueError('Legacy Hist copy-rate migration needs the actual histogram count width')
+    e['hist_copy_us']=max(raw)*8/rate
+    return values
+
+
 def migrate_optical_dataset(document):
     """Preserve physical directions when converting legacy V/y-down data to up."""
     doc=deepcopy(document)

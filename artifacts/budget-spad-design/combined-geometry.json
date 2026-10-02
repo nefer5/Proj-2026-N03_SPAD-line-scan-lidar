@@ -1,0 +1,58 @@
+{
+  "source_config_sha256": "c17693c0ddc94ffb053fe354c1a17f48197bed6e891a144562faff1210d0445b",
+  "pixel_x_edges_um": [
+    -40.0,
+    -20.0,
+    0.0,
+    20.0,
+    40.0
+  ],
+  "pixel_y_edges_um": [
+    -40.0,
+    -20.0,
+    0.0,
+    20.0,
+    40.0
+  ],
+  "equivalent_h_edges_mrad": [
+    1.9999973333397334,
+    0.9999996666668668,
+    -0.0,
+    -0.9999996666668668,
+    -1.9999973333397334
+  ],
+  "equivalent_v_edges_mrad": [
+    1.9999973333397334,
+    0.9999996666668668,
+    -0.0,
+    -0.9999996666668668,
+    -1.9999973333397334
+  ],
+  "rx": {
+    "rx_model": "gaussian_psf",
+    "focal_length_h_mm": 20.0,
+    "focal_length_v_mm": 20.0,
+    "mapping_mode": "inverted",
+    "psf_sigma_h_um": 8.0,
+    "psf_sigma_v_um": 8.0,
+    "psf_order_h": 2.0,
+    "psf_order_v": 2.0,
+    "rx_offset_x_um": 0.0,
+    "rx_offset_y_um": 0.0,
+    "rx_efficiency": 0.8,
+    "rx_aperture_shape": "rectangle",
+    "rx_aperture_mm": 20.0,
+    "rx_aperture_width_mm": 40.0,
+    "rx_aperture_height_mm": 20.0,
+    "rx_angle_h_min_mrad": -2.0,
+    "rx_angle_h_max_mrad": 2.0,
+    "rx_angle_v_min_mrad": -8.726646259971648,
+    "rx_angle_v_max_mrad": 8.726646259971648,
+    "dataset": null
+  },
+  "binning": [
+    4,
+    4
+  ],
+  "verified": "forward/inverse image-center roundtrip < 1e-9 um"
+}

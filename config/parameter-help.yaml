@@ -89,7 +89,7 @@ spad_dead_time_ns:
 spad_jitter_fwhm_ps:
   label: SPAD时间抖动FWHM
   unit: ps
-  description: 高斯时间抖动的半高全宽；除以2sqrt(2ln2)得到标准差。默认按用户确认的Sony相关参考（室温、Vex=3V）；FW10%未作为独立输入。见docs/references/sony-reference.md。
+  description: 高斯时间抖动的半高全宽；除以2sqrt(2ln2)得到标准差。默认按用户确认的Sony相关参考（室温、Vex=3V）；FW10%未作为独立输入。见docs/references/sony-reference.md。 系统预算页中作用于理想IRF/距离精度参考，并传入B事件仿真；单通道静态光子和未计抖动的gate能量预算不因本参数改变。
 pulse_fwhm_ps:
   label: 激光脉宽 FWHM
   unit: ps
@@ -390,7 +390,7 @@ experiments:
   optics.pulse_average_power_w:
     label: 单脉冲等效平均功率 · Tx前
     unit: W
-    description: 全Tx角域、VCSEL出光/Tx光学前。单发能量=功率×脉宽，高斯用FWHM作等效时长；不是FWHM窗内严格平均、峰值或整帧平均功率。默认280W，效率只乘一次。
+    description: 全Tx角域、VCSEL出光/Tx光学前。单发能量=功率×脉宽，高斯用FWHM作等效时长；不是FWHM窗内严格平均、峰值或整帧平均功率。功率初值按当前页面默认配置读取，效率只乘一次。
   optics.total_pulse_energy_nj:
     label: 角域内单发能量 · Tx前
     unit: nJ
@@ -742,7 +742,8 @@ experiments:
   spad.spad_jitter_fwhm_ps:
     label: SPAD时间抖动FWHM
     unit: ps
-    description: 高斯时间抖动的半高全宽；除以2sqrt(2ln2)得到标准差。默认按用户确认的Sony相关参考（室温、Vex=3V）；FW10%未作为独立输入。见docs/references/sony-reference.md。
+    budget_note: 作用于理想IRF/距离精度参考；静态光子预算不随之变化。
+    description: 高斯时间抖动的半高全宽；除以2sqrt(2ln2)得到标准差。默认按用户确认的Sony相关参考（室温、Vex=3V）；FW10%未作为独立输入。见docs/references/sony-reference.md。 系统预算页中作用于理想IRF/距离精度参考，并传入B事件仿真；单通道静态光子和未计抖动的gate能量预算不因本参数改变。
   spad.detector_operation:
     label: 探测器门控方式
     unit: 枚举
@@ -1125,11 +1126,11 @@ hardware_budget_fields:
   geometry.tx_h_width_mrad:
     label: H 发光全角
     unit: mrad
-    description: 默认2mrad，以Tx水平角中心为中心展开；不是高斯FWHM或Rx IFOV。只约束发光功率归一化范围，未改变Rx背景积分域。
+    description: 以Tx水平角中心为中心展开，初值来自预算配置；不是高斯FWHM或Rx IFOV。只约束发光功率归一化范围，未改变Rx背景积分域。
   system.tx.pulse_average_power_w:
     label: 单脉冲等效平均功率 · Tx前
     unit: W
-    description: 全Tx角域、VCSEL出光/Tx光学前功率。总单发能量=功率×脉宽，高斯用FWHM作等效时长，不是FWHM窗内的严格平均值；矩形为实际持续时间。不是峰值或整帧平均功率。默认280W，Tx效率另乘一次。
+    description: 全Tx角域、VCSEL出光/Tx光学前功率。总单发能量=功率×脉宽，高斯用FWHM作等效时长，不是FWHM窗内的严格平均值；矩形为实际持续时间。不是峰值或整帧平均功率。功率初值按当前页面默认配置读取，Tx效率另乘一次。
   transport.histogram_count_bits:
     label: 直方图计数位宽
     unit: bit/bin
@@ -1171,14 +1172,14 @@ hardware_budget_fields:
     unit: ns
     description: 每发相对发射中心的接收门起点；静态信号按本发脉冲门内份额计算，未解析其他发跨门尾部。
   system.acquisition.gate_width_ns:
-    label: 单发接收门宽
+    label: 直方图时间窗口长度
     unit: ns
     description: 每次接收门时长；背景候选按门内开放时间累计，未计算自由运行门外背景对恢复状态的影响。
 
 pulse_average_power_w:
   label: 单脉冲等效平均功率 · Tx前
   unit: W
-  description: 全Tx角域VCSEL出光，E=P×脉宽；高斯以FWHM为等效时长，矩形为实际持续时间。不是峰值或整帧平均功率。默认280W，Tx效率另计一次。
+  description: 全Tx角域VCSEL出光，E=P×脉宽；高斯以FWHM为等效时长，矩形为实际持续时间。不是峰值或整帧平均功率。功率初值按当前页面默认配置读取，Tx效率另计一次。
 
 budget_extended_fields:
   horizontal_angle_step_mrad:
@@ -1194,7 +1195,7 @@ budget_extended_fields:
   electrical.channels_per_chip:
     label: 每芯片角通道数
     unit: channel/chip
-    description: 默认每条V线一芯片，与每通道H/V binning分开。
+    description: 每颗芯片承载的角通道数量。例如192线单芯片：系统线数与每芯片角通道数均填192；Hist SRAM和搬移按全部192通道合计。与通道内H/V binning分开。
 
   electrical.chips_per_link:
     label: 每MIPI链路汇聚芯片数
@@ -1204,7 +1205,7 @@ budget_extended_fields:
   electrical.data_lanes_per_link:
     label: 每链路data lane数
     unit: lane/link
-    description: 按D-PHY数据lane预算；clock lane不计载荷。不是MIPI链路/端口数。
+    description: 一个MIPI接口内的数据lane数量；192线一芯片、一个接口四lane时这里填4。clock lane不计载荷；不是独立接口数量。
 
   electrical.lane_rate_mbps:
     label: 每data lane线速上限
@@ -1212,34 +1213,24 @@ budget_extended_fields:
     description: 输入实际器件比特率，不是时钟MHz，也不再次乘DDR倍率；1500只作示例。
 
   electrical.payload_efficiency:
-    label: MIPI净载荷效率
+    label: 物理发送利用率
     unit: 1
-    description: 明确效率假设，包含协议和切换间隙，不重复扣应用包头；0.8只是可改的初始示例。
+    description: 仅扣未显式建模的物理空隙，不包含CSI-2头/CRC或显式burst间隔；0.8是可改假设。旧v4效率口径已改变，请核对。
 
   electrical.available_links:
     label: 实际可用MIPI端口数
     unit: link
-    description: 空值未知，不宣称端口可实装；与data lane数分开。
-
-  electrical.buffer_bytes_per_link:
-    label: 每链路可用缓存
-    unit: B
-    description: 含等待和正在发送的整列包；空值仅显示所需峰值，不判缓存可行。
+    description: 可用独立MIPI接口的数量上限，不会据此自动拆分输出。例如一个接口四lane，端口数填1，data lane数填4。空值未知，不宣称可实装。
 
   electrical.histogram_mode:
     label: 直方图打包策略
     unit: 枚举
     description: 一列累计一次，或每发独立直方图合成一个列包。列头按每chip每列一次计，不另外猜逐发头。
 
-  electrical.returns_per_point:
-    label: 每点range记录数
-    unit: return/point
-    description: 固定声明数量，不根据候选数、检出率或算法收益删记录。
-
   electrical.ready_delay_us:
-    label: 列采集后输出就绪延时
+    label: DSP输入延时
     unit: μs
-    description: 在接收包络结束后附加。默认0是理想示例；实际range/DSP或芯片搬运耗时需输入。
+    description: Hist交接后、DSP开始前的输入延时。全Hist模式仍计输入路径延时但旁路DSP工作。未绑定具体芯片。
 
   range_reference.enabled:
     label: 启用理想距离参考
@@ -1269,4 +1260,87 @@ budget_extended_fields:
   electrical.chip_header_bytes:
     label: 每chip每列应用包头
     unit: B/chip/column
-    description: MIPI链路中每chip列包的用户头部，和下游全阵列列头分开；不是CSI-2固定包头或CRC，协议/间隙另以效率输入。
+    description: MIPI链路中每chip列包的用户头部，和下游全阵列列头分开；不是CSI-2固定包头或CRC，CSI-2包头/CRC另计，物理空隙由利用率及burst间隔输入。
+
+  transport.point_bytes:
+    label: 每点完整Range记录
+    unit: B/point
+    description: 每角通道每slot一个完整点记录，包含用户需要的全部回波/特征字段；不再乘回波数。空值无法预算Range输出。
+  transport.histogram_count_bits:
+    label: Hist每bin计数字宽
+    unit: bit/bin
+    description: 片内Hist SRAM、全Hist和Echo样本均使用此字宽，按位紧密打包并向上取整到字节；不代表计数溢出或具体存储总线布局。
+  transport.column_header_bytes:
+    label: 每link每slot应用头
+    unit: B/link/slot
+    description: 每链路每slot附加应用元数据，计入首chip长包payload一次；与每chip头分开。空值未知；旧版下游列头迁移后开始计入MIPI预算。
+  transport.mipi_net_mbps:
+    label: 总链路服务速率
+    unit: Mbit/s
+    description: 兼容总净速率模式，按所需link均分；服务对象包含CSI-2显式开销，不再乘物理利用率。不能输入已把相同CSI开销扣过的应用载荷速率。
+  electrical.buffer_architecture:
+    label: SRAM缓冲架构
+    unit: 枚举
+    description: 双缓冲固定A采集/B处理，A->B完成后清A，B在结果提交FIFO后释放；不是交换角色乒乓。单缓冲直到处理和提交完成、清零后才继续采集。
+  electrical.handoff_policy:
+    label: Hist交接时机
+    unit: 枚举
+    description: 接收包络结束即交接，或实际slot开始后等待至少一个目标slot时长再交接。后者用于整slot移交架构；光学曝光仍按配置接收包络。
+  electrical.hist_copy_us:
+    label: A→B Hist搬移时间
+    unit: μs/slot/chip
+    description: 每chip整slot Hist搬移的目标耗时，必须为正；后台按真实Hist字节数反推所需总比特率。只在固定A/B双缓冲生效，单缓冲旁路。不是MIPI发送时间。
+  electrical.bank_clear_us:
+    label: 采集SRAM清零时间
+    unit: μs
+    description: 双缓冲在A->B结束后清A；单缓冲在输出提交后清采集块。与SPAD/TDC物理复位不同。空值无法生成时序。
+  electrical.dsp_time_us:
+    label: 片内DSP工作耗时
+    unit: μs/slot/chip
+    description: 单芯片单资源、非流水DSP占用时间，各chip并行。Range/Echo生效，全Hist旁路。不仿真DSP算法；初始耗时仅为示例，以实际测量替换。
+  electrical.mipi_pack_us:
+    label: MIPI应用打包耗时
+    unit: μs/slot/link
+    description: 每链路单打包资源，结果入FIFO后打包；可与上一slot发送重叠。FIFO整块占用包含等待、打包和发送。
+  electrical.echo_max_count:
+    label: 每点最大回波数
+    unit: echo/point
+    description: 每角通道每slot的最大回波窗口数，Echo模式采用最坏上限，不假装实际检出了这么多回波，也不强制填充。
+  electrical.echo_max_bins:
+    label: 每回波最大bin窗
+    unit: bin/echo
+    description: Echo波形窗口上限，每个窗口按Hist计数字宽打包；不裁剪为gate bin数量。重叠窗口及真实算法行为未模拟。
+  electrical.echo_descriptor_bytes:
+    label: 每回波附加特征字
+    unit: B/echo
+    description: 每回波起始bin、长度、幅度等用户协议字段的总字节数，另外加窗口计数样本；不包含chip/slot公共头。
+  electrical.packet_payload_bytes:
+    label: CSI-2最大长包payload
+    unit: B/packet
+    description: 接收端允许的最大包载荷，范围1–65535B；按chip的应用数据分段，每段4B头+2B CRC。4096是示例，实际包长/数据类型支持需查接收器。
+  electrical.line_short_packets:
+    label: 每slot发送LS/LE
+    unit: 枚举
+    description: 可选行开始/结束短包，每link每slot合计8B；FS/FE始终每link每LiDAR帧合计8B。VC/DT路由不增加链路容量。
+  electrical.burst_gap_us:
+    label: 每长包固定发送间隔
+    unit: μs/packet
+    description: 每CSI-2长包额外计HS/LP切换等固定耗时；与物理利用率扣减的空隙不得重复。0为理想初始假设，不代表器件无切换成本。
+
+  histogram.bin_count:
+    label: 直方图bin数量
+    unit: bin/channel
+    description: 只读；公共Python核心按窗口长度除以单bin宽度向上取整，控制Hist存储、传输及当前候选分箱；不引入第二个可配置bin数量。
+  memory.bank_bytes:
+    label: 每芯片SRAM自动预算
+    unit: B/bank/chip
+    description: 只读；按每chip原始Hist与输出结果较大者计算每块容量，B按原位覆盖、单缓冲一块/固定A-B两块；不含DSP工作区或物理SRAM对齐/ECC，不代表实装容量验证。
+  memory.fifo_bytes:
+    label: 输出FIFO自动预算
+    unit: B/link
+    description: 只读；每链路每slot应用字节数乘algorithms.yaml的有限列块数，保留至TX结束，满时背压；不是无限队列，也不是最大未来积压能由缓存永久解决。
+
+  system.readout.tdc_bin_ps:
+    label: 单bin时间宽度
+    unit: ps
+    description: 每个直方图时间bin的宽度，1000ps等于1ns；与窗口长度一起决定自动bin数。不是单脉冲脉宽或空间binning；门末尾不足一格按实际门宽截断。

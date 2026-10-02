@@ -61,7 +61,7 @@ def budget_schematic(cfg, optics, algorithms, single_channel=None):
         return {'id':identifier,'title':title,'description':description,'paths':paths,
                 'facts':[{'label':label,'value':value,'unit':unit} for label,value,unit in facts]}
     components=[
-        item('source','VCSEL光源 · Tx光学前','输入是全Tx角域的等效平均功率。E=P×脉宽，高斯用FWHM；不是峰值或整帧平均功率。光源形状只是符号，不表示实际发光单元布局。',
+        item('source','VCSEL光源 · Tx光学前','输入是全Tx角域的等效平均功率。E=P×脉宽，高斯用FWHM；不是峰值或整帧平均功率。薄片、发光条带和触点为芯片外观示意，不表示实物尺寸或真实发光单元数量。',
              ['system.tx.pulse_average_power_w','system.tx.pulse_fwhm_ps','system.tx.pulse_shape','system.tx.wavelength_nm','system.tx.tx_efficiency'],
              [('等效平均功率',tx.pulse_average_power_w,'W'),('单发能量',tx.total_pulse_energy_nj,'nJ'),('波长',tx.wavelength_nm,'nm'),('Tx效率',tx.tx_efficiency,'1')]),
         item('tx','Tx角分布与归一化域','红色边界是功率归一化域；远端热图表示角格积分份额除以角格立体角后的相对密度（峰值=1）。空间分布均匀；全线阵功率按V线数均分。',
@@ -95,6 +95,9 @@ def budget_schematic(cfg, optics, algorithms, single_channel=None):
         region['detector_corners']=[[detector[0]+.03,y0,detector[2]+w/2],[detector[0]+.03,y0,detector[2]-w/2],[detector[0]+.03,y1,detector[2]-w/2],[detector[0]+.03,y1,detector[2]+w/2]]
     from .budget_views import budget_views
     views=budget_views(cfg,algorithms,centers,dv,rw,float(np.ptp(ye)))
+    if single_channel is not None:
+        from .budget_detector_view import detector_view
+        views['detector_view']=detector_view(single_channel,rxdata,algorithms)
     return {'views':views,'schema_version':3,'scan_fan':{'origin':scan_origin,'boundary':scan_points,'columns':scan_columns},'channel_regions':channel_regions,'hfov_deg':cfg.targets.hfov_deg,'slot_count':cfg.targets.slot_count,'coordinate_convention':'H_positive_is_negative_X_Z; V_positive_is_positive_Y_Z; Z_Z_forward','components':components,'tx_corners':corners([he[0],he[-1]],[ve[0],ve[-1]]),
         'rx_corners':corners(rh,rv),'tx_cells':cells,'density_label':'相对角能量密度 · 峰值=1（非探测概率）',
         'source_position':source,'origin':origin,'pupil_position':pupil,'detector_position':detector,

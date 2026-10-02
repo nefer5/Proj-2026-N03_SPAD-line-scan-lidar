@@ -22,7 +22,10 @@ client = TestClient(app)
 def test_yaml_is_complete_and_all_parameters_documented():
     defaults = configuration.default_values()
     assert set(defaults) == set(SimulationConfig.model_fields)
-    assert set(defaults) == set(configuration.read_yaml("parameter-help.yaml")) - {'experiments'}
+    help_data = configuration.read_yaml("parameter-help.yaml")
+    # The help resource also contains metadata for the other platform views.
+    assert set(defaults) <= set(help_data)
+    assert all({'label','unit','description'} <= set(help_data[key]) for key in defaults)
     assert all(field.is_required() for field in SimulationConfig.model_fields.values())
     assert SimulationConfig().model_dump() == defaults
 

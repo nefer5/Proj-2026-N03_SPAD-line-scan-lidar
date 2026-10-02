@@ -1,0 +1,67 @@
+{
+  "purpose": "long-term design reference, not production simulation defaults",
+  "date": "2026-10-03",
+  "timezone": "Asia/Singapore",
+  "verified": {
+    "light_original_byte_equal": true,
+    "light_renderer_byte_reproducible": true,
+    "scenario_original_equal": true,
+    "png_dimensions": [
+      1900,
+      1320
+    ],
+    "svg_parsed": true,
+    "light_dark_geometry_and_text_equal": true
+  },
+  "files": {
+    "fixed-ab-dark.png": {
+      "bytes": 251432,
+      "sha256": "9530c5b5f51623188d7a64a9f2fab38495c5d44102e94261624b5e2da3fd323f"
+    },
+    "fixed-ab-dark.svg": {
+      "bytes": 17042,
+      "sha256": "7a596f7f88503a9d039234ef2fbf21dbb0b3abb8766d0c61904361bf260522ff"
+    },
+    "fixed-ab-light.png": {
+      "bytes": 242927,
+      "sha256": "add68fbee719c44deb227c81ea16ed68e3b9568dc36b7c63068981fda7150547"
+    },
+    "fixed-ab-light.svg": {
+      "bytes": 17042,
+      "sha256": "b19c387659b8b5af598841521a054a7db2ce09c0acce95ab88c604f8bd5813e0"
+    },
+    "original-light-renderer.py": {
+      "bytes": 9303,
+      "sha256": "fd851e20062bffa32aad22706650e0390605c3d4ecdd68aefba42000a5329bcf"
+    },
+    "README.md": {
+      "bytes": 2558,
+      "sha256": "f38c3ec904fd298567995f2c6721ebe590f259b049f0596a3f2c25fd333e140c"
+    },
+    "render.py": {
+      "bytes": 9730,
+      "sha256": "5dc15e9457c639c6bcfae5749b1d41f25b30ad1b204be6e42aa1c5e7f5856e00"
+    },
+    "scenario.json": {
+      "bytes": 2184,
+      "sha256": "e925f9785db4e09ee6bfd0fe1e13806a97068abe236a7f400f5791eef436face"
+    },
+    "theme-palette.json": {
+      "bytes": 1966,
+      "sha256": "84c9a5986c398d7d9a0c33082ecca84003b68321f698ec847818e2cce2643c61"
+    }
+  },
+  "historical_files": {
+    "README.md": {
+      "bytes": 2432,
+      "sha256": "97e1227a4d6dc4bf166ee3f401a3efb1c3107d904f533ea88307a61cdc1f495c"
+    }
+  },
+  "post_archive_updates": [
+    {
+      "date": "2026-10-03",
+      "file": "README.md",
+      "change": "Clarify that the archived demo predates production integration; link to current design. Original drawings and scenarios unchanged."
+    }
+  ]
+}

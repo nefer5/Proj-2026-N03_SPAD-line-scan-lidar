@@ -4,6 +4,15 @@ from pydantic import Field,model_validator
 from .spad.config import StrictConfig
 
 
+class BudgetTransportSpec(StrictConfig):
+    """Budget payload declaration; C's event/readout transport remains separate."""
+    payload_format: Literal['points','histogram','echo']
+    histogram_count_bits: int | None = Field(gt=0,strict=True)
+    point_bytes: int | None = Field(gt=0,strict=True)
+    column_header_bytes: int | None = Field(ge=0,strict=True)
+    mipi_net_mbps: float | None = Field(gt=0)
+
+
 class ElectricalBudgetConfig(StrictConfig):
     capacity_mode: Literal['lanes','aggregate_net']
     channels_per_chip: int = Field(ge=1,strict=True)
@@ -12,11 +21,21 @@ class ElectricalBudgetConfig(StrictConfig):
     lane_rate_mbps: float | None = Field(gt=0)
     payload_efficiency: float | None = Field(gt=0,le=1)
     available_links: int | None = Field(ge=1,strict=True)
-    buffer_bytes_per_link: int | None = Field(ge=0,strict=True)
     chip_header_bytes: int = Field(ge=0,strict=True)
     histogram_mode: Literal['accumulated_column','per_shot']
-    returns_per_point: int = Field(ge=1,strict=True)
     ready_delay_us: float | None = Field(ge=0)
+    buffer_architecture: Literal['fixed_ab','single']
+    handoff_policy: Literal['acquisition_end','slot_end']
+    hist_copy_us: float | None = Field(gt=0,strict=True)
+    bank_clear_us: float | None = Field(ge=0)
+    dsp_time_us: float | None = Field(ge=0)
+    mipi_pack_us: float | None = Field(ge=0)
+    echo_max_count: int = Field(ge=1,strict=True)
+    echo_max_bins: int = Field(ge=1,strict=True)
+    echo_descriptor_bytes: int = Field(ge=0,strict=True)
+    packet_payload_bytes: int = Field(ge=1,le=65535,strict=True)
+    line_short_packets: bool
+    burst_gap_us: float = Field(ge=0)
 
 
 class RangeMeasurement(StrictConfig):

@@ -7,6 +7,7 @@ from fastapi.responses import HTMLResponse
 from ..configuration import Algorithms, read_yaml, parse_yaml, frozen_yaml, yaml_snapshot
 from ..models import SimulationConfig
 from ..system_budget import calculate_budget
+from .budget_form import FORM_LAYOUT
 
 router=APIRouter()
 WEB=Path(__file__).resolve().parents[3]/'web'
@@ -23,12 +24,12 @@ GROUPS=[
  ('Rx · 单通道收光角域','rx_channel',['h_width_mrad','v_width_deg']),
  ('Rx · 接收光学','system.rx',['rx_aperture_shape','rx_aperture_mm','rx_aperture_width_mm','rx_aperture_height_mm','rx_efficiency','focal_length_h_mm','focal_length_v_mm','psf_sigma_h_um','psf_sigma_v_um']),
  ('Rx · 门控与标定','system.acquisition',['gate_start_ns','gate_width_ns','calibration_delay_ns']),
- ('SPAD · 通道内像素','system.spad',['H_binning','V_binning','pixel_pitch_um','fill_factor','spad_dead_time_ns']),
+ ('SPAD · 通道内像素','system.spad',['H_binning','V_binning','pixel_pitch_um','fill_factor','spad_dead_time_ns','spad_jitter_fwhm_ps']),
  ('SPAD · 数字读出','system.readout',['tdc_bin_ps','readout_mode','tdc_dead_time_ns']),
  ('环境光','system.background',['solar_enabled','solar_illuminance_lux','solar_reflectivity','other_light_enabled','other_light_scale']),
  ('高级 · 电热与限额','assumptions',['reset_time_ns','wall_plug_efficiency','max_average_optical_power_w','max_peak_optical_power_w']),
  ('电学 · 输出格式','transport',['payload_format','histogram_count_bits','point_bytes','column_header_bytes','mipi_net_mbps']),
- ('电学 · 芯片与MIPI','electrical',['capacity_mode','channels_per_chip','chips_per_link','data_lanes_per_link','lane_rate_mbps','payload_efficiency','available_links','buffer_bytes_per_link','chip_header_bytes','histogram_mode','returns_per_point','ready_delay_us']),
+ ('电学 · 芯片与MIPI','electrical',['capacity_mode','channels_per_chip','chips_per_link','data_lanes_per_link','lane_rate_mbps','payload_efficiency','available_links','chip_header_bytes','histogram_mode','ready_delay_us','buffer_architecture','handoff_policy','hist_copy_us','bank_clear_us','dsp_time_us','mipi_pack_us','echo_max_count','echo_max_bins','echo_descriptor_bytes','packet_payload_bytes','line_short_packets','burst_gap_us']),
  ('距离参考 · 理想扫参','range_reference',['enabled','min_range_m','max_range_m','points','area_kind']),
  ('高级 · PRBS预算','assumptions',['prbs_enabled','prbs_chip_count','prbs_chip_ns','prbs_on_count'])]
 
@@ -42,7 +43,7 @@ def page():
         # Keep the budget usable. The module script displays an explicit load error.
         manifest={'imports':{}}
     html=html.replace('__THREE_IMPORT_MAP__',json.dumps({'imports':manifest['imports']}).replace('<','\\u003c'))
-    for name in ('budget-hardware.js','budget-charts.js','shared/number-format.js','budget-scene.js','budget-scene.css','shared/theme.css', 'shared/theme.js', 'budget.css','budget.js','curve-editor.js','vendor/katex/katex.min.js','vendor/katex/katex.min.css'):
+    for name in ('budget-pipeline.js','budget-hardware.js','budget-charts.js','shared/number-format.js','budget-scene.js','budget-scene.css','shared/theme.css', 'shared/theme.js', 'budget.css','budget.js','curve-editor.js','vendor/katex/katex.min.js','vendor/katex/katex.min.css'):
         html=html.replace(f'/static/{name}"',f'/static/{name}?v={sha256((WEB/name).read_bytes()).hexdigest()}"')
     return HTMLResponse(html)
 
@@ -53,8 +54,8 @@ def catalog():
         a=Algorithms.load();cfg=SimulationConfig.for_experiment('budget',{},a)
         curves=read_yaml('curve-inputs.yaml')
         curves.update(formulas=read_yaml('formulas.yaml'),formula_notes=read_yaml('formula-notes.yaml'))
-        return dict(defaults=cfg.model_dump(),schema=type(cfg).model_json_schema(),groups=GROUPS,
-                    help=read_yaml('parameter-help.yaml'),curves=curves,algorithms=a.model_dump(),schema_version=4)
+        return dict(defaults=cfg.model_dump(),schema=type(cfg).model_json_schema(),groups=GROUPS,form_layout=FORM_LAYOUT,
+                    help=read_yaml('parameter-help.yaml'),curves=curves,algorithms=a.model_dump(),schema_version=7)
 
 
 @router.post('/api/system-budget/calculate')
@@ -73,11 +74,20 @@ def import_budget(document:str=Body(media_type='text/plain')):
         import yaml
         with frozen_yaml(yaml_snapshot()):
             doc=parse_yaml(document)
-            if set(doc)!={'schema_version','kind','experiment'} or doc['schema_version'] not in (1,2,3,4) or doc['kind']!='hardware-budget':
-                raise ValueError('需要 schema_version: 1、2、3或4、kind: hardware-budget、experiment；旧缓存已保留，未静默迁移。')
+            if set(doc)!={'schema_version','kind','experiment'} or doc['schema_version'] not in (1,2,3,4,5,6,7) or doc['kind']!='hardware-budget':
+                raise ValueError('需要 schema_version: 1–7、kind: hardware-budget、experiment；旧缓存已保留，未静默迁移。')
             if doc['schema_version']<3:
                 from ..legacy_config import migrate_budget_v3
                 doc['experiment']=migrate_budget_v3(doc['experiment'])
+            if doc['schema_version']<5:
+                from ..legacy_config import migrate_budget_v5
+                doc['experiment']=migrate_budget_v5(doc['experiment'])
+            if doc['schema_version']<6:
+                from ..legacy_config import migrate_budget_v6
+                doc['experiment']=migrate_budget_v6(doc['experiment'])
+            if doc['schema_version']<7:
+                from ..legacy_config import migrate_budget_v7
+                doc['experiment']=migrate_budget_v7(doc['experiment'])
             return SimulationConfig.for_experiment('budget',doc['experiment']).model_dump()
     except (ValueError,KeyError,yaml.YAMLError) as exc:
         raise HTTPException(422,str(exc)) from exc

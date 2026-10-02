@@ -9,7 +9,11 @@ from spad_lidar.reporting.budget_schematic import budget_schematic
 
 @pytest.fixture(scope='module')
 def data():
-    a=Algorithms.load();c=SimulationConfig.for_experiment('budget',{})
+    # Exercise physical-cell rendering inside the optical and display limits,
+    # independently of the user's full-array budget profile.
+    a=Algorithms.load();c=SimulationConfig.for_experiment('budget',{
+        'geometry':{'vfov_deg':1},
+        'system':{'spad':{'channels_v':16,'H_binning':2,'V_binning':2}}})
     _,_,o=project_illumination(c.system,a,lambda *_:None,lambda:False)
     return c,a,o,budget_schematic(c,o,a)
 
@@ -44,7 +48,9 @@ def test_display_limits_do_not_change_physics_or_fabricate_pixels(data):
 
 
 def test_no_overlap_suppresses_return_animation():
-    a=Algorithms.load();c=SimulationConfig.for_experiment('budget',{'system':{'tx':{'tx_center_h_mrad':20}}})
+    a=Algorithms.load();c=SimulationConfig.for_experiment('budget',{
+        'geometry':{'vfov_deg':1},
+        'system':{'tx':{'tx_center_h_mrad':20},'spad':{'channels_v':16,'H_binning':2,'V_binning':2}}})
     _,_,o=project_illumination(c.system,a,lambda *_:None,lambda:False)
     s=budget_schematic(c,o,a)
     assert not s['return_path_available']

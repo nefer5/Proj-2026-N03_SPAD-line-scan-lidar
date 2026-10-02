@@ -52,3 +52,48 @@
 @media(max-width:760px){.scene-inspector{grid-template-columns:1fr}.scene-info #sceneFacts{grid-template-columns:repeat(2,minmax(0,1fr))}.scene-viewport{height:390px}}
 
 .ray-guide{stroke:var(--rx-color);stroke-dasharray:4 5;stroke-opacity:.28}
+
+/* Whole-field mapping uses degree angles and independent image-plane units. */
+.scene-detail-card .mapping-diagram text{font-size:14px}
+.mapping-diagram .mapping-heading{font-size:15px;font-weight:600;fill:var(--text)}
+.mapping-diagram .mapping-angle{fill:var(--fov-color)}
+.mapping-diagram .mapping-image{fill:var(--rx-color)}
+.mapping-diagram .mapping-grid{fill:none;stroke:var(--line);stroke-width:1;stroke-dasharray:3 5}
+.mapping-diagram .mapping-guide{fill:none;stroke-width:1;stroke-opacity:.22}
+.mapping-diagram .mapping-selected-ray{stroke-width:2}
+.mapping-diagram .mapping-caption-box{fill:var(--bg);stroke:var(--line);stroke-width:1}
+.mapping-diagram .mapping-caption{font-weight:600;fill:var(--rx-color)}
+.mapping-diagram .mapping-note{font-size:12px}
+
+.scene-inspector #sceneImageCard{grid-column:span 2}
+.scene-detail-card .mapping-diagram{max-width:720px;margin-inline:auto}
+@media(max-width:760px){.scene-inspector #sceneImageCard{grid-column:span 1}}
+
+.scene-inspector #sceneVerticalCard{grid-column:span 2}
+.scene-detail-card .detector-diagram{max-width:780px;margin-inline:auto}
+.scene-detail-card .detector-diagram text{font-size:13px}
+.detector-diagram .detector-angle{fill:var(--text)}
+.detector-diagram .detector-image{fill:var(--orange)}
+.detector-grid{stroke:var(--line);stroke-dasharray:3 5;stroke-width:1;fill:none}
+.detector-tx{stroke:var(--tx-color);fill:var(--tx-color);fill-opacity:.12;stroke-width:2}
+.detector-rx{stroke:var(--rx-color);fill:var(--rx-color);fill-opacity:.06;stroke-width:2}
+.detector-cell{stroke:var(--fov-color);stroke-opacity:.8;stroke-width:1;fill:none}
+.detector-binning{stroke:var(--fov-color);stroke-width:3;fill:none}
+.detector-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;font-size:12px;line-height:1.7;padding:10px 0}
+.detector-facts small{display:block;color:var(--muted);font-size:11px}
+.detector-tx-label{color:var(--tx-color)}.detector-rx-label{color:var(--rx-color)}.detector-cell-label{color:var(--fov-color)}
+@media(max-width:760px){.scene-inspector #sceneVerticalCard{grid-column:span 1}.detector-facts{grid-template-columns:1fr}}
+
+.scene-inspector{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:760px){.scene-inspector{grid-template-columns:1fr}}
+
+/* Paired local-angle and whole-field imaging views. */
+.scene-inspector #sceneVerticalCard,.scene-inspector #sceneImageCard{grid-column:span 1}
+
+.scene-inspector{align-items:start}
+
+.scene-axis-label{position:absolute;transform:translate(-50%,-50%);pointer-events:none;font-size:11px;font-weight:600;line-height:1.3;padding:2px 4px;border-radius:2px;background:color-mix(in srgb,var(--bg) 88%,transparent);text-shadow:0 1px 1px var(--bg)}.scene-axis-label.angle{font-size:12px;border:1px solid color-mix(in srgb,currentColor 35%,transparent);padding:2px 5px}
+
+.scene-compass{max-width:calc(100% - 24px);line-height:1.5}
+
+.scene-world-axes{position:absolute;right:12px;bottom:45px;width:125px;height:110px;pointer-events:none;background:color-mix(in srgb,var(--bg) 90%,transparent);border:1px solid var(--line);border-radius:5px}.scene-world-axes path{stroke-width:1.1}.axis-hud-caption{fill:var(--muted);font-size:9px}.axis-hud-label{font-size:11px;font-weight:600}@media(max-width:760px){.scene-world-axes{width:100px;height:88px;bottom:50px}}

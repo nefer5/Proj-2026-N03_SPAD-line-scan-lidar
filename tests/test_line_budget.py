@@ -33,7 +33,15 @@ def test_hardware_coordinate_conversion_and_render_channel_data():
     assert 'negative_X_Z' in s['coordinate_convention']
     assert s['tx_corners'][2][0]<0 and s['tx_corners'][2][1]>0
     assert len(s['channel_regions'])==c.system.spad.channels_v
-    assert len(s['detector_cells'])==c.system.spad.channels_v*c.system.spad.spads_per_channel
+    physical_count=c.system.spad.channels_v*c.system.spad.spads_per_channel
+    assert r['metrics']['physical_spads']==physical_count
+    if physical_count<=Algorithms.load().budget_schematic_max_cells:
+        assert s['detector_display_kind']=='physical_pixels'
+        assert len(s['detector_cells'])==physical_count
+    else:
+        assert s['detector_display_kind']=='channel_groups'
+        assert len(s['detector_cells'])==c.system.spad.channels_v
+        assert s['display_notes']
 
 
 @pytest.mark.parametrize('bad',[{'system':{'spad':{'channels_h':2}}},{'system':{'tx':{'tx_model':'gaussian'}}},{'rx_channel':{'h_width_mrad':0}},{'rx_channel':{'v_width_deg':float('nan')}},{'geometry':{'vfov_deg':None}}])

@@ -227,26 +227,37 @@ experiments:
     prbs_chip_ns: null
     prbs_on_count: null
   budget_transport:
-    payload_format: histogram
-    histogram_count_bits: 16  # 初始格式示例，非芯片规格。
-    point_bytes: 8  # range记录示例，实际字段由用户协议定义。
-    column_header_bytes: 0  # 下游全列额外封装示例，和MIPI芯片包头分开。
+    payload_format: echo
+    histogram_count_bits: 16
+    point_bytes: 16
+    column_header_bytes: 0
+    mipi_net_mbps: null
   budget_electrical:
     capacity_mode: lanes
-    channels_per_chip: 1
+    channels_per_chip: 192
     chips_per_link: 1
-    data_lanes_per_link: 2
-    lane_rate_mbps: 1500  # 示范线速，不绑定D-PHY版本或厂商器件。
-    payload_efficiency: 0.8  # 可修改的协议/间隙效率假设。
-    available_links: null
-    buffer_bytes_per_link: null
-    chip_header_bytes: 16  # 每chip每列应用包头示例，不是CSI-2固定开销。
+    data_lanes_per_link: 4
+    lane_rate_mbps: 1500.0
+    payload_efficiency: 0.8
+    available_links: 1
+    chip_header_bytes: 16
     histogram_mode: accumulated_column
-    returns_per_point: 1
-    ready_delay_us: 0  # 理想输出就绪，实际处理延时需输入。
+    ready_delay_us: 1.0
+    buffer_architecture: fixed_ab
+    handoff_policy: acquisition_end
+    hist_copy_us: 6.291456
+    bank_clear_us: 1.0
+    dsp_time_us: 27.0
+    mipi_pack_us: 1.0
+    echo_max_count: 6
+    echo_max_bins: 8
+    echo_descriptor_bytes: 8
+    packet_payload_bytes: 4096
+    line_short_packets: false
+    burst_gap_us: 0.0
   budget_range_reference:
-    enabled: true
-    min_range_m: null  # 跟随算法扫参策略；解析后存入完整工况。
+    enabled: false
+    min_range_m: null
     max_range_m: null
     points: null
     measurement_mode: manual
@@ -255,16 +266,29 @@ experiments:
     csv_points: []
     csv_name: ''
   budget_geometry:
-    vfov_deg: 10  # 系统目标的独立初始示例，非实物指标；不继承B的Tx边界。
-    tx_h_width_mrad: 2
+    vfov_deg: 20.0
+    tx_h_width_mrad: 3.0
   budget_system:
     tx:
       tx_model: uniform
+      pulse_average_power_w: 1000.0
+      pulse_shape: rectangular
+      tx_efficiency: 1.0
+    rx:
+      psf_sigma_h_um: 4.0
+      psf_sigma_v_um: 4.0
     spad:
+      H_binning: 8
+      fill_factor: 1.0
       channels_h: 1
+      channels_v: 192
+      pixel_pitch_um: 10.0
+    acquisition:
+      period_ns: 2048.0
+      laser_shots: 12
   budget_rx_channel:
-    h_width_mrad: 2
-    v_width_deg: null  # 单通道；空值跟随VFOV/线数，显式值独立。
+    h_width_mrad: 3.5
+    v_width_deg: null
   system_targets:
     frame_rate_hz: 10
     hfov_deg: 120

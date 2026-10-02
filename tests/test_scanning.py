@@ -157,7 +157,8 @@ def test_fixed_rx_rejects_directions_outside_acceptance():
     narrow=run({'scan':{'rx_scan_scale':0}})
     assert narrow['scan']['pulse_optical_audit']
     r=run({'scan':{'rx_scan_scale':0},'optics':{'rx_angle_h_min_mrad':-30,'rx_angle_h_max_mrad':30}})
-    assert sum(x['sensor_j'] for x in r['scan']['pulse_optical_audit']) > sum(x['sensor_j'] for x in narrow['scan']['pulse_optical_audit'])
+    # Flyback audit entries are blanked events, without an optical energy chain.
+    assert sum(x['sensor_j'] for x in r['scan']['pulse_optical_audit'] if x['emitted']) > sum(x['sensor_j'] for x in narrow['scan']['pulse_optical_audit'] if x['emitted'])
 
 
 def test_seed_reproducibility_block_invariance_and_replay():

@@ -1,6 +1,6 @@
 # 项目文档目录
 
-当前研究版本：0.6.7.dev0。先读当前说明，再按需回溯历史设计；文档中的示例数值不构成另一份运行默认值。
+当前研究版本：0.6.13.dev0。先读当前说明，再按需回溯历史设计；文档中的示例数值不构成另一份运行默认值。
 
 ## 目录分类
 
@@ -19,7 +19,7 @@
 
 ## 当前入口与边界
 
-- [Three.js依赖](guides/threejs.md)：本地离线三维绘图库、版本锁定与恢复方法；已验证渲染，尚未接入业务三维视图。
+- [Three.js依赖](guides/threejs.md)：本地离线三维绘图库、版本锁定与恢复方法；已接入系统预算三维与正交视图。
 
 - [系统预算](guides/system-budget.md)：确定性硬件预算、单方案与基准比较；复用B光学和C高层时间预算，保留未知参数与模型边界。
 
@@ -30,6 +30,8 @@
 - [运行数据与复现](guides/run-artifacts.md)：任务文件、Git范围、备份及报告口径。
 
 ## 已确认的设计与偏好
+
+- [SPAD数据导出时序设计](design/spad-data-timing-design.md)：固定A采集/B处理、有限FIFO背压的双主题长期图稿与实现边界。
 
 - [三维示意图生成提示词](design/lidar-3d-schematic-prompt.md)：可复制到其他工具的交互网页／静态图提示词，包含坐标、收发关系、单通道参数与统一对比工况。
 
@@ -57,6 +59,8 @@
 `photon-budget.md`、`spatial-profiles.md`由共享定义生成，修改源YAML后运行对应生成脚本和`--check`；不要手工维护含义不同的公式副本。
 
 ## 历史设计与证据
+
+- [2026-10-03硬件预算阶段日志](history/2026-10-03-hardware-budget-phase.md)：功能/默认工况/资源边界、验证与Git收口记录。
 
 - [早期模型设计](history/model-design.md)：保留研究依据与NPZ/HDF5等草案，实际接口以当前架构和B文档为准。
 - [C界面设计草案](history/c-exposure-workspace-design.md)、[0.6.0实施记录](history/c-implementation-progress.md)：当时的设计、验证和未完成项，不自动代表当前状态。

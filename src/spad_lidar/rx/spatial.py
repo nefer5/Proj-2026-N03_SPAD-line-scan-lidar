@@ -48,6 +48,13 @@ def image_center(optics,h_mrad,v_mrad):
             sign*optics.focal_length_v_mm*1000*np.tan(np.asarray(v_mrad)*1e-3)+optics.rx_offset_y_um)
 
 
+def image_angles(optics,x_um,y_um):
+    """Inverse of image_center for full-pixel boundaries, before PSF/PDE/FF."""
+    sign=-1 if optics.mapping_mode=='inverted' else 1
+    return (np.arctan((np.asarray(x_um)-optics.rx_offset_x_um)/(sign*optics.focal_length_h_mm*1000))*1000,
+            np.arctan((np.asarray(y_um)-optics.rx_offset_y_um)/(sign*optics.focal_length_v_mm*1000))*1000)
+
+
 def normal_bin_mass(edges):
     """Integrate Gaussian tails without subtracting two values rounded to one."""
     low,high=np.asarray(edges)[:-1],np.asarray(edges)[1:]

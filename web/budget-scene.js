@@ -16,6 +16,40 @@ function material(id,opacity=1){const m=new THREE.MeshBasicMaterial({color:palet
 function mesh(geometry,mat,id,position){const o=new THREE.Mesh(geometry,mat);o.userData.component=id;if(position)o.position.fromArray(position);root.add(o);pickables.push(o);return o;}
 function line(points,id,opacity=1){const m=new THREE.LineBasicMaterial({color:palette[id],transparent:true,opacity});m.userData={id,baseOpacity:opacity};materials.push(m);const o=new THREE.Line(new THREE.BufferGeometry().setFromPoints(points.map(p=>new THREE.Vector3(...p))),m);o.userData.component=id;root.add(o);pickables.push(o);return o;}
 function label(id,text,position){const el=document.createElement('button');el.type='button';el.textContent=text;el.setAttribute('aria-label','选择'+text);el.onclick=()=>choose(id,true);$('sceneLabels').append(el);labels.push({id,el,position:new THREE.Vector3(...position)});}
+function axisLabel(text,position,color,family,origin,direction){const el=document.createElement('span');el.className='scene-axis-label '+family;el.textContent=text;el.dataset.axisName=text;el.style.color=color;el.setAttribute('aria-label',(family==='angle'?'角方向':'世界坐标')+text);$('sceneLabels').append(el);labels.push({id:'axis',fixed:true,text,origin,direction,el,position:new THREE.Vector3(...position)});}
+function directionArrow(origin,direction,length,color,text,family){const start=new THREE.Vector3(...origin),dir=new THREE.Vector3(...direction).normalize();const arrow=new THREE.ArrowHelper(dir,start,length,new THREE.Color(color),.17,.085);arrow.line.material.depthTest=false;arrow.cone.material.depthTest=false;arrow.renderOrder=20;arrow.line.renderOrder=20;arrow.cone.renderOrder=20;root.add(arrow);axisLabel(text,start.clone().addScaledVector(dir,length+.22).toArray(),color,family,start,dir);}
+function coordinateArrows(){
+ const xcolor=themeColor('--orange','#f4b46d'),ycolor=themeColor('--cyan','#59d9cc');
+ // Field H is the opposite of Zemax X; V follows Zemax Y, for every camera.
+ const field=[-2.2,-2.5,4.1];directionArrow(field,[-1,0,0],1.5,xcolor,'+H','angle');directionArrow(field,[0,1,0],1.5,ycolor,'+V','angle');
+}
+function worldAxesHud(){
+ const hud=$('sceneWorldAxes');if(!hud)return false;const q=camera.quaternion.clone().invert(),cx=66,cy=68,length=33;let out=false;
+ let drawing='<text x="66" y="15" text-anchor="middle" class="axis-hud-caption">XYZ 世界方向</text>';
+ for(const [name,vector,color]of [['X',[1,0,0],themeColor('--orange','#f4b46d')],['Y',[0,1,0],themeColor('--cyan','#59d9cc')],['Z',[0,0,1],themeColor('--blue','#78aafa')]]){
+  const d=new THREE.Vector3(...vector).applyQuaternion(q),dx=d.x*length,dy=-d.y*length,span=Math.hypot(dx,dy),x=cx+dx,y=cy+dy;let symbol='';
+  if(span<7){out=true;symbol=d.z>0?' ⊙':' ⊗';drawing+=`<circle cx="${cx}" cy="${cy}" r="4" fill="none" stroke="${color}"/>`+(d.z>0?`<circle cx="${cx}" cy="${cy}" r="1.3" fill="${color}"/>`:`<path d="M${cx-2} ${cy-2}l4 4M${cx+2} ${cy-2}l-4 4" stroke="${color}"/>`);}
+  else{const ux=dx/span,uy=dy/span;drawing+=`<path d="M${cx} ${cy}L${x} ${y}" stroke="${color}"/><path d="M${x} ${y}L${x-ux*6-uy*2.5} ${y-uy*6+ux*2.5}L${x-ux*6+uy*2.5} ${y-uy*6-ux*2.5}Z" fill="${color}"/>`;}
+  const tx=span<7?cx+21:cx+dx*(1+10/span),ty=span<7?cy+18:cy+dy*(1+10/span)+3;
+  drawing+=`<text x="${tx}" y="${ty}" fill="${color}" text-anchor="middle" class="axis-hud-label" data-axis-name="+${name}">+${name}${symbol}</text>`;
+ }
+ hud.innerHTML=drawing;return out;
+}
+function vcselChip(){
+ const origin=model.source_position,at=(x,y,z)=>[origin[0]+x,origin[1]+y,origin[2]+z];
+ const substrate=material('source',.96);substrate.color.copy(new THREE.Color(palette.detector).lerp(new THREE.Color(themeColor('--bg','#0b1118')),.62));
+ const body=mesh(new THREE.BoxGeometry(.92,1.76,.055),substrate,'source',origin);
+ const rim=new THREE.LineBasicMaterial({color:new THREE.Color(palette.source).lerp(new THREE.Color(themeColor('--text','#e2ebf2')),.35),transparent:true,opacity:.9});rim.userData={id:'source',baseOpacity:.9};materials.push(rim);
+ const edge=new THREE.LineSegments(new THREE.EdgesGeometry(body.geometry),rim);edge.position.fromArray(origin);edge.userData.component='source';root.add(edge);
+ const die=material('source',.82);die.color.copy(new THREE.Color(palette.source).lerp(new THREE.Color(themeColor('--bg','#0b1118')),.7));
+ mesh(new THREE.BoxGeometry(.58,1.47,.013),die,'source',at(0,0,.034));
+ mesh(new THREE.BoxGeometry(.15,1.34,.007),material('source',.7),'source',at(0,0,.045));
+ const emitter=material('source',1);emitter.color.copy(new THREE.Color(palette.source).lerp(new THREE.Color(themeColor('--text','#e2ebf2')),.64));
+ const dots=new THREE.CircleGeometry(.036,16);for(let i=0;i<12;i++)mesh(dots,emitter,'source',at(0,-.615+i*1.23/11,.052));
+ const contacts=material('source',1);contacts.color.set(themeColor('--orange','#f4b46d'));const pad=new THREE.BoxGeometry(.13,.085,.014);
+ for(let i=0;i<6;i++)for(const x of [-.29,.29])mesh(pad,contacts,'source',at(x,-.61+i*1.22/5,-.034));
+ label('source','VCSEL芯片 · 线阵',at(0,1.15,0));
+}
 function quad(points,id,opacity){const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(points.flat(),3));g.setIndex([0,1,2,0,2,3]);return mesh(g,material(id,opacity),id);}
 function cone(points,id){for(let i=0;i<4;i++){const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute([...model.origin,...points[i],...points[(i+1)%4]],3));mesh(g,material(id,.035),id);line([model.origin,points[i]],id,.5);}line([...points,points[0]],id,.95);}
 function ramp(value,id){const base=new THREE.Color(palette[id]);const bg=new THREE.Color(themeColor('--bg','#0b1118'));return bg.lerp(base,.12+.88*value);}
@@ -31,8 +65,7 @@ function rebuild(){disposeRoot();root=new THREE.Group();scene.add(root);setPalet
  if(scope==='local')mesh(new THREE.PlaneGeometry(9,9),material('target',.025),'target',[0,0,8.03]);
  if(scope==='overview')buildWholeField();else{cone(model.rx_corners,'rx');cone(model.tx_corners,'tx');heatmap();}
  // Exploded device glyphs, deliberately distinct from calibrated ray geometry.
- mesh(new THREE.BoxGeometry(.45,1.6,.4),material('source'),'source',model.source_position);
- label('source','VCSEL线阵',[0,1.4,-4]);
+ vcselChip();
  const mirror=mesh(new THREE.BoxGeometry(1,.8,.09),material('scan',.7),'scan',model.origin);mirror.rotation.y=.55;
  label('scan','转镜 / 角度原点',[0,-.95,0]);
  const pupilGeometry=model.pupil_shape==='rectangle'?new THREE.PlaneGeometry(...model.pupil_size):new THREE.CircleGeometry(.5,48);
@@ -44,7 +77,7 @@ function rebuild(){disposeRoot();root=new THREE.Group();scene.add(root);setPalet
  line([model.source_position,model.origin],'source',.5);line([model.origin,model.pupil_position,model.detector_position],'rx',.5);
  label('tx',scope==='overview'?'整帧视场 · HFOV × VFOV':'Tx整列 / 单通道角域',scope==='overview'?[0,3.6,8]:[model.tx_corners[2][0],model.tx_corners[2][1]+.5,8]);
  label('target','目标参考面',scope==='overview'?[0,-3.6,8]:[model.rx_corners[0][0],model.rx_corners[0][1]-.7,8]);
- const axes=new THREE.AxesHelper(1.2);axes.position.set(-4,-3.3,0);root.add(axes);
+ coordinateArrows();
  packet=mesh(new THREE.SphereGeometry(.1,12,8),new THREE.MeshBasicMaterial({color:palette.tx}),'source');packet.visible=false;pickables.pop();
  applyVisibility();paintSelection();updateChannel();render();
 }
@@ -68,26 +101,47 @@ function renderDetails(){const d=model.views,c=d.channels[channel],p=d.local,col
  $('sceneFullChart').innerHTML=svg(full,'整机HFOV与VFOV、当前列和V通道');for(const e of $('sceneFullChart').querySelectorAll('[data-channel]')){e.onclick=()=>{channel=Number(e.dataset.channel);$('sceneChannel').value=String(channel);pause();updateChannel();};e.onkeydown=event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();e.onclick();}};}
  const rect=(r,id)=>`<rect x="${r[0]}" y="${r[1]}" width="${r[2]}" height="${r[3]}" class="detail-domain ${id}"/>`;
 
- $('sceneAngleNote').textContent='等价 deg：Tx H '+fmt(p.tx_h_deg)+' / V '+fmt(p.tx_v_deg)+'；Rx H '+fmt(p.rx_h_deg)+' / V '+fmt(p.rx_v_deg);
- $('sceneMismatch').textContent=d.explanation+' 整列V包络：Tx '+fmt(d.tx_v_envelope_mrad)+' / Rx '+fmt(d.rx_v_envelope_mrad)+' mrad。';$('sceneMismatch').classList.toggle('different',!d.same_v_width);$('sceneFollowRx').disabled=d.rx_v_follows_tx;
- let localAxes=`<path d="M50 25V140H318" class="detail-axis"/><path d="M184 25V140M50 82.5H318" class="detail-grid"/>`;for(const tick of p.ticks_h)localAxes+=`<path d="M${tick.x} 140v5" class="detail-axis"/><text x="${tick.x}" y="158" text-anchor="middle">${fmt(tick.value)}</text>`;for(const tick of p.ticks_v)localAxes+=`<path d="M45 ${tick.y}H50" class="detail-axis"/><text x="42" y="${tick.y+4}" text-anchor="end">${fmt(tick.value)}</text>`;
- $('sceneLocalChart').innerHTML=diagram(`${rect(p.tx_rect,'tx')}${rect(p.rx_rect,'rx')}${localAxes}<text x="15" y="197">Tx H ${fmt(p.tx_h_mrad)} × V ${fmt(p.tx_v_mrad)} mrad</text><text x="15" y="217">Rx H ${fmt(p.rx_h_mrad)} × V ${fmt(p.rx_v_mrad)} mrad</text><text x="318" y="178" text-anchor="end">H / mrad →</text><text x="50" y="17">V / mrad ↑</text>`,'底部H轴、左侧V轴的单通道角域对照',230);
+ $('sceneMismatch').textContent=d.explanation;$('sceneMismatch').classList.toggle('different',!d.same_v_width);$('sceneFollowRx').disabled=d.rx_v_follows_tx;
+ renderDetectorView(d.detector_view);
  const hp=d.h_profile;let hbody='<path d="M44 25V134H308" class="detail-axis"/><text x="8" y="43">1</text><text x="8" y="137">0</text><text x="44" y="18">相对Tx强度</text>';
  for(const tick of hp.ticks)hbody+=`<path d="M${tick.x} 134v5" class="detail-frame"/><text x="${tick.x}" y="151" text-anchor="middle">${fmt(tick.value)}</text>`;
  for(const r of hp.neighbors)hbody+=rect(r,'tx neighboring');hbody+=rect(hp.rx_rect,'rx dashed');hbody+=`<polyline points="${hp.tx_path.map(v=>v.join(',')).join(' ')}" class="detail-tx-line"/><path d="M${hp.step_bracket[0]} 173v8M${hp.step_bracket[0]} 177H${hp.step_bracket[1]}M${hp.step_bracket[1]} 173v8" class="detail-axis"/><text x="176" y="198" text-anchor="middle">ΔH列间距 ${fmt(hp.step_mrad)} mrad</text><text x="253" y="167">H / mrad →</text>`;
  $('sceneHorizontalChart').innerHTML=diagram(hbody,'Tx/Rx水平角宽与扫描列间距对照',210);$('sceneHorizontalNote').textContent='Tx H '+fmt(p.tx_h_mrad)+' / Rx H '+fmt(p.rx_h_mrad)+' mrad；Rx角宽 / ΔH = '+fmt(hp.rx_to_step_ratio)+'。淡框为相邻列Tx；角宽比不是独立分辨单元数。';
- const vp=d.v_profile;let vb='<path d="M58 20V174H292" class="detail-axis"/><text x="12" y="14">+V / mrad</text><text x="210" y="194">相对Tx强度 →</text>';
- for(const tick of vp.ticks)vb+=`<path d="M53 ${tick.y}H292" class="detail-grid"/><text x="48" y="${tick.y+4}" text-anchor="end">${fmt(tick.value)}</text>`;
- vb+=rect(vp.tx_rect,'tx');vb+=rect(vp.rx_envelope,'rx dashed');for(const r of vp.rx_channels)vb+=rect(r,'rx');vb+='<text x="68" y="188">0</text><text x="234" y="188">1</text>';$('sceneVerticalChart').innerHTML=diagram(vb,'Tx均匀V角分布与Rx整列包络',210);
- let image='<path d="M54 28V158M282 28V158M54 96H282" class="detail-axis"/><path d="M54 28L172 96L282 158M54 158L172 96L282 28" class="detail-grid ray-guide"/><ellipse cx="172" cy="96" rx="9" ry="62" class="detail-lens"/><text x="26" y="18">视场 V</text><text x="150" y="18">Rx光学</text><text x="259" y="18">SPAD Y</text><text x="8" y="42">+V↑</text><text x="288" y="42">+Y↑</text>';
- for(const row of d.chart.channels){const ry=28+row.index*130/model.channel_regions.length;image+=`<rect x="275" y="${158-(row.index+1)*130/model.channel_regions.length}" width="14" height="${130/model.channel_regions.length*.75}" class="detail-pixel"/>`;}
- const ty=28+(c.target_y-28)*130/108,iy=28+(c.detector_y-28)*130/108;
- image+=`<path d="M54 ${ty}L172 96L282 ${iy}" class="detail-ray"/><circle cx="54" cy="${ty}" r="4" class="detail-dot"/><rect x="272" y="${iy-4}" width="20" height="8" class="detail-selected-pixel"/><text x="58" y="${ty-9}">V${channel} · ${fmt(c.v_center_mrad)} mrad</text><text x="197" y="${iy-9}">SPAD组 ${c.detector_group}</text><text x="4" y="63">${fmt(d.tx_v_envelope_mrad/2)}</text><text x="4" y="156">${fmt(-d.tx_v_envelope_mrad/2)}</text><text x="291" y="63">${fmt(d.detector_half_height_um)}</text><text x="291" y="156">${fmt(-d.detector_half_height_um)}</text><text x="35" y="182">mrad</text><text x="267" y="182">μm</text><text x="28" y="205">+V映射到−Y · 角度与像面轴分别缩放</text>`;
- $('sceneImageChart').innerHTML=diagram(image,'带坐标的V视场、Rx光学和SPAD倒置映射',218);
+ renderImageMapping(d,c);
+
+}
+function renderDetectorView(d){
+ if(!d){$('sceneDetectorChart').textContent='双坐标几何数据未加载，请重新计算或重启旧服务。';return;}
+ const low=d.angle_limits_mrad[0],high=d.angle_limits_mrad[1],left=112,top=80,size=430,scale=size/(high-low),x=v=>left+(v-low)*scale,y=v=>top+(high-v)*scale;
+ const label=(px,py,t,cl='',anchor='start')=>`<text x="${px}" y="${py}" class="${cl}" text-anchor="${anchor}">${t}</text>`;
+ const box=(b,cl,title='')=>`<rect x="${x(b.h_min)}" y="${y(b.v_max)}" width="${(b.h_max-b.h_min)*scale}" height="${(b.v_max-b.v_min)*scale}" class="${cl}">${title?'<title>'+title+'</title>':''}</rect>`;
+ let b='';for(const t of d.ticks){const xx=x(t.angle_mrad),yy=y(t.angle_mrad);b+=`<path d="M${xx} ${top}V${top+size}M${left} ${yy}H${left+size}" class="detector-grid"/>`+label(xx,top+size+23,fmt(t.angle_mrad),'detector-angle','middle')+label(left-12,yy+4,fmt(t.angle_mrad),'detector-angle','end')+label(xx,top-14,fmt(t.image_x_um),'detector-image','middle')+label(left+size+12,yy+4,fmt(t.image_y_um),'detector-image');}
+ b+=box(d.rx_bounds,'detector-rx','配置Rx角域')+box(d.tx_bounds,'detector-tx','Tx归一化角域');
+ for(const cell of d.cells)b+=box(cell,'detector-cell','cell H'+cell.h_index+' / V'+cell.v_index);
+ b+=box(d.binning_bounds,'detector-binning','一个角通道的binning边界');
+ b+=`<path d="M${left} ${top}V${top+size}H${left+size}" class="detail-axis"/>`+label(left+size/2,top+size+52,'角度 H / mrad','detector-angle','middle')+label(11,top+size/2,'角度 V','detector-angle')+label(11,top+size/2+19,'/ mrad','detector-angle')+label(left+size/2,24,'像面 X / μm'+(d.mapping_mode==='inverted'?'（倒置）':''),'detector-image','middle')+label(left+size+71,top+size/2-10,'像面 Y','detector-image')+label(left+size+71,top+size/2+10,'/ μm','detector-image');
+ $('sceneDetectorChart').innerHTML=`<svg class="detector-diagram" viewBox="0 0 710 590" role="img" aria-label="来自后台计算的单通道Tx、Rx和SPAD cell/binning双坐标对照">${b}</svg>`;
+ $('sceneDetectorFacts').innerHTML=`<span class="detector-tx-label">Tx H ${fmt(d.tx_h_mrad)} × V ${fmt(d.tx_v_mrad)} mrad<small>等价 H ${fmt(d.tx_h_deg)} × V ${fmt(d.tx_v_deg)} deg</small></span><span class="detector-rx-label">Rx H ${fmt(d.rx_h_mrad)} × V ${fmt(d.rx_v_mrad)} mrad<small>等价 H ${fmt(d.rx_h_deg)} × V ${fmt(d.rx_v_deg)} deg</small></span><span class="detector-cell-label">SPAD H ${d.binning_h} × V ${d.binning_v} cells<small>尺寸 ${fmt(d.detector_h_um)} × ${fmt(d.detector_v_um)} μm · pitch ${fmt(d.pixel_pitch_um)} μm</small><small>对应 H ${fmt(d.detector_h_mrad)} × V ${fmt(d.detector_v_mrad)} mrad</small></span>`;
+ $('sceneDetectorNote').textContent=(d.capture_fraction===null?'无滤光后信号，截获率不定义。':'PSF空间截获率 '+fmt(d.capture_fraction*100)+'%。')+d.note+(d.cells_omitted?' cell数超过显示上限，仅显示binning外框；计算未降采样。':'');
+}
+function renderImageMapping(d,c){
+ const n=model.channel_regions.length,left=100,lens=270,right=434,top=74,bottom=270,span=bottom-top,mid=(top+bottom)/2;
+ const groupY=i=>bottom-(i+.5)*span/n,ty=groupY(channel),iy=groupY(c.detector_group);
+ const label=(x,y,t,kind='',anchor='start')=>`<text x="${x}" y="${y}" class="${kind}" text-anchor="${anchor}">${t}</text>`;
+ let body=label(left,27,'视场 V / deg','mapping-heading','middle')+label(lens,27,'Rx 成像','mapping-heading','middle')+label(right,27,'SPAD Y / μm','mapping-heading','middle');
+ body+=`<path d="M${left} ${top}V${bottom}M${right} ${top}V${bottom}" class="detail-axis"/>`;
+ for(let i=0;i<=4;i++){const y=bottom-span*i/4,v=-d.vfov_deg/2+d.vfov_deg*i/4,um=-d.detector_half_height_um+2*d.detector_half_height_um*i/4;body+=`<path d="M${left-5} ${y}H${right+5}" class="mapping-grid"/>`+label(left-12,y+4,fmt(v),'mapping-angle','end')+label(right+25,y+4,fmt(um),'mapping-image');}
+ const inverted=model.imageMappingMode==='inverted';
+ body+=`<path d="M${left} ${top}L${lens} ${mid}L${right} ${inverted?bottom:top}M${left} ${bottom}L${lens} ${mid}L${right} ${inverted?top:bottom}" class="ray-guide mapping-guide"/><ellipse cx="${lens}" cy="${mid}" rx="12" ry="86" class="detail-lens"/>`;
+ for(const row of d.chart.channels){const y=bottom-(row.index+1)*span/n;body+=`<rect x="${right-9}" y="${y+span/n*.08}" width="18" height="${span/n*.84}" rx="1" class="detail-pixel"/>`;}
+ body+=`<path d="M${left} ${ty}L${lens} ${mid}L${right} ${iy}" class="detail-ray mapping-selected-ray"/><circle cx="${left}" cy="${ty}" r="5" class="detail-dot"/><rect x="${right-13}" y="${iy-span/n*.42}" width="26" height="${Math.max(3,span/n*.84)}" rx="1" class="detail-selected-pixel"/>`;
+ body+=`<rect x="67" y="300" width="190" height="34" rx="6" class="mapping-caption-box"/><rect x="285" y="300" width="230" height="34" rx="6" class="mapping-caption-box"/>`+label(162,322,'V'+channel+' · '+fmt(c.v_center_deg)+' deg','mapping-caption','middle')+label(400,322,'SPAD 分组 '+c.detector_group,'mapping-caption','middle');
+ body+=label(lens,322,'→','mapping-heading','middle')+label(280,364,(inverted?'+V → −Y · 倒置映射':'+V → +Y · 同向映射')+'；两侧坐标分别缩放','mapping-note','middle');
+ $('sceneImageChart').innerHTML=`<svg class="mapping-diagram" viewBox="0 0 560 385" role="img" aria-label="整条V视场的角度坐标为deg、SPAD像面为微米；当前通道与分组映射">${body}</svg>`;
 }
 function diagram(body,label,height){return '<svg viewBox="0 0 350 '+height+'" role="img" aria-label="'+label+'">'+body+'</svg>';}
 
-function updateLabels(){const occupied=[];for(const l of [...labels].sort((a,b)=>(b.id===selected)-(a.id===selected))){const p=l.position.clone().project(camera);l.el.hidden=p.z>1||p.z< -1||p.x< -1||p.x>1||p.y< -1||p.y>1;if(l.el.hidden)continue;const w=l.el.offsetWidth,h=l.el.offsetHeight;const x=Math.max(w/2+8,Math.min(host.clientWidth-w/2-8,(p.x*.5+.5)*host.clientWidth));let y=Math.max(h/2+8,Math.min(host.clientHeight-h/2-55,(-p.y*.5+.5)*host.clientHeight));for(let n=0;n<8;n++){if(!occupied.some(r=>Math.abs(r.x-x)<(r.w+w)/2+5&&Math.abs(r.y-y)<(r.h+h)/2+5))break;y-=h+7;if(y<h/2+8)y=host.clientHeight-h/2-60;}l.el.style.left=x+'px';l.el.style.top=y+'px';l.el.classList.toggle('selected',l.id===selected);occupied.push({x,y,w,h});}}
+function updateLabels(){const occupied=[];let normalAxis=false;for(const l of [...labels].sort((a,b)=>Number(Boolean(b.fixed))-Number(Boolean(a.fixed))||(b.id===selected)-(a.id===selected))){const p=l.position.clone().project(camera);l.el.hidden=p.z>1||p.z< -1||p.x< -1||p.x>1||p.y< -1||p.y>1;if(l.el.hidden)continue;if(l.fixed){const o=l.origin.clone().project(camera),short=Math.hypot((p.x-o.x)*host.clientWidth/2,(p.y-o.y)*host.clientHeight/2)<12;const toward=l.direction.dot(camera.position.clone().sub(l.origin))>0;l.el.textContent=l.text+(short?(toward?' ⊙':' ⊗'):'');l.el.title=short?(toward?'朝向观察者':'背离观察者'):'三维正方向';normalAxis||=short;}const w=l.el.offsetWidth,h=l.el.offsetHeight;const x=l.fixed?(p.x*.5+.5)*host.clientWidth:Math.max(w/2+8,Math.min(host.clientWidth-w/2-8,(p.x*.5+.5)*host.clientWidth));let y=l.fixed?(-p.y*.5+.5)*host.clientHeight:Math.max(h/2+8,Math.min(host.clientHeight-h/2-55,(-p.y*.5+.5)*host.clientHeight));for(let n=0;!l.fixed&&n<8;n++){if(!occupied.some(r=>Math.abs(r.x-x)<(r.w+w)/2+5&&Math.abs(r.y-y)<(r.h+h)/2+5))break;y-=h+7;if(y<h/2+8)y=host.clientHeight-h/2-60;}l.el.style.left=x+'px';l.el.style.top=y+'px';l.el.classList.toggle('selected',l.id===selected);occupied.push({x,y,w,h});}normalAxis=worldAxesHud()||normalAxis;panel.querySelector('.scene-compass').textContent='世界轴 X/Y/Z（Zemax） · +H = −X · +V = +Y · +Z 朝场景'+(normalAxis?' · ⊙朝向观察者 / ⊗背离观察者':'');}
 function render(){if(!renderer||!visible)return;renderer.render(scene,camera);updateLabels();}
 function resize(){if(!renderer)return;const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);if(camera.isOrthographicCamera){const span=Math.max(16,16/(w/h));camera.left=-span*w/h/2;camera.right=span*w/h/2;camera.top=span/2;camera.bottom=-span/2;}else camera.aspect=w/h;camera.updateProjectionMatrix();render();}
 function applyVisibility(){if(!root)return;root.traverse(o=>{const id=o.userData.component;if(id==='tx')o.visible=$('sceneShowTx').checked;if(id==='rx')o.visible=$('sceneShowRx').checked;});}
@@ -112,7 +166,7 @@ function animate(now){if(!playing||!visible||document.hidden)return;const dt=las
  render();frame=requestAnimationFrame(animate);
 }
 function togglePlay(){if(scope==='overview'&&!playing){scope='local';for(const b of document.querySelectorAll('[data-scene-scope]'))b.setAttribute('aria-pressed',String(b.dataset.sceneScope===scope));rebuild();choose(selected);}if(playing){pause();return;}if(!model||stale||!model.animation_allowed)return;playing=true;phase=0;lastTime=0;lastStage=-1;$('scenePlay').textContent='Ⅱ 暂停动画';$('scenePlay').setAttribute('aria-pressed','true');frame=requestAnimationFrame(animate);}
-function update(payload){if(!payload?.schematic)return;try{pause();if(!model)channel=Math.floor(payload.schematic.channel_regions.length/2);model=payload.schematic;channel=Math.min(channel,model.channel_regions.length-1);$('sceneChannel').replaceChildren();for(const c of model.channel_regions){const o=document.createElement('option');o.value=String(c.index);o.textContent='V'+c.index;$('sceneChannel').append(o);}$('sceneChannel').value=String(channel);$('sceneSlot').max=model.slot_count-1;if(!$('sceneSlot').value||Number($('sceneSlot').value)>=model.slot_count)$('sceneSlot').value=String(Math.floor(model.slot_count/2));stale=false;$('sceneAnimation').textContent='拖动旋转 · 滚轮缩放 · 点击部件查看含义';panel.classList.remove('scene-stale');$('sceneState').textContent='当前配置 · '+payload.fingerprint.slice(0,10);$('sceneScope').textContent=model.note;
+function update(payload){if(!payload?.schematic)return;try{pause();if(!model)channel=Math.floor(payload.schematic.channel_regions.length/2);model=payload.schematic;model.imageMappingMode=payload.mappingMode;channel=Math.min(channel,model.channel_regions.length-1);$('sceneChannel').replaceChildren();for(const c of model.channel_regions){const o=document.createElement('option');o.value=String(c.index);o.textContent='V'+c.index;$('sceneChannel').append(o);}$('sceneChannel').value=String(channel);$('sceneSlot').max=model.slot_count-1;if(!$('sceneSlot').value||Number($('sceneSlot').value)>=model.slot_count)$('sceneSlot').value=String(Math.floor(model.slot_count/2));stale=false;$('sceneAnimation').textContent='拖动旋转 · 滚轮缩放 · 点击部件查看含义';panel.classList.remove('scene-stale');$('sceneState').textContent='当前配置 · '+payload.fingerprint.slice(0,10);$('sceneScope').textContent=model.note;
  $('sceneScale').textContent=`角域横向放大 ${fmt(model.scale.angular_exaggeration)} 倍（相对纵深，H/V同比例）。${model.density_label}。${model.display_notes.join(' ')} 整帧视场使用柱面角坐标示意，V方向放大 ${fmt(model.views.vertical_exaggeration)} 倍；下方单通道图H/V同比例。`;
  $('sceneParts').replaceChildren();for(const c of model.components){const b=document.createElement('button');b.type='button';b.dataset.component=c.id;b.textContent=({source:'光源',tx:'Tx角域',rx:'Rx收光',detector:'SPAD',target:'目标',scan:'转镜'})[c.id];b.onclick=()=>choose(c.id,true);$('sceneParts').append(b);}
  rebuild();choose(selected);$('scenePlay').disabled=!model.animation_allowed;if(!model.animation_allowed)$('sceneAnimation').textContent='光源功率为0：保留角分布形状，关闭传播动画。';}catch(e){fail(e);}}

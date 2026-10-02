@@ -1,0 +1,285 @@
+{
+  "example": {
+    "source": "user reference image 2; layout demonstration only",
+    "slot_us": 100,
+    "frame_ms": 100,
+    "columns": 1000,
+    "channels": 200,
+    "acquisition_us": 82,
+    "shots": 4,
+    "hist_transfer_us": 15,
+    "dsp_input_delay_us": 4,
+    "dsp_processing_us": 66,
+    "mipi_pack_us": 5,
+    "mipi_wire_us": 33,
+    "handoff": "slot boundary"
+  },
+  "schedule": {
+    "mode": "pipelined",
+    "complete": true,
+    "stages": [
+      {
+        "key": "hist_transfer",
+        "label": "Hist搬移",
+        "duration_ns": 15000.0,
+        "first_ready_ns": 100000.0,
+        "first_start_ns": 100000.0,
+        "first_end_ns": 115000.0,
+        "arrival_interval_ns": 100000.0,
+        "service_interval_ns": 100000.0,
+        "peak_wait_ns": 0.0,
+        "peak_waiting_columns": 0,
+        "rows": [
+          {
+            "column": 0,
+            "ready_ns": 100000.0,
+            "start_ns": 100000.0,
+            "end_ns": 115000.0,
+            "wait_ns": 0.0
+          },
+          {
+            "column": 1,
+            "ready_ns": 200000.0,
+            "start_ns": 200000.0,
+            "end_ns": 215000.0,
+            "wait_ns": 0.0
+          },
+          {
+            "column": 2,
+            "ready_ns": 300000.0,
+            "start_ns": 300000.0,
+            "end_ns": 315000.0,
+            "wait_ns": 0.0
+          },
+          {
+            "column": 3,
+            "ready_ns": 400000.0,
+            "start_ns": 400000.0,
+            "end_ns": 415000.0,
+            "wait_ns": 0.0
+          },
+          {
+            "column": 999,
+            "ready_ns": 100000000.0,
+            "start_ns": 100000000.0,
+            "end_ns": 100015000.0,
+            "wait_ns": 0.0
+          }
+        ]
+      },
+      {
+        "key": "dsp_input_delay",
+        "label": "DSP输入延迟",
+        "duration_ns": 4000.0,
+        "first_ready_ns": 115000.0,
+        "first_start_ns": 115000.0,
+        "first_end_ns": 119000.0,
+        "arrival_interval_ns": 100000.0,
+        "service_interval_ns": 100000.0,
+        "peak_wait_ns": 0.0,
+        "peak_waiting_columns": 0,
+        "rows": [
+          {
+            "column": 0,
+            "ready_ns": 115000.0,
+            "start_ns": 115000.0,
+            "end_ns": 119000.0,
+            "wait_ns": 0.0
+          },
+          {
+            "column": 1,
+            "ready_ns": 215000.0,
+            "start_ns": 215000.0,
+            "end_ns": 219000.0,
+            "wait_ns": 0.0
+          },
+          {
+            "column": 2,
+            "ready_ns": 315000.0,
+            "start_ns": 315000.0,
+            "end_ns": 319000.0,
+            "wait_ns": 0.0
+          },
+          {
+            "column": 3,
+            "ready_ns": 415000.0,
+            "start_ns": 415000.0,
+            "end_ns": 419000.0,
+            "wait_ns": 0.0
+          },
+          {
+            "column": 999,
+            "ready_ns": 100015000.0,
+            "start_ns": 100015000.0,
+            "end_ns": 100019000.0,
+            "wait_ns": 0.0
+          }
+        ]
+      },
+      {
+        "key": "dsp",
+        "label": "DSP处理",
+        "duration_ns": 66000.0,
+        "first_ready_ns": 119000.0,
+        "first_start_ns": 119000.0,
+        "first_end_ns": 185000.0,
+        "arrival_interval_ns": 100000.0,
+        "service_interval_ns": 100000.0,
+        "peak_wait_ns": 0.0,
+        "peak_waiting_columns": 0,
+        "rows": [
+          {
+            "column": 0,
+            "ready_ns": 119000.0,
+            "start_ns": 119000.0,
+            "end_ns": 185000.0,
+            "wait_ns": 0.0
+          },
+          {
+            "column": 1,
+            "ready_ns": 219000.0,
+            "start_ns": 219000.0,
+            "end_ns": 285000.0,
+            "wait_ns": 0.0
+          },
+          {
+            "column": 2,
+            "ready_ns": 319000.0,
+            "start_ns": 319000.0,
+            "end_ns": 385000.0,
+            "wait_ns": 0.0
+          },
+          {
+            "column": 3,
+            "ready_ns": 419000.0,
+            "start_ns": 419000.0,
+            "end_ns": 485000.0,
+            "wait_ns": 0.0
+          },
+          {
+            "column": 999,
+            "ready_ns": 100019000.0,
+            "start_ns": 100019000.0,
+            "end_ns": 100085000.0,
+            "wait_ns": 0.0
+          }
+        ]
+      },
+      {
+        "key": "mipi_pack",
+        "label": "MIPI打包",
+        "duration_ns": 5000.0,
+        "first_ready_ns": 185000.0,
+        "first_start_ns": 185000.0,
+        "first_end_ns": 190000.0,
+        "arrival_interval_ns": 100000.0,
+        "service_interval_ns": 100000.0,
+        "peak_wait_ns": 0.0,
+        "peak_waiting_columns": 0,
+        "rows": [
+          {
+            "column": 0,
+            "ready_ns": 185000.0,
+            "start_ns": 185000.0,
+            "end_ns": 190000.0,
+            "wait_ns": 0.0
+          },
+          {
+            "column": 1,
+            "ready_ns": 285000.0,
+            "start_ns": 285000.0,
+            "end_ns": 290000.0,
+            "wait_ns": 0.0
+          },
+          {
+            "column": 2,
+            "ready_ns": 385000.0,
+            "start_ns": 385000.0,
+            "end_ns": 390000.0,
+            "wait_ns": 0.0
+          },
+          {
+            "column": 3,
+            "ready_ns": 485000.0,
+            "start_ns": 485000.0,
+            "end_ns": 490000.0,
+            "wait_ns": 0.0
+          },
+          {
+            "column": 999,
+            "ready_ns": 100085000.0,
+            "start_ns": 100085000.0,
+            "end_ns": 100090000.0,
+            "wait_ns": 0.0
+          }
+        ]
+      },
+      {
+        "key": "mipi",
+        "label": "MIPI发送",
+        "duration_ns": 33000.0,
+        "first_ready_ns": 190000.0,
+        "first_start_ns": 190000.0,
+        "first_end_ns": 223000.0,
+        "arrival_interval_ns": 100000.0,
+        "service_interval_ns": 100000.0,
+        "peak_wait_ns": 0.0,
+        "peak_waiting_columns": 0,
+        "rows": [
+          {
+            "column": 0,
+            "ready_ns": 190000.0,
+            "start_ns": 190000.0,
+            "end_ns": 223000.0,
+            "wait_ns": 0.0
+          },
+          {
+            "column": 1,
+            "ready_ns": 290000.0,
+            "start_ns": 290000.0,
+            "end_ns": 323000.0,
+            "wait_ns": 0.0
+          },
+          {
+            "column": 2,
+            "ready_ns": 390000.0,
+            "start_ns": 390000.0,
+            "end_ns": 423000.0,
+            "wait_ns": 0.0
+          },
+          {
+            "column": 3,
+            "ready_ns": 490000.0,
+            "start_ns": 490000.0,
+            "end_ns": 523000.0,
+            "wait_ns": 0.0
+          },
+          {
+            "column": 999,
+            "ready_ns": 100090000.0,
+            "start_ns": 100090000.0,
+            "end_ns": 100123000.0,
+            "wait_ns": 0.0
+          }
+        ]
+      }
+    ],
+    "preview_columns": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "column_period_ns": 100000.0,
+    "acquisition_end_ns": 82000,
+    "fixed_ready_delay_ns": 18000,
+    "frame_completion_ns": 100123000.0,
+    "frame_tail_ns": 123000.0,
+    "max_frame_rate_hz": 4.484304932735426,
+    "throughput_interval_ns": 100000.0,
+    "no_backlog": true,
+    "frame_ok": false,
+    "mipi_resident_columns_peak": 1,
+    "note": "整列交接；采集缓冲与后级独立。搬移、DSP、打包各一共享资源；多MIPI链路并行，以最忙链路展示。输入延迟不独占DSP。流水模式各阶段可服务不同列，串行模式一列发送结束后后级才接下一列。阶段等待假设无限队列、不丢数据；只对已指定MIPI缓存作容量判断，未模拟DSP算法或流式分块。"
+  }
+}

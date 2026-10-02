@@ -69,7 +69,10 @@ def test_power_duration_and_old_energy_migration():
 
 def test_vfov_links_tx_only_and_v_rows_sum_to_total():
     a=Algorithms.load()
-    c=SimulationConfig.for_experiment('budget',{'geometry':{'vfov_deg':1}})
+    c=SimulationConfig.for_experiment('budget',{
+        'geometry':{'vfov_deg':1,'tx_h_width_mrad':2},
+        'rx_channel':{'v_width_deg':None},
+        'system':{'tx':{'pulse_average_power_w':280,'pulse_fwhm_ps':2000}}})
     assert c.system.tx.angle_h_max_mrad-c.system.tx.angle_h_min_mrad==2
     assert c.system.tx.angle_v_max_mrad-c.system.tx.angle_v_min_mrad==pytest.approx(np.deg2rad(1)*1000)
     assert c.system.rx.rx_angle_v_max_mrad==pytest.approx(np.deg2rad(1)*1000/2)  # blank per-channel V follows Tx

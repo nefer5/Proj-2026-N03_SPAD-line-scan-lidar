@@ -1,0 +1,136 @@
+{
+  "example": {
+    "source": "illustration only",
+    "mode": "Range",
+    "buffer_roles": "A acquisition; B DSP",
+    "fifo_blocks": 1,
+    "output_block_bytes": 1024,
+    "planned_slot_us": 80,
+    "acquisition_us": 80,
+    "copy_us": 10,
+    "clear_a_us": 5,
+    "dsp_us": 100,
+    "pack_us": 10,
+    "wire_us": 160,
+    "a_release": "A-to-B copy then A clear complete",
+    "b_release": "DSP output committed to FIFO",
+    "fifo_release": "whole block after TX completion"
+  },
+  "slots": [
+    {
+      "slot": 0,
+      "planned": 0,
+      "capture": [
+        0,
+        80
+      ],
+      "copy": [
+        80,
+        90
+      ],
+      "clear_a": [
+        90,
+        95
+      ],
+      "dsp": [
+        90,
+        190
+      ],
+      "output_wait": [
+        190,
+        190
+      ],
+      "fifo": [
+        190,
+        360
+      ],
+      "pack": [
+        190,
+        200
+      ],
+      "mipi": [
+        200,
+        360
+      ],
+      "b_release": 190,
+      "start_delay": 0
+    },
+    {
+      "slot": 1,
+      "planned": 80,
+      "capture": [
+        95,
+        175
+      ],
+      "copy": [
+        190,
+        200
+      ],
+      "clear_a": [
+        200,
+        205
+      ],
+      "dsp": [
+        200,
+        300
+      ],
+      "output_wait": [
+        300,
+        360
+      ],
+      "fifo": [
+        360,
+        530
+      ],
+      "pack": [
+        360,
+        370
+      ],
+      "mipi": [
+        370,
+        530
+      ],
+      "b_release": 360,
+      "start_delay": 15
+    },
+    {
+      "slot": 2,
+      "planned": 160,
+      "capture": [
+        205,
+        285
+      ],
+      "copy": [
+        360,
+        370
+      ],
+      "clear_a": [
+        370,
+        375
+      ],
+      "dsp": [
+        370,
+        470
+      ],
+      "output_wait": [
+        470,
+        530
+      ],
+      "fifo": [
+        530,
+        700
+      ],
+      "pack": [
+        530,
+        540
+      ],
+      "mipi": [
+        540,
+        700
+      ],
+      "b_release": 530,
+      "start_delay": 45
+    }
+  ],
+  "fifo_peak_blocks": 1
+}

@@ -69,6 +69,9 @@ hardware_budget_energy_window: 单通道回波能量在同一时间窗口积分�
 
 budget_signal_energy_photons: 光学阶段E_i单位J，h和c取公共SI常数，λ为信号激光波长。所有值为一个角通道一次发射的全脉冲；候选雪崩是概率加权计数，不是光学能量或最终读出记录。
 
-budget_mipi_payload: b为计数位宽，N_hist为列内累计输出1或每发输出的发数；range格式改用每chip通道数×每点记录数×记录字节。chip包头和下游总列头分别定义。B_link为汇聚chip包长度，单位B；需求R单位bit/s。
-budget_mipi_capacity: lane速率为bit/s，不是PHY时钟；η为明确输入的净效率，aggregate_net模式直接用总净带宽分配，不再乘效率。T_wire以s计，显示层换算μs。
+budget_mipi_payload: b为计数字宽，N_hist为每slot累计一份或逐发Hist的份数；Range为每chip通道数×完整点字节，Echo按最大回波数/最大bin窗及回波描述字节。应用chip头与每link的slot头均计入payload；CSI-2头/CRC另计。需求R为bit/s，不预测实际算法压缩。
+budget_mipi_capacity: 基线CSI-2/D-PHY；B_payload为最忙link每slot全部应用字节，N_long为实际分段长包数量，每包4B头+2B CRC，LS/LE启用时合计8B/slot。FS/FE各4B，分别加在该帧首/末slot；一帧只有一个slot时加8B。lane速率为bit/s，eta只扣未显式计入的物理空隙；T_gap按每长包另计，不重复扣同一HS/LP开销。aggregate_net直接用分配到的服务速率。公式时间用秒，数值核心显式转换ns/μs。仅发送服务时间，不含FIFO排队、DSP或应用打包；未模拟接收端对齐/自定义DT兼容。
+
 budget_range_fisher: 独立泊松候选计数，A为未知信号幅值，背景视为已知；p_j由激光/器件IRF的TDC/gate积分得出。t_r用s时精度单位m；Python信息矩阵内部用ns，转换mm时显式乘时间单位。无信号或信息不正时不输出有限精度，不含死时间/pile-up/时钟系统误差。
+
+budget_hist_copy_rate: B_Hist/chip为公共核心按当前窗口、bin宽、计数字宽及输出累计策略计算的单芯片整slot原始Hist字节数；T_copy为用户输入的正搬移时长。R_copy是所需总比特率而非实测能力，各chip并行，不乘chip数量。单缓冲旁路A→B，不计算此要求。公式单位秒/bit每秒，接口输入μs，输出Mbit/s。

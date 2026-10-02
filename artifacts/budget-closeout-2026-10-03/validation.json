@@ -1,0 +1,31 @@
+{
+  "utc": "2026-10-02T21:43:35.924470+00:00",
+  "version": "0.6.13.dev0",
+  "pytest": {
+    "command": "python -m pytest -q",
+    "passed": 390,
+    "failed": 0,
+    "duration_seconds": 118.02
+  },
+  "focused_regression": {
+    "passed": 92,
+    "duration_seconds": 20.94
+  },
+  "checks": {
+    "form_serialization": "passed",
+    "timing_viewport": "passed",
+    "photon_budget_doc_sync": "passed",
+    "spatial_profiles_doc_sync": "passed",
+    "vscode_katex_equations": 83,
+    "javascript_syntax": [
+      "web/budget.js",
+      "web/budget-pipeline.js",
+      "web/budget-charts.js",
+      "web/budget-hardware.js",
+      "web/budget-scene.js"
+    ],
+    "working_diff_whitespace": "passed"
+  },
+  "browser": "Normal reload and actual Reload defaults button; result configuration equals selected profile; no visible error",
+  "scope": "Software self-validation and user stage closeout; no real-chip or CSI-2 receiver certification"
+}

@@ -1,0 +1,14 @@
+{
+  "resolved_defaults_equal_selected": true,
+  "other_platform_defaults_unchanged": true,
+  "derived_angles_not_duplicated": true,
+  "changed_sections": [
+    "budget_transport",
+    "budget_electrical",
+    "budget_range_reference",
+    "budget_geometry",
+    "budget_system",
+    "budget_rx_channel"
+  ],
+  "config_sha256": "5707e11a2d6437dae9bb11b15003a4b32523b152f5f5e4698dc83b12f5b75572"
+}

@@ -1,0 +1,49 @@
+{
+  "board_id": "5586b159-c9c2-4abb-a09c-4ae63dc76fad",
+  "source_revision": 1089,
+  "source_updated_at": "2026-10-02T16:04:44.709Z",
+  "backup_time_utc": "2026-10-02T16:08:13.666415+00:00",
+  "backup_time_asia_singapore": "2026-10-03T00:08:13.666415+08:00",
+  "active_elements": 461,
+  "total_elements_including_deleted": 549,
+  "embedded_images": 3,
+  "active_image_references": 2,
+  "image_validation": {
+    "ff4202c765d1c097fd157e59ebf6330427fc652a": {
+      "mimeType": "image/png",
+      "bytes": 57032,
+      "sha256": "6e357bb1b24f8750d12fb55605ae8aae4378a7185ec4e53130b5d08d0dfaa214",
+      "active_reference": false
+    },
+    "58371d36a0b1a205ebff41b782fcdba0cd0e1960": {
+      "mimeType": "image/png",
+      "bytes": 258403,
+      "sha256": "f2d3886dcf7dba24b3c5fa512bb6126f4c704985c9d579d7f6dd2c5011c89b8e",
+      "active_reference": true
+    },
+    "043e18538dac5645294cb9880762c7f7c3e83850": {
+      "mimeType": "image/png",
+      "bytes": 127082,
+      "sha256": "628f757c8cc913ed222e2a6363a555e031bf578d8482d1e89ef42372e6e8eb8d",
+      "active_reference": true
+    }
+  },
+  "files": {
+    "lidar-design-board.excalidraw": {
+      "bytes": 1155907,
+      "sha256": "da1d42d3849006fc546481f4d8f7dc046d8d437578a20c303ba6d46d14c6feaf"
+    },
+    "parameter-preview.png": {
+      "bytes": 139993,
+      "sha256": "fd10da084f6703f1dc5f741fbfa83036b634ec67701007c8884c3277373af3f5"
+    },
+    "README.md": {
+      "bytes": 948,
+      "sha256": "51aa9717268e8c471e035c4424bc009046ff78d8d405b426f54a1ecce5b002f5"
+    },
+    "whole-board-overview.png": {
+      "bytes": 95854,
+      "sha256": "a7886d71a23aa62cf7867340932f3ea251f4aa8f604cc8989174685469e61659"
+    }
+  }
+}

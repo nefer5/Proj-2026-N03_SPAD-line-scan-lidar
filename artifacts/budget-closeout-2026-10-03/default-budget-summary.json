@@ -1,0 +1,91 @@
+{
+  "version": "0.6.13.dev0",
+  "provenance": {
+    "utc": "2026-10-02T21:42:24.869971+00:00",
+    "model_version": "0.6.13.dev0",
+    "configuration_sha256": "f7f5524531a3390bae51310450507bded3d4e2411d4fb409f39bf1aa75c8fcdc",
+    "optical_dataset_sha256": "937102cc79b80b6f5bcf441cbd9d6856ebb99e1037315153037fe8573a2f429d",
+    "definitions_sha256": "61d837a74acd585f94ef017e703f809c1957a86058e7d5afbd9128169dd56b54",
+    "sampling": "deterministic-no-random-sampling",
+    "source": "YAML defaults + validated overrides; B optical core + uniform column planning"
+  },
+  "channels": 192,
+  "physical_spads": 6144,
+  "histogram": {
+    "gate_start_ns": 0.0,
+    "gate_width_ns": 2048.0,
+    "bin_width_ps": 1000.0,
+    "bin_width_ns": 1.0,
+    "bin_count": 2048
+  },
+  "selected_output": "echo",
+  "chip_count": 1,
+  "link_count": 1,
+  "total_data_lanes": 4,
+  "net_mbps_per_link": 4800.0,
+  "selected_format": {
+    "total_bytes_per_column": 27664,
+    "bytes_per_frame": 27664000,
+    "wire_bytes_per_frame": 27706008,
+    "total_required_mbps": 2216.48064,
+    "wire_ns": 46176.66666666667,
+    "memory": {
+      "mode": "automatic_budget",
+      "banks_per_chip": 2,
+      "bank_bytes_per_chip": [
+        786432
+      ],
+      "maximum_bank_bytes": 786432,
+      "maximum_chip_sram_bytes": 1572864,
+      "total_sram_bytes": 1572864,
+      "fifo_columns": 2,
+      "fifo_bytes_per_link": [
+        55328
+      ],
+      "maximum_fifo_bytes": 55328,
+      "total_fifo_bytes": 55328,
+      "total_memory_bytes": 1628192,
+      "note": "逻辑存储需求自动计算，B结果按原位覆盖Hist；不含DSP工作区、SRAM对齐/ECC。FIFO有限，按整列块保留至TX结束。不是实装容量验证。"
+    },
+    "copy_required_mbps": 1000000.0,
+    "frame_ok": true,
+    "average_bandwidth_ok": true,
+    "no_backlog": true
+  },
+  "pipeline_status": {
+    "complete": true,
+    "feasible": true,
+    "acquisition_ns": 24576.0,
+    "copy_ns": 6291.456,
+    "copy_required_mbps": 1000000.0,
+    "clear_ns": 1000.0,
+    "input_delay_ns": 1000.0,
+    "dsp_ns": 27000.0,
+    "pack_ns": 1000.0,
+    "bank_required_bytes": 786432,
+    "minimum_banks_total_bytes": 1572864,
+    "bank_count": 2,
+    "raw_hist_bytes": 786432,
+    "result_bank_bytes": 27648,
+    "fifo_capacity_bytes": 55328,
+    "fifo_minimum_bytes": 27664,
+    "fifo_slots": 2,
+    "peak_fifo_bytes": 27664,
+    "fifo_wait_max_ns": 0.0,
+    "max_slot_delay_ns": 0.0,
+    "tail_growth_ns": 0,
+    "frame_completion_ns": 66739350.78933334,
+    "frame_ok": true,
+    "scan_ok": true,
+    "cadence_ok": true,
+    "sustained_ok": true,
+    "observed_output_frame_rate_hz": 10.0,
+    "resource_frame_rate_bound_hz": 19.450909287724617,
+    "dsp_bypassed": false,
+    "architecture": "fixed_ab",
+    "note": "固定A采集/B处理；B在整列结果入输出FIFO后释放。"
+  },
+  "b_simulation_runnable": false,
+  "b_simulation_blocker": "完整B事件仿真暂不可运行：Physical pixel count exceeds configured resource limit: total 6144 / limit 4096; per channel 32 / limit 4096 (simulation software limits)",
+  "range_reference_enabled": false
+}

@@ -46,3 +46,18 @@ artifacts/b-noise-audit/optical_background_off.json
 artifacts/spad-research-archive/
 artifacts/zotero-connector-test/
 node_modules/
+
+# Local raw computation arrays and runtime logs; input/README/proof images stay versioned.
+artifacts/runtime/
+artifacts/budget-data-path-live/**/*snapshot.json
+artifacts/budget-data-path-live/*-snapshot.json
+artifacts/budget-data-path-live/192-lines/minimum-bank-reference.json
+artifacts/budget-closeout-2026-10-03/defaults-before.yaml
+artifacts/budget-closeout-2026-10-03/full-default-snapshot.json
+# Duplicate archive containers stay local; editable originals and manifests are tracked.
+artifacts/canvas-backups/**/*.zip
+artifacts/design-library/**/*.zip
+# Withdrawn one-time implementation and downloaded paper image extracts are local references.
+artifacts/timing-design/implementation-draft/
+artifacts/paper-comparison/
+temp/project-log-*.json

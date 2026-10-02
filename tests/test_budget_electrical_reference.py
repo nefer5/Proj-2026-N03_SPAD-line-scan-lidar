@@ -6,15 +6,16 @@ from spad_lidar.configuration import Algorithms
 from spad_lidar.system_budget import calculate_budget
 from spad_lidar.numerics.ideal_irf import IdealIRF
 from spad_lidar.constants import C,FWHM_TO_SIGMA
+from spad_lidar.curves import merge_config
 
 
 def calc(overrides):
-    a=Algorithms.load();c=SimulationConfig.for_experiment('budget',overrides,a)
+    a=Algorithms.load();c=SimulationConfig.for_experiment('budget',merge_config({'range_reference':{'enabled':True}},overrides),a)
     return c,calculate_budget(c,a)
 
 
 def test_histogram_and_range_payload_and_link_grouping():
-    c,r=calc({'system':{'spad':{'channels_v':10}},'targets':{'slot_count':100}})
+    c,r=calc({'system':{'spad':{'channels_v':10}},'targets':{'slot_count':100},'electrical':{'channels_per_chip':1,'chips_per_link':1}})
     e=r['electrical'];h=e['formats']['histogram'];p=e['formats']['points']
     assert e['chip_count']==e['link_count']==10
     assert h['total_bytes_per_column']==10*(math.ceil(r['metrics']['histogram_bins']*c.transport.histogram_count_bits/8)+c.electrical.chip_header_bytes)
@@ -23,12 +24,12 @@ def test_histogram_and_range_payload_and_link_grouping():
 
 
 def test_average_pass_can_need_buffer_and_low_bandwidth_blocks_frame():
-    base={'system':{'readout':{'tdc_bin_ps':20},'spad':{'channels_v':1}},'targets':{'slot_count':100},'transport':{'histogram_count_bits':16,'column_header_bytes':16}}
+    base={'system':{'readout':{'tdc_bin_ps':20},'spad':{'channels_v':1}},'geometry':{'vfov_deg':1},'targets':{'slot_count':100},'transport':{'payload_format':'histogram','histogram_count_bits':16,'column_header_bytes':16},'electrical':{'data_lanes_per_link':2,'lane_rate_mbps':1500,'payload_efficiency':.8}}
     _,r=calc(base);s=r['electrical']['selected']
     assert s['average_bandwidth_ok'] and s['frame_ok'] and not s['no_backlog']
     assert s['peak_buffer_bytes_per_link']>s['link_bytes_per_column'][0]
     assert s['timeline'][-1]['end_ns']==pytest.approx(s['frame_completion_ns'])
-    _,slow=calc({**base,'electrical':{'lane_rate_mbps':100}})
+    _,slow=calc({**base,'electrical':{**base['electrical'],'lane_rate_mbps':100}})
     assert not slow['electrical']['selected']['frame_ok']
 
 
@@ -50,7 +51,7 @@ def test_ideal_irf_normalized_and_inverse_square_area(shape):
 
 
 def test_gaussian_signal_only_fisher_matches_shot_noise_limit():
-    _,r=calc({'system':{'spad':{'spad_jitter_fwhm_ps':0,'dcr_cps_per_spad':0,'other_noise_cps_per_spad':0},'readout':{'other_jitter_fwhm_ps':0,'tdc_bin_ps':1},'background':{'solar_enabled':False,'other_light_enabled':False}},'range_reference':{'points':3,'min_range_m':50,'max_range_m':150}})
+    _,r=calc({'system':{'tx':{'pulse_shape':'gaussian','pulse_fwhm_ps':2000},'spad':{'spad_jitter_fwhm_ps':0,'dcr_cps_per_spad':0,'other_noise_cps_per_spad':0},'readout':{'other_jitter_fwhm_ps':0,'tdc_bin_ps':1},'background':{'solar_enabled':False,'other_light_enabled':False}},'range_reference':{'points':3,'min_range_m':50,'max_range_m':150}})
     p=r['range_reference']['current'];expected=C*.5e-6*(2/FWHM_TO_SIGMA)/math.sqrt(p['signal_area_counts'])
     assert p['precision_crlb_mm']==pytest.approx(expected,rel=1e-5)
 

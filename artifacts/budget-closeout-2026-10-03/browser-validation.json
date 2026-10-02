@@ -1,0 +1,14 @@
+{
+  "defaults_button_matches_selected": true,
+  "form_state": "计算完成；功率×脉宽换算单发能量，Rx角域独立。",
+  "error_visible": false,
+  "provenance": {
+    "utc": "2026-10-02T21:40:38.848755+00:00",
+    "model_version": "0.6.13.dev0",
+    "configuration_sha256": "f7f5524531a3390bae51310450507bded3d4e2411d4fb409f39bf1aa75c8fcdc",
+    "optical_dataset_sha256": "937102cc79b80b6f5bcf441cbd9d6856ebb99e1037315153037fe8573a2f429d",
+    "definitions_sha256": "61d837a74acd585f94ef017e703f809c1957a86058e7d5afbd9128169dd56b54",
+    "sampling": "deterministic-no-random-sampling",
+    "source": "YAML defaults + validated overrides; B optical core + uniform column planning"
+  }
+}

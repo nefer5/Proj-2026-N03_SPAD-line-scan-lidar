@@ -132,7 +132,7 @@ def resolve_experiment(kind, overrides, algorithms=None):
                                                  len(data.rx.y_edges_um)!=cfg.optics.channels_v*cfg.device.V_binning+1):
                 raise ValueError('Dataset pixel geometry does not match the selected array')
     if pixels > a.max_lab_pixels or cfg.device.spads_per_channel > a.max_spads_per_channel:
-        raise ValueError('Physical pixel count exceeds configured resource limit')
+        raise ValueError(f'Physical pixel count exceeds configured resource limit: total {pixels} / limit {a.max_lab_pixels}; per channel {cfg.device.spads_per_channel} / limit {a.max_spads_per_channel} (simulation software limits)')
     if kind=='scan':
         from ..scan.schedule import scan_dimensions
         from ..scan.trajectory import angle_bin_edges
