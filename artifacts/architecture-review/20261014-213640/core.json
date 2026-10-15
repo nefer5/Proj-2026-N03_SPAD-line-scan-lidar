@@ -1,0 +1,471 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "SPAD 项目 · 光学与共享采集核心",
+    "locale": "zh-CN",
+    "output": "artifacts/architecture-review/20261014-213640/core.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/nefer5/Proj-2026-N03_SPAD-line-scan-lidar.git",
+      "revision": "354cb2e3aeac4d093d8291b1601f5f40587d8e14",
+      "link_mode": "local-only"
+    }
+  },
+  "components": [
+    {
+      "id": "optics",
+      "type": "backend",
+      "label": "B 空间光学投影",
+      "sublabel": "tx → scene → rx / 光谱 / PSF",
+      "pos": [
+        40,
+        50
+      ],
+      "size": [
+        220,
+        74
+      ],
+      "sources": [
+        {
+          "path": "src/spad_lidar/experiments/spatial.py",
+          "line": 158,
+          "end_line": 180,
+          "label": "光学投影入口"
+        },
+        {
+          "path": "src/spad_lidar/experiments/spatial.py",
+          "line": 11,
+          "end_line": 23,
+          "label": "模块组合"
+        }
+      ]
+    },
+    {
+      "id": "light",
+      "type": "backend",
+      "label": "探测面照明契约",
+      "sublabel": "SensorIllumination / 像素 × 波长",
+      "pos": [
+        410,
+        50
+      ],
+      "size": [
+        220,
+        74
+      ],
+      "sources": [
+        {
+          "path": "src/spad_lidar/contracts/illumination.py",
+          "line": 7,
+          "end_line": 35,
+          "label": "照明定义"
+        },
+        {
+          "path": "src/spad_lidar/experiments/lab.py",
+          "line": 17,
+          "end_line": 25,
+          "label": "独立SPAD直接照明"
+        }
+      ]
+    },
+    {
+      "id": "source",
+      "type": "backend",
+      "label": "候选雪崩采样",
+      "sublabel": "spad/source.py · PDE / FF / seed",
+      "pos": [
+        780,
+        50
+      ],
+      "size": [
+        220,
+        74
+      ],
+      "sources": [
+        {
+          "path": "src/spad_lidar/spad/source.py",
+          "line": 36,
+          "end_line": 72,
+          "label": "固定照明采样"
+        },
+        {
+          "path": "src/spad_lidar/spad/source.py",
+          "line": 73,
+          "end_line": 100,
+          "label": "逐发变化采样"
+        }
+      ]
+    },
+    {
+      "id": "scan",
+      "type": "backend",
+      "label": "C 扫描编排与逐发投影",
+      "sublabel": "scan/* / ColumnPulseProjection",
+      "pos": [
+        780,
+        270
+      ],
+      "size": [
+        220,
+        74
+      ],
+      "sources": [
+        {
+          "path": "src/spad_lidar/experiments/columns.py",
+          "line": 52,
+          "end_line": 70,
+          "label": "计划、投影与采样"
+        }
+      ]
+    },
+    {
+      "id": "session",
+      "type": "backend",
+      "label": "AcquisitionSession",
+      "sublabel": "时间水位 / 门控 / 跨块状态",
+      "pos": [
+        410,
+        270
+      ],
+      "size": [
+        220,
+        74
+      ],
+      "sources": [
+        {
+          "path": "src/spad_lidar/spad/acquisition.py",
+          "line": 31,
+          "end_line": 105,
+          "label": "状态推进"
+        },
+        {
+          "path": "src/spad_lidar/experiments/columns.py",
+          "line": 69,
+          "end_line": 70,
+          "label": "C 注入专用适配器"
+        }
+      ]
+    },
+    {
+      "id": "aadapter",
+      "type": "backend",
+      "label": "A 兼容事件入口",
+      "sublabel": "保留历史 RNG 与单角预算",
+      "pos": [
+        40,
+        270
+      ],
+      "size": [
+        220,
+        74
+      ],
+      "sources": [
+        {
+          "path": "src/spad_lidar/experiments/a_acquisition.py",
+          "line": 12,
+          "end_line": 43,
+          "label": "A 候选采样"
+        },
+        {
+          "path": "src/spad_lidar/experiments/a_router.py",
+          "line": 9,
+          "end_line": 18,
+          "label": "A 接入 Session"
+        }
+      ]
+    },
+    {
+      "id": "device",
+      "type": "backend",
+      "label": "器件状态与响应",
+      "sublabel": "spad/device/* · 死时间 / 恢复",
+      "pos": [
+        40,
+        490
+      ],
+      "size": [
+        220,
+        74
+      ],
+      "sources": [
+        {
+          "path": "src/spad_lidar/spad/acquisition.py",
+          "line": 65,
+          "end_line": 98,
+          "label": "器件门与雪崩"
+        },
+        {
+          "path": "src/spad_lidar/spad/device/state.py",
+          "line": 1,
+          "end_line": 12,
+          "label": "恢复状态"
+        }
+      ]
+    },
+    {
+      "id": "readout",
+      "type": "backend",
+      "label": "数字读出引擎",
+      "sublabel": "OR / 符合 / TDC / 容量",
+      "pos": [
+        410,
+        490
+      ],
+      "size": [
+        220,
+        74
+      ],
+      "sources": [
+        {
+          "path": "src/spad_lidar/spad/acquisition.py",
+          "line": 61,
+          "end_line": 64,
+          "label": "读出工厂"
+        },
+        {
+          "path": "src/spad_lidar/spad/readout/engine.py",
+          "line": 1,
+          "end_line": 45,
+          "label": "读出引擎"
+        }
+      ]
+    },
+    {
+      "id": "quantize",
+      "type": "backend",
+      "label": "时间抖动与量化记录",
+      "sublabel": "普通周期 / 列级记录适配",
+      "pos": [
+        780,
+        490
+      ],
+      "size": [
+        220,
+        74
+      ],
+      "sources": [
+        {
+          "path": "src/spad_lidar/experiments/lab.py",
+          "line": 40,
+          "end_line": 72,
+          "label": "周期记录"
+        },
+        {
+          "path": "src/spad_lidar/experiments/columns.py",
+          "line": 32,
+          "end_line": 49,
+          "label": "列级量化"
+        }
+      ]
+    },
+    {
+      "id": "process",
+      "type": "backend",
+      "label": "直方图与测距重建",
+      "sublabel": "processing/* · 统计 / 点云",
+      "pos": [
+        780,
+        710
+      ],
+      "size": [
+        220,
+        74
+      ],
+      "sources": [
+        {
+          "path": "src/spad_lidar/experiments/columns.py",
+          "line": 79,
+          "end_line": 95,
+          "label": "重建与交付点云"
+        },
+        {
+          "path": "src/spad_lidar/experiments/lab.py",
+          "line": 61,
+          "end_line": 64,
+          "label": "直方图"
+        }
+      ]
+    },
+    {
+      "id": "transport",
+      "type": "backend",
+      "label": "C 输出资源计划",
+      "sublabel": "scan/transport.py · DSP / MIPI",
+      "pos": [
+        410,
+        710
+      ],
+      "size": [
+        220,
+        74
+      ],
+      "sources": [
+        {
+          "path": "src/spad_lidar/experiments/columns.py",
+          "line": 81,
+          "end_line": 95,
+          "label": "传输计划与筛选"
+        }
+      ]
+    },
+    {
+      "id": "report",
+      "type": "backend",
+      "label": "Python 审计与展示数据",
+      "sublabel": "reporting/* / photon_flow / provenance",
+      "pos": [
+        780,
+        930
+      ],
+      "size": [
+        220,
+        74
+      ],
+      "sources": [
+        {
+          "path": "src/spad_lidar/experiments/columns.py",
+          "line": 101,
+          "end_line": 103,
+          "label": "光子流程展示"
+        },
+        {
+          "path": "src/spad_lidar/experiments/lab.py",
+          "line": 83,
+          "end_line": 87,
+          "label": "版本与指纹"
+        },
+        {
+          "path": "src/spad_lidar/reporting/column_view.py",
+          "line": 1,
+          "end_line": 21,
+          "label": "视图共享计算"
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "optics-light",
+      "from": "optics",
+      "to": "light",
+      "label": "投影光子",
+      "variant": "emphasis"
+    },
+    {
+      "id": "light-source",
+      "from": "light",
+      "to": "source",
+      "label": "光谱积分输入",
+      "variant": "emphasis"
+    },
+    {
+      "id": "scan-source",
+      "from": "scan",
+      "to": "source",
+      "label": "逐发信号",
+      "variant": "default"
+    },
+    {
+      "id": "scan-session",
+      "from": "scan",
+      "to": "session",
+      "label": "采集程序",
+      "variant": "default"
+    },
+    {
+      "id": "source-session",
+      "from": "source",
+      "to": "session",
+      "label": "CandidateEvents",
+      "variant": "emphasis"
+    },
+    {
+      "id": "aadapter-session",
+      "from": "aadapter",
+      "to": "session",
+      "label": "事件模式",
+      "variant": "default"
+    },
+    {
+      "id": "session-device",
+      "from": "session",
+      "to": "device",
+      "label": "雪崩判定",
+      "variant": "default"
+    },
+    {
+      "id": "session-readout",
+      "from": "session",
+      "to": "readout",
+      "label": "推进状态",
+      "variant": "emphasis"
+    },
+    {
+      "id": "readout-quantize",
+      "from": "readout",
+      "to": "quantize",
+      "label": "已记录时间",
+      "variant": "emphasis"
+    },
+    {
+      "id": "quantize-process",
+      "from": "quantize",
+      "to": "process",
+      "label": "量化记录",
+      "variant": "emphasis"
+    },
+    {
+      "id": "process-transport",
+      "from": "process",
+      "to": "transport",
+      "label": "记录数",
+      "variant": "default"
+    },
+    {
+      "id": "process-report",
+      "from": "process",
+      "to": "report",
+      "label": "结果 / 真值 / 审计",
+      "variant": "default"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "共享核心的输入边界",
+      "items": [
+        "B 先完成 Tx/场景/Rx 投影；独立 SPAD 直接构造探测面照明。",
+        "照明在 PDE/FF 之前，以完整像素为参考面；候选雪崩与最终混合记录分开。",
+        "C 复用 B 背景/光学数据，再按逐发角度和时序形成变化信号。"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "状态与硬件信息边界",
+      "items": [
+        "Session 在同一事件时间线上维护器件恢复、读出窗口、TDC 容量和时间水位。",
+        "C 注入 TraceDevice 与 FragmentAwareReadout；仍使用公共 Session。",
+        "读出记录只暴露读出/TDC 身份；光学真值和器件诊断独立保存。"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "A 的分支与兼容层",
+      "items": [
+        "A 的事件模式通过 a_router 接入同一器件/读出核心；保留旧采样顺序。",
+        "A 的 analytic_reference 分支直接计算和采样解析直方图，绕过事件 Session。",
+        "A 的单角 Rx 预算与 B 的空间光学不同；共同函数共享不等于模型范围相同。"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "检查时需要保留的限制",
+      "items": [
+        "核心检查点恢复不等于 JobManager 能在进程崩溃后自动续算。",
+        "C 当前仍跨列连续；完全复位为已确认待实施意图。",
+        "B/C 原始测距不等于已标定 Pd/PFA；afterpulse、雪崩串扰和完整直方图硬件资源仍有限制。"
+      ]
+    }
+  ]
+}

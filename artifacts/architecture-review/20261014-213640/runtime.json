@@ -1,0 +1,430 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "SPAD 项目 · 运行与代码架构",
+    "locale": "zh-CN",
+    "output": "artifacts/architecture-review/20261014-213640/runtime.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/nefer5/Proj-2026-N03_SPAD-line-scan-lidar.git",
+      "revision": "354cb2e3aeac4d093d8291b1601f5f40587d8e14",
+      "link_mode": "local-only"
+    }
+  },
+  "components": [
+    {
+      "id": "web",
+      "type": "frontend",
+      "label": "网页与共享组件",
+      "sublabel": "A / SPAD / B / C / 系统预算",
+      "pos": [
+        40,
+        50
+      ],
+      "size": [
+        220,
+        74
+      ],
+      "sources": [
+        {
+          "path": "web/app.js",
+          "line": 287,
+          "end_line": 290,
+          "label": "A 请求"
+        },
+        {
+          "path": "web/shared/labs.js",
+          "line": 9,
+          "end_line": 9,
+          "label": "实验请求"
+        },
+        {
+          "path": "web/columns.js",
+          "line": 20,
+          "end_line": 20,
+          "label": "C 请求"
+        }
+      ]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "FastAPI 入口与路由",
+      "sublabel": "api.py + webapi/*",
+      "pos": [
+        420,
+        50
+      ],
+      "size": [
+        220,
+        74
+      ],
+      "sources": [
+        {
+          "path": "src/spad_lidar/api.py",
+          "line": 25,
+          "end_line": 40,
+          "label": "路由注册与缓存"
+        },
+        {
+          "path": "src/spad_lidar/webapi/labs.py",
+          "line": 118,
+          "end_line": 153,
+          "label": "任务 API"
+        }
+      ]
+    },
+    {
+      "id": "config",
+      "type": "database",
+      "label": "YAML 配置与校验",
+      "sublabel": "SimulationConfig / Algorithms",
+      "pos": [
+        800,
+        50
+      ],
+      "size": [
+        220,
+        74
+      ],
+      "sources": [
+        {
+          "path": "src/spad_lidar/configuration.py",
+          "line": 31,
+          "end_line": 75,
+          "label": "安全加载与唯一源"
+        },
+        {
+          "path": "src/spad_lidar/models.py",
+          "line": 29,
+          "end_line": 63,
+          "label": "类型与解析"
+        }
+      ]
+    },
+    {
+      "id": "a",
+      "type": "backend",
+      "label": "A 单角同步入口",
+      "sublabel": "simulate / 性能扫参",
+      "pos": [
+        40,
+        260
+      ],
+      "size": [
+        220,
+        74
+      ],
+      "sources": [
+        {
+          "path": "src/spad_lidar/api.py",
+          "line": 107,
+          "end_line": 134,
+          "label": "同步调用"
+        },
+        {
+          "path": "src/spad_lidar/experiments/single_channel.py",
+          "line": 22,
+          "end_line": 48,
+          "label": "解析或事件模式"
+        }
+      ]
+    },
+    {
+      "id": "jobs",
+      "type": "backend",
+      "label": "JobManager 任务编排",
+      "sublabel": "快照 / 取消 / 进程池",
+      "pos": [
+        420,
+        260
+      ],
+      "size": [
+        220,
+        74
+      ],
+      "sources": [
+        {
+          "path": "src/spad_lidar/runtime/jobs.py",
+          "line": 123,
+          "end_line": 155,
+          "label": "提交与 spawn"
+        },
+        {
+          "path": "src/spad_lidar/runtime/jobs.py",
+          "line": 60,
+          "end_line": 101,
+          "label": "执行与写结果"
+        }
+      ]
+    },
+    {
+      "id": "budget",
+      "type": "backend",
+      "label": "独立系统预算路径",
+      "sublabel": "光学 / 电热 / DSP / MIPI",
+      "pos": [
+        800,
+        260
+      ],
+      "size": [
+        220,
+        74
+      ],
+      "sources": [
+        {
+          "path": "src/spad_lidar/webapi/budget.py",
+          "line": 65,
+          "end_line": 73,
+          "label": "无状态计算 API"
+        },
+        {
+          "path": "src/spad_lidar/system_budget.py",
+          "line": 125,
+          "end_line": 177,
+          "label": "预算组合"
+        },
+        {
+          "path": "src/spad_lidar/electrical_budget.py",
+          "line": 1,
+          "end_line": 75,
+          "label": "输出资源调度"
+        }
+      ]
+    },
+    {
+      "id": "store",
+      "type": "database",
+      "label": "本地任务与结果",
+      "sublabel": "SQLite + artifacts/runs/<id>",
+      "pos": [
+        40,
+        480
+      ],
+      "size": [
+        220,
+        74
+      ],
+      "sources": [
+        {
+          "path": "src/spad_lidar/runtime/jobs.py",
+          "line": 15,
+          "end_line": 20,
+          "label": "任务根目录"
+        },
+        {
+          "path": "src/spad_lidar/runtime/jobs.py",
+          "line": 94,
+          "end_line": 121,
+          "label": "结果与中断状态"
+        },
+        {
+          "path": "src/spad_lidar/runtime/jobs.py",
+          "line": 140,
+          "end_line": 146,
+          "label": "请求快照"
+        }
+      ]
+    },
+    {
+      "id": "experiments",
+      "type": "backend",
+      "label": "实验编排 experiments/*",
+      "sublabel": "A / SPAD / B / 历史C / 列级C",
+      "pos": [
+        420,
+        480
+      ],
+      "size": [
+        220,
+        74
+      ],
+      "sources": [
+        {
+          "path": "src/spad_lidar/runtime/jobs.py",
+          "line": 73,
+          "end_line": 91,
+          "label": "按 kind 分派"
+        },
+        {
+          "path": "src/spad_lidar/experiments/spatial_analysis.py",
+          "line": 41,
+          "end_line": 63,
+          "label": "B 重复分析"
+        },
+        {
+          "path": "src/spad_lidar/experiments/columns.py",
+          "line": 52,
+          "end_line": 83,
+          "label": "C 编排"
+        }
+      ]
+    },
+    {
+      "id": "views",
+      "type": "backend",
+      "label": "结果视图与重放 API",
+      "sublabel": "reporting/* / 重分箱 / CSV",
+      "pos": [
+        40,
+        700
+      ],
+      "size": [
+        220,
+        74
+      ],
+      "sources": [
+        {
+          "path": "src/spad_lidar/webapi/labs.py",
+          "line": 155,
+          "end_line": 192,
+          "label": "B 结果视图"
+        },
+        {
+          "path": "src/spad_lidar/webapi/columns.py",
+          "line": 100,
+          "end_line": 170,
+          "label": "C 结果与导出"
+        }
+      ]
+    },
+    {
+      "id": "core",
+      "type": "backend",
+      "label": "公共模型与数值核心",
+      "sublabel": "tx / scene / rx / spad / processing",
+      "pos": [
+        420,
+        700
+      ],
+      "size": [
+        220,
+        74
+      ],
+      "sources": [
+        {
+          "path": "src/spad_lidar/experiments/lab.py",
+          "line": 28,
+          "end_line": 47,
+          "label": "共用采集核心"
+        },
+        {
+          "path": "src/spad_lidar/experiments/a_router.py",
+          "line": 9,
+          "end_line": 18,
+          "label": "A 器件适配"
+        },
+        {
+          "path": "src/spad_lidar/experiments/columns.py",
+          "line": 52,
+          "end_line": 82,
+          "label": "列级核心组合"
+        }
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "web-api",
+      "from": "web",
+      "to": "api",
+      "label": "HTTP / JSON",
+      "variant": "emphasis"
+    },
+    {
+      "id": "api-config",
+      "from": "api",
+      "to": "config",
+      "label": "解析与校验",
+      "variant": "default"
+    },
+    {
+      "id": "api-a",
+      "from": "api",
+      "to": "a",
+      "label": "同步计算",
+      "variant": "default"
+    },
+    {
+      "id": "api-jobs",
+      "from": "api",
+      "to": "jobs",
+      "label": "提交 / 轮询",
+      "variant": "default"
+    },
+    {
+      "id": "api-budget",
+      "from": "api",
+      "to": "budget",
+      "label": "预算计算",
+      "variant": "default"
+    },
+    {
+      "id": "jobs-store",
+      "from": "jobs",
+      "to": "store",
+      "label": "读写",
+      "variant": "default"
+    },
+    {
+      "id": "jobs-experiments",
+      "from": "jobs",
+      "to": "experiments",
+      "label": "子进程执行",
+      "variant": "emphasis"
+    },
+    {
+      "id": "store-views",
+      "from": "store",
+      "to": "views",
+      "label": "读取已完成结果",
+      "variant": "default"
+    },
+    {
+      "id": "experiments-core",
+      "from": "experiments",
+      "to": "core",
+      "label": "组合调用",
+      "variant": "emphasis"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "从入口读代码",
+      "items": [
+        "start-dev.cmd → run.py → Uvicorn → api:app；服务绑定本机。",
+        "网页共用曲线、直方图和扫描工作台组件；参数预览也调用 Python。",
+        "A 支持同步 API，也支持 kind=a 后台任务；图中两种入口分开标示。"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "任务与审计的实际边界",
+      "items": [
+        "JobManager 保存 YAML、实际配置、算法快照；worker 写 result.json，元数据存 SQLite。",
+        "服务发现已停止的任务所有者后标 interrupted；不是自动崩溃续算。",
+        "图中的箭头是调用或数据方向；响应沿 HTTP 原路返回。结果视图由 API 提供。"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "模块复用与预算分支",
+      "items": [
+        "experiments 是编排层，公共核心的内部关系见另一张核心链路图。",
+        "simulator.py、readout.py、curves.py 等保留兼容导出；并非另外一套主模型。",
+        "预算路径调用同一个 B 光学投影，并独立计算电热/输出容量；不运行完整事件采集。"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "审查范围与未完成项",
+      "items": [
+        "依据干净工作树 HEAD 354cb2e；节点附本地源码路径和行号。",
+        "此图核对代码结构和调用关系，不替代数值验证或器件实测。",
+        "roadmap：C 人工精细验收、C 列间完全复位、命名与参数跨平台审计仍待完成。"
+      ]
+    }
+  ]
+}
