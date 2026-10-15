@@ -1,52 +1,54 @@
 # 工况默认值唯一来源；CSV和手动模式分别保存采样点。
 schema_version: 1
 simulation:
-  range_m: 100
+  range_m: 100.0
   target_reflectivity: 0.1
-  wavelength_nm: 905
-  pulse_energy_nj: 12
+  wavelength_nm: 905.0
+  pulse_energy_nj: 24.0
   pulse_shape: gaussian
-  laser_prf_hz: 100000
+  laser_prf_hz: 100000.0
   tx_efficiency: 0.8
-  overlap_factor: 1
+  overlap_factor: 1.0
   atmospheric_one_way_transmission: 0.95
-  rx_aperture_shape: rectangle
-  rx_aperture_mm: 20
-  rx_aperture_width_mm: 40
-  rx_aperture_height_mm: 20
-  rx_efficiency: 0.8
-  channel_ifov_h_mrad: 0.2
-  channel_ifov_v_mrad: 0.2
+  rx_aperture_shape: circle
+  rx_aperture_mm: 23.0
+  rx_aperture_width_mm: 40.0
+  rx_aperture_height_mm: 20.0
+  rx_efficiency: 0.6
+  channel_ifov_h_mrad: 2.5
+  channel_ifov_v_mrad: 2.0
   solar_enabled: true
-  solar_illuminance_lux: 50000
-  solar_reflectivity: 0.1
-  other_light_enabled: true
-  other_light_scale: 1
-  H_binning: 4
-  V_binning: 4
+  solar_illuminance_lux: 100000.0
+  solar_reflectivity: 0.7
+  other_light_enabled: false
+  other_light_scale: 1.0
+  H_binning: 8
+  V_binning: 8
   fill_factor: 0.92
   # 用户确认的Sony/IMX459相关工程参考；条件与未映射项见docs/references/sony-reference.md。
-  dcr_cps_per_spad: 2007
-  other_noise_cps_per_spad: 0
-  spad_dead_time_ns: 6
+  dcr_cps_per_spad: 4000000
+  other_noise_cps_per_spad: 0.0
+  spad_dead_time_ns: 9.0
   readout_mode: independent_multi
   detector_operation: gated
-  tdc_dead_time_ns: 0  # 暂不研究TDC忙碌限制；理想读出假设，非器件实测值。
+  tdc_dead_time_ns: 0.0 # 暂不研究TDC忙碌限制；理想读出假设，非器件实测值。
   tdc_count: 4
   tdc_max_hits_per_cycle: 1000
-  or_pulse_width_ns: 1
-  coincidence_window_ns: 2
+  or_pulse_width_ns: 1.0
+  coincidence_window_ns: 2.0
   coincidence_threshold: 2
-  spad_jitter_fwhm_ps: 173
-  pulse_fwhm_ps: 2000
-  other_jitter_fwhm_ps: 80
-  tdc_bin_ps: 1000  # 时间量化间隔，不是SPAD抖动或TDC死时间。
-  gate_start_ns: 0
-  gate_width_ns: 2048
-  calibration_delay_ns: 0
-  laser_shots: 1
-  monte_carlo_trials: 40
-  detection_enabled: true
+  spad_jitter_fwhm_ps: 173.0
+  pulse_fwhm_ps: 2000.0
+  other_jitter_fwhm_ps: 80.0
+  tdc_bin_ps: 1000.0 # 时间量化间隔，不是SPAD抖动或TDC死时间。
+  gate_start_ns: 3.0
+  gate_width_ns: 2048.0
+  calibration_delay_ns: 0.0
+  laser_shots: 6
+  monte_carlo_trials: 4
+  readout_mean_trials: 8
+  noise_mean_trials: 6
+  detection_enabled: false
   detection_target_pfa: 0.05
   rng_seed: 7
   line_channels: 16
@@ -272,20 +274,13 @@ experiments:
     tx:
       tx_model: uniform
       pulse_average_power_w: 1000.0
-      pulse_shape: rectangular
-      tx_efficiency: 1.0
     rx:
       psf_sigma_h_um: 4.0
       psf_sigma_v_um: 4.0
     spad:
-      H_binning: 8
-      fill_factor: 1.0
       channels_h: 1
       channels_v: 192
       pixel_pitch_um: 10.0
-    acquisition:
-      period_ns: 2048.0
-      laser_shots: 12
   budget_rx_channel:
     h_width_mrad: 3.5
     v_width_deg: null
@@ -342,8 +337,6 @@ experiments:
       spatial_mode: uniform
       pixel_weights: []
   system:
-    acquisition:
-      monte_carlo_trials: 10
     tx:
       pulse_average_power_w: 280  # 全Tx角域、VCSEL出光/Tx光学前；E=P×FWHM等效时长。
       tx_model: gaussian

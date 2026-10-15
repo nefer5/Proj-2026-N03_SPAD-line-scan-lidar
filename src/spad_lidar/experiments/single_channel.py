@@ -72,7 +72,7 @@ def simulate(cfg: SimulationConfig, debug=False) -> dict:
     fingerprint = sha256(json.dumps(config_snapshot, sort_keys=True).encode()).hexdigest()
     result = {
         "configuration": config_snapshot,
-        "provenance": {"model_version": "0.2.1", "software_version": __version__, "simulation_scope": "A_single_angular_channel", "utc": datetime.now(timezone.utc).isoformat(),
+        "provenance": {"model_version": "0.2.2", "software_version": __version__, "simulation_scope": "A_single_angular_channel", "utc": datetime.now(timezone.utc).isoformat(),
                        "sha256": fingerprint, "defaults_source": "config/defaults.yaml"},
         "derived": derived,
         "readout": readout,

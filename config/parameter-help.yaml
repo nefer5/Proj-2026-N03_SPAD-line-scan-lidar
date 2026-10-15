@@ -77,7 +77,7 @@ fill_factor:
 dcr_cps_per_spad:
   label: 单SPAD暗计数率
   unit: cps
-  description: 单个SPAD每秒暗触发候选数；每门期望=DCR×SPAD数×门宽秒，不乘PDE/FF。默认按用户确认的Sony相关参考（60°C条件）；当前不会按温度自动换算。见docs/references/sony-reference.md。
+  description: 单个SPAD每秒暗触发候选数。配置与API保存cps，界面以kHz输入，1kHz=1000cps；当前用户默认4000kHz/SPAD，即4000000cps/SPAD，不表示器件实测值。每门期望=DCR×SPAD数×门宽秒，不乘PDE/FF，不按温度自动换算。
 other_noise_cps_per_spad:
   label: 其他单SPAD随机噪声
   unit: cps
@@ -121,7 +121,7 @@ laser_shots:
 monte_carlo_trials:
   label: 测距统计重复次数
   unit: 次
-  description: 测距统计MC总次数，大于0时包含首次蓝柱，再补足其余独立采集；用于偏差、精度、成功率和逐bin样本最小–最大误差棒，不平均蓝柱。与青色GT无关。橙色均值另用readout_expected_trials。0次不计算统计/误差棒；1次上下限与蓝柱重合。
+  description: 测距统计MC总次数，大于0时包含首次蓝柱，再补足其余独立采集；用于偏差、精度、成功率和逐bin样本最小–最大误差棒，不平均蓝柱。与青色GT无关。橙色均值另用noise_mean_trials；含信号内部均值用readout_mean_trials。0次不计算统计/误差棒；1次上下限与蓝柱重合。
 rng_seed:
   label: 随机种子
   unit: 整数
@@ -129,7 +129,7 @@ rng_seed:
 detection_enabled:
   label: 启用检测门限
   unit: bool
-  description: 用独立无目标样本校准全门峰值评分门限。未过门限返回未检出；关闭仅供旧版对照，不计算Pd/PFA。青色GT和原始计数不受门限影响。
+  description: 用独立无目标样本校准全门峰值评分门限。未过门限返回未检出；A常规仿真已停用，不计算Pd/PFA；仅历史API显式启用时执行。青色GT和原始计数不受门限影响。
 detection_target_pfa:
   label: 目标虚警概率 PFA
   unit: '1'
@@ -730,7 +730,7 @@ experiments:
   spad.dcr_cps_per_spad:
     label: 单SPAD暗计数率
     unit: cps
-    description: 单个SPAD每秒暗触发候选数；每门期望=DCR×SPAD数×门宽秒，不乘PDE/FF。默认按用户确认的Sony相关参考（60°C条件）；当前不会按温度自动换算。见docs/references/sony-reference.md。
+    description: 单个SPAD每秒暗触发候选数。配置与API保存cps，界面以kHz输入，1kHz=1000cps；当前用户默认4000kHz/SPAD，即4000000cps/SPAD，不表示器件实测值。每门期望=DCR×SPAD数×门宽秒，不乘PDE/FF，不按温度自动换算。
   spad.other_noise_cps_per_spad:
     label: 其他单SPAD随机噪声
     unit: cps
@@ -1344,3 +1344,12 @@ budget_extended_fields:
     label: 单bin时间宽度
     unit: ps
     description: 每个直方图时间bin的宽度，1000ps等于1ns；与窗口长度一起决定自动bin数。不是单脉冲脉宽或空间binning；门末尾不足一格按实际门宽截断。
+
+readout_mean_trials:
+  label: 含信号内部均值次数
+  unit: 次
+  description: A事件读出模式下独立含信号及全部噪声的采集批数，每批按累计发数形成直方图，逐bin求均值用于读出损失诊断和JSON。与测距统计及纯噪声均值使用独立随机流，不平均蓝柱、不影响青色解析GT。至少1次，最大值取algorithms.yaml的max_monte_carlo_trials；analytic_reference下不生效。
+noise_mean_trials:
+  label: 纯噪声均值次数
+  unit: 次
+  description: A事件读出模式下关闭激光、保留当前噪声及读出机制的独立采集批数，每批按累计发数生成直方图，逐bin求均值作为橙线。与含信号均值和测距统计独立；至少1次，最大值取algorithms.yaml的max_monte_carlo_trials；analytic_reference下橙线解析计算，此参数不生效。

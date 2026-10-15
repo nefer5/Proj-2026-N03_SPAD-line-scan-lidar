@@ -21,10 +21,12 @@ filter_plot_padding_fraction: 0.1
 filter_plot_samples: 601
 spectral_quadrature_order: 6
 filter_leakage_domain: source_coverage
+# Exact achromatic separation for leakage, or when dense work/storage exceeds resource limits.
 factorize_achromatic_leakage: true
 spectral_plot_min_nm: 350.0
 spectral_plot_max_nm: 1200.0
 spectral_plot_samples: 851
+# Legacy B sampled_output_mean only; A uses simulation.readout_mean_trials/noise_mean_trials.
 readout_expected_trials: 24
 # B: one independently reset column experiment; no fictitious prehistory.
 b_initial_condition: fully_recovered
@@ -44,10 +46,11 @@ histogram_preview_subdivisions: 16
 max_histogram_preview_bins: 400000
 ground_truth_plot_points: 801
 ground_truth_extent_sigma: 8
+# Legacy SPAD/C and B periodic_history only; A always starts fully recovered.
 readout_warmup_cycles: 8
 readout_trace_events: 200
-max_readout_events_per_run: 200000
-max_readout_expected_work: 2000000
+max_readout_events_per_run: 2000000
+max_readout_expected_work: 10000000
 max_readout_cycles: 200000
 basic_gaussian_extent_fwhm: 6.0
 basic_quadrature_segments: 32

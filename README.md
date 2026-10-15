@@ -77,3 +77,5 @@ node scripts/check-histogram-rendering.cjs
 ## 系统预算入口（2026-09-28）
 
 启动平台后打开 `/system/budget`，或通过A/B/C顶部“系统预算”进入。支持单方案与基准对比、列时序、光子预算、硬件约束及可审计快照；初始值继承现有配置。[使用说明与模型边界](docs/guides/system-budget.md)。
+
+2026-10-15：已保存用户当前工况为各平台共用默认，DCR界面为4000kHz/SPAD（配置/API为4000000cps/SPAD）；A每份独立采集从完全恢复状态开始，无预热。已有草稿/任务保留，恢复默认后运行新采集生效。来源、验证与提交边界见[收口记录](artifacts/a-defaults-closeout/README.md)。

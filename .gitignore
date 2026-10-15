@@ -61,3 +61,14 @@ artifacts/design-library/**/*.zip
 artifacts/timing-design/implementation-draft/
 artifacts/paper-comparison/
 temp/project-log-*.json
+
+# A verification raw arrays remain local; compact fixtures and reports are versioned.
+artifacts/a-detection-retirement/high-dcr-result.json
+artifacts/a-statistics-controls/high-solar-result.json
+artifacts/a-fully-recovered/current-case-result.json
+artifacts/a-fully-recovered/a-fixtures.json
+
+# Local test logs and full browser inventory are not project deliverables.
+artifacts/a-defaults-closeout/full-suite.log
+artifacts/a-defaults-closeout/tabbit-inventory-local.txt
+artifacts/a-defaults-closeout/inspect-defaults-cache.js

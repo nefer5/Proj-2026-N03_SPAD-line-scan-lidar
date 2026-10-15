@@ -20,7 +20,7 @@ function drawHistogram(canvas,data,ch,range,ymax,series,overview=false,windowRan
  const axis=countAxis(ymax);if(!overview)ymax=axis.max;
  canvas.dataset.yMax=String(ymax);canvas.dataset.yTicks=overview?'':JSON.stringify(axis.ticks);
  const sx=t=>left+(t-range[0])/(range[1]-range[0])*pw,sy=y=>top+ph-y/ymax*ph;
- c.clearRect(0,0,w,h);c.font='9px Consolas,"Microsoft YaHei",sans-serif';c.lineWidth=1;
+ c.clearRect(0,0,w,h);c.font=(canvas.dataset.axisFont||'9')+'px Consolas,"Microsoft YaHei",sans-serif';c.lineWidth=1;
  if(!overview){for(const tick of axis.ticks){const y=sy(tick);c.strokeStyle=(globalThis.LidarTheme?.color('#1b3041') ?? ('#1b3041'));c.beginPath();c.moveTo(left,y);c.lineTo(w-right,y);c.stroke();c.fillStyle=(globalThis.LidarTheme?.color('#68899f') ?? ('#68899f'));c.textAlign='right';c.fillText(fmt(tick,0),left-9,y+3);}c.fillStyle=(globalThis.LidarTheme?.color('#85a3b6') ?? ('#85a3b6'));c.textAlign='left';c.fillText('计数 / 时间分箱',left,11);}
  for(let i=0;i<=4;i++){const t=range[0]+(range[1]-range[0])*i/4;c.fillStyle=(globalThis.LidarTheme?.color('#6f90a5') ?? ('#6f90a5'));c.textAlign='center';c.fillText(fmt(t,1),sx(t),h-(overview?2:14));}if(!overview){c.textAlign='right';c.fillText(data.x_axis_label||'时间 · ns',w-right,h-1,pw);}
  c.save();c.beginPath();c.rect(left,top,pw,ph);c.clip();
@@ -37,13 +37,16 @@ function drawHistogram(canvas,data,ch,range,ymax,series,overview=false,windowRan
 
 function bindOverview(canvas,gate,getRange,onChange){
  let drag=null;
+ const controller=new AbortController();
+ const listen=(event,handler)=>canvas.addEventListener(event,handler,{signal:controller.signal});
  const value=e=>{const r=canvas.getBoundingClientRect();return gate[0]+(e.clientX-r.left-43)/(r.width-58)*(gate[1]-gate[0]);};
  const valid=v=>Math.max(gate[0],Math.min(gate[1],v));
  canvas.style.touchAction='none';canvas.style.cursor='grab';
- canvas.addEventListener('pointerdown',e=>{if(e.button!==0)return;const r=canvas.getBoundingClientRect();if(e.clientX<r.left+43||e.clientX>r.right-15)return;e.preventDefault();const current=getRange(),t=value(e),handle=(gate[1]-gate[0])*7/(r.width-58);let mode=current[1]-current[0]<2*handle?'move':Math.abs(t-current[0])<=handle?'left':Math.abs(t-current[1])<=handle?'right':'move';drag={id:e.pointerId,mode,start:t,range:[...current]};canvas.setPointerCapture(e.pointerId);canvas.style.cursor='grabbing';if(mode==='move'&&(t<current[0]||t>current[1])){const width=current[1]-current[0],lo=Math.max(gate[0],Math.min(gate[1]-width,t-width/2));drag.range=[lo,lo+width];onChange([...drag.range]);}});
- canvas.addEventListener('pointermove',e=>{if(!drag)return;const t=value(e),[lo,hi]=drag.range;let next;if(drag.mode==='move'){const width=hi-lo,start=Math.max(gate[0],Math.min(gate[1]-width,lo+t-drag.start));next=[start,start+width];}else if(drag.mode==='left'){next=[valid(t),hi];}else{next=[lo,valid(t)];}if(next[0]<next[1])onChange(next);});
+ listen('pointerdown',e=>{if(e.button!==0)return;const r=canvas.getBoundingClientRect();if(e.clientX<r.left+43||e.clientX>r.right-15)return;e.preventDefault();const current=getRange(),t=value(e),handle=(gate[1]-gate[0])*7/(r.width-58);let mode=current[1]-current[0]<2*handle?'move':Math.abs(t-current[0])<=handle?'left':Math.abs(t-current[1])<=handle?'right':'move';drag={id:e.pointerId,mode,start:t,range:[...current]};canvas.setPointerCapture(e.pointerId);canvas.style.cursor='grabbing';if(mode==='move'&&(t<current[0]||t>current[1])){const width=current[1]-current[0],lo=Math.max(gate[0],Math.min(gate[1]-width,t-width/2));drag.range=[lo,lo+width];onChange([...drag.range]);}});
+ listen('pointermove',e=>{if(!drag)return;const t=value(e),[lo,hi]=drag.range;let next;if(drag.mode==='move'){const width=hi-lo,start=Math.max(gate[0],Math.min(gate[1]-width,lo+t-drag.start));next=[start,start+width];}else if(drag.mode==='left'){next=[valid(t),hi];}else{next=[lo,valid(t)];}if(next[0]<next[1])onChange(next);});
  const end=e=>{if(drag&&drag.id===e.pointerId){drag=null;canvas.style.cursor='grab';if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);}};
- canvas.addEventListener('pointerup',end);canvas.addEventListener('pointercancel',end);canvas.addEventListener('lostpointercapture',()=>drag=null);
+ listen('pointerup',end);listen('pointercancel',end);listen('lostpointercapture',()=>drag=null);
+ return ()=>{if(drag&&canvas.hasPointerCapture(drag.id))canvas.releasePointerCapture(drag.id);drag=null;controller.abort();canvas.style.cursor='grab';};
 }
 globalThis.PhotonHistogram={draw:drawHistogram,maximum:histMaximum,scales,countAxis,bindOverview};
 })();

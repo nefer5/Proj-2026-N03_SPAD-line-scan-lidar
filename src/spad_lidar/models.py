@@ -126,7 +126,9 @@ class SimulationConfig(BaseModel):
     gate_width_ns: float = Field(gt=0.0)
     calibration_delay_ns: float
     laser_shots: int = Field(ge=1)
-    monte_carlo_trials: int = Field(ge=0)
+    monte_carlo_trials: int = Field(ge=0, strict=True)
+    readout_mean_trials: int = Field(ge=1, strict=True)
+    noise_mean_trials: int = Field(ge=1, strict=True)
     detection_enabled: bool
     detection_target_pfa: float = Field(gt=0,lt=1)
     rng_seed: int = Field(ge=0)
@@ -153,6 +155,9 @@ class SimulationConfig(BaseModel):
         for field in ('laser_shots', 'monte_carlo_trials', 'line_channels'):
             if getattr(self, field) > getattr(algorithms, 'max_' + field):
                 raise ValueError(f'{field} exceeds configured resource limit')
+        for field in ('readout_mean_trials', 'noise_mean_trials'):
+            if getattr(self, field) > algorithms.max_monte_carlo_trials:
+                raise ValueError(f'{field} exceeds max_monte_carlo_trials resource limit')
         if bins > algorithms.max_histogram_bins:
             raise ValueError("Histogram bin count exceeds config/algorithms.yaml limit")
         tof_ns = 2.0 * self.range_m / C * 1e9 + self.calibration_delay_ns

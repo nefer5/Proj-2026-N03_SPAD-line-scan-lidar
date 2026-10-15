@@ -1,0 +1,1 @@
+return await page.evaluate(() => ({url: location.href, configuration: collectConfig(), resultFingerprint: lastResult?.provenance?.sha256, resultStatus: document.getElementById('resultStatus').textContent}));

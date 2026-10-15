@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="zh-CN">
-<head>
+<head><script src="/static/shared/units.js"></script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>A · 单角通道 LiDAR 评估</title>
@@ -14,7 +14,7 @@
       <h1>单角通道 LiDAR 建模评估</h1>
       <p class="lede">当前：A 单通道信号链 · 规划：B 全光斑光学映射 → C 扫描机制</p>
     </div>
-    <nav class="toolbar"><a href="/system/budget">系统预算</a><a href="/spad">SPAD 研究台</a><a href="/system">静态 B</a><a href="/system/scan">扫描 C</a><a href="#photonBudgetPanel">光子计算公式与逻辑 ↓</a><a id="modeLink" href="/debug">专家调试版 →</a><div class="status"><span></span> A / V0.2.1</div></nav>
+    <nav class="toolbar"><a href="/system/budget">系统预算</a><a href="/spad">SPAD 研究台</a><a href="/system">静态 B</a><a href="/system/scan">扫描 C</a><a href="#photonBudgetPanel">光子计算公式与逻辑 ↓</a><a id="modeLink" href="/debug">专家调试版 →</a><div class="status"><span></span> A / V0.2.2</div></nav>
   </header>
 
   <main>
@@ -102,7 +102,7 @@
           <div class="wide derived-box"><div class="formula" id="binningFormula"></div><p class="formula-note" id="binningNote"></p><strong id="binningTotal">等待计算</strong></div>
           <div class="wide curve-editor" id="curve-pde"></div>
           <label>Fill factor<input data-key="fill_factor" type="number" step="0.01"></label>
-          <label>DCR / SPAD (cps)<input data-key="dcr_cps_per_spad" type="number" step="100"></label>
+          <label>DCR / SPAD (kHz)<input data-key="dcr_cps_per_spad" type="number" min="0" step="any"></label>
           <label>其他噪声 / SPAD (cps)<input data-key="other_noise_cps_per_spad" type="number" step="100"></label>
           <label>SPAD 抖动 FWHM (ps)<input data-key="spad_jitter_fwhm_ps" type="number" step="10"></label>
           <label>其他抖动 FWHM (ps)<input data-key="other_jitter_fwhm_ps" type="number" step="10"></label>
@@ -112,19 +112,14 @@
           <label>累计脉冲数<input data-key="laser_shots" type="number" step="1"></label>
           <label>标定延迟 (ns)<input data-key="calibration_delay_ns" type="number" step="any"></label>
           <label>SPAD死时间 (ns)<input data-key="spad_dead_time_ns" type="number" step="any"></label>
-          <label>测距统计重复次数<input data-key="monte_carlo_trials" type="number" step="10"></label>
+          <label>测距统计次数<input data-key="monte_carlo_trials" type="number" min="0" step="1"></label>
+          <label>含信号内部均值次数<input data-key="readout_mean_trials" type="number" min="1" step="1"></label>
+          <label>纯噪声均值次数<input data-key="noise_mean_trials" type="number" min="1" step="1"></label>
           <label>随机种子<input data-key="rng_seed" type="number" step="1"></label>
         </div>
+        <p class="formula-note">新采集每份从完全恢复状态开始，不做预热；同份内多发保持器件状态连续。三项次数独立：测距统计包含首次蓝柱并生成误差棒；含信号均值只用于读出诊断，纯噪声均值用于橙线。两项均值至少1次，解析参考模式下不生效；测距次数为0时不生成误差棒。修改后点击运行仿真。</p>
       </details>
 
-      <details open>
-        <summary>检测判定</summary>
-        <div class="field-grid">
-          <label>启用检测门限<input data-key="detection_enabled" type="checkbox"></label>
-          <label>目标PFA（每次全门采集）<input data-key="detection_target_pfa" type="number" min="0" max="1" step="0.01"></label>
-        </div>
-        <p class="formula-note">无目标校准次数、评估次数及置信水平在algorithms.yaml中配置。关闭门限仅作旧版对照。</p>
-      </details>
       <details class="debug-only hidden">
         <summary>历史附加诊断：独立串扰矩阵（不属于A信号链）</summary>
         <div class="field-grid">
@@ -171,25 +166,45 @@
       <article class="panel chart-card">
         <div class="chart-title"><div><h2>TCSPC 直方图</h2><p>蓝柱：一次含噪观测；青色散点/虚线：纯信号解析ground truth（PDE/FF后、读出损失前），分别为当前bin积分/连续计数密度×标称bin宽；橙线：纯噪声期望。局部图按真实目标位置聚焦，估计器仍全门搜索。</p></div></div>
         <p id="readoutSummary"></p>
+        <p class="formula-note">A常规仿真不进行检测门限校准或Pd/PFA验证；测距统计保留原始寻峰、偏差、精度与误差棒。</p>
         <p id="histogramSamplingNote" class="formula-note"></p>
         <p id="histogramErrorNote" class="formula-note"></p>
         <details class="histogram-methods" open>
           <summary>各数据的计算方式与统计次数</summary>
           <div class="table-wrap"><table><thead><tr><th>数据</th><th>生成与计算方式</th><th>累计 / 平均</th></tr></thead><tbody id="histogramMethods"></tbody></table></div>
         </details>
-        <canvas id="histFull" height="260"></canvas>
-        <canvas id="histZoom" height="260"></canvas>
+        <div class="a-histogram-legend" aria-label="直方图图例">
+          <span><i class="hist-observed"></i>首次含噪观测</span>
+          <span><i class="hist-ideal-line"></i>纯信号解析 GT</span>
+          <span><i class="hist-ideal-point"></i>GT bin 积分</span>
+          <span><i class="hist-noise"></i>纯噪声期望</span>
+          <span><i class="hist-error"></i>MC 最小–最大范围</span>
+        </div>
+        <h3>局部时间窗口</h3>
+        <div class="a-histogram-controls">
+          <label>起点 / ns<input id="histWindowStart" type="number" step="any" disabled></label>
+          <label>终点 / ns<input id="histWindowEnd" type="number" step="any" disabled></label>
+          <button id="histWindowApply" type="button" disabled>应用时间范围</button>
+          <button id="histWindowPeak" type="button" disabled>聚焦目标峰</button>
+          <button id="histWindowFull" type="button" disabled>显示全门</button>
+        </div>
+        <p id="histWindowError" class="warning hidden" role="alert"></p>
+        <p id="histWindowStatus" class="formula-note" aria-live="polite">等待仿真</p>
+        <canvas id="histZoom" height="360" data-axis-font="11" aria-label="局部时间窗口直方图"></canvas>
+        <h3>全门概览 · 拖动橙色窗口或边界调整局部视图</h3>
+        <p class="formula-note">显示窗口只改变作图，不修改接收门、测距搜索范围或已有采集数据。窄窗口可整体拖动，精确边界用上方输入框调整。</p>
+        <canvas id="histFull" height="90" data-axis-font="11" aria-label="可拖动的全门直方图概览"></canvas>
       </article>
 
-      <article class="panel chart-card">
-        <h2>检测判定与概率评估</h2>
+      <article class="panel chart-card hidden" id="legacyDetectionPanel">
+        <h2>历史检测判定与概率评估</h2>
         <p id="detectionStatus" aria-live="polite">等待仿真</p>
         <div class="table-scroll"><table><thead><tr><th>指标</th><th>估计</th><th>置信区间 / 样本数</th></tr></thead><tbody id="detectionMetrics"></tbody></table></div>
         <p class="formula-note">Pd定义为通过门限且距离命中真值容差；PFA是无目标时整张直方图出现任意有效距离的概率，不是每bin概率。少量样本中零虚警不代表真实PFA=0。</p>
         <details><summary>检测校准与独立评估审计</summary><pre id="detectionAudit"></pre></details>
       </article>
       <article id="photonBudgetPanel" class="panel chart-card"></article>
-      <article class="panel chart-card" id="performancePanel">
+      <article class="panel chart-card hidden" id="performancePanel">
         <h2>性能扫参 · 当前读出引擎</h2>
         <p>每个工况独立校准检测门限，使用相同SPAD/TDC机制评估Pd、PFA及测距误差。非扫描驻留模型。</p>
         <div class="toolbar sweep-controls">

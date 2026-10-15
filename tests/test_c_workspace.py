@@ -23,7 +23,8 @@ def test_c_preview_reports_real_resource_lower_bound_and_does_not_fake_records()
     view=client.post('/api/experiments/scan/workspace-preview',json={})
     assert view.status_code==200
     value=view.json()
-    assert value['resource_probe']['blocked']
+    probe=value['resource_probe']
+    assert probe['blocked']==(probe['expected_noise_candidates']>probe['event_limit'])
     assert 'records' not in value
     assert value['scan_preview']['summary']['emitted_reference_slots']==80
     demo=client.get('/api/experiments/scan/demo').json()

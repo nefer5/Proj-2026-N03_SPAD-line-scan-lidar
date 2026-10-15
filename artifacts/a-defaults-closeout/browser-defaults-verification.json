@@ -1,0 +1,42 @@
+{
+  "result": {
+    "elapsedMs": 5506,
+    "requestId": "run-final-defaults",
+    "value": {
+      "defaultsMatchRequestedConfig": true,
+      "displayDcrKHz": "4000",
+      "initial": "fully_recovered",
+      "model": "0.2.2",
+      "resultFingerprint": "79c73e89b57b39c27f08ed1366d9505dbd66b0557f798f5b6460ec8d429503d5",
+      "resultMatchesDefaults": true,
+      "storedDcrCps": 4000000,
+      "work": {
+        "cycles": 108,
+        "events": 490517.2848897922,
+        "noise_runs": 6,
+        "runs": 18,
+        "signal_runs": 12
+      }
+    }
+  },
+  "status": "succeeded",
+  "transition": {
+    "closedPages": [
+      {
+        "id": "p2",
+        "url": "http://127.0.0.1:8016/"
+      }
+    ],
+    "documentGeneration": 1,
+    "openedPages": [
+      {
+        "id": "p2",
+        "url": "http://127.0.0.1:8016/"
+      }
+    ],
+    "pageCount": 1,
+    "targetEpoch": 2,
+    "url": "http://127.0.0.1:8016/",
+    "urlChanged": false
+  }
+}

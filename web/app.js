@@ -8,6 +8,8 @@ let derivedSequence = 0;
 let readoutModes = {};
 let algorithmConfig = {};
 let lastPerformance = null;
+let histogramView = null;
+let disposeHistogramOverview = null;
 let performanceInputSnapshot = null;
 const isDebug = location.pathname === "/debug";
 
@@ -17,7 +19,7 @@ const colors = { cyan: "#41d9d0", blue: "#659cff", orange: "#ffb55b", muted: "#8
 
 function fillForm(config) {
   inputEls().forEach(el => { if (config[el.dataset.key] !== undefined) {
-    if(el.type==='checkbox')el.checked=config[el.dataset.key];else el.value=config[el.dataset.key];
+    if(el.type==='checkbox')el.checked=config[el.dataset.key];else el.value=LidarUnits.display(config[el.dataset.key],el.dataset.key);
   }});
   curveEditors.fill(config.spectral_inputs);
 }
@@ -26,13 +28,13 @@ function collectConfig() {
   const cfg = { ...defaults };
   inputEls().forEach(el => {
     const key = el.dataset.key;
-    const isInteger = ["H_binning", "V_binning", "laser_shots", "monte_carlo_trials", "rng_seed", "line_channels"].includes(key);
+    const isInteger = ["H_binning", "V_binning", "laser_shots", "monte_carlo_trials", "readout_mean_trials", "noise_mean_trials", "rng_seed", "line_channels"].includes(key);
     if(el.type==='checkbox')cfg[key]=el.checked;
     else if (el.tagName === 'SELECT') {
       if (!el.value || !Array.from(el.options).some(option=>option.value===el.value)) throw new Error(`参数 ${key} 需要选择有效选项，请刷新页面后重试。`);
       cfg[key] = el.value;
     } else {
-      cfg[key] = Number(el.value);
+      cfg[key] = LidarUnits.canonical(Number(el.value),key);
       if (el.value.trim() === '' || !Number.isFinite(cfg[key]) || (isInteger && !Number.isInteger(cfg[key]))) throw new Error(`参数 ${key} 需要有效${isInteger ? '整数' : '数值'}`);
     }
   });
@@ -227,13 +229,57 @@ async function runPerformance() {
   finally{$('runPerformance').disabled=false;}
 }
 
+function prepareHistogramView(result) {
+  if(histogramView?.result===result)return;
+  const h=result.histogram,truth=h.ground_truth,bounds=h.sample_range;
+  const data={histogram:{time_ns:h.time_ns,edges_ns:h.edges_ns,counts:[h.observed_counts]},references:[truth],statistics:{noise_mean:[h.expected_noise_counts],lower:bounds.available?[bounds.lower_counts]:null,upper:bounds.available?[bounds.upper_counts]:null}};
+  const gate=[h.edges_ns[0],h.edges_ns.at(-1)];
+  const extent=algorithmConfig.ground_truth_extent_sigma*result.derived.irf_sigma_ns;
+  let peak=[Math.max(gate[0],result.derived.tof_ns-extent),Math.min(gate[1],result.derived.tof_ns+extent)];
+  if(peak[0]>=peak[1])peak=[...gate];
+  histogramView={result,data,gate,peak,range:[...peak],layers:{observed:true,ideal:true,noise:true,error:bounds.available}};
+  disposeHistogramOverview?.();
+  disposeHistogramOverview=PhotonHistogram.bindOverview($('histFull'),gate,()=>histogramView.range,range=>setHistogramWindow(range));
+  for(const id of ['histWindowStart','histWindowEnd','histWindowApply','histWindowPeak','histWindowFull'])$(id).disabled=false;
+  document.querySelector('.a-histogram-legend .hist-error').parentElement.classList.toggle('hidden',!bounds.available);
+  $('histWindowError').classList.add('hidden');
+}
+
+function drawHistogramView() {
+  if(!histogramView)return;
+  const {data,gate,range,layers}=histogramView;
+  PhotonHistogram.draw($('histZoom'),data,0,range,PhotonHistogram.maximum(data,0,range,layers),layers);
+  PhotonHistogram.draw($('histFull'),data,0,gate,PhotonHistogram.maximum(data,0,gate,{observed:true}),{observed:true},true,range);
+  $('histWindowStart').value=String(range[0]);$('histWindowEnd').value=String(range[1]);
+  $('histWindowStatus').textContent='当前窗口 '+fmt(range[0],3)+'–'+fmt(range[1],3)+' ns · 全门 '+fmt(gate[0],3)+'–'+fmt(gate[1],3)+' ns；局部纵轴随窗口自适应。';
+}
+
+function setHistogramWindow(range) {
+  if(!histogramView)return;
+  const [lo,hi]=range,[start,end]=histogramView.gate;
+  if(!range.every(Number.isFinite)||lo>=hi||lo<start||hi>end){
+    $('histWindowError').textContent='时间范围须在 '+fmt(start,3)+'–'+fmt(end,3)+' ns 内，且终点大于起点。';
+    $('histWindowError').classList.remove('hidden');return;
+  }
+  $('histWindowError').classList.add('hidden');histogramView.range=[...range];drawHistogramView();
+}
+
+$('histWindowApply').addEventListener('click',()=>setHistogramWindow([
+  $('histWindowStart').value.trim()===''?NaN:$('histWindowStart').valueAsNumber,
+  $('histWindowEnd').value.trim()===''?NaN:$('histWindowEnd').valueAsNumber
+]));
+for(const id of ['histWindowStart','histWindowEnd'])$(id).addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('histWindowApply').click();}});
+$('histWindowPeak').addEventListener('click',()=>{if(histogramView)setHistogramWindow(histogramView.peak);});
+$('histWindowFull').addEventListener('click',()=>{if(histogramView)setHistogramWindow(histogramView.gate);});
+
 function render(result) {
   lastResult=result;
   const m=result.metrics,b=result.budget;
   $('mSolar').textContent=fmt(b.solar_detected_per_gate,5);
   $('mOtherLight').textContent=fmt(b.other_light_detected_per_gate,5);
   $('readoutSummary').textContent=(readoutModes[result.readout.mode]?.label||result.readout.mode)+' · '+
-    (result.readout.engine==='event_monte_carlo'?'蓝柱为一次采集（不平均）；橙色纯噪声及内部读出均值诊断各用 '+result.readout.expected_trials+' 次MC平均。':'蓝柱为一次首事件抽样；橙色为解析纯噪声期望。')+
+    (result.readout.engine==='event_monte_carlo'?'蓝柱为一次采集（不平均）；含信号内部读出均值用 '+result.readout.expected_trials+' 次，橙色纯噪声均值用 '+(result.readout.noise_mean_trials??result.readout.expected_trials)+' 次。':'蓝柱为一次首事件抽样；橙色为解析纯噪声期望。')+
+    (result.readout.initial_condition==='fully_recovered'?' 每份独立采集从完全恢复状态开始，无预热；同份多发状态连续。':'')+
     ' 测距统计共 '+result.configuration.simulation.monte_carlo_trials+' 次（大于0时含首次蓝柱），用于偏差/精度/成功率及逐bin误差棒；青色为解析真值，不参与MC平均。';
   $("mRange").textContent=fmt(m.estimated_range_m,3);$("mPrecision").textContent=fmt(m.precision_cm_1sigma,2);$("mBias").textContent=fmt(m.bias_cm,2);$("mSuccess").textContent=fmt(m.success_rate == null ? null : m.success_rate*100,1);
   $("mSignal").textContent=fmt(b.signal_detected_per_pulse,4);$("mNoise").textContent=fmt(b.background_detected_per_gate+b.dark_detected_per_gate+b.other_detected_per_gate,4);$("mSnr").textContent=fmt(m.observed_peak_snr,2);$("mPileup").textContent=fmt(m.pileup_loss_fraction*100,2);
@@ -245,25 +291,19 @@ function render(result) {
   $('histogramErrorNote').textContent=(bounds.available?'误差棒：'+bounds.trial_count+'次测距统计MC的逐bin最小–最大范围。':'测距统计重复次数为0，未绘制误差棒。')+bounds.note;
   $('histogramSamplingNote').textContent=truth.note+' 门内GT合计：'+fmt(truth.in_gate_total,6)+' events；预算参考面为PDE/FF之后，非原始入射光子数。';
   const shots=result.configuration.simulation.laser_shots, repetitions=result.configuration.simulation.monte_carlo_trials;
-  const eventMode=result.readout.engine==='event_monte_carlo', meanRuns=result.readout.expected_trials;
+  const eventMode=result.readout.engine==='event_monte_carlo', meanRuns=result.readout.expected_trials, noiseRuns=result.readout.noise_mean_trials??meanRuns;
   const methods=[
     ['蓝色观测柱',eventMode?'信号及各噪声候选做泊松抽样，经SPAD恢复、当前读出逻辑及TDC限制，将成功时间戳按当前bin计数。':'按含信号和噪声的解析首事件概率做一次多项分布抽样，得到当前bin整数计数。',shots+'发累加成一张图；仅展示一次采集，不平均。'],
     ['青色GT散点','纯信号时间响应在每个bin左右边界之间解析积分，再乘每发理想信号候选数及累计发数。PDE/FF已计入，不含任何背景或读出损失。',shots+'发的解析计数；不做MC平均或测距重复抽样。'],
     ['青色GT虚线','直接高密度采样解析信号计数密度，再乘当前标称bin宽用于柱高比较；不是对散点拟合，也不是MC均值。保留设定脉宽与抖动分布的解析展宽。','确定性曲线；面积除以标称bin宽得到门内GT总计数，散点是bin积分，曲线不必穿过散点。'],
-    ['橙色纯噪声线',eventMode?'关闭激光但保留同步采集时序，以及太阳、其他光、DCR、其他电子噪声和当前读出机制；独立生成噪声直方图，逐bin相加再除以实验次数。':'关闭激光后计算纯噪声的解析首事件概率，乘SPAD数及采集门数。',eventMode?meanRuns+'张图求均值，每张统计'+shots+'个接收门；不是'+(meanRuns*shots)+'个门直接相加。':'解析期望，不做MC平均。'],
+    ['橙色纯噪声线',eventMode?'关闭激光但保留同步采集时序，以及太阳、其他光、DCR、其他电子噪声和当前读出机制；独立生成噪声直方图，逐bin相加再除以实验次数。':'关闭激光后计算纯噪声的解析首事件概率，乘SPAD数及采集门数。',eventMode?noiseRuns+'张图求均值，每张统计'+shots+'个接收门；不是'+(noiseRuns*shots)+'个门直接相加。':'解析期望，不做MC平均。'],
     ['浅蓝误差棒','复用测距统计的全部MC直方图，按每个bin取最小、最大计数；不额外模拟，不筛除测距失败样本。样本范围不是置信区间。',repetitions+'次，含首次蓝柱；0次不画，1次上下限与蓝柱重合。'],
+    ['含信号内部读出均值','含信号和全部噪声，经过当前SPAD/TDC机制，生成独立直方图后逐bin平均；用于读出损失诊断和JSON，不是青色解析GT，也不平均蓝柱。',eventMode?meanRuns+'张图求均值，每张累计'+shots+'发。':'解析读出期望；两项均值次数不生效。'],
     ['测距统计（非图形平均）','大于0时以蓝柱为第1次，补足其余独立含噪采集。每张估计一次距离，汇总偏差、精度与成功率；同批数据也计算误差棒。',repetitions+'次，每次累计'+shots+'发；不平均蓝柱，也不决定青色GT或橙线。'],
   ];
   $('histogramMethods').replaceChildren(...methods.map(cells=>{const row=document.createElement('tr');cells.forEach(value=>{const cell=document.createElement('td');cell.textContent=value;row.append(cell);});return row;}));
-  const cfg=result.configuration.simulation;
-  const sharedHistogram={histogram:{time_ns:h.time_ns,edges_ns:h.edges_ns,counts:[h.observed_counts]},references:[truth],statistics:{noise_mean:[h.expected_noise_counts],lower:bounds.available?[bounds.lower_counts]:null,upper:bounds.available?[bounds.upper_counts]:null}};
-  const enabled={observed:true,ideal:true,noise:true,error:bounds.available};
-  const fullGate=[h.edges_ns[0],h.edges_ns.at(-1)];
-  const extent=algorithmConfig.ground_truth_extent_sigma*result.derived.irf_sigma_ns;
-  let zoomGate=[Math.max(fullGate[0],result.derived.tof_ns-extent),Math.min(fullGate[1],result.derived.tof_ns+extent)];
-  if(zoomGate[0]>=zoomGate[1])zoomGate=fullGate;
-  PhotonHistogram.draw($('histFull'),sharedHistogram,0,fullGate,PhotonHistogram.maximum(sharedHistogram,0,fullGate,enabled),enabled);
-  PhotonHistogram.draw($('histZoom'),sharedHistogram,0,zoomGate,PhotonHistogram.maximum(sharedHistogram,0,zoomGate,enabled),enabled);
+  prepareHistogramView(result);
+  drawHistogramView();
   drawRange($("rangeChart"),result.range_sweep);
   if(result.crosstalk.status === "ok") {
     if(isDebug) drawHeatmap($("xtalkChart"),result.crosstalk.total_induced_matrix);
@@ -447,7 +487,7 @@ function renderDebug(result) {
     const meta=d.parameter_help[key];
     return [meta.label+" · "+key,typeof value==="object"?JSON.stringify(value):value,meta.unit,meta.description];
   }));
-  $("algorithmTrace").textContent=JSON.stringify({algorithms:result.configuration.algorithms,constants:d.constants},null,2);
+  $("algorithmTrace").textContent=JSON.stringify({a_statistics:Object.fromEntries(["monte_carlo_trials","readout_mean_trials","noise_mean_trials"].map(key=>[key,result.configuration.simulation[key]??null])),readout_work_estimate:result.readout.work_estimate??null,algorithm_scope_note:"readout_expected_trials仅供历史B噪声均值；A使用工况中的两项独立均值次数。readout_warmup_cycles仅供其他平台/历史模式；A每份从完全恢复状态开始，无预热。",algorithms:result.configuration.algorithms,constants:d.constants},null,2);
   table($("trialTable"),["重复试验","距离 (m)","误差 (m)"],d.trial_estimates_m.map((r,i)=>[i+1,r,d.trial_errors_m[i]]));
   renderBins(); $("saveDebug").disabled=false;
 }
@@ -518,6 +558,7 @@ window.addEventListener("resize",()=>{
     const [d,c]=await Promise.all([fetch("/api/defaults",{cache:"no-store"}),fetch("/api/catalog",{cache:"no-store"})]);
     if(!d.ok || !c.ok)throw new Error("无法读取YAML配置："+await (!d.ok?d:c).text());
     defaults=await d.json();const catalog=await c.json();help=catalog.parameters;readoutModes=catalog.readout_modes;algorithmConfig=catalog.algorithms;setSweepDefaults();
+    for(const key of ['monte_carlo_trials','readout_mean_trials','noise_mean_trials'])document.querySelector('[data-key="'+key+'"]').max=String(algorithmConfig.max_monte_carlo_trials);
     curveEditors=new CurveEditors(catalog.curve_inputs,changed,async(kind,spec)=>await (await request('/api/curve/validate?kind='+kind,spec)).json());
     try{katex.render(catalog.curve_inputs.formulas.binning,$('binningFormula'),{displayMode:true,throwOnError:true});}catch(e){$('binningFormula').textContent='公式渲染失败：'+e.message;}
     $('binningNote').textContent=catalog.curve_inputs.formula_notes.binning;

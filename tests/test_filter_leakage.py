@@ -141,3 +141,19 @@ def test_column_acquisition_accepts_full_spectrum_factored_background():
     assert result['optics']['spectral_integration']['storage']=='outer_product'
     assert result['audit']['final_records']==len(result['records'])
     assert result['photon_flow']['values']['solar_mean_candidates_per_time_bin']>0
+
+
+def test_zero_leakage_achromatic_fallback_preserves_dense_integrals():
+    a=Algorithms.load()
+    cfg=SimulationConfig.for_experiment('system',{'spad':{'channels_h':1,'channels_v':1,'H_binning':2,'V_binning':2},
+        'spectral_inputs':{'filter':{'basic':{'out_of_band_transmission':0}}}})
+    dense=project_illumination(cfg,a.model_copy(update={'factorize_achromatic_leakage':False}),lambda *_:None,lambda:False)
+    dense_work=dense[2]['spectral_integration']['integration_work']
+    constrained=a.model_copy(update={'max_spatial_integration_work':dense_work-1})
+    fast=project_illumination(cfg,constrained,lambda *_:None,lambda:False)
+    assert fast[2]['spectral_integration']['resource_factorization']
+    assert fast[2]['spectral_integration']['integration_work']<=constrained.max_spatial_integration_work
+    np.testing.assert_allclose(fast[0].background_photons_per_second.dense(),dense[0].background_photons_per_second,rtol=1e-12)
+    assert fast[2]['budget']['solar_candidate_avalanches_per_gate']==pytest.approx(dense[2]['budget']['solar_candidate_avalanches_per_gate'],rel=1e-12)
+    with pytest.raises(ValueError,match='integration exceeds'):
+        project_illumination(cfg,constrained.model_copy(update={'factorize_achromatic_leakage':False}),lambda *_:None,lambda:False)

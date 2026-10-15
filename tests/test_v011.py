@@ -88,7 +88,7 @@ def test_rectangular_shape_is_not_gaussian_and_partial_bin():
     width_ns = cfg.pulse_fwhm_ps*1e-3
     edges = center + np.linspace(-width_ns/2,width_ns/2,8)
     assert _signal_shape(cfg,edges) == pytest.approx(np.full(7,1/7))
-    partial = SimulationConfig(range_m=1, gate_width_ns=10.05, tdc_bin_ps=100)
+    partial = SimulationConfig(range_m=1, gate_start_ns=0, gate_width_ns=10.05, tdc_bin_ps=100)
     edges, _ = _time_axis(partial)
     assert edges[-1] == 10.05
     assert np.diff(edges)[-1] == pytest.approx(0.05)

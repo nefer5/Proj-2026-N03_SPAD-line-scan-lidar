@@ -130,6 +130,6 @@ def signal_ground_truth(cfg, budget, edges, algorithms):
             'nominal_bin_width_ns':cfg.tdc_bin_ps*1e-3,
             'subdivisions':factor,
         },
-        'note':'青色为纯信号解析ground truth：PDE/FF后的理想候选计数，含已配置脉宽和抖动分布的解析展宽；不含背景、暗计数、随机抽样、死时间、首事件竞争或读出容量损失。散点为当前bin积分；虚线为解析计数密度×标称bin宽，不必穿过积分散点。与24次均值和测距重复次数均无关。',
+        'note':'青色为纯信号解析ground truth：PDE/FF后的理想候选计数，含已配置脉宽和抖动分布的解析展宽；不含背景、暗计数、随机抽样、死时间、首事件竞争或读出容量损失。散点为当前bin积分；虚线为解析计数密度×标称bin宽，不必穿过积分散点。与读出均值次数和测距统计次数均无关。',
     }
 

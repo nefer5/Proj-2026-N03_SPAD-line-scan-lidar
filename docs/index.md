@@ -66,3 +66,5 @@
 - [C界面设计草案](history/c-exposure-workspace-design.md)、[0.6.0实施记录](history/c-implementation-progress.md)：当时的设计、验证和未完成项，不自动代表当前状态。
 - [A审视记录](history/a-review.md)、[历史README](history/readme-through-0.6.0.md)：保留早期问题及版本说明。
 - 近期验收入口：[采集范围](../artifacts/b-acquisition-scopes/README.md)、[Tx归一化](../artifacts/tx-domain-normalization/README.md)、[直方图核验](../artifacts/histogram-display-audit/README.md)、[双轴光学](../artifacts/optical-shapes/README.md)、[带外漏光](../artifacts/filter-leakage/README.md)、[A/B背景差异](../artifacts/b-noise-audit/README.md)。部分原始数组仅保存在本机运行目录，报告会注明。
+
+2026-10-15收口：[共用默认与DCR单位](../artifacts/a-defaults-closeout/README.md)、[A无预热初始化](../artifacts/a-fully-recovered/README.md)、[历史架构图快照](../artifacts/architecture-review/README.md)。

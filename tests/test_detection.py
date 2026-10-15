@@ -42,7 +42,7 @@ def test_calibration_and_null_evaluation_use_separate_reproducible_streams():
 
 @pytest.mark.parametrize('mode',['independent_multi','analytic_reference','shared_first','coincidence_fixed'])
 def test_detector_does_not_change_observed_histogram_or_gt(mode):
-    cfg=SimulationConfig(readout_mode=mode,monte_carlo_trials=3)
+    cfg=SimulationConfig(readout_mode=mode,monte_carlo_trials=3,detection_enabled=True)
     enabled=simulate(cfg,debug=True)
     disabled=simulate(SimulationConfig(**{**cfg.model_dump(),'detection_enabled':False}),debug=True)
     assert enabled['histogram']==disabled['histogram']
@@ -53,7 +53,7 @@ def test_detector_does_not_change_observed_histogram_or_gt(mode):
 
 
 def test_no_events_are_rejected_and_no_trials_are_not_zero_pd():
-    cfg=SimulationConfig(pulse_energy_nj=0,solar_enabled=False,other_light_enabled=False,dcr_cps_per_spad=0,monte_carlo_trials=0)
+    cfg=SimulationConfig(detection_enabled=True,pulse_energy_nj=0,solar_enabled=False,other_light_enabled=False,dcr_cps_per_spad=0,monte_carlo_trials=0)
     result=simulate(cfg)
     assert result['metrics']['estimated_range_m'] is None
     assert result['metrics']['detection_status']=='not_detected'
@@ -63,7 +63,7 @@ def test_no_events_are_rejected_and_no_trials_are_not_zero_pd():
 
 
 def test_default_pure_noise_observation_is_not_reported_as_target():
-    result=simulate(SimulationConfig(pulse_energy_nj=0))
+    result=simulate(SimulationConfig(pulse_energy_nj=0,detection_enabled=True))
     assert result['metrics']['raw_estimated_range_m'] is not None
     assert result['metrics']['estimated_range_m'] is None
     assert result['detection']['pd'] is None

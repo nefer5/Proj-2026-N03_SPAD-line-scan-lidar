@@ -1,0 +1,12 @@
+{
+  "source": "Tabbit live A form",
+  "source_url": "http://127.0.0.1:8016/",
+  "matches_job_id": "7df6b057491c4ca3b2eac6df7f42f7f8",
+  "previous_result_sha256": "b14b42aac463fe9c5365a56f4fa853bb3b567c1fb0a08178846657b834b78666",
+  "captured_config_sha256": "e6d04c24240130ef94121b286804bbf923c9c58afc962e37ebf0196ce9a09707",
+  "user_overrides_after_capture": {
+    "dcr_cps_per_spad": 4000000
+  },
+  "default_scope": "all platforms inherit equivalent shared parameters",
+  "final_config_sha256": "4bc051dce2b916cb76381cf71c0fcedd772819de98af9bbccc41de3d92abcea3"
+}

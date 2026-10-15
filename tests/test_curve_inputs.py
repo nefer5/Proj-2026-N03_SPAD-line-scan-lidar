@@ -82,7 +82,7 @@ def test_solar_custom_shape_normalizes_lux_and_rejects_infrared_only():
     a=spectral_components(cfg)
     altered=cfg.model_dump();altered["spectral_inputs"]["solar"]["basic"]["amplitude"]=10
     b=spectral_components(SimulationConfig.model_validate(altered))
-    assert a["solar_lux"]==50000
+    assert a["solar_lux"]==cfg.solar_illuminance_lux
     assert a["solar_detectable_photons_s_m2_sr"]==pytest.approx(b["solar_detectable_photons_s_m2_sr"])
     bad=cfg_curve("solar",shape="constant",min_nm=900,max_nm=1000)
     with pytest.raises(ValueError,match="visible"):

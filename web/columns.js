@@ -32,7 +32,7 @@ function makeField(path,value){
  else if(type==='boolean'||typeof value==='boolean')input=`<input type="checkbox" data-path="${path}">`;
  else if(wide)input=`<textarea rows="3" data-path="${path}" data-json="true" spellcheck="false"></textarea>`;
  else input=`<input type="number" step="${type==='integer'?'1':'any'}" data-path="${path}" data-nullable="${nullable}" ${nullable?'placeholder="未配置 / 继承"':''}>`;
- return `<label class="${wide?'wide':''}" title="${esc(h.description||label)}"><span>${esc(label)}${h.unit?' / '+esc(h.unit):''}</span>${input}</label>`;
+ return `<label class="${wide?'wide':''}" title="${esc(h.description||label)}"><span>${esc(label)}${h.unit?' / '+esc(LidarUnits.unit(path,h.unit)):''}</span>${input}</label>`;
 }
 function renderConfiguration(){
  const high=[['frame_rate_hz','目标帧率','Hz'],['hfov_deg','HFOV','deg'],['scan_time_utilization','扫描时间利用率','%'],['slot_count','每帧 slot 数','列']];
@@ -41,7 +41,7 @@ function renderConfiguration(){
  const groups=[['motion','转镜与角度归档'],['acquisition','采集、门与统计'],['exposure','曝光与拖尾'],['tx','Tx 发射光学'],['rx','Rx 接收光学'],['spad','SPAD 线阵'],['readout','电子读出'],['scene','场景与目标'],['scene_motion','场景运动'],['background','太阳与其他环境光'],['transport','DSP / MIPI'],['diagnostics','器件轨迹选择']];
  const curves={rx:['filter'],spad:['pde'],background:['solar','other']};
  $('parameters').innerHTML=groups.map(([group,title])=>`<details class="parameter-group" ${['acquisition','exposure'].includes(group)?'open':''}><summary>${title}</summary><div class="parameter-body"><div class="field-grid">${groupedFields(group)}</div>${(curves[group]||[]).map(kind=>`<details class="wave-detail"><summary>${esc(catalog.curves.groups[kind].label)}输入</summary><div id="curve-${kind}"></div></details>`).join('')}${group==='exposure'?'<p class="field-note">逐发列表在右侧编辑；尾迹为基底波形的指数延迟分量，光学仍按中心姿态求值。</p>':''}${group==='transport'?'<p class="field-note">启用后必须填写有效耗时或数据格式 / 净速率。默认保留未知值。</p>':''}</div></details>`).join('');
- for(const el of document.querySelectorAll('[data-path]')){const v=get(config,el.dataset.path);if(el.type==='checkbox')el.checked=v;else if(el.dataset.json)el.value=v===null?'':JSON.stringify(v,null,2);else el.value=v===null?'':v;el.setAttribute('aria-label',help(el.dataset.path).label||el.dataset.path);el.oninput=()=>changed(false);}
+ for(const el of document.querySelectorAll('[data-path]')){const v=get(config,el.dataset.path);if(el.type==='checkbox')el.checked=v;else if(el.dataset.json)el.value=v===null?'':JSON.stringify(v,null,2);else el.value=v===null?'':LidarUnits.display(v,el.dataset.path);el.setAttribute('aria-label',help(el.dataset.path).label||el.dataset.path);el.oninput=()=>changed(false);}
  editors=new CurveEditors(catalog.curves,()=>changed(false),(kind,spec)=>request('/api/curve/validate?kind='+kind,spec));editors.fill(config.spectral_inputs);
  renderPulses();$('arrayNote').innerHTML=`<strong>H × V = ${config.spad.channels_h} × ${config.spad.channels_v}</strong><span>V 表示线数 · 所有H路参与计算<br>整列并行 / 共用器件模型</span>`;
 }
@@ -49,7 +49,7 @@ const axisGroups={tx:[['H/V 角中心',['tx_center_h_mrad','tx_center_v_mrad']],
 function groupedFields(group){const pairs=axisGroups[group]||[],paired=new Set(pairs.flatMap(([,keys])=>keys));const singles=Object.entries(config[group]).filter(([key])=>!paired.has(key)&&!(group==='exposure'&&key==='pulses')&&!(group==='acquisition'&&key==='period_ns')).map(([key,v])=>makeField(group+'.'+key,v)).join('');return singles+pairs.map(([title,keys])=>`<fieldset class="hv-pair wide"><legend>${title}</legend>${keys.map(key=>makeField(group+'.'+key,config[group][key])).join('')}</fieldset>`).join('');}
 function collect(){
  const next=clone(config);
- for(const el of document.querySelectorAll('[data-path]')){let v;if(el.type==='checkbox')v=el.checked;else if(el.dataset.json)v=el.value.trim()===''?null:JSON.parse(el.value);else if(el.tagName==='SELECT')v=el.value;else{if(el.value.trim()===''){if(el.dataset.nullable==='true')v=null;else throw Error((help(el.dataset.path).label||el.dataset.path)+'需要数值');}else{v=Number(el.value);if(!Number.isFinite(v))throw Error('需要有限数值：'+el.dataset.path);}}set(next,el.dataset.path,v);}
+ for(const el of document.querySelectorAll('[data-path]')){let v;if(el.type==='checkbox')v=el.checked;else if(el.dataset.json)v=el.value.trim()===''?null:JSON.parse(el.value);else if(el.tagName==='SELECT')v=el.value;else{if(el.value.trim()===''){if(el.dataset.nullable==='true')v=null;else throw Error((help(el.dataset.path).label||el.dataset.path)+'需要数值');}else{v=LidarUnits.canonical(Number(el.value),el.dataset.path);if(!Number.isFinite(v))throw Error('需要有限数值：'+el.dataset.path);}}set(next,el.dataset.path,v);}
  for(const el of document.querySelectorAll('[data-high]')){if(el.value.trim()===''||!Number.isFinite(Number(el.value)))throw Error('高层目标需要有限数值');next.system_targets[el.dataset.high]=Number(el.value)/(el.dataset.high==='scan_time_utilization'?100:1);}
  next.exposure.pulses=[...$('pulseRows').querySelectorAll('tr')].map(row=>{const t=row.querySelector('[data-time]').value,e=row.querySelector('[data-energy]').value;if(t.trim()===''||!Number.isFinite(Number(t)))throw Error('逐发时间必须填写有限数值');if(e.trim()!==''&&!Number.isFinite(Number(e)))throw Error('单发能量需要有限数值');return {time_offset_ns:Number(t),energy_nj:e.trim()===''?null:Number(e)};});
  next.spectral_inputs=editors.values();return next;

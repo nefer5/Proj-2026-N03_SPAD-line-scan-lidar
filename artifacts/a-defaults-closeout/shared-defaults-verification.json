@@ -1,0 +1,44 @@
+{
+  "spad": {
+    "H_binning": 8,
+    "V_binning": 8,
+    "dcr_cps_per_spad": 4000000.0,
+    "spad_dead_time_ns": 9.0,
+    "fill_factor": 0.92
+  },
+  "system": {
+    "H_binning": 8,
+    "V_binning": 8,
+    "dcr_cps_per_spad": 4000000.0,
+    "spad_dead_time_ns": 9.0,
+    "fill_factor": 0.92
+  },
+  "scan": {
+    "H_binning": 8,
+    "V_binning": 8,
+    "dcr_cps_per_spad": 4000000.0,
+    "spad_dead_time_ns": 9.0,
+    "fill_factor": 0.92
+  },
+  "columns": {
+    "H_binning": 8,
+    "V_binning": 8,
+    "dcr_cps_per_spad": 4000000.0,
+    "spad_dead_time_ns": 9.0,
+    "fill_factor": 0.92
+  },
+  "budget": {
+    "H_binning": 8,
+    "V_binning": 8,
+    "dcr_cps_per_spad": 4000000.0,
+    "spad_dead_time_ns": 9.0,
+    "fill_factor": 0.92
+  },
+  "b_preview_factorization": {
+    "storage": "outer_product",
+    "integration_work": 313944,
+    "dense_integration_work": 188006400,
+    "resource_factorization": true
+  },
+  "fingerprinted_no_store_pages": 7
+}

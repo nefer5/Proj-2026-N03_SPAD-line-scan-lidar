@@ -1,0 +1,355 @@
+{
+  "result": {
+    "acquisition": {
+      "codeDispatched": true,
+      "entryTabId": 795277399,
+      "groupId": "A5DAE3E8966915806829BC43C7E1808E",
+      "ownedPageCount": 1,
+      "status": "acquired",
+      "tabIds": [
+        795277399
+      ]
+    },
+    "elapsedMs": 114,
+    "requestId": "read-current-config",
+    "value": {
+      "configuration": {
+        "H_binning": 8,
+        "V_binning": 8,
+        "atmospheric_one_way_transmission": 0.95,
+        "calibration_delay_ns": 0,
+        "channel_ifov_h_mrad": 2.5,
+        "channel_ifov_v_mrad": 2,
+        "coincidence_threshold": 2,
+        "coincidence_window_ns": 2,
+        "crosstalk_decay_channels": 0.8,
+        "dcr_cps_per_spad": 10000,
+        "detection_enabled": false,
+        "detection_target_pfa": 0.05,
+        "detector_operation": "gated",
+        "fill_factor": 0.92,
+        "gate_start_ns": 3,
+        "gate_width_ns": 2048,
+        "laser_prf_hz": 100000,
+        "laser_shots": 6,
+        "line_channels": 16,
+        "monte_carlo_trials": 4,
+        "nearest_neighbor_crosstalk": 0.005,
+        "noise_mean_trials": 6,
+        "or_pulse_width_ns": 1,
+        "other_jitter_fwhm_ps": 80,
+        "other_light_enabled": false,
+        "other_light_scale": 1,
+        "other_noise_cps_per_spad": 0,
+        "overlap_factor": 1,
+        "pulse_energy_nj": 24,
+        "pulse_fwhm_ps": 2000,
+        "pulse_shape": "gaussian",
+        "range_m": 100,
+        "readout_mean_trials": 8,
+        "readout_mode": "independent_multi",
+        "rng_seed": 7,
+        "rx_aperture_height_mm": 20,
+        "rx_aperture_mm": 23,
+        "rx_aperture_shape": "circle",
+        "rx_aperture_width_mm": 40,
+        "rx_efficiency": 0.6,
+        "solar_enabled": true,
+        "solar_illuminance_lux": 100000,
+        "solar_reflectivity": 0.7,
+        "spad_dead_time_ns": 9,
+        "spad_jitter_fwhm_ps": 173,
+        "spectral_inputs": {
+          "filter": {
+            "basic": {
+              "amplitude": 0.95,
+              "center_nm": 905,
+              "edge_width_nm": 2,
+              "flat_width_nm": 8,
+              "max_nm": 955,
+              "min_nm": 855,
+              "out_of_band_transmission": 0,
+              "shape": "rectangle",
+              "width_nm": 10
+            },
+            "csv_name": "",
+            "csv_points": [],
+            "interpolation": "pchip",
+            "manual_points": [],
+            "mode": "basic"
+          },
+          "other": {
+            "basic": {
+              "amplitude": 0.02,
+              "center_nm": 905,
+              "edge_width_nm": 20,
+              "flat_width_nm": 80,
+              "max_nm": 1200,
+              "min_nm": 350,
+              "shape": "constant",
+              "width_nm": 100
+            },
+            "csv_name": "",
+            "csv_points": [],
+            "interpolation": "pchip",
+            "manual_points": [
+              {
+                "value": 0,
+                "wavelength_nm": 350
+              },
+              {
+                "value": 0.0005,
+                "wavelength_nm": 450
+              },
+              {
+                "value": 0.001,
+                "wavelength_nm": 550
+              },
+              {
+                "value": 0.0018,
+                "wavelength_nm": 650
+              },
+              {
+                "value": 0.0025,
+                "wavelength_nm": 750
+              },
+              {
+                "value": 0.0035,
+                "wavelength_nm": 850
+              },
+              {
+                "value": 0.004,
+                "wavelength_nm": 905
+              },
+              {
+                "value": 0.0035,
+                "wavelength_nm": 940
+              },
+              {
+                "value": 0.003,
+                "wavelength_nm": 1050
+              },
+              {
+                "value": 0,
+                "wavelength_nm": 1200
+              }
+            ],
+            "mode": "manual"
+          },
+          "pde": {
+            "basic": {
+              "amplitude": 0.15,
+              "center_nm": 700,
+              "edge_width_nm": 100,
+              "flat_width_nm": 200,
+              "max_nm": 1200,
+              "min_nm": 350,
+              "shape": "constant",
+              "width_nm": 400
+            },
+            "csv_name": "pde-van-sieleghem-2022-3p5v.csv",
+            "csv_points": [
+              {
+                "value": 0.467,
+                "wavelength_nm": 460
+              },
+              {
+                "value": 0.4888,
+                "wavelength_nm": 480
+              },
+              {
+                "value": 0.5183,
+                "wavelength_nm": 500
+              },
+              {
+                "value": 0.5455,
+                "wavelength_nm": 520
+              },
+              {
+                "value": 0.5734,
+                "wavelength_nm": 540
+              },
+              {
+                "value": 0.5994,
+                "wavelength_nm": 560
+              },
+              {
+                "value": 0.6254,
+                "wavelength_nm": 580
+              },
+              {
+                "value": 0.6451,
+                "wavelength_nm": 600
+              },
+              {
+                "value": 0.653,
+                "wavelength_nm": 620
+              },
+              {
+                "value": 0.6629,
+                "wavelength_nm": 640
+              },
+              {
+                "value": 0.6637,
+                "wavelength_nm": 660
+              },
+              {
+                "value": 0.6633,
+                "wavelength_nm": 680
+              },
+              {
+                "value": 0.6469,
+                "wavelength_nm": 700
+              },
+              {
+                "value": 0.6412,
+                "wavelength_nm": 720
+              },
+              {
+                "value": 0.6291,
+                "wavelength_nm": 740
+              },
+              {
+                "value": 0.6046,
+                "wavelength_nm": 760
+              },
+              {
+                "value": 0.5827,
+                "wavelength_nm": 780
+              },
+              {
+                "value": 0.5209,
+                "wavelength_nm": 800
+              },
+              {
+                "value": 0.5043,
+                "wavelength_nm": 820
+              },
+              {
+                "value": 0.4402,
+                "wavelength_nm": 840
+              },
+              {
+                "value": 0.3834,
+                "wavelength_nm": 860
+              },
+              {
+                "value": 0.3286,
+                "wavelength_nm": 880
+              },
+              {
+                "value": 0.2861,
+                "wavelength_nm": 900
+              },
+              {
+                "value": 0.2373,
+                "wavelength_nm": 920
+              },
+              {
+                "value": 0.1996,
+                "wavelength_nm": 940
+              },
+              {
+                "value": 0.1609,
+                "wavelength_nm": 960
+              },
+              {
+                "value": 0.1222,
+                "wavelength_nm": 980
+              },
+              {
+                "value": 0.0835,
+                "wavelength_nm": 1000
+              }
+            ],
+            "interpolation": "pchip",
+            "manual_points": [
+              {
+                "value": 0,
+                "wavelength_nm": 350
+              },
+              {
+                "value": 0.08,
+                "wavelength_nm": 400
+              },
+              {
+                "value": 0.25,
+                "wavelength_nm": 450
+              },
+              {
+                "value": 0.45,
+                "wavelength_nm": 550
+              },
+              {
+                "value": 0.42,
+                "wavelength_nm": 650
+              },
+              {
+                "value": 0.33,
+                "wavelength_nm": 750
+              },
+              {
+                "value": 0.23,
+                "wavelength_nm": 850
+              },
+              {
+                "value": 0.18,
+                "wavelength_nm": 905
+              },
+              {
+                "value": 0.15,
+                "wavelength_nm": 940
+              },
+              {
+                "value": 0.08,
+                "wavelength_nm": 1000
+              },
+              {
+                "value": 0,
+                "wavelength_nm": 1100
+              }
+            ],
+            "mode": "csv"
+          },
+          "solar": {
+            "basic": {
+              "amplitude": 1,
+              "center_nm": 550,
+              "edge_width_nm": 150,
+              "flat_width_nm": 300,
+              "max_nm": 4000,
+              "min_nm": 280,
+              "shape": "gaussian",
+              "width_nm": 500
+            },
+            "csv_name": "",
+            "csv_points": [],
+            "interpolation": "pchip",
+            "manual_points": [],
+            "mode": "standard"
+          }
+        },
+        "target_reflectivity": 0.1,
+        "tdc_bin_ps": 1000,
+        "tdc_count": 4,
+        "tdc_dead_time_ns": 0,
+        "tdc_max_hits_per_cycle": 1000,
+        "tx_efficiency": 0.8,
+        "wavelength_nm": 905
+      },
+      "resultFingerprint": "b14b42aac463fe9c5365a56f4fa853bb3b567c1fb0a08178846657b834b78666",
+      "resultStatus": "本次结果：累计 6 发；成功容差 ±0.2 m。",
+      "url": "http://127.0.0.1:8016/"
+    }
+  },
+  "status": "succeeded",
+  "transition": {
+    "closedPages": [],
+    "documentGeneration": 0,
+    "openedPages": [],
+    "pageCount": 1,
+    "targetEpoch": 2,
+    "url": "http://127.0.0.1:8016/",
+    "urlChanged": false
+  }
+}

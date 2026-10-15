@@ -1,4 +1,4 @@
-"""A source adapter preserves historical RNG ordering; routes through the shared detector core."""
+"""Independent A acquisitions start fully recovered and share the detector core."""
 import numpy as np
 from ..constants import C, FWHM_TO_SIGMA
 from .a_router import route_events
@@ -7,13 +7,12 @@ from ..numerics.temporal import sample_pulse_offsets
 
 def event_histogram(cfg,budget,rng,algorithms,edges,signal=True,trace=False):
     period=1e9/cfg.laser_prf_hz
-    warmup=algorithms.readout_warmup_cycles
     duration=period if cfg.detector_operation=="free_running" else cfg.gate_width_ns
     noise_mu=(budget.background_detected_per_gate+budget.dark_detected_per_gate+budget.other_detected_per_gate)*duration/cfg.gate_width_ns
     tof=2*cfg.range_m/C*1e9+cfg.calibration_delay_ns
     all_times=[];all_pixels=[]
     raw_count=0
-    for cycle in range(-warmup,cfg.laser_shots):
+    for cycle in range(cfg.laser_shots):
         ns=int(rng.poisson(budget.signal_detected_per_pulse)) if signal else 0
         nb=int(rng.poisson(noise_mu))
         raw_count+=ns+nb
@@ -37,10 +36,10 @@ def readout_work_estimate(cfg,budget,algorithms):
     period=1e9/cfg.laser_prf_hz
     ratio=period/cfg.gate_width_ns if cfg.detector_operation=="free_running" else 1
     noise=(budget.background_detected_per_gate+budget.dark_detected_per_gate+budget.other_detected_per_gate)*ratio
-    signal_runs=1+max(cfg.monte_carlo_trials-1,0)+algorithms.readout_expected_trials
-    noise_runs=algorithms.readout_expected_trials+(algorithms.detector_calibration_trials+algorithms.detector_null_trials if cfg.detection_enabled else 0)
-    cycles=cfg.laser_shots+algorithms.readout_warmup_cycles
-    return {'runs':signal_runs+noise_runs,'cycles':cycles*(signal_runs+noise_runs),
+    signal_runs=max(1,cfg.monte_carlo_trials)+cfg.readout_mean_trials
+    noise_runs=cfg.noise_mean_trials+(algorithms.detector_calibration_trials+algorithms.detector_null_trials if cfg.detection_enabled else 0)
+    cycles=cfg.laser_shots
+    return {'signal_runs':signal_runs,'noise_runs':noise_runs,'runs':signal_runs+noise_runs,'cycles':cycles*(signal_runs+noise_runs),
             'events':cycles*((budget.signal_detected_per_pulse+noise)*signal_runs+noise*noise_runs)}
 
 
@@ -49,20 +48,22 @@ def event_acquisition(cfg,budget,algorithms,edges):
     if workload['cycles']>algorithms.max_readout_cycles:
         raise ValueError('Cycle work exceeds configured limit; reduce pulse count or repetitions')
     if workload['events']>algorithms.max_readout_expected_work:
-        raise ValueError("Event simulation work exceeds configured limit; reduce repetitions/flux or use analytic_reference")
+        raise ValueError(f"Event simulation work exceeds configured limit: estimated {workload['events']:.0f} > max_readout_expected_work={algorithms.max_readout_expected_work}; signal batches={workload['signal_runs']}, noise batches={workload['noise_runs']}; reduce configured statistics batches, flux or pulses")
     seeds=np.random.SeedSequence(cfg.rng_seed).spawn(4)
     observation_rng,trial_rng,mean_rng,noise_rng=[np.random.default_rng(s) for s in seeds]
     observed,stats,trace=event_histogram(cfg,budget,observation_rng,algorithms,edges,trace=True)
     expected=np.zeros_like(observed);noise=np.zeros_like(observed)
-    for _ in range(algorithms.readout_expected_trials):
+    for _ in range(cfg.readout_mean_trials):
         sample=event_histogram(cfg,budget,mean_rng,algorithms,edges)
         expected+=sample[0]
+    for _ in range(cfg.noise_mean_trials):
         noise+=event_histogram(cfg,budget,noise_rng,algorithms,edges,signal=False)[0]
     trial_histograms=([observed.copy()]+[event_histogram(cfg,budget,trial_rng,algorithms,edges)[0]
                        for _ in range(cfg.monte_carlo_trials-1)]) if cfg.monte_carlo_trials else []
-    return observed,expected/algorithms.readout_expected_trials,noise/algorithms.readout_expected_trials,trial_histograms,{
+    return observed,expected/cfg.readout_mean_trials,noise/cfg.noise_mean_trials,trial_histograms,{
         "mode":cfg.readout_mode,"engine":"event_monte_carlo",
-        "expected_trials":algorithms.readout_expected_trials,"warmup_cycles":algorithms.readout_warmup_cycles,
+        "expected_trials":cfg.readout_mean_trials,"noise_mean_trials":cfg.noise_mean_trials,
+        "work_estimate":workload,"warmup_cycles":0,"initial_condition":"fully_recovered",
         "losses":stats,"trace":trace,"trace_truncated":stats["logic_triggers"]>len(trace),
         "note":"MC mean is not an exact expectation. Nonparalyzable dead times; gate controls TDC input; free_running allows out-of-gate SPAD avalanches. Coincidence counts distinct cells. No afterpulse or avalanche crosstalk yet.",
     }

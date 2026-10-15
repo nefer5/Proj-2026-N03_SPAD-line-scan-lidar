@@ -198,7 +198,10 @@ def project_illumination(cfg,a,progress,cancelled):
     weights=np.array(integration['weights_nm'])
     transmission=np.array(integration['filter_transmission'])
     sun=np.array(integration['solar_radiance']);ambient=np.array(integration['other_radiance'])
-    factorized=a.factorize_achromatic_leakage and filt.has_out_of_band and o.rx_model!='dataset'
+    dense_work=len(wavelengths)*len(omega)*nx*ny
+    dense_cells=nx*ny*(len(wavelengths)+1)
+    resource_factorization=dense_work>a.max_spatial_integration_work or dense_cells>a.max_optical_cells
+    factorized=a.factorize_achromatic_leakage and o.rx_model!='dataset' and (filt.has_out_of_band or resource_factorization)
     work=(len(omega)*nx*ny+len(wavelengths)) if factorized else len(wavelengths)*len(omega)*nx*ny
     if work>a.max_spatial_integration_work:
         raise ValueError('Spatial/spectral integration exceeds configured work limit')
@@ -304,6 +307,7 @@ def project_illumination(cfg,a,progress,cancelled):
           'other_photons_per_pixel_per_gate':(other.sum(axis=1)*gate_s).reshape(ny,nx).tolist(),
           'spectral_integration':{'storage':'outer_product' if factorized else 'dense',
                                   'domain':spectral['integration_domain'],'integration_work':work,
+                                  'dense_integration_work':dense_work,'resource_factorization':bool(factorized and resource_factorization),
                                   'logical_cells':nx*ny*len(wavelengths),'stored_cells_per_measure':stored_cells,
                                   'wavelength_nm':wavelengths.tolist(),'weights_nm':weights.tolist(),
                                   'filter_transmission':transmission.tolist(),'solar_radiance_w_m2_sr_nm':sun.tolist(),

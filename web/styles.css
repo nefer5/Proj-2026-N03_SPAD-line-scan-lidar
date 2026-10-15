@@ -143,3 +143,19 @@ input[type=checkbox] { accent-color:var(--cyan); }
 
 /* Collapsible section titles should remain easy to discover. */
 details>summary{font-weight:700}.subdetails>summary,.explanation>summary,.wave-detail>summary{font-weight:700}
+
+/* A evaluation/debug share explicit CSS heights, independent of canvas bitmap size. */
+#histZoom { height: 360px; }
+#histFull { height: 90px; }
+.a-histogram-legend { display: flex; flex-wrap: wrap; gap: 10px 20px; margin: 16px 0; color: var(--muted); font-size: 12px; }
+.a-histogram-legend span { display: inline-flex; align-items: center; gap: 7px; }
+.a-histogram-legend i { display: inline-block; width: 18px; height: 9px; }
+.hist-observed { background: var(--theme-color-5e91dc, #5e91dc); }
+.hist-ideal-line { border-top: 2px dashed var(--theme-color-57d8ca, #57d8ca); transform: translateY(4px); }
+.a-histogram-legend .hist-ideal-point { width: 6px; height: 6px; border-radius: 50%; background: var(--theme-color-65ecda, #65ecda); }
+.hist-noise { border-top: 2px solid var(--theme-color-dba768, #dba768); transform: translateY(4px); }
+.hist-error { border-left: 1px solid var(--theme-color-aacbf599, #aacbf599); border-right: 1px solid var(--theme-color-aacbf599, #aacbf599); }
+.a-histogram-controls { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; }
+.a-histogram-controls label { width: 150px; max-width: 100%; }
+.a-histogram-controls button { min-height: 36px; }
+@media(max-width:570px) { #histZoom { height:300px; } }

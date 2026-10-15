@@ -8,6 +8,7 @@ const fields=[
   {tagName:"INPUT",dataset:{key:"laser_shots"},value:"100"},
 ];
 const context=vm.createContext({location:{pathname:"/"},document:{querySelectorAll:()=>fields}});
+vm.runInContext(fs.readFileSync(path.join(__dirname,"../web/shared/units.js"),"utf8"),context);
 vm.runInContext(source.slice(0,source.indexOf("function fmt(")),context);
 vm.runInContext("curveEditors={values:()=>({})}",context);
 let result=JSON.parse(JSON.stringify(context.collectConfig()));
