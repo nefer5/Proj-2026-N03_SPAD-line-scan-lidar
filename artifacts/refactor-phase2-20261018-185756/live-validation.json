@@ -1,0 +1,12 @@
+{
+  "defaults_equal": {
+    "a": true,
+    "spad": true,
+    "system": true,
+    "scan": true,
+    "columns": true,
+    "budget": true
+  },
+  "preview_unchanged": true,
+  "base_url": "http://127.0.0.1:8016"
+}

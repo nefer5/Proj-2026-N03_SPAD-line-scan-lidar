@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "4c2a6dab-4747-4101-8310-2da253f2c31c",
+  "status": "current",
+  "command": "deliver",
+  "type": "dataflow",
+  "input": "E:\\Proj-2026-N03_SPAD线扫lidar建模\\artifacts\\architecture-review\\20261018-032102\\config-flow.json",
+  "output": "E:\\Proj-2026-N03_SPAD线扫lidar建模\\artifacts\\architecture-review\\20261018-032102\\config-flow.html",
+  "specification": {
+    "sha256": "e2f6114907b9138ed5d7913cff2bbdbe0f29acc462009daad0bb1e7747083d03",
+    "bytes": 30000
+  },
+  "artifact": {
+    "sha256": "77e453ebd328c8cb9c00585cff60c2e8d9d0c88599ae9c903abd7e06ee567757",
+    "bytes": 753732
+  }
+}

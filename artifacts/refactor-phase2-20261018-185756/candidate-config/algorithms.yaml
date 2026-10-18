@@ -1,0 +1,131 @@
+# 算法策略和资源限制。物理常数与数学恒等式不属于可调工况。
+max_histogram_bins: 50000
+max_spads_per_channel: 4096
+max_laser_shots: 100000000
+max_monte_carlo_trials: 500
+max_line_channels: 128
+estimator_min_sigma_bins: 0.6
+estimator_kernel_sigma: 3.0
+estimator_centroid_sigma: 2.0
+snr_baseline_floor_counts: 1.0
+success_tolerance_m: 0.20
+sweep_min_range_m: 1.0
+sweep_low_ratio: 0.35
+sweep_high_ratio: 2.0
+sweep_gate_margin_ratio: 0.98
+sweep_points: 28
+sweep_noise_width_sigma: 4.709640090061899
+pulse_preview_points: 401
+pulse_preview_half_widths: 3.0
+filter_plot_padding_fraction: 0.1
+filter_plot_samples: 601
+spectral_quadrature_order: 6
+filter_leakage_domain: source_coverage
+# Exact achromatic separation for leakage, or when dense work/storage exceeds resource limits.
+factorize_achromatic_leakage: true
+spectral_plot_min_nm: 350.0
+spectral_plot_max_nm: 1200.0
+spectral_plot_samples: 851
+# Legacy B sampled_output_mean only; A uses simulation.readout_mean_trials/noise_mean_trials.
+readout_expected_trials: 24
+# B: one independently reset column experiment; no fictitious prehistory.
+b_initial_condition: fully_recovered
+# Cheap scalar reference at the candidate-avalanche plane, not output noise MC.
+b_noise_reference: candidate_scalar
+detector_calibration_trials: 99
+detector_null_trials: 100
+probability_confidence_level: 0.95
+max_detection_bin_work: 100000000
+max_performance_sweep_points: 16
+max_performance_sweep_work: 20000000
+max_performance_sweep_bin_work: 200000000
+performance_sweep_range_values: [25, 50, 75, 100, 125, 150]
+performance_sweep_lux_values: [0, 10000, 25000, 50000, 75000, 100000]
+performance_sweep_shot_values: [1, 2, 4, 8, 16]
+histogram_preview_subdivisions: 16
+max_histogram_preview_bins: 400000
+ground_truth_plot_points: 801
+ground_truth_extent_sigma: 8
+# Legacy SPAD/C and B periodic_history only; A always starts fully recovered.
+readout_warmup_cycles: 8
+readout_trace_events: 200
+max_readout_events_per_run: 2000000
+max_readout_expected_work: 10000000
+max_readout_cycles: 200000
+basic_gaussian_extent_fwhm: 6.0
+basic_quadrature_segments: 32
+max_lab_pixels: 4096
+max_optical_cells: 4000000
+spatial_angle_samples_h: 17
+max_super_gaussian_order: 32
+psf_preview_samples: 81
+psf_preview_extent_sigma: 4
+psf_preview_retained_fraction: 0.999
+spatial_angle_samples_v: 9
+acquisition_block_cycles: 16
+max_pending_jobs: 8
+max_job_workers: 1
+job_poll_ms: 600
+max_spatial_angle_mrad: 100
+energy_conservation_rtol: 1.0e-10
+spatial_wavelength_chunk_size: 32
+max_spatial_integration_work: 100000000
+max_lab_histogram_cells: 2000000
+max_detector_sampling_work: 2000000
+rx_angle_samples_h: 17
+rx_angle_samples_v: 9
+max_scan_frames: 100
+max_scan_pulses: 10000
+max_scan_angle_bins: 256
+max_scan_histogram_cells: 4000000
+max_scan_projection_work: 20000000
+max_column_projection_work: 1000000000
+max_column_pulses: 20000
+max_column_count: 10000
+max_column_histogram_work: 100000000
+max_column_selected_histogram_cells: 2000000
+max_column_sampling_work: 100000000
+column_projection_cache_entries: 64
+max_column_analysis_events: 2000000
+max_column_analysis_candidates: 4000000
+max_column_reference_work: 64000000
+column_result_cache_entries: 2
+max_scan_sampling_work: 2000000
+scan_preview_table_rows: 50
+scan_angle_boundary_tolerance_mrad: 1.0e-12
+parameter_preview_debounce_ms: 500
+max_visible_channels: 16
+b_mechanism_preview_gates: 50
+b_timeline_max_points: 2000
+b_view_cache_entries: 2
+max_lab_analysis_events: 20000000
+max_lab_analysis_histogram_cells: 8000000
+max_lab_reference_cells: 4000000
+max_channel_ratio_cells: 1000000
+lab_analysis_seed_streams:
+  trials: 1
+  noise: 2
+budget_timeline_max_pulses: 128
+background_angular_domain: independent_rx
+budget_schematic_max_cells: 2048
+budget_schematic_scan_samples: 65
+
+budget_temporal_plot_samples: 201
+budget_pulse_plot_half_widths: 3.0
+budget_frame_preview_slots: 8
+budget_pipeline_preview_slots: 3
+budget_pipeline_frames: 3  # 连续帧保留资源状态，区分固定延迟与积压。
+budget_output_fifo_columns: 2  # 自动预算有限FIFO，容纳两列完整应用数据块；不接受用户容量输入。
+budget_pipeline_max_work: 100000  # 帧数×slot数×不同链路载荷类型数，超限报错。
+
+budget_reference_min_range_m: 10
+budget_reference_max_range_m: 300
+budget_reference_points: 41
+budget_reference_max_points: 201
+budget_reference_sigma_extent: 8
+budget_reference_max_bins: 20000
+budget_reference_max_measurements: 5000
+
+budget_max_histogram_bins: 10000000  # 预算只估计存储/带宽，不分配全直方图；A/B/C仿真仍用max_histogram_bins。
+budget_max_channels: 1024  # 独立角通道预算的元数据/链路数量保护，不是器件通道数上限。
+budget_max_physical_pixels: 131072  # 预算整阵列显示汇总数组保护；不运行整阵列事件采样。

@@ -26,6 +26,10 @@
 - 独立SPAD、A、B、C继续共用器件/读出核心及共同数值逻辑；新增光学或扫描层不得复制SPAD实现。参数、定义、后台逻辑和平台命名的跨平台统一仍需按roadmap专项核验。
 - 必须区分已确认意图、已实现、自验通过和用户人工验收。Rx/Tx角域分离、C人工精细验收、列间完全复位等未完成项不能仅凭界面说明或自动测试改成已完成。
 
+- 当前架构按C4的C1–C3维护在`docs/design/architecture.md`；参数默认/用户数据归属在`docs/guides/configuration-and-data.md`，实现与验收只以`docs/roadmap.md`为状态入口。references/history分别是参考/历史，旧记录不能覆盖现行定义。
+- defaults.yaml内部布局使用schema 2（domains与experiments），默认组合/来源追踪统一在default_composition.py，版本适配在default_layout.py。新增参数必须同时确定唯一领域来源和平台适用范围；保留schema 1快照读取，不把文件布局版本与工况导入/导出版本混同。
+- HTML架构页属于artifacts中的带时间快照，必须标明来源、已实现/建议及快照边界；不能当作第二套持续维护的规范或实时目录。归档/迁移文档须同步导航、相对链接和生成/校验入口，保留可追溯原件。
+
 ## 公式书写与渲染约定
 
 本节约束项目文档、网页及项目相关技术说明。公式的数学含义、符号和单位须与 Python 公共计算核心一致。

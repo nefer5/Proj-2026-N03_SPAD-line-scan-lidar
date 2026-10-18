@@ -1,0 +1,101 @@
+> **历史归档，不是当前架构或默认配置的权威源。** 归类于2026-10-18，原位置：`docs/design/architecture.md`。文中“当前”、默认值、端口和测试数量保留记录时的含义；现行入口见[文档目录](../index.md)和[当前架构](../design/architecture.md)。
+
+# 模块化 SPAD / 光学研究架构
+
+本方案由架构讨论和后续迭代形成，初版对应0.6.3.dev0；当前0.6.14.dev0的后台提取进度见本页末尾的2026-10-18第一阶段记录。实现保持同一仓库、共用Python物理核心、按研究角色分开的网页入口。已确认的长期偏好与实现状态见[架构决策](../design/architecture-decisions.md)，后续统一工作见[路标](../roadmap.md)。
+
+## 入口与模型范围
+
+| 入口 | 实验 | 当前状态 |
+|---|---|---|
+| `/spad` | 直接给定探测面照明，独立研究 SPAD 与数字读出 | 已实现并自动验收 |
+| `/system` | B 全光斑 Tx/场景/Rx 映射，再调用同一 SPAD 核心 | 已实现并自检，按用户反馈持续优化 |
+| `/system/scan` | C 列级逐发计划、扫描、按列重建与DSP/MIPI | 已实现并自检，人工精细验收待完成 |
+| `/system/scan/legacy` | 历史周期C与旧任务 | 兼容保留 |
+| `/`、`/debug` | 兼容 A 单角通道的评估与专家视图 | 保留并对照基线验证 |
+
+评估/调试是观察方式。C通过扫描与控制时序组装逐发光学输入，在一个连续SPAD/读出会话中采集；正式C见[column-scanning.md](../models/column-scanning.md)，历史周期C见[scanning.md](legacy-periodic-scanning.md)。用户确认的C列间完全复位尚未接入，不能把连续状态实现称为复位架构。
+
+## 代码职责与依赖
+
+- `contracts`：探测面光子输入、候选事件、采集窗口与控制时序。
+- `numerics`：Curve、时间分布、积分等共享数值工具。
+- `spad/device`：PDE/FF、器件抖动、非延长型恢复状态。
+- `spad/readout`：OR、符合、TDC、仲裁、容量和输出记录。
+- `spad/acquisition.py`：协调器件与读出状态；接受显式时序及物理像素到读出组的映射。
+- `spad/source.py`：消费探测面光子分布，生成候选雪崩并加入 DCR/其他电子候选。
+- `tx`、`scene`、`rx`：发射角份额、朗伯传播、Rx效率/PSF与像素映射。
+- `timing`：周期时序预设与显式控制窗口。
+- `scan`：机械轨迹、光学角映射、帧/PRF调度、回扫策略、同步误差与角bin计数。
+- `processing`：直方图、检测、距离估计与指标。
+- `experiments`：组装 A、独立 SPAD 或 B 实验，分发配置，检查能力和资源限制。
+- `adapters`：严格校验外部光学数据。数据不自动裁剪或外推；Tx角域归一化在实验层显式执行并审计，Rx PSF不补偿像面边缘损失。
+- `runtime`：持久化本地任务、进程执行、进度、取消与结果文件。
+- `webapi`、`web/shared`：HTTP、复用表单、Curve 编辑器、图形与审计展示。
+- `reporting`：将 Python 中间量绑定到共享光子流程/公式定义。
+
+`spad` 不导入 Tx、Rx、场景、整机配置、YAML IO、任务或网页。测试通过 AST 检查这一约束。旧 `simulator.py`、`readout.py`、`detection.py`、`performance.py` 与 `curves.py` 是兼容入口。旧 A 的输入源适配器保留历史 RNG 顺序，事件处理调用同一器件与读出核心。
+
+可信 Python 调用方可向 `AcquisitionSession` 注入独立的 `device_engine` 或 `readout_factory`，不必更改光学模块。网页只提供已登记并校验的内置模式，不从配置执行 Python。自定义后端需提供与其状态匹配的检查点适配器；内置检查点不会假装能恢复未知后端。
+
+## 稳定契约
+
+1. `SensorIllumination`：逻辑形状`[pixel,wavelength]`的信号光子/发和背景光子/秒。可用稠密数组或精确`SpectralProduct`外积表示；元素已含光谱积分权重，不是每nm密度。参考面为完整像素，尚未应用PDE/FF；分离表示不丢弃零PDE波段的入射光子。
+2. `CandidateEvents`：内部候选雪崩，绝对时间 ns 和物理像素 ID。它是低层测试/兼容入口，不能冒充光学入口。
+3. `AcquisitionProgram`：显式周期起止、器件门、读出门与是否计入测量。器件门和读出门可以不同；周期型网页表单目前将两者设置为同一门。
+4. `AcquisitionSession`：器件恢复、OR/符合窗口、TDC恢复/容量和时间水位跨处理块保留。`checkpoint()` 输出 JSON 状态，`restore()` 接续事件流。
+5. 采集记录：周期参考、读出通道、TDC标识、量化码和实际时间区间。不会凭空暴露共享读出丢失的像素身份。真值在独立光学/场景数据中保存。
+
+每读出组像素数仅由 `H_binning × V_binning` 派生。B 以通道行列数和 H/V 数定义完整阵列，实际像素坐标由构造模型或数据库给出。当前仅实现不重叠矩形读出组；不宣称已实现动态 ROI、任意重叠拓扑或跨组共享 TDC。
+
+同一候选事件流在单块、任意合法分块及检查点恢复后具有相同记录和统计。光子候选生成当前在明确的事件/像素周期工作量限额内先生成，再分块推进核心；超限报错。尚未实现无限时长的流式光子源及源生成器检查点。
+
+## 配置、随机数和审计
+
+`SimulationConfig` 保留 A 构造入口，并通过 `for_experiment(kind, overrides)` 解析实验配置。SPAD 实验无需构造距离、孔径、反射率等无关字段。
+
+- 默认值仅在 `config/defaults.yaml`；B/C的公共器件、时序、光谱、背景默认值按字段复用 `simulation`，新增光学值按 `experiments.system.tx/rx/spad` 分类。B不再另设100发/关闭背景的隐含演示覆盖；C也继承共有默认值。关闭背景的快速扫描示例位于`experiments.scan_demo`，须明确载入；B→C转移会带入用户当前选择。
+- 所有采样策略、容差和资源限额在 `config/algorithms.yaml`，类型与边界由 `Algorithms` 校验。
+- 新参数在 `parameter-help.yaml` 的 `experiments` 分支注明单位、条件和生效模式。
+- 缺失默认键即使能由用户覆盖补齐，也会报错；未知键、重复 YAML 键、NaN/Infinity及非法范围均拒绝。
+- 每个后台任务保存完整 YAML、实际配置和算法快照。运行中不重新读取编辑后的默认值。
+- A 保留原 RNG 协议；新实验使用 `per-cycle-per-pixel-v1`，光子采样与电子时间抖动分流。两种采样协议不要求逐样本相同，但共享器件模型。
+- 结果包含 seed、版本、时间、配置指纹、数据指纹、物理中间量、模型限制、全部记录及直方图。B 另外保存完整光学数据库和光谱积分数组。
+
+旧A配置继续经`legacy_config`迁移。独立SPAD使用信封版本2，B及历史周期C使用版本3，正式列级C使用版本4；schema_version是配置格式，不是模型版本。B按`tx/scene/rx/spad/readout/background/acquisition/spectral_inputs`组织；历史C增加`scan/scene_motion`，正式C使用`system_targets/motion/exposure/transport/diagnostics`等独立域。具体类型以各配置模型为准，跨平台命名/字段归一还需R03–R04专项核验。
+
+旧B的`optics/device/timing`字段仅经`legacy_config`转换；同时出现新旧分组或新旧焦距/PSF字段会报错。旧标量焦距迁为两轴焦距并显式保留`legacy_upright`；旧V/y向下的相关参数转到向上坐标。旧PSF标量迁为等值双轴σ；旧完整滤光片配置明确保留零带外语义。构造新工况默认双轴倒置。共享采集核心使用只读适配视图，不复制默认值或另造物理参数源。
+
+## 任务与记录重放
+
+任务元数据在本地 SQLite 中持久化，配置快照与结果 JSON 位于 `artifacts/runs/<id>/`。网页刷新能重新列出任务。取消在安全阶段/处理块检查；A 兼容求解器目前在整次求解结束检查取消。未完成结果不标为完成。
+
+服务重启时未完成任务标为 `interrupted`，保留配置以重新提交；不宣称作业能从进程崩溃自动续算。更改工作进程数在空闲队列时生效，活动任务期间明确拒绝重配。
+
+重放只使用已记录信息。当前网页提供按原 TDC 宽度整数倍、相同门起点的重新分箱，保持总记录数。不能恢复量化精度，也不能借此改变 PDE、死时间或硬件读出。检测/测距代码已经独立；B 当前仅输出未经门限标定的距离估计，不报告 B 的 Pd/PFA。
+
+B正式界面将当前参数预览与已采集结果分开保存。参数图/光学预览由Python公共核心计算；修改输入不会修改历史记录。`spatial_analysis`在一次采集之外组织重复试验，保存逐次直方图与独立随机种子；重放先对每次直方图重新分箱，再计算最小/最大范围，不能将旧误差棒简单相加。A/B复用`shared/histogram-window.js`绘图和公共纯信号解析函数。橙色观察窗口、拖动和图旁精确时间输入只改变显示。
+
+C复用同一工作台、光谱编辑器、参数图与直方图组件，扩展帧/角bin/通道联动、距离分面、等比例点云、逐发像面和时序明细。正式列级C按显式`trial_count`与`noise_trial_count`保存完整扫描的独立重复/噪声记录和seed，选列、选通道、重新分箱后再计算统计范围；历史任务未保存的统计不补造。轨迹预览与采集结果可显式切换。界面原则见`ui-design-guidelines.md`。
+
+## 回归与快照
+
+基线提交 `3fcfb23`，前两阶段验收提交 `8fbbeab`，C开发前快照为 `522b16f`。早期源码/数值/截图在 `artifacts/architecture-upgrade/`；包含C的整体快照在 `artifacts/scan-upgrade/`。
+
+近场收光比例超过1会造成朗伯远场近似产生非物理能量增益，因此单独增加拒绝条件，不静默裁剪到1。普通A/B基线保持不变；这不代表已经实现近场精确光学。
+
+回归覆盖 A 八种模式逐项一致、器件门与读出门、分块/恢复、无目标/零通量、非均匀照明、资源限额、光学守恒、插值、单通道退化、数据导入和实际网页。所有页面资源使用内容指纹，开发响应禁用缓存。光子说明来自共享 YAML；公式通过本地 KaTeX 显式渲染。
+
+
+## 2026-10-18：后台结构重构第一阶段
+
+本阶段按已讨论方案开始提取公共职责；五个平台、接口、配置格式与当前数值协议保留。三个工作台属于后续前端整合方案，尚未实施，2026-10-18已有的桌面/1080P适配不随本阶段重做。
+
+- `domains/acquisition.py`：周期时序字段；`domains/optical.py`：统一光学字段与平铺兼容视图；`domains/system.py`：Tx/场景/Rx/阵列/背景/采集域类型。只定义类型与约束，不引入默认值。原实验模块保留同对象兼容导出。
+- `optics/service.py`：接管`optical_dataset`与`project_illumination`；B、C、预算和相关HTTP/参数预览直接调用该入口。该层不导入experiments、reporting或网页/任务层；背景每bin数值移至`processing/background.py`，展示层保留兼容导出。
+- `acquisition/trials.py`与`executor.py`：表达已有观测/重复/含信号均值/噪声角色和显式次数，按顺序逐次执行；不生成seed、不预取下一次、不新增取消点、不改初始化策略。A/B/C继续在各适配器中保留原随机分流、计数与资源检查。
+- `acquisition/adapters/periodic.py`：接管SPAD/B/历史C的周期量化与直方图；原`experiments.lab.acquire_candidates`仍导出同一函数。列级C量化及门碎片保持独立；底层`spad/acquisition.py`仍是原状态核心。
+
+`BSystemConfig`与`ColumnConfig`的外部schema、C对B配置的继承、预算嵌套B配置目前保留；本阶段提取字段唯一源，不声称已完成整个领域组合迁移。两种DSP/MIPI调度、A解析参考、历史C及核心检查点行为保留。
+
+回退点、完整数值/配置等价证据与保护检查见[第一阶段验证](../../artifacts/refactor-phase1-20261018-170544/validation.json)。原Archify分析页是a19f273的历史源码快照，不能用它的行号判断本阶段新文件。

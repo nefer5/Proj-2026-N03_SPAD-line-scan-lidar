@@ -4,11 +4,10 @@ from typing import Literal
 import math
 from pydantic import Field,model_validator
 from ..spad.config import StrictConfig
-from ..experiments.system_config import BSystemConfig
-from ..experiments.scanning import ScanAcquisition
+from ..domains.optical_system import BSystemConfig
 from ..configuration import read_yaml
 from ..curves import merge_config
-from .config import ScanSettings,ScanTiming,SceneMotion
+from .config import ScanSettings,ScanTiming,SceneMotion,ColumnMotion,ScanAcquisition
 from .planning import SystemTargets,uniform_column_budget
 
 
@@ -96,20 +95,6 @@ class TraceSelection(StrictConfig):
         return self
 
 
-class ColumnMotion(StrictConfig):
-    trajectory: Literal['sawtooth','triangle','sinusoidal','static']
-    optical_multiplier: float
-    optical_offset_mrad: float
-    phase_offset_ns: float
-    laser_time_offset_ns: float
-    laser_jitter_std_ns: float = Field(ge=0)
-    encoder_latency_ns: float
-    encoder_angle_offset_mrad: float
-    rx_scan_scale: float
-    rx_angle_offset_mrad: float
-    channel_direction_mode: Literal['optical_centroid','explicit']
-    channel_h_mrad: list[float]
-    channel_v_mrad: list[float]
 
 
 class ColumnScanSettings(ScanSettings):
@@ -174,13 +159,8 @@ class ColumnConfig(BSystemConfig):
 
 
 def column_defaults():
-    from ..experiments.configuration import experiment_defaults
-    base=experiment_defaults('scan');legacy_scan=base.pop('scan')
-    base['acquisition']['frame_count']=legacy_scan['frame_count']
-    base['motion']={k:legacy_scan[k] for k in ColumnMotion.model_fields}
-    sections=read_yaml('defaults.yaml')['experiments']
-    base['system_targets']=sections['system_targets']
-    return merge_config(base,sections['columns'])
+    from ..default_composition import compose_defaults
+    return compose_defaults('columns').values
 
 
 def resolve_columns(overrides,algorithms):

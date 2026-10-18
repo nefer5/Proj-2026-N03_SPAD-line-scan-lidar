@@ -1,0 +1,27 @@
+{
+  "restart": {
+    "backend_crash_simulated": true,
+    "old_launcher_pid": 86504,
+    "new_launcher_pid": 15624,
+    "old_server_pid": 71740,
+    "new_server_pid": 62508,
+    "old_instance": "4d870077d8d04414a5b40fbe3547ac79",
+    "new_instance": "8cc7e7969b144b9896733b983a7c9f12",
+    "old_tree_pids": [
+      86504,
+      66120,
+      71740,
+      58880
+    ],
+    "old_tree_remaining": [],
+    "worker_job": "0501e66c5628435eb1e8cc5f1776f7d4",
+    "version": "0.6.14.dev0"
+  },
+  "foreign_port": {
+    "port": 52362,
+    "pid": 85924,
+    "restart_exit_code": 1,
+    "foreign_process_alive": true,
+    "message": "Startup failed: Port 52362 belongs to an unverified process. No process was stopped; use another port or close its owner."
+  }
+}

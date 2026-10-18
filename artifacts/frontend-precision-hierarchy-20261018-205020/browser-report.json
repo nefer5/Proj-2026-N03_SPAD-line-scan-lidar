@@ -1,0 +1,86 @@
+{
+  "b": {
+    "background": "rgb(232, 238, 243)",
+    "errors": [],
+    "field": "905",
+    "group": "rgb(220, 230, 237)",
+    "helper": true,
+    "input": "rgb(143, 163, 179)",
+    "overflow": false,
+    "precision": {
+      "path": "optics.wavelength_nm",
+      "raw": 905.123456789,
+      "shown": "905.12"
+    },
+    "browserErrors": []
+  },
+  "a": {
+    "background": "rgb(232, 238, 243)",
+    "errors": [],
+    "field": "100",
+    "group": "rgb(220, 230, 237)",
+    "helper": true,
+    "input": "rgb(143, 163, 179)",
+    "overflow": false,
+    "precision": {
+      "raw": 905.123456789,
+      "shown": "905.12",
+      "window": [
+        "660.3",
+        "673.95"
+      ],
+      "windowRaw": [
+        660.3028307242,
+        673.9535500684
+      ]
+    },
+    "browserErrors": []
+  },
+  "spad": {
+    "background": "rgb(232, 238, 243)",
+    "errors": [],
+    "field": "8",
+    "group": "rgb(220, 230, 237)",
+    "helper": true,
+    "input": "rgb(143, 163, 179)",
+    "overflow": false,
+    "precision": {
+      "path": "device.H_binning",
+      "raw": 905.123456789,
+      "shown": "905.12"
+    },
+    "browserErrors": []
+  },
+  "budget": {
+    "background": "rgb(232, 238, 243)",
+    "errors": [],
+    "field": "120",
+    "group": "rgb(220, 230, 237)",
+    "helper": true,
+    "input": "rgb(143, 163, 179)",
+    "overflow": false,
+    "precision": {
+      "collector": "function",
+      "raw": 120,
+      "shown": "120"
+    },
+    "browserErrors": []
+  },
+  "c": {
+    "background": "rgb(232, 238, 243)",
+    "errors": [
+      "Column optical projection exceeds configured work limit"
+    ],
+    "field": "2",
+    "group": "rgb(220, 230, 237)",
+    "helper": true,
+    "input": "rgb(143, 163, 179)",
+    "overflow": false,
+    "precision": {
+      "path": "motion.optical_multiplier",
+      "raw": 905.123456789,
+      "shown": "905.12"
+    },
+    "browserErrors": []
+  }
+}

@@ -1,7 +1,7 @@
 /* B acquisition explanation and immutable-record views. No detector simulation here. */
 (function(){
 'use strict';
-const fmt=(n,d=3)=>Number(n).toLocaleString('en-US',{maximumFractionDigits:d});
+const fmt=(n,d=3)=>LidarNumbers.format(Number(n));
 const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 class BAcquisitionMechanism{
  constructor(root){this.root=root;}
@@ -23,11 +23,11 @@ class BAcquisitionMechanism{
  }
  drawTiming(c){
   const end=c.gate_preview_end_ns,left=115,width=780,sx=t=>left+t/end*width;
-  let svg=`<svg viewBox="0 0 950 235" xmlns="http://www.w3.org/2000/svg"><text x="${left}" y="22" fill="#97b6c8" font-size="10">本次 B 序列时间 / μs</text>`;
-  for(let i=0;i<=4;i++){const t=end*i/4;svg+=`<path d="M${sx(t)} 32V197" stroke="#294252"/><text x="${sx(t)}" y="222" text-anchor="middle" fill="#809caf" font-size="10">${fmt(t/1000)}</text>`;}
-  for(const [label,y] of [['Tx 触发',57],['接收门',108],['slot 直方图',175]])svg+=`<text x="100" y="${y}" text-anchor="end" fill="#b5d0df" font-size="11">${label}</text>`;
-  for(const w of c.gate_preview){const x=sx(w.trigger_ns),lo=sx(w.open_ns),hi=sx(w.close_ns);svg+=`<g><title>G${w.index}：${fmt(w.open_ns)}–${fmt(w.close_ns)} ns</title><path d="M${x} 38V68" stroke="#5bdbcf" stroke-width="2"/><rect x="${lo}" y="83" width="${hi-lo}" height="35" fill="#24556a" stroke="#68aab7"/>${hi-lo>28?`<text x="${(lo+hi)/2}" y="105" text-anchor="middle" fill="#c3e3ef" font-size="10">G${w.index}</text>`:''}</g>`;}
-  svg+=`<rect x="${left}" y="148" width="${width}" height="43" rx="4" fill="#20493f" stroke="#55b392"/><text x="${left+width/2}" y="174" text-anchor="middle" fill="#b6e6c9" font-size="12">同一份 slot 直方图持续累积 · 不是 M 次统计结果叠加</text></svg>`;
+  let svg=`<svg viewBox="0 0 950 235" xmlns="http://www.w3.org/2000/svg"><text x="${left}" y="22" fill="#97b6c8" font-size="13">本次 B 序列时间 / μs</text>`;
+  for(let i=0;i<=4;i++){const t=end*i/4;svg+=`<path d="M${sx(t)} 32V197" stroke="#294252"/><text x="${sx(t)}" y="222" text-anchor="middle" fill="#809caf" font-size="13">${fmt(t/1000)}</text>`;}
+  for(const [label,y] of [['Tx 触发',57],['接收门',108],['slot 直方图',175]])svg+=`<text x="100" y="${y}" text-anchor="end" fill="#b5d0df" font-size="13">${label}</text>`;
+  for(const w of c.gate_preview){const x=sx(w.trigger_ns),lo=sx(w.open_ns),hi=sx(w.close_ns);svg+=`<g><title>G${w.index}：${fmt(w.open_ns)}–${fmt(w.close_ns)} ns</title><path d="M${x} 38V68" stroke="#5bdbcf" stroke-width="2"/><rect x="${lo}" y="83" width="${hi-lo}" height="35" fill="#24556a" stroke="#68aab7"/>${hi-lo>28?`<text x="${(lo+hi)/2}" y="105" text-anchor="middle" fill="#c3e3ef" font-size="13">G${w.index}</text>`:''}</g>`;}
+  svg+=`<rect x="${left}" y="148" width="${width}" height="43" rx="4" fill="#20493f" stroke="#55b392"/><text x="${left+width/2}" y="174" text-anchor="middle" fill="#b6e6c9" font-size="13">同一份 slot 直方图持续累积 · 不是 M 次统计结果叠加</text></svg>`;
   this.root.querySelector('[data-timing]').innerHTML=svg;
  }
 }
@@ -60,7 +60,7 @@ function drawExposureTimeline(canvas,timeline,channel,selectedGate){
  const[c,w,h]=PhotonPlots.canvasSetup(canvas),left=46,right=49,top=25,bottom=28,pw=w-left-right,ph=h-top-bottom;
  const bars=timeline.counts[index],cum=timeline.cumulative_counts[index],last=timeline.sequence_duration_ns;
  const maxBar=Math.max(1,...bars),maxCum=Math.max(1,...cum),sx=t=>left+t/last*pw;
- c.clearRect(0,0,w,h);c.font='9px Consolas,monospace';c.fillStyle=(globalThis.LidarTheme?.color('#88a6bc') ?? ('#88a6bc'));c.textAlign='left';c.fillText(timeline.grouped?'每组记录':'每门记录',left,12);c.fillStyle=(globalThis.LidarTheme?.color('#5bdbcf') ?? ('#5bdbcf'));c.textAlign='right';c.fillText('slot 累计',w-right,12);
+ c.clearRect(0,0,w,h);c.font='13px Consolas,monospace';c.fillStyle=(globalThis.LidarTheme?.color('#88a6bc') ?? ('#88a6bc'));c.textAlign='left';c.fillText(timeline.grouped?'每组记录':'每门记录',left,12);c.fillStyle=(globalThis.LidarTheme?.color('#5bdbcf') ?? ('#5bdbcf'));c.textAlign='right';c.fillText('slot 累计',w-right,12);
  for(let i=0;i<=2;i++){const y=top+ph*(1-i/2);c.strokeStyle=(globalThis.LidarTheme?.color('#28404f') ?? ('#28404f'));c.beginPath();c.moveTo(left,y);c.lineTo(w-right,y);c.stroke();c.fillStyle=(globalThis.LidarTheme?.color('#88a6bc') ?? ('#88a6bc'));c.textAlign='right';c.fillText(fmt(maxBar*i/2,0),left-6,y+3);c.fillStyle=(globalThis.LidarTheme?.color('#5bdbcf') ?? ('#5bdbcf'));c.textAlign='left';c.fillText(fmt(maxCum*i/2,0),w-right+6,y+3);}
  for(let i=0;i<bars.length;i++){const x=left+i/bars.length*pw,bw=pw/bars.length;const active=selectedGate!==null&&selectedGate>=timeline.start_gate[i]&&selectedGate<=timeline.end_gate[i];c.fillStyle=(globalThis.LidarTheme?.color(active?'#dfb172':'#507fae') ?? (active?'#dfb172':'#507fae'));c.fillRect(x+1,top+ph*(1-bars[i]/maxBar),Math.max(.5,bw-2),ph*bars[i]/maxBar);}
  c.strokeStyle=(globalThis.LidarTheme?.color('#62decb') ?? ('#62decb'));c.lineWidth=1.7;c.beginPath();c.moveTo(left,top+ph);let previous=0;

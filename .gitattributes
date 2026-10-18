@@ -10,3 +10,6 @@ artifacts/budget-spad-design/*.excalidraw -text whitespace=blank-at-eol,blank-at
 
 # Architecture review receipts pin the original diagram/specification bytes.
 artifacts/architecture-review/** -text -whitespace
+
+# Dated architecture/refactor/UI evidence includes byte-pinned source snapshots.
+artifacts/*20261018*/** -text -whitespace

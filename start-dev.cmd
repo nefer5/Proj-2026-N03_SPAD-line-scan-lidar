@@ -3,9 +3,9 @@ setlocal
 cd /d "%~dp0"
 title LiDAR Model - Development Server
 if exist "%~dp0.venv\Scripts\python.exe" (
-    "%~dp0.venv\Scripts\python.exe" run.py --reload --open
+    "%~dp0.venv\Scripts\python.exe" "%~dp0run.py" --restart --reload --open
 ) else (
-    python run.py --reload --open
+    python "%~dp0run.py" --restart --reload --open
 )
 if errorlevel 1 (
     echo.

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "6f9d2005-f7f9-48a9-b902-93ee12c17571",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "E:\\Proj-2026-N03_SPAD线扫lidar建模\\artifacts\\architecture-review\\20261018-032102\\shared-core.json",
+  "output": "E:\\Proj-2026-N03_SPAD线扫lidar建模\\artifacts\\architecture-review\\20261018-032102\\shared-core.html",
+  "specification": {
+    "sha256": "57781fb78dc1786a8f91db423c4bd40021d381ff1097240cb4659e94642a7c8b",
+    "bytes": 32243
+  },
+  "artifact": {
+    "sha256": "eb51762b88dcb21d45451fda1f9794f65387765c464043a7ab194b84420b3295",
+    "bytes": 761631
+  }
+}

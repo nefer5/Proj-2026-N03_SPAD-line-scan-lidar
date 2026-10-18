@@ -1,0 +1,629 @@
+title: "回波、太阳光与其他环境光：光子预算计算链路"
+intro: "文档、评估页和专家调试页共用此定义。所有中间值由Python计算；公式用于解释，不从展示字符串执行模型。"
+conventions:
+  - "回波按完整单脉冲计算；背景按单个记录门计算。进入入瞳、到达探测面、候选雪崩和最终记录是不同层次。"
+  - "背景原始光子数限定在比较波段B：零漏光基础模型或采样模式采用滤光片形状域/采样范围；非零基础带外值扩展到提供的源光谱并受已知Rx响应范围约束。实际B明确记录，不一定是全光谱或滤光片FWHM。"
+  - "信号使用目标激光反射率；太阳使用独立的太阳灰反射率；其他环境光已经是接收方向辐亮度，不再乘反射率或1/R²。"
+  - "最终直方图是回波、太阳、其他光和器件噪声共同竞争后的混合记录，不按各来源的候选比例线性拆分。"
+  - "数据随有效输入实时更新；实际观测直方图仍需点击运行。专家调试采用该次仿真的参数快照。"
+common:
+  - title: "空间binning与每通道SPAD数"
+    formula_id: binning
+    logic: "H、V分别记录聚合方向数量，乘积是计算核心唯一使用的总SPAD数。A版不根据H/V自动改变通道IFOV或总光学通量。"
+    values:
+      - key: H_binning
+        label: "水平聚合数量"
+        unit: "SPAD"
+      - key: V_binning
+        label: "垂直聚合数量"
+        unit: "SPAD"
+      - key: spad_count
+        label: "派生的每通道总数"
+        unit: "SPAD/channel"
+  - title: "共同几何与单位"
+    formula_id: budget_geometry
+    logic: "先把尺寸、角度和时间换到所需单位。面积进入信号和背景；通道IFOV在A模型中决定背景收集立体角。信号能量已按角通道分配，不再额外乘IFOV。"
+    values:
+      - key: aperture_m2
+        label: "接收入瞳面积"
+        unit: "m²"
+      - key: aperture_shape
+        label: "所选入瞳形状"
+        unit: "shape"
+      - key: aperture_dimensions_m
+        label: "所选形状尺寸（已换算）"
+        unit: "m"
+      - key: ifov_h_mrad
+        label: "水平通道全IFOV"
+        unit: "mrad"
+      - key: ifov_v_mrad
+        label: "垂直通道全IFOV"
+        unit: "mrad"
+      - key: omega_sr
+        label: "通道立体角"
+        unit: "sr"
+      - key: gate_s
+        label: "记录门宽"
+        unit: "s"
+      - key: lambda_nm
+        label: "激光波长"
+        unit: "nm"
+      - key: photon_j
+        label: "激光单光子能量"
+        unit: "J"
+      - key: band_min_nm
+        label: "背景比较波段B起点"
+        unit: "nm"
+      - key: band_max_nm
+        label: "背景比较波段B终点"
+        unit: "nm"
+chains:
+  - id: echo
+    title: "回波信号"
+    steps:
+      - title: "发射、传播到目标与反射"
+        formula_id: budget_echo_target
+        logic: "输入为当前角通道Tx前的单脉冲能量；先经过Tx效率和去程大气透过率，再按灰朗伯目标的激光反射率反射。"
+        values:
+          - key: echo_input_j
+            label: "Tx前角通道能量"
+            unit: "J/pulse"
+          - key: echo_tx_j
+            label: "Tx光学后能量"
+            unit: "J/pulse"
+          - key: tx_efficiency
+            label: "Tx光学效率"
+            unit: "1"
+          - key: echo_target_j
+            label: "目标面入射能量"
+            unit: "J/pulse"
+          - key: echo_reflected_j
+            label: "目标半空间总反射能量"
+            unit: "J/pulse"
+          - key: rho_laser
+            label: "目标激光反射率"
+            unit: "1"
+          - key: atmosphere
+            label: "单程大气透过率"
+            unit: "1"
+      - title: "返回Rx入瞳"
+        formula_id: budget_echo_rx
+        logic: "朗伯目标按A/(πR²)将反射能量分配到接收孔径，再计返回程透过率和重叠因子O。这里是该角通道有效入瞳能量。"
+        values:
+          - key: range_m
+            label: "目标距离"
+            unit: "m"
+          - key: geometry
+            label: "朗伯几何收集比例"
+            unit: "1"
+          - key: overlap
+            label: "Tx/Rx重叠因子O"
+            unit: "1"
+          - key: echo_rx_j
+            label: "有效进入Rx的信号能量"
+            unit: "J/pulse"
+          - key: echo_rx_photons
+            label: "有效进入Rx的信号光子数"
+            unit: "photons/pulse"
+      - title: "经过接收光学和滤光片"
+        formula_id: budget_echo_sensor
+        logic: "用激光波长处的透过率计算窄带回波光学损耗。到达感光面的光子还未必触发雪崩。"
+        values:
+          - key: rx_efficiency
+            label: "Rx光学效率"
+            unit: "1"
+          - key: filter_at_laser
+            label: "激光处滤光片透过率"
+            unit: "1"
+          - key: echo_sensor_j
+            label: "到达探测面的信号能量"
+            unit: "J/pulse"
+          - key: echo_sensor_photons
+            label: "到达探测面的信号光子数"
+            unit: "photons/pulse"
+      - title: "PDE、FF、门控与累计"
+        formula_id: budget_echo_candidate
+        logic: "再乘感光区PDE与FF得到完整回波候选数。门内份额G由当前时间响应计算；保留门截断损失，不重新归一化。"
+        values:
+          - key: pde_at_laser
+            label: "激光处感光区PDE"
+            unit: "1"
+          - key: fill_factor
+            label: "FF"
+            unit: "1"
+          - key: echo_candidates_pulse
+            label: "完整回波期望候选数"
+            unit: "events/pulse"
+          - key: echo_gate_fraction
+            label: "时间响应门内份额G（参考）"
+            unit: "1"
+          - key: echo_candidates_gate
+            label: "门内候选数（理想参考）"
+            unit: "events/pulse"
+          - key: echo_candidates_acquisition
+            label: "累计候选数（理想参考）"
+            unit: "events"
+  - id: solar
+    title: "太阳背景"
+    steps:
+      - title: "标准/自定义太阳谱按lux归一化"
+        formula_id: budget_solar_scale
+        logic: "用完整可见光谱与CIE V(λ)计算参考照度，再按目标面设置的lux缩放整条谱。不能只拿近红外波段换算lux。"
+        values:
+          - key: solar_enabled
+            label: "太阳开关"
+            unit: "bool"
+          - key: solar_requested_lux
+            label: "设置太阳照度"
+            unit: "lux"
+          - key: solar_actual_lux
+            label: "当前生效照度"
+            unit: "lux"
+          - key: solar_reference_lux
+            label: "参考谱照度"
+            unit: "lux"
+          - key: solar_source
+            label: "所选参考谱"
+            unit: "source"
+          - key: solar_reference_irradiance
+            label: "归一化前全谱积分（自定义为参考量）"
+            unit: "W/m²或相对值"
+          - key: solar_scale
+            label: "参考谱缩放系数α"
+            unit: "1"
+          - key: solar_irradiance_w_m2
+            label: "缩放后的全谱辐照度"
+            unit: "W/m²"
+      - title: "目标反射到接收方向"
+        formula_id: budget_solar_reflection
+        logic: "太阳背景灰反射率将目标面谱辐照度变为朝Rx的谱辐亮度。目标被视为填充本通道视场的均匀灰朗伯面，未模拟太阳直射镜头。"
+        values:
+          - key: rho_solar
+            label: "太阳灰反射率"
+            unit: "1"
+          - key: solar_irradiance_at_laser
+            label: "激光波长处太阳谱辐照度"
+            unit: "W/(m²·nm)"
+          - key: solar_radiance_at_laser
+            label: "激光波长处反射谱辐亮度"
+            unit: "W/(m²·sr·nm)"
+      - title: "进入Rx入瞳（光学损耗前）"
+        formula_id: budget_background_rx
+        logic: "在同一个比较波段B内积分。均匀场景辐亮度乘面积和立体角得到功率，逐波长换算光子数再乘门宽。"
+        values:
+          - key: solar_rx_power_w
+            label: "进入Rx的带内功率"
+            unit: "W"
+          - key: solar_rx_photons_gate
+            label: "每门进入Rx的带内光子数"
+            unit: "photons/gate"
+      - title: "到达探测面（PDE/FF前）"
+        formula_id: budget_background_sensor
+        logic: "接收光学效率与滤光片透过率衰减后，得到到达整个探测面的光功率和光子数。PDE与FF尚未加入。"
+        values:
+          - key: rx_efficiency
+            label: "Rx光学效率"
+            unit: "1"
+          - key: solar_sensor_power_w
+            label: "探测面背景光功率"
+            unit: "W"
+          - key: solar_sensor_photons_gate
+            label: "每门到达探测面的光子数"
+            unit: "photons/gate"
+      - title: "SPAD候选事件与累计数"
+        formula_id: budget_background_candidate
+        logic: "PDE按波长放在积分内，FF只乘一次。候选事件随后进入SPAD与读出模型；这些候选数不是最终时间戳数。"
+        values:
+          - key: fill_factor
+            label: "填充因子"
+            unit: "1"
+          - key: solar_candidates_gate
+            label: "每门期望雪崩候选数"
+            unit: "events/gate"
+          - key: solar_candidates_acquisition
+            label: "本次累计的理想候选数"
+            unit: "events"
+          - key: shots
+            label: "累计脉冲数"
+            unit: "shots"
+          - key: solar_mean_candidates_per_time_bin
+            label: "每time_bin平均探测候选数（单角通道）"
+            unit: "candidates/bin"
+  - id: other
+    title: "其他环境光"
+    steps:
+      - title: "直接输入接收方向的谱辐亮度"
+        formula_id: budget_other_input
+        logic: "基础函数或采样点插值得到Linput，乘开关和强度倍率。这里不是灯的总功率，也不是目标面的谱辐照度；如果来源是这两者，须在外部先处理几何传播与反射。"
+        values:
+          - key: other_enabled
+            label: "其他光开关"
+            unit: "bool"
+          - key: other_scale
+            label: "其他光倍率"
+            unit: "1"
+          - key: other_raw_radiance_at_laser
+            label: "输入谱在激光波长处的原始值"
+            unit: "W/(m²·sr·nm)"
+          - key: other_radiance_at_laser
+            label: "倍率/开关作用后谱辐亮度"
+            unit: "W/(m²·sr·nm)"
+      - title: "进入Rx入瞳（光学损耗前）"
+        formula_id: budget_background_rx
+        logic: "在同一个比较波段B内积分。均匀场景辐亮度乘面积和立体角得到功率，逐波长换算光子数再乘门宽。"
+        values:
+          - key: other_rx_power_w
+            label: "进入Rx的带内功率"
+            unit: "W"
+          - key: other_rx_photons_gate
+            label: "每门进入Rx的带内光子数"
+            unit: "photons/gate"
+      - title: "到达探测面（PDE/FF前）"
+        formula_id: budget_background_sensor
+        logic: "接收光学效率与滤光片透过率衰减后，得到到达整个探测面的光功率和光子数。PDE与FF尚未加入。"
+        values:
+          - key: rx_efficiency
+            label: "Rx光学效率"
+            unit: "1"
+          - key: other_sensor_power_w
+            label: "探测面背景光功率"
+            unit: "W"
+          - key: other_sensor_photons_gate
+            label: "每门到达探测面的光子数"
+            unit: "photons/gate"
+      - title: "SPAD候选事件与累计数"
+        formula_id: budget_background_candidate
+        logic: "PDE按波长放在积分内，FF只乘一次。候选事件随后进入SPAD与读出模型；这些候选数不是最终时间戳数。"
+        values:
+          - key: fill_factor
+            label: "填充因子"
+            unit: "1"
+          - key: other_candidates_gate
+            label: "每门期望雪崩候选数"
+            unit: "events/gate"
+          - key: other_candidates_acquisition
+            label: "本次累计的理想候选数"
+            unit: "events"
+          - key: shots
+            label: "累计脉冲数"
+            unit: "shots"
+          - key: other_mean_candidates_per_time_bin
+            label: "每time_bin平均探测候选数（单角通道）"
+            unit: "candidates/bin"
+readout:
+  - title: "合并候选输入，再经过读出"
+    formula_id: budget_readout
+    logic: "光学候选数加上DCR和其他电子噪声，按当前读出架构生成实际时间戳。事件模式会处理SPAD/TDC死时间、OR、符合检测及容量；解析参考使用理想首光子分布。"
+    values:
+      - key: dark_gate
+        label: "每门DCR候选数"
+        unit: "events/gate"
+      - key: electronic_gate
+        label: "每门其他电子噪声候选数"
+        unit: "events/gate"
+      - key: background_gate
+        label: "每门全部光学背景候选数"
+        unit: "events/gate"
+      - key: noise_gate
+        label: "每门总噪声候选数"
+        unit: "events/gate"
+      - key: readout_mode
+        label: "读出模式"
+        unit: "mode"
+spatial:
+  title: 'B 全光斑：入瞳、探测面、候选雪崩与混合记录'
+  intro: 'Tx全光斑按角度单元分配，Rx效率与PSF将能量映射到真实像素；光子预算由Python计算。构造光学样例不代表实测器件或实际光学系统。'
+  steps:
+    - title: 'Tx：配置角域内归一化与能量分配'
+      formula_id: tx_domain_energy
+      logic: '单发能量由全Tx角域等效平均功率×脉宽派生，高斯以FWHM为等效时长，参考面在Tx光学之前。高斯、均匀及导入Tx份额在该角域内归一化；只乘一次Tx光学效率，不额外扣除角域外能量。'
+      values:
+        - {key: tx_input_j, label: 角域内Tx前单发能量, unit: J/pulse}
+        - {key: tx_angular_coverage_fraction, label: 角域内份额合计, unit: '1'}
+        - {key: tx_domain_output_j, label: 角域内Tx后单发能量, unit: J/pulse}
+    - title: '回波：角度能量经过Rx映射到像素'
+      formula_id: spatial_signal
+      logic: '先计算各角度单元入瞳能量，再分别乘Rx效率、滤光片及PSF像素份额。入射信号光子仍未乘PDE/FF。'
+      values:
+        - {key: tx_input_j, label: 角域内Tx前能量, unit: J/pulse}
+        - {key: signal_rx_incident_photons_per_pulse, label: 回波入瞳光子, unit: photons/pulse}
+        - {key: signal_sensor_incident_photons_per_pulse, label: 回波探测面光子, unit: photons/pulse}
+    - title: '太阳：按明确波段积分并映射到像素'
+      formula_id: spatial_background
+      logic: '太阳光谱沿用标准谱或选定输入模式及lux归一化；背景仅在配置Rx接收角域上积分，与Tx归一化角域独立，不乘Tx能量权重；响应表必须覆盖Rx域内。'
+      values:
+        - {key: solar_rx_incident_photons_per_gate, label: 太阳入瞳光子（限定积分波段）, unit: photons/gate}
+        - {key: solar_after_rx_photons_per_gate, label: 太阳Rx效率后光子, unit: photons/gate}
+        - {key: solar_after_filter_fullplane_photons_per_gate, label: 太阳滤光后无限像面光子, unit: photons/gate}
+        - {key: solar_sensor_incident_photons_per_gate, label: 太阳探测面光子, unit: photons/gate}
+        - {key: solar_mean_candidates_per_time_bin, label: 太阳每time_bin平均探测候选数（全阵列，含PDE/FF）, unit: candidates/bin}
+    - title: '其他环境光：独立输入谱的空间积分'
+      formula_id: spatial_background
+      logic: '其他光输入已经是接收方向谱辐亮度；不再额外乘目标反射率。背景原始光子数同样限定当前积分波段。'
+      values:
+        - {key: other_rx_incident_photons_per_gate, label: 其他光入瞳光子（限定积分波段）, unit: photons/gate}
+        - {key: other_after_rx_photons_per_gate, label: 其他光Rx效率后光子, unit: photons/gate}
+        - {key: other_after_filter_fullplane_photons_per_gate, label: 其他光滤光后无限像面光子, unit: photons/gate}
+        - {key: other_sensor_incident_photons_per_gate, label: 其他光探测面光子, unit: photons/gate}
+        - {key: other_mean_candidates_per_time_bin, label: 其他环境光每time_bin平均探测候选数（全阵列，含PDE/FF）, unit: candidates/bin}
+    - title: '器件转换与最终混合记录'
+      formula_id: spatial_candidates
+      logic: 'PDE/FF转换后再由共用SPAD及读出核心处理DCR、恢复和竞争。最终记录是所有来源混合的结果，不能按候选比例线性拆分。'
+      values:
+        - {key: signal_candidate_avalanches_per_pulse, label: 回波候选雪崩期望, unit: candidates/pulse}
+        - {key: solar_candidate_avalanches_per_gate, label: 太阳候选雪崩期望, unit: candidates/gate}
+        - {key: other_candidate_avalanches_per_gate, label: 其他光候选雪崩期望, unit: candidates/gate}
+        - {key: final_mixed_records, label: 本次采集最终混合记录, unit: records/acquisition}
+    - title: '接收能量守恒与边缘损失'
+      formula_id: spatial_energy_balance
+      logic: '不通过PSF重新归一化补偿感光面外能量。守恒残差保留浮点误差，所有损耗参考面分别列出。'
+      values:
+        - {key: rx_pupil_signal_j, label: 入瞳信号能量, unit: J/pulse}
+        - {key: sensor_signal_j, label: 探测面信号能量, unit: J/pulse}
+        - {key: rx_loss_j, label: Rx效率损失, unit: J/pulse}
+        - {key: filter_loss_j, label: 滤光损失, unit: J/pulse}
+        - {key: psf_edge_loss_j, label: PSF感光面边缘损失, unit: J/pulse}
+        - {key: energy_balance_residual_j, label: 能量平衡残差, unit: J/pulse}
+scan:
+  title: 'C 逐脉冲扫描：时序、实际发数与光子审计'
+  intro: '扫描只组装逐发光学输入和控制时序；所有脉冲共享同一SPAD/读出状态。下列总量按完整测量帧的参考时隙统计，不代表检测成功率。'
+  steps:
+    - title: '扫描与发射时序'
+      formula_id: scan_pulse_schedule
+      logic: '单发能量定义于Tx角域内并按域内份额归一化。PRF生成名义触发时隙；帧预算决定时隙数。激光偏移/抖动改变实际发射时刻，机械角经倍率映射为光学角。'
+      values:
+        - {key: duration_ns, label: 总测量帧时长, unit: ns}
+        - {key: scheduled_slots, label: 名义触发时隙, unit: slots}
+        - {key: emitted_reference_slots, label: 实际启用发射的测量参考时隙, unit: pulses}
+        - {key: reference_tx_input_energy_j, label: 测量参考时隙Tx前能量合计, unit: J}
+        - {key: reference_tx_domain_output_j, label: 测量参考时隙角域内Tx后能量, unit: J}
+    - title: '有限测量时间窗内的Tx功率'
+      formula_id: scan_tx_window_power
+      logic: '脉冲中心计数与实际时间积分分别记录。高斯/矩形波形在帧边界可能只有部分能量落入时间窗；这里积分时间波形，不补回边界能量。'
+      values:
+        - {key: center_accounted_tx_output_energy_j, label: 中心位于测量窗内的完整脉冲计账能量, unit: J}
+        - {key: actual_tx_output_energy_j, label: 测量时间窗内积分Tx后能量, unit: J}
+        - {key: actual_tx_average_power_w, label: 测量时间窗内积分Tx后平均功率, unit: W}
+    - title: '角bin累计数'
+      formula_id: scan_dwell_count
+      logic: '编码器分配发数用于测量结果重建；真实有效发数是独立真值诊断。回扫、域外脉冲和空bin不补齐。'
+      values:
+        - {key: assigned_pulses, label: 分配到角bin的发数, unit: pulses}
+        - {key: true_useful_pulses, label: 真实有效角bin发数, unit: pulses}
+    - title: '回波：逐发Rx指向与光子求和'
+      formula_id: scan_rx_return
+      logic: '每发在实际发射角照射场景，在各回波到达中心计算Rx指向与PSF。反射距离允许随全局H角和径向运动变化。'
+      values:
+        - {key: target_incident_j, label: 测量发射的目标入射能量, unit: J}
+        - {key: target_reflected_j, label: 测量发射的目标反射能量, unit: J}
+        - {key: signal_pupil_photons_total, label: 信号入瞳光子总数, unit: photons/acquisition}
+        - {key: signal_sensor_photons_total, label: 信号探测面光子总数, unit: photons/acquisition}
+        - {key: signal_candidates_total, label: 信号候选雪崩期望总数, unit: candidates/acquisition}
+    - title: '构造场景：角向距离与径向运动'
+      formula_id: scan_moving_range
+      logic: '逐角单元计算真实反射距离，再确定回波时刻和Rx姿态。真值距离仅用于生成光子与误差审计，不交给距离估计器寻峰。'
+      values:
+        - {key: reflection_range_min_m, label: 测量发射的最小反射距离, unit: m}
+        - {key: reflection_range_max_m, label: 测量发射的最大反射距离, unit: m}
+    - title: '太阳：记录门实际曝光'
+      formula_id: scan_background_total
+      logic: '背景按接收机局部角域与明确波段积分。发射关闭不会自动关闭SPAD/TDC周期门。'
+      values:
+        - {key: gate_exposure_s, label: 所有记录门实际时长之和, unit: s}
+        - {key: solar_rx_incident_photons_total, label: 太阳入瞳光子（限定波段）, unit: photons/acquisition}
+        - {key: solar_sensor_incident_photons_total, label: 太阳探测面光子, unit: photons/acquisition}
+        - {key: solar_candidate_avalanches_total, label: 太阳门内候选雪崩期望, unit: candidates/acquisition}
+        - {key: solar_mean_candidates_per_time_bin, label: 太阳每time_bin平均探测候选数（全阵列）, unit: candidates/bin}
+    - title: '其他环境光：独立积分'
+      formula_id: scan_background_total
+      logic: '只使用当前环境光谱输入模式。原始光子数限定显示波段；不随Tx能量份额缩放。'
+      values:
+        - {key: other_rx_incident_photons_total, label: 其他光入瞳光子（限定波段）, unit: photons/acquisition}
+        - {key: other_sensor_incident_photons_total, label: 其他光探测面光子, unit: photons/acquisition}
+        - {key: other_candidate_avalanches_total, label: 其他光门内候选雪崩期望, unit: candidates/acquisition}
+        - {key: other_mean_candidates_per_time_bin, label: 其他环境光每time_bin平均探测候选数（全阵列）, unit: candidates/bin}
+    - title: '整次接收能量与最终混合记录'
+      formula_id: spatial_energy_balance
+      logic: '能量等式对测量参考时隙中启用发射的脉冲求和。最终记录包含源间竞争；角bin重建可以进一步排除回扫或域外记录。'
+      values:
+        - {key: pupil_energy_j, label: 入瞳信号能量合计, unit: J}
+        - {key: sensor_energy_j, label: 探测面信号能量合计, unit: J}
+        - {key: rx_loss_j, label: Rx损耗合计, unit: J}
+        - {key: filter_loss_j, label: 滤光损耗合计, unit: J}
+        - {key: edge_loss_j, label: 阵列外损耗合计, unit: J}
+        - {key: energy_balance_residual_j, label: 能量平衡残差, unit: J}
+        - {key: final_mixed_records, label: 全采集混合记录, unit: records}
+        - {key: angle_assigned_records, label: 进入角bin重建的记录, unit: records}
+
+columns:
+  title: C 列级扫描：逐发列表、门并集、光学与器件审计
+  intro: 高层分配列时隙，每列按显式时间/能量列表发射。所有候选经过相同SPAD核心，最终混合记录不按源比例拆分。
+  steps:
+  - title: 列目标与逐发列表
+    formula_id: column_pulse_schedule
+    logic: 高层确定帧/列节拍；列表确定列内波形中心与能量。名义参考、实际发射和编码器角标签分开记录，不把列数当发数。
+    values:
+    - key: duration_ns
+      label: 事件观测时域长度（整帧或显式选区）
+      unit: ns
+    - key: column_count
+      label: 点云列数量
+      unit: columns
+    - key: trigger_count
+      label: 列表触发次数（含暗触发）
+      unit: triggers
+    - key: emitted_reference_slots
+      label: 实际启用发射的测量参考时隙
+      unit: pulses
+    - key: reference_tx_input_energy_j
+      label: 测量参考时隙Tx前能量合计
+      unit: J
+    - key: reference_tx_domain_output_j
+      label: 测量参考时隙角域内Tx后能量
+      unit: J
+  - title: 有限测量时间窗内的Tx功率
+    formula_id: scan_tx_window_power
+    logic: 逐发能量允许不同，各发能量属于配置Tx角域，角度份额归一化且不扣角域外能量；对包含可选归一化拖尾的完整时间分布积分。名义测量列的完整脉冲能量、实际中心计数与观测时间窗能量分别审计，不补回边界尾部。
+    values:
+    - key: center_accounted_tx_output_energy_j
+      label: 中心位于测量窗内的完整脉冲计账能量
+      unit: J
+    - key: actual_tx_output_energy_j
+      label: 测量时间窗内积分Tx后能量
+      unit: J
+    - key: actual_tx_average_power_w
+      label: 测量时间窗内积分Tx后平均功率
+      unit: W
+  - title: 参考时钟归属与门并集
+    formula_id: column_record_assignment
+    logic: 记录依据触发/列锚点参考归档，不读取隐藏的光子来源。并集门避免重复背景曝光；跨列器件状态连续。
+    values:
+    - key: trigger_count
+      label: 有列表项的触发参考数
+      unit: triggers
+    - key: gate_exposure_s
+      label: 测量门并集曝光时间
+      unit: s
+  - title: 回波：逐发Rx指向与光子求和
+    formula_id: column_rx_return
+    logic: 世界方向与接收机局部方向使用三维旋转。B的Rx效率/PSF在局部角度查询，再将探测面光子交给共同器件模型。
+    values:
+    - key: target_incident_j
+      label: 测量发射的目标入射能量
+      unit: J
+    - key: target_reflected_j
+      label: 测量发射的目标反射能量
+      unit: J
+    - key: signal_pupil_photons_total
+      label: 信号入瞳光子总数
+      unit: photons/acquisition
+    - key: signal_sensor_photons_total
+      label: 信号探测面光子总数
+      unit: photons/acquisition
+    - key: signal_candidates_total
+      label: 信号候选雪崩期望总数
+      unit: candidates/acquisition
+  - title: 构造场景：角向距离与径向运动
+    formula_id: scan_moving_range
+    logic: 逐角单元计算真实反射距离，再确定回波时刻和Rx姿态。真值距离仅用于生成光子与误差审计，不交给距离估计器寻峰。
+    values:
+    - key: reflection_range_min_m
+      label: 测量发射的最小反射距离
+      unit: m
+    - key: reflection_range_max_m
+      label: 测量发射的最大反射距离
+      unit: m
+  - title: 太阳：记录门实际曝光
+    formula_id: scan_background_total
+    logic: 太阳背景按Rx局部角域和指定积分波段积分。此处报告记录门并集内量；free_running门外背景还参与器件状态，见候选采样审计。
+    values:
+    - key: gate_exposure_s
+      label: 所有记录门实际时长之和
+      unit: s
+    - key: solar_rx_incident_photons_total
+      label: 太阳入瞳光子（限定波段）
+      unit: photons/acquisition
+    - key: solar_sensor_incident_photons_total
+      label: 太阳探测面光子
+      unit: photons/acquisition
+    - key: solar_candidate_avalanches_total
+      label: 太阳门内候选雪崩期望
+      unit: candidates/acquisition
+    - key: solar_mean_candidates_per_time_bin
+      label: 太阳每time_bin平均探测候选数（全阵列）
+      unit: candidates/bin
+  - title: 其他环境光：独立积分
+    formula_id: scan_background_total
+    logic: 只使用当前环境光谱输入模式。原始光子数限定显示波段；不随Tx能量份额缩放。
+    values:
+    - key: other_rx_incident_photons_total
+      label: 其他光入瞳光子（限定波段）
+      unit: photons/acquisition
+    - key: other_sensor_incident_photons_total
+      label: 其他光探测面光子
+      unit: photons/acquisition
+    - key: other_candidate_avalanches_total
+      label: 其他光门内候选雪崩期望
+      unit: candidates/acquisition
+    - key: other_mean_candidates_per_time_bin
+      label: 其他环境光每time_bin平均探测候选数（全阵列）
+      unit: candidates/bin
+  - title: 整次接收能量与最终混合记录
+    formula_id: spatial_energy_balance
+    logic: 接收能量等式对测量列源脉冲求和；器件输出保留全部混合记录，分析时间窗口可再排除区间外记录。DSP/MIPI丢列另报，不更改离线探测记录。
+    values:
+    - key: pupil_energy_j
+      label: 入瞳信号能量合计
+      unit: J
+    - key: sensor_energy_j
+      label: 探测面信号能量合计
+      unit: J
+    - key: rx_loss_j
+      label: Rx损耗合计
+      unit: J
+    - key: filter_loss_j
+      label: 滤光损耗合计
+      unit: J
+    - key: edge_loss_j
+      label: 阵列外损耗合计
+      unit: J
+    - key: energy_balance_residual_j
+      label: 能量平衡残差
+      unit: J
+    - key: final_mixed_records
+      label: 全采集混合记录
+      unit: records
+    - key: angle_assigned_records
+      label: 进入列内时间分析窗口的记录
+      unit: records
+
+budget_window:
+  title: 单通道时间窗口的光子与能量
+  steps:
+    - title: 信号 · 入瞳 → 探测面 → 候选雪崩
+      logic: 对同一单通道全脉冲光学预算按窗口时间份额积分，逐一显示各参考面与候选数。
+      formula_id: hardware_budget_signal_window
+      values:
+        - {key: signal_fraction, label: 窗口内单发能量份额, unit: '1'}
+        - {key: signal_pupil_photons, label: 窗口内入瞳光子, unit: photons/channel/window}
+        - {key: signal_sensor_photons, label: 窗口内探测面光子, unit: photons/channel/window}
+        - {key: signal_candidates, label: 窗口内候选雪崩, unit: candidates/channel/window}
+        - {key: final_mixed_records, label: 最终混合记录, unit: 未仿真}
+    - title: 背景与器件噪声 · 同一时间窗口
+      logic: 稳态背景和器件噪声率分别乘当前窗口时长，不能混作最终读出记录。
+      formula_id: hardware_budget_background_window
+      values:
+        - {key: solar_pupil_photons, label: 太阳入瞳原始光子, unit: photons/channel/window}
+        - {key: other_pupil_photons, label: 其他环境光入瞳原始光子, unit: photons/channel/window}
+        - {key: solar_sensor_photons, label: 太阳探测面光子, unit: photons/channel/window}
+        - {key: other_sensor_photons, label: 其他环境光探测面光子, unit: photons/channel/window}
+        - {key: background_candidates, label: 背景候选雪崩, unit: candidates/channel/window}
+        - {key: device_noise_candidates, label: 器件噪声候选, unit: candidates/channel/window}
+    - title: 回波光能 · 同一时间窗口
+      logic: 回波入瞳及探测面能量按同一时间窗口积分，保持光学参考面一致。
+      formula_id: hardware_budget_energy_window
+      values:
+        - {key: signal_pupil_energy_nj, label: 入瞳回波能量, unit: nJ/channel/window}
+        - {key: signal_sensor_energy_nj, label: 探测面回波能量, unit: nJ/channel/window}
+
+budget_signal_chain:
+  title: 单通道全脉冲信号链路
+  intro: 阶段柱状图不是时间直方图；光学阶段以同一波长的能量和光子数计，候选雪崩含PDE/FF但不是最终混合记录。
+  stages:
+    - {key: tx_input_j, label: VCSEL出光 / Tx光学前, short: Tx前, kind: optical}
+    - {key: tx_output_j, label: Tx光学后出射, short: Tx出射, kind: optical}
+    - {key: target_incident_j, label: 大气去程后目标入射, short: 目标入射, kind: optical}
+    - {key: target_reflected_j, label: 目标反射光能, short: 目标反射, kind: optical}
+    - {key: rx_pupil_signal_j, label: 回程大气与收光几何后Rx入瞳, short: Rx入瞳, kind: optical}
+    - {key: after_rx_signal_j, label: Rx光学效率后, short: Rx后, kind: optical}
+    - {key: after_filter_fullplane_signal_j, label: 滤光片后 / 无限像面, short: 滤光后, kind: optical}
+    - {key: sensor_signal_j, label: PSF与阵列边缘截获后探测面, short: 探测面, kind: optical}
+    - {key: signal_candidate_avalanches_per_pulse, label: 含PDE与FF的候选雪崩, short: 候选雪崩, kind: candidate}
+  steps:
+    - title: 光学能量与同波长光子数
+      logic: 各阶段光学能量由公共B核给出，只做hc/λ单位换算；不把候选雪崩赋予光学能量。
+      formula_id: budget_signal_energy_photons
+      values:
+        - {key: tx_input_j, label: 单通道Tx光学前全脉冲能量, unit: J/pulse/channel}
+        - {key: sensor_signal_j, label: 单通道探测面全脉冲光学能量, unit: J/pulse/channel}
+        - {key: signal_candidate_avalanches_per_pulse, label: 单通道候选雪崩期望, unit: candidates/pulse/channel}

@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "ok": false,
+  "command": "finalize",
+  "status": "fail",
+  "type": "sequence",
+  "quality": "showcase",
+  "startedAt": "2026-10-17T19:23:53.624Z",
+  "specification": {
+    "path": "E:\\Proj-2026-N03_SPAD线扫lidar建模\\artifacts\\architecture-review\\20261018-032102\\job-sequence.json",
+    "sha256": "5dc910f23be37ec0c7b7a733c332fb821c1d776122c827a10d2da2bb58a0bfed",
+    "bytes": 30717
+  },
+  "artifact": {
+    "path": "E:\\Proj-2026-N03_SPAD线扫lidar建模\\artifacts\\architecture-review\\20261018-032102\\job-sequence.html",
+    "sha256": "15aae466fe3cb93e4bc33452f7deaeea0ba5c175f06a40704df4a3d09fb0a9df",
+    "bytes": 760829
+  },
+  "stages": {
+    "validate": {
+      "status": "not-run",
+      "execution": "embedded-in-deliver"
+    },
+    "deliver": {
+      "status": "fail",
+      "exitCode": 0,
+      "durationMs": 546,
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Users\\admin\\.agents\\skills\\archify\\bin\\archify.mjs",
+        "deliver",
+        "sequence",
+        "E:\\Proj-2026-N03_SPAD线扫lidar建模\\artifacts\\architecture-review\\20261018-032102\\job-sequence.json",
+        "E:\\Proj-2026-N03_SPAD线扫lidar建模\\artifacts\\architecture-review\\20261018-032102\\job-sequence.html",
+        "--quality",
+        "showcase",
+        "--repo-root",
+        "E:\\Proj-2026-N03_SPAD线扫lidar建模",
+        "--json"
+      ],
+      "receipt": {
+        "schemaVersion": 1,
+        "receiptId": "1e7ddc38-8156-49c3-8c9b-c525b79bcf09",
+        "ok": true,
+        "command": "deliver",
+        "type": "sequence",
+        "input": "E:\\Proj-2026-N03_SPAD线扫lidar建模\\artifacts\\architecture-review\\20261018-032102\\job-sequence.json",
+        "output": "E:\\Proj-2026-N03_SPAD线扫lidar建模\\artifacts\\architecture-review\\20261018-032102\\job-sequence.html",
+        "specification": {
+          "sha256": "5dc910f23be37ec0c7b7a733c332fb821c1d776122c827a10d2da2bb58a0bfed",
+          "bytes": 30717
+        },
+        "artifact": {
+          "sha256": "15aae466fe3cb93e4bc33452f7deaeea0ba5c175f06a40704df4a3d09fb0a9df",
+          "bytes": 760829
+        },
+        "validation": {
+          "checksPassed": 9,
+          "checkCount": 9,
+          "compositionProfile": "showcase",
+          "compositionStatus": "pass",
+          "errors": 0,
+          "warnings": 1,
+          "compositionIssues": [
+            {
+              "severity": "warning",
+              "code": "composition/viewport-height",
+              "readerFit": null,
+              "viewBoxWidth": 1080,
+              "viewBoxHeight": 1010,
+              "viewportWidth": 1440,
+              "viewportHeight": 900,
+              "ratio": 1.07,
+              "wideRatio": 1.55,
+              "svgWidthPx": 1346,
+              "svgHeightPx": 1259,
+              "fixedChromePx": 126,
+              "pageHeightPx": 1385,
+              "overflowPx": 485,
+              "detail": "[composition/viewport-height] Preserve every node, relationship, and label. This 1080x1010 canvas (ratio 1.07) declares no intrinsic-height fit and is below the 1.55 wide ratio, so the desktop Reader can neither narrow it nor accept vertical scroll: it renders 1259px tall at the full 1346px width and the page reaches 1385px before cards against 900px, a certain visual-check failure. Either compact vertical spacing so meta.viewBox height is at most 696 at this width, or spread content sideways so the width is at least 1566 at this height; for architecture, omitting meta.viewBox lets the renderer size the canvas and declare the fit."
+            }
+          ]
+        },
+        "evidence": {
+          "verified": true,
+          "repository": "https://github.com/nefer5/Proj-2026-N03_SPAD-line-scan-lidar",
+          "revision": "a19f273d2c3c74db065e5601f7f7bd3cea6c1864",
+          "references": 9,
+          "linkMode": "local-only"
+        },
+        "update": {
+          "status": "unavailable",
+          "installedVersion": null,
+          "availableVersion": null,
+          "releaseNotes": null,
+          "checkedAt": null,
+          "source": null,
+          "noticeRequired": false,
+          "noticeText": null,
+          "reason": "disabled"
+        }
+      },
+      "stderr": "archify: meta.translations for locale \"zh-CN\" covers 391/438 renderer-owned messages (89%); uncovered keys fall back to English."
+    }
+  },
+  "diagnostics": [
+    {
+      "code": "composition/viewport-height",
+      "severity": "error",
+      "message": "Showcase delivery reported composition/viewport-height; zero warnings are required.",
+      "subject": {
+        "stage": "deliver",
+        "check": "composition"
+      },
+      "evidence": {
+        "reportedSeverity": "warning",
+        "readerFit": null,
+        "viewBoxWidth": 1080,
+        "viewBoxHeight": 1010,
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "ratio": 1.07,
+        "wideRatio": 1.55,
+        "svgWidthPx": 1346,
+        "svgHeightPx": 1259,
+        "fixedChromePx": 126,
+        "pageHeightPx": 1385,
+        "overflowPx": 485
+      },
+      "supportedFixes": [
+        "Preserve every node, relationship, and label. This 1080x1010 canvas (ratio 1.07) declares no intrinsic-height fit and is below the 1.55 wide ratio, so the desktop Reader can neither narrow it nor accept vertical scroll: it renders 1259px tall at the full 1346px width and the page reaches 1385px before cards against 900px, a certain visual-check failure. Either compact vertical spacing so meta.viewBox height is at most 696 at this width, or spread content sideways so the width is at least 1566 at this height; for architecture, omitting meta.viewBox lets the renderer size the canvas and declare the fit."
+      ]
+    }
+  ],
+  "evidence": {
+    "receipt": "E:\\Proj-2026-N03_SPAD线扫lidar建模\\artifacts\\architecture-review\\20261018-032102\\job-sequence.finalize.json",
+    "summaryReceipt": "E:\\Proj-2026-N03_SPAD线扫lidar建模\\artifacts\\architecture-review\\20261018-032102\\job-sequence.finalize-summary.json"
+  },
+  "visualReview": "not-requested",
+  "failedStage": "deliver",
+  "finishedAt": "2026-10-17T19:23:54.279Z",
+  "durationMs": 655,
+  "update": {
+    "status": "update_available",
+    "installedVersion": "3.0.1",
+    "availableVersion": "3.1.0",
+    "releaseNotes": "https://github.com/tt-a1i/archify/releases/tag/v3.1.0",
+    "severity": "normal",
+    "checkedAt": "2026-10-17T18:15:25.575Z",
+    "source": "cache",
+    "noticeRequired": true,
+    "noticeText": "Archify update: 3.0.1 → 3.1.0. A previous check at 2026-10-17T18:15:25.575Z found a newer release. Release notes: https://github.com/tt-a1i/archify/releases/tag/v3.1.0. The installed Skill has not changed; ask to snooze or ignore this reminder.",
+    "eventKey": "archify@sha256:ffedc53390c9da6e859f41e432c5d2d0615a23cf00a503181f07efbba88a7ce8"
+  }
+}

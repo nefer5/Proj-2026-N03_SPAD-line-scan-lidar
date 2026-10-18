@@ -6,19 +6,21 @@
   <title>A · 单角通道 LiDAR 评估</title>
   <link rel="stylesheet" href="/static/styles.css">
   <link rel="stylesheet" href="/static/vendor/katex/katex.min.css">
-<link rel="stylesheet" href="/static/shared/theme.css"><script src="/static/shared/theme.js"></script></head>
+<link rel="stylesheet" href="/static/shared/theme.css"><script src="/static/shared/theme.js"></script><link rel="stylesheet" href="/static/shared/defaults.css"><script src="/static/shared/defaults.js"></script></head>
 <body>
-  <header>
-    <div>
+  __PLATFORM_HEADER__
+<section class="page-intro"><div>
       <p class="eyebrow">A · SINGLE ANGULAR CHANNEL · SPAD DTOF</p>
       <h1>单角通道 LiDAR 建模评估</h1>
-      <p class="lede">当前：A 单通道信号链 · 规划：B 全光斑光学映射 → C 扫描机制</p>
-    </div>
-    <nav class="toolbar"><a href="/system/budget">系统预算</a><a href="/spad">SPAD 研究台</a><a href="/system">静态 B</a><a href="/system/scan">扫描 C</a><a href="#photonBudgetPanel">光子计算公式与逻辑 ↓</a><a id="modeLink" href="/debug">专家调试版 →</a><div class="status"><span></span> A / V0.2.2</div></nav>
-  </header>
+      <p class="lede">单角通道光子预算、器件读出与测距统计；评估和专家调试共用同一模型。</p>
+    </div><nav class="page-tools"><a href="#photonBudgetPanel">光子计算公式与逻辑 ↓</a><a id="modeLink" href="/debug">专家调试版 →</a><div class="status"><span></span> A / V0.2.2</div></nav></section>
 
-  <main>
-    <aside class="panel controls">
+  <div class="a-workspace-switch" role="group" aria-label="A工作区切换">
+    <button type="button" data-a-view="parameters" aria-controls="aParameters" aria-pressed="false">参数配置</button>
+    <button type="button" data-a-view="results" aria-controls="aResults" aria-pressed="true">图形与结果</button>
+  </div>
+  <main id="aWorkspace" data-view="results">
+    <aside id="aParameters" class="panel controls" tabindex="-1" aria-label="参数配置">
       <div class="toolbar">
         <button id="runButton" class="primary">运行仿真</button>
         <button id="cancelAJob" disabled>取消任务</button>
@@ -136,7 +138,7 @@
       </div>
     </aside>
 
-    <section class="results">
+    <section id="aResults" class="results" tabindex="-1" aria-label="图形与结果">
       <div id="errorBox" class="error hidden"></div>
       <p id="resultStatus" class="result-status" aria-live="polite"></p>
       <article class="panel chart-card"><h2>当前角通道时间脉冲</h2><p>Tx 光学前的功率波形；面积对应单脉冲能量，PRF 决定时间平均功率。</p><canvas id="pulseChart" height="210"></canvas></article>
@@ -190,10 +192,10 @@
         </div>
         <p id="histWindowError" class="warning hidden" role="alert"></p>
         <p id="histWindowStatus" class="formula-note" aria-live="polite">等待仿真</p>
-        <canvas id="histZoom" height="360" data-axis-font="11" aria-label="局部时间窗口直方图"></canvas>
+        <canvas id="histZoom" height="360" data-axis-font="13" aria-label="局部时间窗口直方图"></canvas>
         <h3>全门概览 · 拖动橙色窗口或边界调整局部视图</h3>
         <p class="formula-note">显示窗口只改变作图，不修改接收门、测距搜索范围或已有采集数据。窄窗口可整体拖动，精确边界用上方输入框调整。</p>
-        <canvas id="histFull" height="90" data-axis-font="11" aria-label="可拖动的全门直方图概览"></canvas>
+        <canvas id="histFull" height="90" data-axis-font="13" aria-label="可拖动的全门直方图概览"></canvas>
       </article>
 
       <article class="panel chart-card hidden" id="legacyDetectionPanel">

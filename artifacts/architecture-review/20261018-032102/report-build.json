@@ -1,0 +1,89 @@
+{
+  "kind": "architecture-atlas-build",
+  "basis": "a19f273d2c3c74db065e5601f7f7bd3cea6c1864",
+  "generated": "2026-10-18T03:29:38.716671+08:00",
+  "proposalUpdated": "2026-10-18",
+  "proposalImplemented": false,
+  "snapshotSha256": "f3f564cc79509308446c3bbf11ba2cc0c647852c0c5c434420b015c0d61449d1",
+  "reportSha256": "e5ffea64120105090eacf80d1e14aaf11ec4784a30721736effeb6676656bacc",
+  "bytes": 13341155,
+  "diagrams": [
+    {
+      "id": "shared-core",
+      "sha256": "eb51762b88dcb21d45451fda1f9794f65387765c464043a7ab194b84420b3295",
+      "gates": {
+        "validate": "pass",
+        "deliver": "pass",
+        "check": "pass",
+        "browser-check": "pass"
+      }
+    },
+    {
+      "id": "job-states",
+      "sha256": "4e2645fddf558a99645ec420d8aee81e562c2cf9ab68944e018d9863b0fe38df",
+      "gates": {
+        "validate": "pass",
+        "deliver": "pass",
+        "check": "pass",
+        "browser-check": "pass"
+      }
+    },
+    {
+      "id": "job-sequence",
+      "sha256": "ed0c71a1aa706065b00236715fa2779c3ca73e9afc57fd0eaac8f44f41024e1e",
+      "gates": {
+        "validate": "pass",
+        "deliver": "pass",
+        "check": "pass",
+        "browser-check": "pass"
+      }
+    },
+    {
+      "id": "job-result",
+      "sha256": "4bb9cefabb5c63d76487b684a666bb8f2cb6e8edf414b13b4dc2f9368a497eaf",
+      "gates": {
+        "validate": "pass",
+        "deliver": "pass",
+        "check": "pass",
+        "browser-check": "pass"
+      }
+    },
+    {
+      "id": "config-flow",
+      "sha256": "77e453ebd328c8cb9c00585cff60c2e8d9d0c88599ae9c903abd7e06ee567757",
+      "gates": {
+        "validate": "pass",
+        "deliver": "pass",
+        "check": "pass",
+        "browser-check": "pass"
+      }
+    }
+  ],
+  "comparisonDiagrams": [
+    {
+      "id": "current",
+      "sha256": "3088d61d67491e5aa87614fd1ca089fba1b8009e0d3c282f0254eb7f93f7d9d4",
+      "gates": {
+        "validate": "pass",
+        "deliver": "pass",
+        "check": "pass",
+        "browser-check": "pass"
+      }
+    },
+    {
+      "id": "proposed",
+      "sha256": "d7eaef15f6ab72e5a9188978d24d2f34f62f9ae31e5d4682c4513a110c8cd1b5",
+      "gates": {
+        "validate": "pass",
+        "deliver": "pass",
+        "check": "pass",
+        "browser-check": "pass"
+      }
+    }
+  ],
+  "sourceSnapshots": 270,
+  "pythonModules": 115,
+  "staticEdges": 426,
+  "cycles": 1,
+  "configErrors": {}
+}

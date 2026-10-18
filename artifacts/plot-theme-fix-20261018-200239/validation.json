@@ -1,0 +1,25 @@
+{
+  "ok": true,
+  "changed_files": [
+    "web/app.js",
+    "web/budget-scene.css",
+    "web/budget-scene.js",
+    "web/budget.html",
+    "web/index.html",
+    "web/shared/histogram-window.js",
+    "web/shared/plot-series.js",
+    "web/shared/theme.css",
+    "web/shared/theme.js",
+    "web/shared/workspace.js"
+  ],
+  "changed_core_or_configuration": [],
+  "tests_passed": 491,
+  "broken_links": [],
+  "links_checked": 355,
+  "visual_review": "主线程与视觉专家均实际检查两处深浅主题截图，未见遮挡、轴/单位裁切或网格抢占数据重点。",
+  "browser_cases": 12,
+  "camera_states": 60,
+  "min_grid_contrast": 3.1127297970976375,
+  "min_axis_contrast": 6.214165235010345,
+  "min_text_contrast": 8.325777236779727
+}

@@ -1,0 +1,30 @@
+{
+  "ok": true,
+  "head_at_start": "a19f273d2c3c74db065e5601f7f7bd3cea6c1864",
+  "baseline": "dirty working checkout including existing 1080P/launcher changes",
+  "protected_files": 223,
+  "all_existing_frontend_bytes_unchanged": true,
+  "all_yaml_bytes_unchanged": true,
+  "state_core_and_launcher_unchanged": true,
+  "changed_since_checkpoint": [
+    "src/spad_lidar/photon_flow.py",
+    "src/spad_lidar/system_budget.py",
+    "src/spad_lidar/experiments/a_acquisition.py",
+    "src/spad_lidar/experiments/columns.py",
+    "src/spad_lidar/experiments/configuration.py",
+    "src/spad_lidar/experiments/lab.py",
+    "src/spad_lidar/experiments/scanning.py",
+    "src/spad_lidar/experiments/spatial.py",
+    "src/spad_lidar/experiments/spatial_analysis.py",
+    "src/spad_lidar/experiments/system_config.py",
+    "src/spad_lidar/reporting/background_bins.py",
+    "src/spad_lidar/reporting/column_view.py",
+    "src/spad_lidar/webapi/labs.py",
+    "docs/release-notes.md",
+    "docs/roadmap.md",
+    "docs/design/architecture-decisions.md",
+    "docs/design/architecture.md"
+  ],
+  "missing": [],
+  "violations": []
+}

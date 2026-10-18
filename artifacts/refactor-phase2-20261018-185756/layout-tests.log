@@ -1,0 +1,16 @@
+..............F......................................................    [100%]
+================================== FAILURES ===================================
+___________ test_migration_preserves_annotations_and_is_idempotent ____________
+
+    def test_migration_preserves_annotations_and_is_idempotent():
+        text = (ROOT / 'tests/fixtures/numerical-reference-defaults.yaml').read_text(encoding='utf8')
+        migrated = MIGRATION['migrate_text'](text)
+        assert parse_yaml(migrated) == normalize_layout(parse_yaml(text)).document
+        assert MIGRATION['migrate_text'](migrated) == migrated
+>       assert '# 全Tx角域' in migrated
+E       assert '# 全Tx角域' in "# 领域化工况默认值唯一来源（schema 2）；所有数值保持原工况。\n# domains 为共享定义；experiments 只保存平台专用输入/差异。\n# 工况JSON/YAML导入导出版本不变；历史任务可继续读取schema...measurement_mode: manual\n      area_kind: signal\n      manual_points: []\n      csv_points: []\n      csv_name: ''\n"
+
+tests\test_default_layout.py:77: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/test_default_layout.py::test_migration_preserves_annotations_and_is_idempotent
+1 failed, 68 passed in 20.60s

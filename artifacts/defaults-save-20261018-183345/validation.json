@@ -1,0 +1,40 @@
+{
+  "ok": true,
+  "documents": 47,
+  "links": 334,
+  "broken": [],
+  "production_defaults_unchanged": true,
+  "defaults_sha256": "2acaa7b25060094b8c6bda196b2dd85356c1d37f0f159262f640f8d01c740dff",
+  "full_suite": {
+    "passed": 464,
+    "log": "full-suite-final.log"
+  },
+  "browser": {
+    "platforms": [
+      "a",
+      "spad",
+      "system",
+      "columns",
+      "budget"
+    ],
+    "roundtrip": true,
+    "cancel": true,
+    "viewports": [
+      [
+        1920,
+        1080
+      ],
+      [
+        1280,
+        720
+      ]
+    ],
+    "production_write_tested": false
+  },
+  "live": {
+    "base_url": "http://127.0.0.1:8016",
+    "new_api_loaded": true,
+    "cache_control": "no-store",
+    "unchanged_preview": true
+  }
+}

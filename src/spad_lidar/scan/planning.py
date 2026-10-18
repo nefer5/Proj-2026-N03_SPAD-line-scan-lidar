@@ -18,7 +18,13 @@ class SystemTargets(StrictConfig):
 
 
 def resolve_system_targets(overrides):
-    values=read_yaml('defaults.yaml')['experiments']['system_targets']
+    from ..default_layout import normalize_layout
+    document=read_yaml('defaults.yaml')
+    # Preserve the typed missing/unknown-field error at the public entry point.
+    values=(document['experiments']['system_targets'] if document.get('schema_version')==1
+            else document['domains']['system_targets'])
+    SystemTargets.model_validate(values)
+    values=normalize_layout(document).document['domains']['system_targets']
     SystemTargets.model_validate(values)
     return SystemTargets.model_validate(merge_config(values,overrides))
 

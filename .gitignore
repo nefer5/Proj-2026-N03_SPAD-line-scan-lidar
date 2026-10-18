@@ -1,4 +1,8 @@
 __pycache__/
+config/.defaults-write.lock
+config/.defaults-*.tmp
+artifacts/defaults-backups/
+artifacts/default-layout-migrations/
 *.py[cod]
 .pytest_cache/
 .venv/
@@ -72,3 +76,9 @@ artifacts/a-fully-recovered/a-fixtures.json
 artifacts/a-defaults-closeout/full-suite.log
 artifacts/a-defaults-closeout/tabbit-inventory-local.txt
 artifacts/a-defaults-closeout/inspect-defaults-cache.js
+
+# Temporary workspaces, rollback containers and raw numerical baselines stay local.
+temp/
+artifacts/*/before.zip
+artifacts/refactor-*/numerical-before.json.gz
+artifacts/*/live-launcher*.log

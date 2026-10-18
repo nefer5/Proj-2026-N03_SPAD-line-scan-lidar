@@ -1,0 +1,24 @@
+{
+  "revision": "df0e4f8039eeaf04de7cc55e7fdf67a58a4d4a7bb4d5d9fbae41ad5c7d3663a5",
+  "changes": [
+    {
+      "parameter": "acquisition.trial_count",
+      "before": 1,
+      "after": 2,
+      "source": "experiments.columns.acquisition.trial_count"
+    }
+  ],
+  "affected": [
+    {
+      "kind": "columns",
+      "label": "C 列扫描",
+      "count": 1
+    }
+  ],
+  "path": "config/defaults.yaml",
+  "unchanged": false,
+  "kind": "columns",
+  "original_sha256": "5af1cfb647414ba1be8a3b5df1c1f37d2f53d1b5c4f0a0ebad07cc990bb7a60c",
+  "saved_sha256": "686b356e1fe648222130761ba91b6fe4668738ff8d6c1e2f44496a77b73a2fe4",
+  "utc": "2026-10-18T11:05:30.477355+00:00"
+}

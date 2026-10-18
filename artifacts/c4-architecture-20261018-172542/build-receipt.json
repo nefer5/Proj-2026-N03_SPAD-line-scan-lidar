@@ -1,0 +1,45 @@
+{
+  "reportSha256": "6793b03d0ce7b16e7b9c952e29fe63629b9dc99047cec987add58f95b5a9d849",
+  "bytes": 4767860,
+  "snapshotSha256": "83168ea578313c1f8f85ae0de5c2ca51a5283c9c12857c9f9f65860c44ab77d8",
+  "generated": "2026-10-18T17:27:44.782115+08:00",
+  "productHead": "a19f273d2c3c74db065e5601f7f7bd3cea6c1864",
+  "proofRevision": "89605e9465fc9f555165187f3309faf2553c3ea8",
+  "graphs": {
+    "c1": {
+      "sha256": "342ede28f060b300c37db0d27b63617993748684269e16a9167b97c2d7a089e3",
+      "gates": {
+        "validate": "pass",
+        "deliver": "pass",
+        "check": "pass",
+        "browser-check": "pass"
+      }
+    },
+    "c2": {
+      "sha256": "57c280cb7c5c9355a0eb15124594dca67594f29c98b95f5eb0c8783f17fd6aa5",
+      "gates": {
+        "validate": "pass",
+        "deliver": "pass",
+        "check": "pass",
+        "browser-check": "pass"
+      }
+    },
+    "c3": {
+      "sha256": "e51fdc7873db830e835d2bd45a63251728c14e5699d6f03a8cfd02f8cbded04f",
+      "gates": {
+        "validate": "pass",
+        "deliver": "pass",
+        "check": "pass",
+        "browser-check": "pass"
+      }
+    }
+  },
+  "expertSource": {
+    "path": "C:\\Users\\admin\\.agents\\experts\\software-architect\\instructions.md",
+    "sha256": "4539b1023cba3e9198205058e80f8bf6083aecde0c3d4b5040bc8510004d8309",
+    "C4SectionConfirmed": true,
+    "hostReloadVerified": false
+  },
+  "modelChanges": false,
+  "configurationMigration": false
+}

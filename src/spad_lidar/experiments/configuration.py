@@ -5,19 +5,7 @@ from pydantic import Field, model_validator
 from ..spad.config import StrictConfig, DeviceConfig, ReadoutConfig
 from ..curves import CurveSpec, merge_config
 from ..configuration import default_values, read_yaml, Algorithms
-
-
-class TimingConfig(StrictConfig):
-    period_ns: float = Field(gt=0)
-    gate_start_ns: float = Field(ge=0)
-    gate_width_ns: float = Field(gt=0)
-    laser_shots: int = Field(ge=1, strict=True)
-
-    @model_validator(mode='after')
-    def valid(self):
-        if self.gate_start_ns + self.gate_width_ns > self.period_ns:
-            raise ValueError('Acquisition gate exceeds period')
-        return self
+from ..domains.acquisition import TimingConfig  # Compatibility export.
 
 
 class LabIllumination(StrictConfig):
@@ -72,34 +60,11 @@ class LabConfig(StrictConfig):
 
 
 def experiment_defaults(kind):
-    if kind not in ('spad','system','scan'):
+    """Compatibility entry; all platform compositions live outside experiments."""
+    if kind not in ('spad', 'system', 'scan'):
         raise ValueError(f'Unknown experiment kind: {kind}')
-    base = default_values()
-    sections = read_yaml('defaults.yaml')['experiments']
-    if kind not in sections:
-        raise ValueError(f'Unknown experiment kind: {kind}')
-    if kind=='system':
-        from .system_config import domain_defaults
-        return domain_defaults(base,sections[kind])
-    if kind=='scan':
-        result=experiment_defaults('system')
-        result['acquisition'].pop('laser_shots')
-        result['acquisition'].pop('monte_carlo_trials')
-        return merge_config(result,sections[kind])
-    # Reuse named existing defaults, never copy numeric fallbacks into domain code.
-    result = {
-        'device': {k: base[k] for k in DeviceConfig.model_fields},
-        'readout': {k: base[k] for k in ReadoutConfig.model_fields},
-        'timing': {'period_ns': 1e9/base['laser_prf_hz'], **{k: base[k] for k in TimingConfig.model_fields if k != 'period_ns'}},
-        'spectral_inputs': {'pde': base['spectral_inputs']['pde']},
-        'rng_seed': base['rng_seed'],
-    }
-    if kind == 'spad':
-        result['illumination'] = {k: base[k] for k in ('wavelength_nm', 'pulse_shape', 'pulse_fwhm_ps')}
-    else:
-        from .spatial import system_defaults
-        result.update(system_defaults(base))
-    return merge_config(result, sections[kind])
+    from ..default_composition import compose_defaults
+    return compose_defaults(kind).values
 
 
 def resolve_experiment(kind, overrides, algorithms=None):

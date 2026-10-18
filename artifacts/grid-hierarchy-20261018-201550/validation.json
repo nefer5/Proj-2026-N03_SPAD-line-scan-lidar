@@ -1,0 +1,13 @@
+{
+  "ok": true,
+  "changed_compute_or_config": [],
+  "browser_cases": 6,
+  "horizontal_and_vertical_dashed": true,
+  "axes_remain_solid": true,
+  "data_unchanged": true,
+  "pytest_passed": 491,
+  "expert_source": "C:\\Users\\admin\\.agents\\experts\\visual-designer\\instructions.md",
+  "expert_version": "0.7.3",
+  "expert_source_sha256": "e262a67ad65af0de630581b2305eba744ab3c1353a19c5047366677332003a38",
+  "expert_update": "中心源与个人偏好已回读核对，未另行分发其他项目"
+}

@@ -1,0 +1,65 @@
+{
+  "kind": "architecture-atlas-build",
+  "basis": "a19f273d2c3c74db065e5601f7f7bd3cea6c1864",
+  "generated": "2026-10-18T03:29:38.716671+08:00",
+  "snapshotSha256": "f3f564cc79509308446c3bbf11ba2cc0c647852c0c5c434420b015c0d61449d1",
+  "reportSha256": "c6f1cfe6b9ad8013f2edca468d57309dd31f835651ef9e4332cb15f6217ba806",
+  "bytes": 11228336,
+  "diagrams": [
+    {
+      "id": "shared-core",
+      "sha256": "eb51762b88dcb21d45451fda1f9794f65387765c464043a7ab194b84420b3295",
+      "gates": {
+        "validate": "pass",
+        "deliver": "pass",
+        "check": "pass",
+        "browser-check": "pass"
+      }
+    },
+    {
+      "id": "job-states",
+      "sha256": "4e2645fddf558a99645ec420d8aee81e562c2cf9ab68944e018d9863b0fe38df",
+      "gates": {
+        "validate": "pass",
+        "deliver": "pass",
+        "check": "pass",
+        "browser-check": "pass"
+      }
+    },
+    {
+      "id": "job-sequence",
+      "sha256": "ed0c71a1aa706065b00236715fa2779c3ca73e9afc57fd0eaac8f44f41024e1e",
+      "gates": {
+        "validate": "pass",
+        "deliver": "pass",
+        "check": "pass",
+        "browser-check": "pass"
+      }
+    },
+    {
+      "id": "job-result",
+      "sha256": "4bb9cefabb5c63d76487b684a666bb8f2cb6e8edf414b13b4dc2f9368a497eaf",
+      "gates": {
+        "validate": "pass",
+        "deliver": "pass",
+        "check": "pass",
+        "browser-check": "pass"
+      }
+    },
+    {
+      "id": "config-flow",
+      "sha256": "77e453ebd328c8cb9c00585cff60c2e8d9d0c88599ae9c903abd7e06ee567757",
+      "gates": {
+        "validate": "pass",
+        "deliver": "pass",
+        "check": "pass",
+        "browser-check": "pass"
+      }
+    }
+  ],
+  "sourceSnapshots": 270,
+  "pythonModules": 115,
+  "staticEdges": 426,
+  "cycles": 1,
+  "configErrors": {}
+}

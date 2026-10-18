@@ -61,7 +61,7 @@ function detector(){const pos=model.detector_position;const [w,h]=model.detector
 function disposeRoot(){if(!root)return;const gs=new Set(),ms=new Set();root.traverse(o=>{if(o.geometry)gs.add(o.geometry);if(o.material)(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>ms.add(m));});gs.forEach(g=>g.dispose());ms.forEach(m=>m.dispose());scene.remove(root);$('sceneLabels').replaceChildren();labels=[];pickables=[];materials=[];}
 function rebuild(){disposeRoot();root=new THREE.Group();scene.add(root);setPalette();
  if(scope==='local'){line(model.scan_fan.boundary,'scan',.5);label('scan','HFOV扇区参考 · 独立缩放',[0,-3.4,2]);}
- const grid=new THREE.GridHelper(16,16,new THREE.Color(palette.target),new THREE.Color(palette.target));grid.position.set(0,-3.3,3);grid.material.transparent=true;grid.material.opacity=.13;root.add(grid);
+ const grid=new THREE.GridHelper(16,16,new THREE.Color(themeColor('--plot-scene-grid','#60788f')),new THREE.Color(themeColor('--plot-scene-grid','#60788f')));grid.material.dispose();grid.material=new THREE.LineDashedMaterial({color:new THREE.Color(themeColor('--plot-scene-grid','#60788f')),dashSize:.13,gapSize:.18,transparent:true});grid.computeLineDistances();grid.position.set(0,-3.3,3);grid.material.transparent=true;grid.material.opacity=document.documentElement.dataset.theme==='light'?.4:.28;root.add(grid);
  if(scope==='local')mesh(new THREE.PlaneGeometry(9,9),material('target',.025),'target',[0,0,8.03]);
  if(scope==='overview')buildWholeField();else{cone(model.rx_corners,'rx');cone(model.tx_corners,'tx');heatmap();}
  // Exploded device glyphs, deliberately distinct from calibrated ray geometry.

@@ -1,0 +1,1211 @@
+{
+  "ok": true,
+  "basis": "a19f273d2c3c74db065e5601f7f7bd3cea6c1864",
+  "reportSha256": "e5ffea64120105090eacf80d1e14aaf11ec4784a30721736effeb6676656bacc",
+  "checks": 287,
+  "sourceReferencesChecked": 154,
+  "sourceFilesUnchanged": 115,
+  "proposalImplemented": false,
+  "archifyDiagrams": 7,
+  "desktopChecks": 53,
+  "narrowChecks": 53,
+  "proposalDesktopChecks": 27,
+  "proposalNarrowChecks": 27,
+  "perceptualReview": {
+    "inspected": [
+      "overview-desktop.png",
+      "reuse-desktop.png",
+      "overview-narrow.png",
+      "core-report-desktop.png",
+      "state-captures/job-states.visual-check.1440x900.light.png",
+      "proposal-20261018-041154/current-visual/current.visual-check.1440x900.light.png",
+      "proposal-20261018-041154/proposed-visual/proposed.visual-check.1440x900.light.png",
+      "proposal-20261018-041154/report-proposed-desktop.png",
+      "proposal-20261018-041154/report-proposed-narrow.png"
+    ],
+    "note": "State diagram retains bridged crossings; exact conditions also appear in a table."
+  },
+  "physicalModelTests": "not run; no model code changed",
+  "details": [
+    {
+      "name": "report hash matches build receipt",
+      "ok": true
+    },
+    {
+      "name": "configuration parsing succeeded",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/single_channel.py:22",
+      "ok": true
+    },
+    {
+      "name": "source reference web/app.js:1",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/a_acquisition.py:46",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/a_router.py:8",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/lab.py:70",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/configuration.py:53",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/lab.py:28",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/spatial_analysis.py:41",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/spatial.py:158",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/spatial.py:327",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/spatial.py:340",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/columns.py:106",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/columns.py:52",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/scan/column_schedule.py:56",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/scan/column_config.py:119",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/system_budget.py:125",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/system_budget.py:66",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/electrical_budget.py:25",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/budget_pipeline.py:18",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/models.py:57",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/configuration.py:105",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/system_config.py:52",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/scan/column_config.py:119",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/system_budget.py:83",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/numerics/curves.py:97",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/lab.py:28",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/spatial.py:158",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/columns.py:52",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/system_budget.py:125",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/rx/budget.py:62",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/spatial.py:158",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/columns.py:52",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/system_budget.py:66",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/a_acquisition.py:8",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/spad/source.py:36",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/lab.py:28",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/spad/source.py:73",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/system_budget.py:125",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/a_router.py:8",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/lab.py:39",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/spatial_analysis.py:41",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/columns.py:52",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/system_budget.py:125",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/a_router.py:8",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/lab.py:28",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/spatial.py:327",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/scan/column_schedule.py:56",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/system_budget.py:125",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/a_acquisition.py:8",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/lab.py:39",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/lab.py:39",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/columns.py:32",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/electrical_budget.py:25",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/a_acquisition.py:46",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/spatial_analysis.py:41",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/columns.py:106",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/single_channel.py:22",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/processing/spatial_ranges.py:7",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/processing/column_reconstruction.py:37",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/system_budget.py:125",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/scan/transport.py:5",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/budget_pipeline.py:18",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/single_channel.py:22",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/lab.py:79",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/spatial.py:340",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/columns.py:106",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/system_budget.py:125",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/runtime/jobs.py:60",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/runtime/jobs.py:60",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/runtime/jobs.py:60",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/runtime/jobs.py:60",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/webapi/budget.py:62",
+      "ok": true
+    },
+    {
+      "name": "source reference web/app.js:1",
+      "ok": true
+    },
+    {
+      "name": "source reference web/shared/labs.js:1",
+      "ok": true
+    },
+    {
+      "name": "source reference web/system.js:1",
+      "ok": true
+    },
+    {
+      "name": "source reference web/columns.js:1",
+      "ok": true
+    },
+    {
+      "name": "source reference web/budget.js:1",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/spad/config.py:9",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/scan/column_config.py:119",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/single_channel.py:22",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/lab.py:16",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/system_budget.py:66",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/configuration.py:74",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/scan/column_config.py:64",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/scan/column_schedule.py:56",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/contracts/events.py:6",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/scan/column_schedule.py:56",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/a_acquisition.py:46",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/spatial.py:327",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/scan/column_schedule.py:56",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/a_acquisition.py:46",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/spatial_analysis.py:41",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/columns.py:106",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/numerics/curves.py:97",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/contracts/illumination.py:7",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/lab.py:39",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/scan/column_config.py:157",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/spatial.py:158",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/system_budget.py:66",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/scan/column_config.py:35",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/scan/transport.py:5",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/budget_pipeline.py:18",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/spad/acquisition.py:26",
+      "ok": true
+    },
+    {
+      "name": "source reference tests/test_modular_core.py:1",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/a_acquisition.py:46",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/spatial_analysis.py:41",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/columns.py:106",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/lab.py:39",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/columns.py:32",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/processing/column_reconstruction.py:17",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/scan/transport.py:5",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/electrical_budget.py:25",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/budget_pipeline.py:18",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/system_budget.py:125",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/reporting/column_view.py:69",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/spatial.py:158",
+      "ok": true
+    },
+    {
+      "name": "source reference web/app.js:1",
+      "ok": true
+    },
+    {
+      "name": "source reference web/system.js:1",
+      "ok": true
+    },
+    {
+      "name": "source reference web/columns.js:1",
+      "ok": true
+    },
+    {
+      "name": "source reference web/budget.js:1",
+      "ok": true
+    },
+    {
+      "name": "source reference web/system.js:1",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/webapi/columns.py:79",
+      "ok": true
+    },
+    {
+      "name": "source reference web/system.js:1",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/runtime/jobs.py:60",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/webapi/labs.py:47",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/scanning.py:156",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/configuration.py:74",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/system_config.py:95",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/contracts/illumination.py:7",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/contracts/events.py:48",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/contracts/events.py:21",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/spad/acquisition.py:83",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/columns.py:32",
+      "ok": true
+    },
+    {
+      "name": "diagram bytes shared-core",
+      "ok": true
+    },
+    {
+      "name": "diagram bytes job-states",
+      "ok": true
+    },
+    {
+      "name": "diagram bytes job-sequence",
+      "ok": true
+    },
+    {
+      "name": "diagram bytes job-result",
+      "ok": true
+    },
+    {
+      "name": "diagram bytes config-flow",
+      "ok": true
+    },
+    {
+      "name": "comparison diagram bytes current",
+      "ok": true
+    },
+    {
+      "name": "source reference web/app.js:430",
+      "ok": true
+    },
+    {
+      "name": "source reference web/system.js:179",
+      "ok": true
+    },
+    {
+      "name": "source reference web/budget.js:113",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/runtime/jobs.py:123",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/runtime/jobs.py:60",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/a_acquisition.py:46",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/spatial_analysis.py:41",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/columns.py:106",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/webapi/budget.py:62",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/system_budget.py:125",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/spatial.py:158",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/a_router.py:8",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/lab.py:39",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/columns.py:32",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/scan/transport.py:5",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/budget_pipeline.py:18",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/processing/ranging.py:10",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/spatial_analysis.py:41",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/experiments/columns.py:106",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/spad/acquisition.py:26",
+      "ok": true
+    },
+    {
+      "name": "source reference src/spad_lidar/spad/readout/engine.py:5",
+      "ok": true
+    },
+    {
+      "name": "comparison diagram bytes proposed",
+      "ok": true
+    },
+    {
+      "name": "proposed diagram has no invented repository source",
+      "ok": true
+    },
+    {
+      "name": "proposal explicitly unimplemented",
+      "ok": true
+    },
+    {
+      "name": "browser desktop",
+      "ok": true
+    },
+    {
+      "name": "all diagrams loaded desktop",
+      "ok": true
+    },
+    {
+      "name": "browser narrow",
+      "ok": true
+    },
+    {
+      "name": "all diagrams loaded narrow",
+      "ok": true
+    },
+    {
+      "name": "comparison browser desktop",
+      "ok": true
+    },
+    {
+      "name": "comparison browser narrow",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/__init__.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/adapters/__init__.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/adapters/optical_data.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/api.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/budget_extensions.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/budget_pipeline.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/configuration.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/constants.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/contracts/__init__.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/contracts/events.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/contracts/illumination.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/contracts/pulses.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/contracts/spectral_product.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/curves.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/detection.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/electrical_budget.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/experiments/__init__.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/experiments/a_acquisition.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/experiments/a_router.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/experiments/a_signal.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/experiments/columns.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/experiments/configuration.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/experiments/lab.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/experiments/legacy_diagnostics.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/experiments/scanning.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/experiments/single_channel.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/experiments/spatial.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/experiments/spatial_analysis.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/experiments/sweeps.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/experiments/system_config.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/filters.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/legacy_config.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/models.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/numerics/__init__.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/numerics/curves.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/numerics/ideal_irf.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/numerics/spatial_profiles.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/numerics/temporal.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/pde_data.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/performance.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/photon_flow.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/processing/__init__.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/processing/column_reconstruction.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/processing/detection.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/processing/ranging.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/processing/records.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/processing/scan_reconstruction.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/processing/spatial_ranges.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/processing/statistics.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/range_reference.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/readout.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/reporting/__init__.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/reporting/a_view.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/reporting/b_acquisition.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/reporting/background_bins.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/reporting/budget_detector_view.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/reporting/budget_schematic.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/reporting/budget_views.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/reporting/budget_windows.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/reporting/column_flow.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/reporting/column_view.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/reporting/display_numbers.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/reporting/noise_reference.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/reporting/psf_view.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/reporting/readout_layout.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/reporting/scan_flow.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/reporting/spatial_flow.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/reporting/spatial_view.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/runtime/__init__.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/runtime/jobs.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/runtime/result_views.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/rx/__init__.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/rx/budget.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/rx/projection.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/rx/response.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/rx/spatial.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/scan/__init__.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/scan/aggregation.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/scan/column_config.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/scan/column_optics.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/scan/column_schedule.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/scan/config.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/scan/planning.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/scan/schedule.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/scan/trajectory.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/scan/transport.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/scene/__init__.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/scene/propagation.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/scene/scan_target.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/simulator.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/spad/__init__.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/spad/acquisition.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/spad/analytical.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/spad/config.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/spad/device/__init__.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/spad/device/response.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/spad/device/state.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/spad/device/trace.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/spad/readout/__init__.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/spad/readout/engine.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/spad/readout/gates.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/spad/source.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/spectra.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/system_budget.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/timing/__init__.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/timing/gates.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/timing/program.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/tx/__init__.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/tx/angular.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/tx/power.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/webapi/__init__.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/webapi/budget.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/webapi/budget_form.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/webapi/columns.py",
+      "ok": true
+    },
+    {
+      "name": "model source unchanged src/spad_lidar/webapi/labs.py",
+      "ok": true
+    },
+    {
+      "name": "pre-existing work preserved",
+      "ok": true,
+      "detail": {
+        "prior": [
+          " M README.md",
+          " M docs/design/architecture-decisions.md",
+          " M docs/index.md",
+          " M docs/release-notes.md",
+          " M run.py",
+          " M src/spad_lidar/api.py",
+          " M start-dev.cmd",
+          "?? artifacts/launcher-restart/README.md",
+          "?? artifacts/launcher-restart/isolated-verification.json",
+          "?? artifacts/launcher-restart/production-verification.json",
+          "?? docs/guides/launcher.md",
+          "?? src/spad_lidar/runtime/launcher.py",
+          "?? tests/test_launcher.py"
+        ],
+        "current": [
+          " M README.md",
+          " M docs/design/architecture-decisions.md",
+          " M docs/index.md",
+          " M docs/release-notes.md",
+          " M run.py",
+          " M src/spad_lidar/api.py",
+          " M start-dev.cmd",
+          "?? artifacts/launcher-restart/README.md",
+          "?? artifacts/launcher-restart/isolated-verification.json",
+          "?? artifacts/launcher-restart/production-verification.json",
+          "?? docs/guides/launcher.md",
+          "?? src/spad_lidar/runtime/launcher.py",
+          "?? tests/test_launcher.py"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,3197 @@
+[
+  {
+    "w": 1920,
+    "h": 940,
+    "dpr": 1,
+    "documentWidth": 1905,
+    "clientWidth": 1905,
+    "controls": {
+      "x": 28,
+      "y": 182.375,
+      "w": 360,
+      "h": 912,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 2882,
+      "clientHeight": 910,
+      "scrollTop": 0
+    },
+    "results": {
+      "x": 408,
+      "y": 182.375,
+      "w": 1469,
+      "h": 10305.640625,
+      "display": "grid",
+      "overflow": "visible",
+      "scrollHeight": 10306,
+      "clientHeight": 10306,
+      "scrollTop": 0
+    },
+    "switcher": null,
+    "aside": {
+      "x": 28,
+      "y": 182.375,
+      "w": 360,
+      "h": 912,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 2882,
+      "clientHeight": 910,
+      "scrollTop": 0
+    },
+    "groups": null,
+    "visibleFormHeight": null,
+    "details": [
+      {
+        "id": "sceneVerticalCard",
+        "card": {
+          "x": 431,
+          "y": 1783.59375,
+          "w": 702.5,
+          "h": 826.265625,
+          "display": "block",
+          "overflow": "auto",
+          "scrollHeight": 824,
+          "clientHeight": 824,
+          "scrollTop": 0
+        },
+        "svg": {
+          "x": 446,
+          "y": 1828.390625,
+          "w": 672.5,
+          "h": 558.828125,
+          "display": "block",
+          "overflow": "hidden",
+          "scrollHeight": 559,
+          "clientHeight": 559,
+          "scrollTop": 0
+        },
+        "viewBoxWidth": 710
+      },
+      {
+        "id": "sceneImageCard",
+        "card": {
+          "x": 1151.5,
+          "y": 1783.59375,
+          "w": 702.5,
+          "h": 554.140625,
+          "display": "block",
+          "overflow": "auto",
+          "scrollHeight": 552,
+          "clientHeight": 552,
+          "scrollTop": 0
+        },
+        "svg": {
+          "x": 1166.5,
+          "y": 1831.390625,
+          "w": 672.5,
+          "h": 462.34375,
+          "display": "block",
+          "overflow": "hidden",
+          "scrollHeight": 462,
+          "clientHeight": 462,
+          "scrollTop": 0
+        },
+        "viewBoxWidth": 560
+      }
+    ],
+    "canvases": [
+      {
+        "id": "sceneCanvas",
+        "w": 1421,
+        "buffer": 2842
+      }
+    ],
+    "alerts": [],
+    "case": "budget-1920"
+  },
+  {
+    "w": 1920,
+    "h": 940,
+    "dpr": 1,
+    "documentWidth": 1905,
+    "clientWidth": 1905,
+    "controls": {
+      "x": 28,
+      "y": 14,
+      "w": 360,
+      "h": 912,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 2882,
+      "clientHeight": 910,
+      "scrollTop": 0
+    },
+    "results": {
+      "x": 408,
+      "y": -1601.625,
+      "w": 1469,
+      "h": 10305.640625,
+      "display": "grid",
+      "overflow": "visible",
+      "scrollHeight": 10306,
+      "clientHeight": 10306,
+      "scrollTop": 0
+    },
+    "switcher": null,
+    "aside": {
+      "x": 28,
+      "y": 14,
+      "w": 360,
+      "h": 912,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 2882,
+      "clientHeight": 910,
+      "scrollTop": 0
+    },
+    "groups": null,
+    "visibleFormHeight": null,
+    "details": [
+      {
+        "id": "sceneVerticalCard",
+        "card": {
+          "x": 431,
+          "y": -0.40625,
+          "w": 702.5,
+          "h": 826.265625,
+          "display": "block",
+          "overflow": "auto",
+          "scrollHeight": 824,
+          "clientHeight": 824,
+          "scrollTop": 0
+        },
+        "svg": {
+          "x": 446,
+          "y": 44.390625,
+          "w": 672.5,
+          "h": 558.828125,
+          "display": "block",
+          "overflow": "hidden",
+          "scrollHeight": 559,
+          "clientHeight": 559,
+          "scrollTop": 0
+        },
+        "viewBoxWidth": 710
+      },
+      {
+        "id": "sceneImageCard",
+        "card": {
+          "x": 1151.5,
+          "y": -0.40625,
+          "w": 702.5,
+          "h": 554.140625,
+          "display": "block",
+          "overflow": "auto",
+          "scrollHeight": 552,
+          "clientHeight": 552,
+          "scrollTop": 0
+        },
+        "svg": {
+          "x": 1166.5,
+          "y": 47.390625,
+          "w": 672.5,
+          "h": 462.34375,
+          "display": "block",
+          "overflow": "hidden",
+          "scrollHeight": 462,
+          "clientHeight": 462,
+          "scrollTop": 0
+        },
+        "viewBoxWidth": 560
+      }
+    ],
+    "canvases": [
+      {
+        "id": "sceneCanvas",
+        "w": 1421,
+        "buffer": 2842
+      }
+    ],
+    "alerts": [],
+    "case": "budget-details-1920"
+  },
+  {
+    "w": 1536,
+    "h": 734,
+    "dpr": 1.25,
+    "documentWidth": 1521,
+    "clientWidth": 1521,
+    "controls": {
+      "x": 28,
+      "y": 182.375,
+      "w": 360,
+      "h": 706,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 2882,
+      "clientHeight": 704,
+      "scrollTop": 0
+    },
+    "results": {
+      "x": 408,
+      "y": 182.375,
+      "w": 1085,
+      "h": 11593.15625,
+      "display": "grid",
+      "overflow": "visible",
+      "scrollHeight": 11593,
+      "clientHeight": 11593,
+      "scrollTop": 0
+    },
+    "switcher": null,
+    "aside": {
+      "x": 28,
+      "y": 182.375,
+      "w": 360,
+      "h": 706,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 2882,
+      "clientHeight": 704,
+      "scrollTop": 0
+    },
+    "groups": null,
+    "visibleFormHeight": null,
+    "details": [
+      {
+        "id": "sceneVerticalCard",
+        "card": {
+          "x": 431,
+          "y": 2615.015625,
+          "w": 1039,
+          "h": 898.59375,
+          "display": "block",
+          "overflow": "auto",
+          "scrollHeight": 897,
+          "clientHeight": 897,
+          "scrollTop": 0
+        },
+        "svg": {
+          "x": 560.5,
+          "y": 2659.8125,
+          "w": 780,
+          "h": 648.15625,
+          "display": "block",
+          "overflow": "hidden",
+          "scrollHeight": 648,
+          "clientHeight": 648,
+          "scrollTop": 0
+        },
+        "viewBoxWidth": 710
+      },
+      {
+        "id": "sceneImageCard",
+        "card": {
+          "x": 431,
+          "y": 3531.609375,
+          "w": 1039,
+          "h": 586.796875,
+          "display": "block",
+          "overflow": "auto",
+          "scrollHeight": 585,
+          "clientHeight": 585,
+          "scrollTop": 0
+        },
+        "svg": {
+          "x": 590.5,
+          "y": 3579.40625,
+          "w": 720,
+          "h": 495,
+          "display": "block",
+          "overflow": "hidden",
+          "scrollHeight": 495,
+          "clientHeight": 495,
+          "scrollTop": 0
+        },
+        "viewBoxWidth": 560
+      }
+    ],
+    "canvases": [
+      {
+        "id": "sceneCanvas",
+        "w": 1037,
+        "buffer": 2074
+      }
+    ],
+    "alerts": [],
+    "case": "budget-1536"
+  },
+  {
+    "w": 1536,
+    "h": 734,
+    "dpr": 1.25,
+    "documentWidth": 1521,
+    "clientWidth": 1521,
+    "controls": {
+      "x": 28,
+      "y": 14,
+      "w": 360,
+      "h": 706,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 2882,
+      "clientHeight": 704,
+      "scrollTop": 0
+    },
+    "results": {
+      "x": 408,
+      "y": -2432.625,
+      "w": 1085,
+      "h": 11593.15625,
+      "display": "grid",
+      "overflow": "visible",
+      "scrollHeight": 11593,
+      "clientHeight": 11593,
+      "scrollTop": 0
+    },
+    "switcher": null,
+    "aside": {
+      "x": 28,
+      "y": 14,
+      "w": 360,
+      "h": 706,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 2882,
+      "clientHeight": 704,
+      "scrollTop": 0
+    },
+    "groups": null,
+    "visibleFormHeight": null,
+    "details": [
+      {
+        "id": "sceneVerticalCard",
+        "card": {
+          "x": 431,
+          "y": 0.015625,
+          "w": 1039,
+          "h": 898.59375,
+          "display": "block",
+          "overflow": "auto",
+          "scrollHeight": 897,
+          "clientHeight": 897,
+          "scrollTop": 0
+        },
+        "svg": {
+          "x": 560.5,
+          "y": 44.8125,
+          "w": 780,
+          "h": 648.15625,
+          "display": "block",
+          "overflow": "hidden",
+          "scrollHeight": 648,
+          "clientHeight": 648,
+          "scrollTop": 0
+        },
+        "viewBoxWidth": 710
+      },
+      {
+        "id": "sceneImageCard",
+        "card": {
+          "x": 431,
+          "y": 916.609375,
+          "w": 1039,
+          "h": 586.796875,
+          "display": "block",
+          "overflow": "auto",
+          "scrollHeight": 585,
+          "clientHeight": 585,
+          "scrollTop": 0
+        },
+        "svg": {
+          "x": 590.5,
+          "y": 964.40625,
+          "w": 720,
+          "h": 495,
+          "display": "block",
+          "overflow": "hidden",
+          "scrollHeight": 495,
+          "clientHeight": 495,
+          "scrollTop": 0
+        },
+        "viewBoxWidth": 560
+      }
+    ],
+    "canvases": [
+      {
+        "id": "sceneCanvas",
+        "w": 1037,
+        "buffer": 2074
+      }
+    ],
+    "alerts": [],
+    "case": "budget-details-1536"
+  },
+  {
+    "w": 1280,
+    "h": 600,
+    "dpr": 1.5,
+    "documentWidth": 1265,
+    "clientWidth": 1265,
+    "controls": {
+      "x": 28,
+      "y": 182.375,
+      "w": 360,
+      "h": 572,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 2882,
+      "clientHeight": 570,
+      "scrollTop": 0
+    },
+    "results": {
+      "x": 408,
+      "y": 182.375,
+      "w": 829,
+      "h": 11371.3125,
+      "display": "grid",
+      "overflow": "visible",
+      "scrollHeight": 11371,
+      "clientHeight": 11371,
+      "scrollTop": 0
+    },
+    "switcher": null,
+    "aside": {
+      "x": 28,
+      "y": 182.375,
+      "w": 360,
+      "h": 572,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 2882,
+      "clientHeight": 570,
+      "scrollTop": 0
+    },
+    "groups": null,
+    "visibleFormHeight": null,
+    "details": [
+      {
+        "id": "sceneVerticalCard",
+        "card": {
+          "x": 431,
+          "y": 2340.375,
+          "w": 783,
+          "h": 893.15625,
+          "display": "block",
+          "overflow": "auto",
+          "scrollHeight": 891,
+          "clientHeight": 891,
+          "scrollTop": 0
+        },
+        "svg": {
+          "x": 446,
+          "y": 2385.171875,
+          "w": 753,
+          "h": 625.71875,
+          "display": "block",
+          "overflow": "hidden",
+          "scrollHeight": 626,
+          "clientHeight": 626,
+          "scrollTop": 0
+        },
+        "viewBoxWidth": 710
+      },
+      {
+        "id": "sceneImageCard",
+        "card": {
+          "x": 431,
+          "y": 3251.53125,
+          "w": 783,
+          "h": 586.796875,
+          "display": "block",
+          "overflow": "auto",
+          "scrollHeight": 585,
+          "clientHeight": 585,
+          "scrollTop": 0
+        },
+        "svg": {
+          "x": 462.5,
+          "y": 3299.328125,
+          "w": 720,
+          "h": 495,
+          "display": "block",
+          "overflow": "hidden",
+          "scrollHeight": 495,
+          "clientHeight": 495,
+          "scrollTop": 0
+        },
+        "viewBoxWidth": 560
+      }
+    ],
+    "canvases": [
+      {
+        "id": "sceneCanvas",
+        "w": 781,
+        "buffer": 1562
+      }
+    ],
+    "alerts": [],
+    "case": "budget-1280"
+  },
+  {
+    "w": 1280,
+    "h": 600,
+    "dpr": 1.5,
+    "documentWidth": 1265,
+    "clientWidth": 1265,
+    "controls": {
+      "x": 28,
+      "y": 14,
+      "w": 360,
+      "h": 572,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 2882,
+      "clientHeight": 570,
+      "scrollTop": 0
+    },
+    "results": {
+      "x": 408,
+      "y": -2157.625,
+      "w": 829,
+      "h": 11371.3125,
+      "display": "grid",
+      "overflow": "visible",
+      "scrollHeight": 11371,
+      "clientHeight": 11371,
+      "scrollTop": 0
+    },
+    "switcher": null,
+    "aside": {
+      "x": 28,
+      "y": 14,
+      "w": 360,
+      "h": 572,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 2882,
+      "clientHeight": 570,
+      "scrollTop": 0
+    },
+    "groups": null,
+    "visibleFormHeight": null,
+    "details": [
+      {
+        "id": "sceneVerticalCard",
+        "card": {
+          "x": 431,
+          "y": 0.375,
+          "w": 783,
+          "h": 893.15625,
+          "display": "block",
+          "overflow": "auto",
+          "scrollHeight": 891,
+          "clientHeight": 891,
+          "scrollTop": 0
+        },
+        "svg": {
+          "x": 446,
+          "y": 45.171875,
+          "w": 753,
+          "h": 625.71875,
+          "display": "block",
+          "overflow": "hidden",
+          "scrollHeight": 626,
+          "clientHeight": 626,
+          "scrollTop": 0
+        },
+        "viewBoxWidth": 710
+      },
+      {
+        "id": "sceneImageCard",
+        "card": {
+          "x": 431,
+          "y": 911.53125,
+          "w": 783,
+          "h": 586.796875,
+          "display": "block",
+          "overflow": "auto",
+          "scrollHeight": 585,
+          "clientHeight": 585,
+          "scrollTop": 0
+        },
+        "svg": {
+          "x": 462.5,
+          "y": 959.328125,
+          "w": 720,
+          "h": 495,
+          "display": "block",
+          "overflow": "hidden",
+          "scrollHeight": 495,
+          "clientHeight": 495,
+          "scrollTop": 0
+        },
+        "viewBoxWidth": 560
+      }
+    ],
+    "canvases": [
+      {
+        "id": "sceneCanvas",
+        "w": 781,
+        "buffer": 1562
+      }
+    ],
+    "alerts": [],
+    "case": "budget-details-1280"
+  },
+  {
+    "w": 960,
+    "h": 440,
+    "dpr": 2,
+    "documentWidth": 945,
+    "clientWidth": 945,
+    "controls": {
+      "x": 18,
+      "y": 182.375,
+      "w": 310,
+      "h": 412,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 2930,
+      "clientHeight": 410,
+      "scrollTop": 0
+    },
+    "results": {
+      "x": 348,
+      "y": 182.375,
+      "w": 579,
+      "h": 12778,
+      "display": "grid",
+      "overflow": "visible",
+      "scrollHeight": 12778,
+      "clientHeight": 12778,
+      "scrollTop": 0
+    },
+    "switcher": null,
+    "aside": {
+      "x": 18,
+      "y": 182.375,
+      "w": 310,
+      "h": 412,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 2930,
+      "clientHeight": 410,
+      "scrollTop": 0
+    },
+    "groups": null,
+    "visibleFormHeight": null,
+    "details": [
+      {
+        "id": "sceneVerticalCard",
+        "card": {
+          "x": 371,
+          "y": 2132.03125,
+          "w": 533,
+          "h": 797.640625,
+          "display": "block",
+          "overflow": "auto",
+          "scrollHeight": 781,
+          "clientHeight": 781,
+          "scrollTop": 0
+        },
+        "svg": {
+          "x": 386,
+          "y": 2176.828125,
+          "w": 620,
+          "h": 515.203125,
+          "display": "block",
+          "overflow": "hidden",
+          "scrollHeight": 515,
+          "clientHeight": 515,
+          "scrollTop": 0
+        },
+        "viewBoxWidth": 710
+      },
+      {
+        "id": "sceneImageCard",
+        "card": {
+          "x": 371,
+          "y": 2947.671875,
+          "w": 533,
+          "h": 464.296875,
+          "display": "block",
+          "overflow": "auto",
+          "scrollHeight": 447,
+          "clientHeight": 447,
+          "scrollTop": 0
+        },
+        "svg": {
+          "x": 386,
+          "y": 2995.46875,
+          "w": 520,
+          "h": 357.5,
+          "display": "block",
+          "overflow": "hidden",
+          "scrollHeight": 358,
+          "clientHeight": 358,
+          "scrollTop": 0
+        },
+        "viewBoxWidth": 560
+      }
+    ],
+    "canvases": [
+      {
+        "id": "sceneCanvas",
+        "w": 531,
+        "buffer": 1062
+      }
+    ],
+    "alerts": [],
+    "case": "budget-960"
+  },
+  {
+    "w": 960,
+    "h": 440,
+    "dpr": 2,
+    "documentWidth": 945,
+    "clientWidth": 945,
+    "controls": {
+      "x": 18,
+      "y": 14,
+      "w": 310,
+      "h": 412,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 2930,
+      "clientHeight": 410,
+      "scrollTop": 0
+    },
+    "results": {
+      "x": 348,
+      "y": -1949.625,
+      "w": 579,
+      "h": 12778,
+      "display": "grid",
+      "overflow": "visible",
+      "scrollHeight": 12778,
+      "clientHeight": 12778,
+      "scrollTop": 0
+    },
+    "switcher": null,
+    "aside": {
+      "x": 18,
+      "y": 14,
+      "w": 310,
+      "h": 412,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 2930,
+      "clientHeight": 410,
+      "scrollTop": 0
+    },
+    "groups": null,
+    "visibleFormHeight": null,
+    "details": [
+      {
+        "id": "sceneVerticalCard",
+        "card": {
+          "x": 371,
+          "y": 0.03125,
+          "w": 533,
+          "h": 797.640625,
+          "display": "block",
+          "overflow": "auto",
+          "scrollHeight": 781,
+          "clientHeight": 781,
+          "scrollTop": 0
+        },
+        "svg": {
+          "x": 386,
+          "y": 44.828125,
+          "w": 620,
+          "h": 515.203125,
+          "display": "block",
+          "overflow": "hidden",
+          "scrollHeight": 515,
+          "clientHeight": 515,
+          "scrollTop": 0
+        },
+        "viewBoxWidth": 710
+      },
+      {
+        "id": "sceneImageCard",
+        "card": {
+          "x": 371,
+          "y": 815.671875,
+          "w": 533,
+          "h": 464.296875,
+          "display": "block",
+          "overflow": "auto",
+          "scrollHeight": 447,
+          "clientHeight": 447,
+          "scrollTop": 0
+        },
+        "svg": {
+          "x": 386,
+          "y": 863.46875,
+          "w": 520,
+          "h": 357.5,
+          "display": "block",
+          "overflow": "hidden",
+          "scrollHeight": 358,
+          "clientHeight": 358,
+          "scrollTop": 0
+        },
+        "viewBoxWidth": 560
+      }
+    ],
+    "canvases": [
+      {
+        "id": "sceneCanvas",
+        "w": 531,
+        "buffer": 1062
+      }
+    ],
+    "alerts": [],
+    "case": "budget-details-960"
+  },
+  {
+    "w": 3440,
+    "h": 1320,
+    "dpr": 1,
+    "documentWidth": 3425,
+    "clientWidth": 3425,
+    "controls": {
+      "x": 28,
+      "y": 182.375,
+      "w": 360,
+      "h": 1292,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 2882,
+      "clientHeight": 1290,
+      "scrollTop": 0
+    },
+    "results": {
+      "x": 408,
+      "y": 182.375,
+      "w": 2989,
+      "h": 12403.484375,
+      "display": "grid",
+      "overflow": "visible",
+      "scrollHeight": 12403,
+      "clientHeight": 12403,
+      "scrollTop": 0
+    },
+    "switcher": null,
+    "aside": {
+      "x": 28,
+      "y": 182.375,
+      "w": 360,
+      "h": 1292,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 2882,
+      "clientHeight": 1290,
+      "scrollTop": 0
+    },
+    "groups": null,
+    "visibleFormHeight": null,
+    "details": [
+      {
+        "id": "sceneVerticalCard",
+        "card": {
+          "x": 431,
+          "y": 2239.59375,
+          "w": 1462.5,
+          "h": 898.59375,
+          "display": "block",
+          "overflow": "auto",
+          "scrollHeight": 897,
+          "clientHeight": 897,
+          "scrollTop": 0
+        },
+        "svg": {
+          "x": 772.25,
+          "y": 2284.390625,
+          "w": 780,
+          "h": 648.15625,
+          "display": "block",
+          "overflow": "hidden",
+          "scrollHeight": 648,
+          "clientHeight": 648,
+          "scrollTop": 0
+        },
+        "viewBoxWidth": 710
+      },
+      {
+        "id": "sceneImageCard",
+        "card": {
+          "x": 1911.5,
+          "y": 2239.59375,
+          "w": 1462.5,
+          "h": 586.796875,
+          "display": "block",
+          "overflow": "auto",
+          "scrollHeight": 585,
+          "clientHeight": 585,
+          "scrollTop": 0
+        },
+        "svg": {
+          "x": 2282.75,
+          "y": 2287.390625,
+          "w": 720,
+          "h": 495,
+          "display": "block",
+          "overflow": "hidden",
+          "scrollHeight": 495,
+          "clientHeight": 495,
+          "scrollTop": 0
+        },
+        "viewBoxWidth": 560
+      }
+    ],
+    "canvases": [
+      {
+        "id": "sceneCanvas",
+        "w": 2941,
+        "buffer": 5882
+      }
+    ],
+    "alerts": [],
+    "case": "budget-3440"
+  },
+  {
+    "w": 3440,
+    "h": 1320,
+    "dpr": 1,
+    "documentWidth": 3425,
+    "clientWidth": 3425,
+    "controls": {
+      "x": 28,
+      "y": 14,
+      "w": 360,
+      "h": 1292,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 2882,
+      "clientHeight": 1290,
+      "scrollTop": 0
+    },
+    "results": {
+      "x": 408,
+      "y": -2057.625,
+      "w": 2989,
+      "h": 12403.484375,
+      "display": "grid",
+      "overflow": "visible",
+      "scrollHeight": 12403,
+      "clientHeight": 12403,
+      "scrollTop": 0
+    },
+    "switcher": null,
+    "aside": {
+      "x": 28,
+      "y": 14,
+      "w": 360,
+      "h": 1292,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 2882,
+      "clientHeight": 1290,
+      "scrollTop": 0
+    },
+    "groups": null,
+    "visibleFormHeight": null,
+    "details": [
+      {
+        "id": "sceneVerticalCard",
+        "card": {
+          "x": 431,
+          "y": -0.40625,
+          "w": 1462.5,
+          "h": 898.59375,
+          "display": "block",
+          "overflow": "auto",
+          "scrollHeight": 897,
+          "clientHeight": 897,
+          "scrollTop": 0
+        },
+        "svg": {
+          "x": 772.25,
+          "y": 44.390625,
+          "w": 780,
+          "h": 648.15625,
+          "display": "block",
+          "overflow": "hidden",
+          "scrollHeight": 648,
+          "clientHeight": 648,
+          "scrollTop": 0
+        },
+        "viewBoxWidth": 710
+      },
+      {
+        "id": "sceneImageCard",
+        "card": {
+          "x": 1911.5,
+          "y": -0.40625,
+          "w": 1462.5,
+          "h": 586.796875,
+          "display": "block",
+          "overflow": "auto",
+          "scrollHeight": 585,
+          "clientHeight": 585,
+          "scrollTop": 0
+        },
+        "svg": {
+          "x": 2282.75,
+          "y": 47.390625,
+          "w": 720,
+          "h": 495,
+          "display": "block",
+          "overflow": "hidden",
+          "scrollHeight": 495,
+          "clientHeight": 495,
+          "scrollTop": 0
+        },
+        "viewBoxWidth": 560
+      }
+    ],
+    "canvases": [
+      {
+        "id": "sceneCanvas",
+        "w": 2941,
+        "buffer": 5882
+      }
+    ],
+    "alerts": [],
+    "case": "budget-details-3440"
+  },
+  {
+    "w": 1920,
+    "h": 940,
+    "dpr": 1,
+    "documentWidth": 1905,
+    "clientWidth": 1905,
+    "view": "results",
+    "controls": {
+      "x": 32,
+      "y": 170.390625,
+      "w": 420,
+      "h": 916,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 4473,
+      "clientHeight": 914,
+      "scrollTop": 0
+    },
+    "results": {
+      "x": 474,
+      "y": 170.390625,
+      "w": 1399,
+      "h": 6462.359375,
+      "display": "block",
+      "overflow": "visible",
+      "scrollHeight": 6462,
+      "clientHeight": 6462,
+      "scrollTop": 0
+    },
+    "switcher": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "display": "none",
+      "overflow": "visible",
+      "scrollHeight": 0,
+      "clientHeight": 0,
+      "scrollTop": 0
+    },
+    "aside": {
+      "x": 32,
+      "y": 170.390625,
+      "w": 420,
+      "h": 916,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 4473,
+      "clientHeight": 914,
+      "scrollTop": 0
+    },
+    "groups": null,
+    "visibleFormHeight": null,
+    "details": [
+      null,
+      null
+    ],
+    "canvases": [
+      {
+        "id": "pulseChart",
+        "w": 1359,
+        "buffer": 1359
+      },
+      {
+        "id": "filterChart",
+        "w": 1359,
+        "buffer": 1359
+      },
+      {
+        "id": "solarChart",
+        "w": 1359,
+        "buffer": 1359
+      },
+      {
+        "id": "environmentChart",
+        "w": 1359,
+        "buffer": 1359
+      },
+      {
+        "id": "pdeChart",
+        "w": 1359,
+        "buffer": 1359
+      },
+      {
+        "id": "histZoom",
+        "w": 1359,
+        "buffer": 1361
+      },
+      {
+        "id": "histFull",
+        "w": 1359,
+        "buffer": 1361
+      },
+      {
+        "id": "rangeChart",
+        "w": 1359,
+        "buffer": 1359
+      }
+    ],
+    "alerts": [],
+    "case": "a-1920"
+  },
+  {
+    "w": 1536,
+    "h": 734,
+    "dpr": 1.25,
+    "documentWidth": 1521,
+    "clientWidth": 1521,
+    "view": "results",
+    "controls": {
+      "x": 32,
+      "y": 170.390625,
+      "w": 368.625,
+      "h": 710,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 4609,
+      "clientHeight": 708,
+      "scrollTop": 0
+    },
+    "results": {
+      "x": 422.625,
+      "y": 170.390625,
+      "w": 1066.375,
+      "h": 6577.828125,
+      "display": "block",
+      "overflow": "visible",
+      "scrollHeight": 6578,
+      "clientHeight": 6578,
+      "scrollTop": 0
+    },
+    "switcher": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "display": "none",
+      "overflow": "visible",
+      "scrollHeight": 0,
+      "clientHeight": 0,
+      "scrollTop": 0
+    },
+    "aside": {
+      "x": 32,
+      "y": 170.390625,
+      "w": 368.625,
+      "h": 710,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 4609,
+      "clientHeight": 708,
+      "scrollTop": 0
+    },
+    "groups": null,
+    "visibleFormHeight": null,
+    "details": [
+      null,
+      null
+    ],
+    "canvases": [
+      {
+        "id": "pulseChart",
+        "w": 1026,
+        "buffer": 1283
+      },
+      {
+        "id": "filterChart",
+        "w": 1026,
+        "buffer": 1283
+      },
+      {
+        "id": "solarChart",
+        "w": 1026,
+        "buffer": 1283
+      },
+      {
+        "id": "environmentChart",
+        "w": 1026,
+        "buffer": 1283
+      },
+      {
+        "id": "pdeChart",
+        "w": 1026,
+        "buffer": 1283
+      },
+      {
+        "id": "histZoom",
+        "w": 1026,
+        "buffer": 1285
+      },
+      {
+        "id": "histFull",
+        "w": 1026,
+        "buffer": 1285
+      },
+      {
+        "id": "rangeChart",
+        "w": 1026,
+        "buffer": 1283
+      }
+    ],
+    "alerts": [],
+    "case": "a-1536"
+  },
+  {
+    "w": 1280,
+    "h": 600,
+    "dpr": 1.5,
+    "documentWidth": 1265,
+    "clientWidth": 1265,
+    "view": "results",
+    "controls": {
+      "x": 32,
+      "y": 168.390625,
+      "w": 310,
+      "h": 576,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 4775,
+      "clientHeight": 574,
+      "scrollTop": 0
+    },
+    "results": {
+      "x": 364,
+      "y": 168.390625,
+      "w": 869,
+      "h": 6666.5625,
+      "display": "block",
+      "overflow": "visible",
+      "scrollHeight": 6667,
+      "clientHeight": 6667,
+      "scrollTop": 0
+    },
+    "switcher": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "display": "none",
+      "overflow": "visible",
+      "scrollHeight": 0,
+      "clientHeight": 0,
+      "scrollTop": 0
+    },
+    "aside": {
+      "x": 32,
+      "y": 168.390625,
+      "w": 310,
+      "h": 576,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 4775,
+      "clientHeight": 574,
+      "scrollTop": 0
+    },
+    "groups": null,
+    "visibleFormHeight": null,
+    "details": [
+      null,
+      null
+    ],
+    "canvases": [
+      {
+        "id": "pulseChart",
+        "w": 829,
+        "buffer": 1244
+      },
+      {
+        "id": "filterChart",
+        "w": 829,
+        "buffer": 1244
+      },
+      {
+        "id": "solarChart",
+        "w": 829,
+        "buffer": 1244
+      },
+      {
+        "id": "environmentChart",
+        "w": 829,
+        "buffer": 1244
+      },
+      {
+        "id": "pdeChart",
+        "w": 829,
+        "buffer": 1244
+      },
+      {
+        "id": "histZoom",
+        "w": 829,
+        "buffer": 1247
+      },
+      {
+        "id": "histFull",
+        "w": 829,
+        "buffer": 1247
+      },
+      {
+        "id": "rangeChart",
+        "w": 829,
+        "buffer": 1244
+      }
+    ],
+    "alerts": [],
+    "case": "a-1280"
+  },
+  {
+    "w": 960,
+    "h": 440,
+    "dpr": 2,
+    "documentWidth": 945,
+    "clientWidth": 945,
+    "view": "results",
+    "controls": {
+      "x": 32,
+      "y": 202.390625,
+      "w": 300,
+      "h": 416,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 4845,
+      "clientHeight": 414,
+      "scrollTop": 0
+    },
+    "results": {
+      "x": 354,
+      "y": 202.390625,
+      "w": 559,
+      "h": 7320.265625,
+      "display": "block",
+      "overflow": "visible",
+      "scrollHeight": 7320,
+      "clientHeight": 7320,
+      "scrollTop": 0
+    },
+    "switcher": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "display": "none",
+      "overflow": "visible",
+      "scrollHeight": 0,
+      "clientHeight": 0,
+      "scrollTop": 0
+    },
+    "aside": {
+      "x": 32,
+      "y": 202.390625,
+      "w": 300,
+      "h": 416,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 4845,
+      "clientHeight": 414,
+      "scrollTop": 0
+    },
+    "groups": null,
+    "visibleFormHeight": null,
+    "details": [
+      null,
+      null
+    ],
+    "canvases": [
+      {
+        "id": "pulseChart",
+        "w": 519,
+        "buffer": 1038
+      },
+      {
+        "id": "filterChart",
+        "w": 519,
+        "buffer": 1038
+      },
+      {
+        "id": "solarChart",
+        "w": 519,
+        "buffer": 1038
+      },
+      {
+        "id": "environmentChart",
+        "w": 519,
+        "buffer": 1038
+      },
+      {
+        "id": "pdeChart",
+        "w": 519,
+        "buffer": 1038
+      },
+      {
+        "id": "histZoom",
+        "w": 519,
+        "buffer": 1042
+      },
+      {
+        "id": "histFull",
+        "w": 519,
+        "buffer": 1042
+      },
+      {
+        "id": "rangeChart",
+        "w": 519,
+        "buffer": 1038
+      }
+    ],
+    "alerts": [],
+    "case": "a-960"
+  },
+  {
+    "w": 3440,
+    "h": 1320,
+    "dpr": 1,
+    "documentWidth": 3425,
+    "clientWidth": 3425,
+    "view": "results",
+    "controls": {
+      "x": 32,
+      "y": 170.390625,
+      "w": 420,
+      "h": 1296,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 4473,
+      "clientHeight": 1294,
+      "scrollTop": 0
+    },
+    "results": {
+      "x": 474,
+      "y": 170.390625,
+      "w": 2919,
+      "h": 6330.046875,
+      "display": "block",
+      "overflow": "visible",
+      "scrollHeight": 6330,
+      "clientHeight": 6330,
+      "scrollTop": 0
+    },
+    "switcher": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "display": "none",
+      "overflow": "visible",
+      "scrollHeight": 0,
+      "clientHeight": 0,
+      "scrollTop": 0
+    },
+    "aside": {
+      "x": 32,
+      "y": 170.390625,
+      "w": 420,
+      "h": 1296,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 4473,
+      "clientHeight": 1294,
+      "scrollTop": 0
+    },
+    "groups": null,
+    "visibleFormHeight": null,
+    "details": [
+      null,
+      null
+    ],
+    "canvases": [
+      {
+        "id": "pulseChart",
+        "w": 2879,
+        "buffer": 2879
+      },
+      {
+        "id": "filterChart",
+        "w": 2879,
+        "buffer": 2879
+      },
+      {
+        "id": "solarChart",
+        "w": 2879,
+        "buffer": 2879
+      },
+      {
+        "id": "environmentChart",
+        "w": 2879,
+        "buffer": 2879
+      },
+      {
+        "id": "pdeChart",
+        "w": 2879,
+        "buffer": 2879
+      },
+      {
+        "id": "histZoom",
+        "w": 2879,
+        "buffer": 2881
+      },
+      {
+        "id": "histFull",
+        "w": 2879,
+        "buffer": 2881
+      },
+      {
+        "id": "rangeChart",
+        "w": 2879,
+        "buffer": 2879
+      }
+    ],
+    "alerts": [],
+    "case": "a-3440"
+  },
+  {
+    "w": 760,
+    "h": 600,
+    "dpr": 1,
+    "documentWidth": 745,
+    "clientWidth": 745,
+    "view": "results",
+    "controls": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "display": "none",
+      "overflow": "auto",
+      "scrollHeight": 0,
+      "clientHeight": 0,
+      "scrollTop": 0
+    },
+    "results": {
+      "x": 15,
+      "y": 76.390625,
+      "w": 715,
+      "h": 7044.921875,
+      "display": "block",
+      "overflow": "visible",
+      "scrollHeight": 7045,
+      "clientHeight": 7045,
+      "scrollTop": 0
+    },
+    "switcher": {
+      "x": 0,
+      "y": 0,
+      "w": 745,
+      "h": 60,
+      "display": "flex",
+      "overflow": "visible",
+      "scrollHeight": 59,
+      "clientHeight": 59,
+      "scrollTop": 0
+    },
+    "aside": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "display": "none",
+      "overflow": "auto",
+      "scrollHeight": 0,
+      "clientHeight": 0,
+      "scrollTop": 0
+    },
+    "groups": null,
+    "visibleFormHeight": null,
+    "details": [
+      null,
+      null
+    ],
+    "canvases": [
+      {
+        "id": "pulseChart",
+        "w": 675,
+        "buffer": 675
+      },
+      {
+        "id": "filterChart",
+        "w": 675,
+        "buffer": 675
+      },
+      {
+        "id": "solarChart",
+        "w": 675,
+        "buffer": 675
+      },
+      {
+        "id": "environmentChart",
+        "w": 675,
+        "buffer": 675
+      },
+      {
+        "id": "pdeChart",
+        "w": 675,
+        "buffer": 675
+      },
+      {
+        "id": "histZoom",
+        "w": 675,
+        "buffer": 677
+      },
+      {
+        "id": "histFull",
+        "w": 675,
+        "buffer": 677
+      },
+      {
+        "id": "rangeChart",
+        "w": 675,
+        "buffer": 675
+      }
+    ],
+    "alerts": [],
+    "case": "a-switch-results"
+  },
+  {
+    "w": 760,
+    "h": 600,
+    "dpr": 1,
+    "documentWidth": 745,
+    "clientWidth": 745,
+    "view": "results",
+    "controls": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "display": "none",
+      "overflow": "auto",
+      "scrollHeight": 0,
+      "clientHeight": 0,
+      "scrollTop": 0
+    },
+    "results": {
+      "x": 15,
+      "y": 76.390625,
+      "w": 715,
+      "h": 7044.921875,
+      "display": "block",
+      "overflow": "visible",
+      "scrollHeight": 7045,
+      "clientHeight": 7045,
+      "scrollTop": 0
+    },
+    "switcher": {
+      "x": 0,
+      "y": 0,
+      "w": 745,
+      "h": 60,
+      "display": "flex",
+      "overflow": "visible",
+      "scrollHeight": 59,
+      "clientHeight": 59,
+      "scrollTop": 0
+    },
+    "aside": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "display": "none",
+      "overflow": "auto",
+      "scrollHeight": 0,
+      "clientHeight": 0,
+      "scrollTop": 0
+    },
+    "groups": null,
+    "visibleFormHeight": null,
+    "details": [
+      null,
+      null
+    ],
+    "canvases": [
+      {
+        "id": "pulseChart",
+        "w": 675,
+        "buffer": 675
+      },
+      {
+        "id": "filterChart",
+        "w": 675,
+        "buffer": 675
+      },
+      {
+        "id": "solarChart",
+        "w": 675,
+        "buffer": 675
+      },
+      {
+        "id": "environmentChart",
+        "w": 675,
+        "buffer": 675
+      },
+      {
+        "id": "pdeChart",
+        "w": 675,
+        "buffer": 675
+      },
+      {
+        "id": "histZoom",
+        "w": 675,
+        "buffer": 677
+      },
+      {
+        "id": "histFull",
+        "w": 675,
+        "buffer": 677
+      },
+      {
+        "id": "rangeChart",
+        "w": 675,
+        "buffer": 675
+      }
+    ],
+    "alerts": [],
+    "case": "a-breakpoint-760"
+  },
+  {
+    "w": 1920,
+    "h": 940,
+    "dpr": 1,
+    "documentWidth": 1905,
+    "clientWidth": 1905,
+    "view": "results",
+    "controls": {
+      "x": 32,
+      "y": 170.390625,
+      "w": 420,
+      "h": 916,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 4531,
+      "clientHeight": 914,
+      "scrollTop": 0
+    },
+    "results": {
+      "x": 474,
+      "y": 170.390625,
+      "w": 1399,
+      "h": 43753.125,
+      "display": "block",
+      "overflow": "visible",
+      "scrollHeight": 43753,
+      "clientHeight": 43753,
+      "scrollTop": 0
+    },
+    "switcher": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "display": "none",
+      "overflow": "visible",
+      "scrollHeight": 0,
+      "clientHeight": 0,
+      "scrollTop": 0
+    },
+    "aside": {
+      "x": 32,
+      "y": 170.390625,
+      "w": 420,
+      "h": 916,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 4531,
+      "clientHeight": 914,
+      "scrollTop": 0
+    },
+    "groups": null,
+    "visibleFormHeight": null,
+    "details": [
+      null,
+      null
+    ],
+    "canvases": [
+      {
+        "id": "pulseChart",
+        "w": 1359,
+        "buffer": 1359
+      },
+      {
+        "id": "filterChart",
+        "w": 1359,
+        "buffer": 1359
+      },
+      {
+        "id": "solarChart",
+        "w": 1359,
+        "buffer": 1359
+      },
+      {
+        "id": "environmentChart",
+        "w": 1359,
+        "buffer": 1359
+      },
+      {
+        "id": "pdeChart",
+        "w": 1359,
+        "buffer": 1359
+      },
+      {
+        "id": "histZoom",
+        "w": 1359,
+        "buffer": 1361
+      },
+      {
+        "id": "histFull",
+        "w": 1359,
+        "buffer": 1361
+      },
+      {
+        "id": "rangeChart",
+        "w": 654,
+        "buffer": 654
+      },
+      {
+        "id": "xtalkChart",
+        "w": 654,
+        "buffer": 654
+      }
+    ],
+    "alerts": [],
+    "case": "debug-1920"
+  },
+  {
+    "w": 1536,
+    "h": 734,
+    "dpr": 1.25,
+    "documentWidth": 1521,
+    "clientWidth": 1521,
+    "view": "results",
+    "controls": {
+      "x": 32,
+      "y": 170.390625,
+      "w": 368.625,
+      "h": 710,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 4667,
+      "clientHeight": 708,
+      "scrollTop": 0
+    },
+    "results": {
+      "x": 422.625,
+      "y": 170.390625,
+      "w": 1066.375,
+      "h": 44043.859375,
+      "display": "block",
+      "overflow": "visible",
+      "scrollHeight": 44044,
+      "clientHeight": 44044,
+      "scrollTop": 0
+    },
+    "switcher": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "display": "none",
+      "overflow": "visible",
+      "scrollHeight": 0,
+      "clientHeight": 0,
+      "scrollTop": 0
+    },
+    "aside": {
+      "x": 32,
+      "y": 170.390625,
+      "w": 368.625,
+      "h": 710,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 4667,
+      "clientHeight": 708,
+      "scrollTop": 0
+    },
+    "groups": null,
+    "visibleFormHeight": null,
+    "details": [
+      null,
+      null
+    ],
+    "canvases": [
+      {
+        "id": "pulseChart",
+        "w": 1026,
+        "buffer": 1283
+      },
+      {
+        "id": "filterChart",
+        "w": 1026,
+        "buffer": 1283
+      },
+      {
+        "id": "solarChart",
+        "w": 1026,
+        "buffer": 1283
+      },
+      {
+        "id": "environmentChart",
+        "w": 1026,
+        "buffer": 1283
+      },
+      {
+        "id": "pdeChart",
+        "w": 1026,
+        "buffer": 1283
+      },
+      {
+        "id": "histZoom",
+        "w": 1026,
+        "buffer": 1285
+      },
+      {
+        "id": "histFull",
+        "w": 1026,
+        "buffer": 1285
+      },
+      {
+        "id": "rangeChart",
+        "w": 487,
+        "buffer": 609
+      },
+      {
+        "id": "xtalkChart",
+        "w": 487,
+        "buffer": 609
+      }
+    ],
+    "alerts": [],
+    "case": "debug-1536"
+  },
+  {
+    "w": 1280,
+    "h": 600,
+    "dpr": 1.5,
+    "documentWidth": 1265,
+    "clientWidth": 1265,
+    "view": "results",
+    "controls": {
+      "x": 32,
+      "y": 168.390625,
+      "w": 310,
+      "h": 576,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 4852,
+      "clientHeight": 574,
+      "scrollTop": 0
+    },
+    "results": {
+      "x": 364,
+      "y": 168.390625,
+      "w": 869,
+      "h": 44189.78125,
+      "display": "block",
+      "overflow": "visible",
+      "scrollHeight": 44190,
+      "clientHeight": 44190,
+      "scrollTop": 0
+    },
+    "switcher": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "display": "none",
+      "overflow": "visible",
+      "scrollHeight": 0,
+      "clientHeight": 0,
+      "scrollTop": 0
+    },
+    "aside": {
+      "x": 32,
+      "y": 168.390625,
+      "w": 310,
+      "h": 576,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 4852,
+      "clientHeight": 574,
+      "scrollTop": 0
+    },
+    "groups": null,
+    "visibleFormHeight": null,
+    "details": [
+      null,
+      null
+    ],
+    "canvases": [
+      {
+        "id": "pulseChart",
+        "w": 829,
+        "buffer": 1244
+      },
+      {
+        "id": "filterChart",
+        "w": 829,
+        "buffer": 1244
+      },
+      {
+        "id": "solarChart",
+        "w": 829,
+        "buffer": 1244
+      },
+      {
+        "id": "environmentChart",
+        "w": 829,
+        "buffer": 1244
+      },
+      {
+        "id": "pdeChart",
+        "w": 829,
+        "buffer": 1244
+      },
+      {
+        "id": "histZoom",
+        "w": 829,
+        "buffer": 1247
+      },
+      {
+        "id": "histFull",
+        "w": 829,
+        "buffer": 1247
+      },
+      {
+        "id": "rangeChart",
+        "w": 389,
+        "buffer": 584
+      },
+      {
+        "id": "xtalkChart",
+        "w": 389,
+        "buffer": 584
+      }
+    ],
+    "alerts": [],
+    "case": "debug-1280"
+  },
+  {
+    "w": 960,
+    "h": 440,
+    "dpr": 2,
+    "documentWidth": 945,
+    "clientWidth": 945,
+    "view": "results",
+    "controls": {
+      "x": 32,
+      "y": 202.390625,
+      "w": 300,
+      "h": 416,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 4922,
+      "clientHeight": 414,
+      "scrollTop": 0
+    },
+    "results": {
+      "x": 354,
+      "y": 202.390625,
+      "w": 559,
+      "h": 45277.46875,
+      "display": "block",
+      "overflow": "visible",
+      "scrollHeight": 45277,
+      "clientHeight": 45277,
+      "scrollTop": 0
+    },
+    "switcher": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "display": "none",
+      "overflow": "visible",
+      "scrollHeight": 0,
+      "clientHeight": 0,
+      "scrollTop": 0
+    },
+    "aside": {
+      "x": 32,
+      "y": 202.390625,
+      "w": 300,
+      "h": 416,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 4922,
+      "clientHeight": 414,
+      "scrollTop": 0
+    },
+    "groups": null,
+    "visibleFormHeight": null,
+    "details": [
+      null,
+      null
+    ],
+    "canvases": [
+      {
+        "id": "pulseChart",
+        "w": 519,
+        "buffer": 1038
+      },
+      {
+        "id": "filterChart",
+        "w": 519,
+        "buffer": 1038
+      },
+      {
+        "id": "solarChart",
+        "w": 519,
+        "buffer": 1038
+      },
+      {
+        "id": "environmentChart",
+        "w": 519,
+        "buffer": 1038
+      },
+      {
+        "id": "pdeChart",
+        "w": 519,
+        "buffer": 1038
+      },
+      {
+        "id": "histZoom",
+        "w": 519,
+        "buffer": 1042
+      },
+      {
+        "id": "histFull",
+        "w": 519,
+        "buffer": 1042
+      },
+      {
+        "id": "rangeChart",
+        "w": 234,
+        "buffer": 468
+      },
+      {
+        "id": "xtalkChart",
+        "w": 234,
+        "buffer": 468
+      }
+    ],
+    "alerts": [],
+    "case": "debug-960"
+  },
+  {
+    "w": 3440,
+    "h": 1320,
+    "dpr": 1,
+    "documentWidth": 3425,
+    "clientWidth": 3425,
+    "view": "results",
+    "controls": {
+      "x": 32,
+      "y": 170.390625,
+      "w": 420,
+      "h": 1296,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 4531,
+      "clientHeight": 1294,
+      "scrollTop": 0
+    },
+    "results": {
+      "x": 474,
+      "y": 170.390625,
+      "w": 2919,
+      "h": 43602.265625,
+      "display": "block",
+      "overflow": "visible",
+      "scrollHeight": 43602,
+      "clientHeight": 43602,
+      "scrollTop": 0
+    },
+    "switcher": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "display": "none",
+      "overflow": "visible",
+      "scrollHeight": 0,
+      "clientHeight": 0,
+      "scrollTop": 0
+    },
+    "aside": {
+      "x": 32,
+      "y": 170.390625,
+      "w": 420,
+      "h": 1296,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 4531,
+      "clientHeight": 1294,
+      "scrollTop": 0
+    },
+    "groups": null,
+    "visibleFormHeight": null,
+    "details": [
+      null,
+      null
+    ],
+    "canvases": [
+      {
+        "id": "pulseChart",
+        "w": 2879,
+        "buffer": 2879
+      },
+      {
+        "id": "filterChart",
+        "w": 2879,
+        "buffer": 2879
+      },
+      {
+        "id": "solarChart",
+        "w": 2879,
+        "buffer": 2879
+      },
+      {
+        "id": "environmentChart",
+        "w": 2879,
+        "buffer": 2879
+      },
+      {
+        "id": "pdeChart",
+        "w": 2879,
+        "buffer": 2879
+      },
+      {
+        "id": "histZoom",
+        "w": 2879,
+        "buffer": 2881
+      },
+      {
+        "id": "histFull",
+        "w": 2879,
+        "buffer": 2881
+      },
+      {
+        "id": "rangeChart",
+        "w": 1414,
+        "buffer": 1414
+      },
+      {
+        "id": "xtalkChart",
+        "w": 1414,
+        "buffer": 1414
+      }
+    ],
+    "alerts": [],
+    "case": "debug-3440"
+  },
+  {
+    "w": 760,
+    "h": 600,
+    "dpr": 1,
+    "documentWidth": 745,
+    "clientWidth": 745,
+    "view": "results",
+    "controls": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "display": "none",
+      "overflow": "auto",
+      "scrollHeight": 0,
+      "clientHeight": 0,
+      "scrollTop": 0
+    },
+    "results": {
+      "x": 15,
+      "y": 76.390625,
+      "w": 715,
+      "h": 45213.140625,
+      "display": "block",
+      "overflow": "visible",
+      "scrollHeight": 45213,
+      "clientHeight": 45213,
+      "scrollTop": 0
+    },
+    "switcher": {
+      "x": 0,
+      "y": 0,
+      "w": 745,
+      "h": 60,
+      "display": "flex",
+      "overflow": "visible",
+      "scrollHeight": 59,
+      "clientHeight": 59,
+      "scrollTop": 0
+    },
+    "aside": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "display": "none",
+      "overflow": "auto",
+      "scrollHeight": 0,
+      "clientHeight": 0,
+      "scrollTop": 0
+    },
+    "groups": null,
+    "visibleFormHeight": null,
+    "details": [
+      null,
+      null
+    ],
+    "canvases": [
+      {
+        "id": "pulseChart",
+        "w": 675,
+        "buffer": 675
+      },
+      {
+        "id": "filterChart",
+        "w": 675,
+        "buffer": 675
+      },
+      {
+        "id": "solarChart",
+        "w": 675,
+        "buffer": 675
+      },
+      {
+        "id": "environmentChart",
+        "w": 675,
+        "buffer": 675
+      },
+      {
+        "id": "pdeChart",
+        "w": 675,
+        "buffer": 675
+      },
+      {
+        "id": "histZoom",
+        "w": 675,
+        "buffer": 677
+      },
+      {
+        "id": "histFull",
+        "w": 675,
+        "buffer": 677
+      },
+      {
+        "id": "rangeChart",
+        "w": 675,
+        "buffer": 675
+      },
+      {
+        "id": "xtalkChart",
+        "w": 675,
+        "buffer": 675
+      }
+    ],
+    "alerts": [],
+    "case": "debug-switch-results"
+  },
+  {
+    "w": 760,
+    "h": 600,
+    "dpr": 1,
+    "documentWidth": 745,
+    "clientWidth": 745,
+    "view": "results",
+    "controls": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "display": "none",
+      "overflow": "auto",
+      "scrollHeight": 0,
+      "clientHeight": 0,
+      "scrollTop": 0
+    },
+    "results": {
+      "x": 15,
+      "y": 76.390625,
+      "w": 715,
+      "h": 45213.140625,
+      "display": "block",
+      "overflow": "visible",
+      "scrollHeight": 45213,
+      "clientHeight": 45213,
+      "scrollTop": 0
+    },
+    "switcher": {
+      "x": 0,
+      "y": 0,
+      "w": 745,
+      "h": 60,
+      "display": "flex",
+      "overflow": "visible",
+      "scrollHeight": 59,
+      "clientHeight": 59,
+      "scrollTop": 0
+    },
+    "aside": {
+      "x": 0,
+      "y": 0,
+      "w": 0,
+      "h": 0,
+      "display": "none",
+      "overflow": "auto",
+      "scrollHeight": 0,
+      "clientHeight": 0,
+      "scrollTop": 0
+    },
+    "groups": null,
+    "visibleFormHeight": null,
+    "details": [
+      null,
+      null
+    ],
+    "canvases": [
+      {
+        "id": "pulseChart",
+        "w": 675,
+        "buffer": 675
+      },
+      {
+        "id": "filterChart",
+        "w": 675,
+        "buffer": 675
+      },
+      {
+        "id": "solarChart",
+        "w": 675,
+        "buffer": 675
+      },
+      {
+        "id": "environmentChart",
+        "w": 675,
+        "buffer": 675
+      },
+      {
+        "id": "pdeChart",
+        "w": 675,
+        "buffer": 675
+      },
+      {
+        "id": "histZoom",
+        "w": 675,
+        "buffer": 677
+      },
+      {
+        "id": "histFull",
+        "w": 675,
+        "buffer": 677
+      },
+      {
+        "id": "rangeChart",
+        "w": 675,
+        "buffer": 675
+      },
+      {
+        "id": "xtalkChart",
+        "w": 675,
+        "buffer": 675
+      }
+    ],
+    "alerts": [],
+    "case": "debug-breakpoint-760"
+  },
+  {
+    "w": 1920,
+    "h": 940,
+    "dpr": 1,
+    "documentWidth": 1905,
+    "clientWidth": 1905,
+    "controls": null,
+    "results": null,
+    "switcher": null,
+    "aside": {
+      "x": 32,
+      "y": 204.1875,
+      "w": 370,
+      "h": 908,
+      "display": "flex",
+      "overflow": "hidden",
+      "scrollHeight": 906,
+      "clientHeight": 906,
+      "scrollTop": 0
+    },
+    "groups": {
+      "x": 33,
+      "y": 430.578125,
+      "w": 368,
+      "h": 623.609375,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 973,
+      "clientHeight": 624,
+      "scrollTop": 0
+    },
+    "visibleFormHeight": 509.421875,
+    "details": [
+      null,
+      null
+    ],
+    "canvases": [],
+    "alerts": [],
+    "case": "b-1920"
+  },
+  {
+    "w": 1536,
+    "h": 734,
+    "dpr": 1.25,
+    "documentWidth": 1521,
+    "clientWidth": 1521,
+    "controls": null,
+    "results": null,
+    "switcher": null,
+    "aside": {
+      "x": 32,
+      "y": 204.1875,
+      "w": 345,
+      "h": 702,
+      "display": "flex",
+      "overflow": "hidden",
+      "scrollHeight": 700,
+      "clientHeight": 700,
+      "scrollTop": 0
+    },
+    "groups": {
+      "x": 33,
+      "y": 421.578125,
+      "w": 343,
+      "h": 426.609375,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 957,
+      "clientHeight": 427,
+      "scrollTop": 0
+    },
+    "visibleFormHeight": 312.421875,
+    "details": [
+      null,
+      null
+    ],
+    "canvases": [],
+    "alerts": [],
+    "case": "b-1536"
+  },
+  {
+    "w": 1280,
+    "h": 600,
+    "dpr": 1.5,
+    "documentWidth": 1265,
+    "clientWidth": 1265,
+    "controls": null,
+    "results": null,
+    "switcher": null,
+    "aside": {
+      "x": 32,
+      "y": 204.1875,
+      "w": 345,
+      "h": 568,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 1176,
+      "clientHeight": 566,
+      "scrollTop": 0
+    },
+    "groups": {
+      "x": 33,
+      "y": 377.578125,
+      "w": 328,
+      "h": 957,
+      "display": "block",
+      "overflow": "visible",
+      "scrollHeight": 957,
+      "clientHeight": 957,
+      "scrollTop": 0
+    },
+    "visibleFormHeight": 222.421875,
+    "details": [
+      null,
+      null
+    ],
+    "canvases": [],
+    "alerts": [],
+    "case": "b-1280"
+  },
+  {
+    "w": 1280,
+    "h": 600,
+    "dpr": 1.5,
+    "documentWidth": 1265,
+    "clientWidth": 1265,
+    "controls": null,
+    "results": null,
+    "switcher": null,
+    "aside": {
+      "x": 32,
+      "y": 16.1875,
+      "w": 345,
+      "h": 568,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 1176,
+      "clientHeight": 566,
+      "scrollTop": 260
+    },
+    "groups": {
+      "x": 33,
+      "y": -70.421875,
+      "w": 328,
+      "h": 957,
+      "display": "block",
+      "overflow": "visible",
+      "scrollHeight": 957,
+      "clientHeight": 957,
+      "scrollTop": 0
+    },
+    "visibleFormHeight": 568,
+    "details": [
+      null,
+      null
+    ],
+    "canvases": [],
+    "alerts": [],
+    "case": "b-editor-1280"
+  },
+  {
+    "w": 960,
+    "h": 440,
+    "dpr": 2,
+    "documentWidth": 945,
+    "clientWidth": 945,
+    "controls": null,
+    "results": null,
+    "switcher": null,
+    "aside": {
+      "x": 20,
+      "y": 199.1875,
+      "w": 315,
+      "h": 408,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 1176,
+      "clientHeight": 406,
+      "scrollTop": 0
+    },
+    "groups": {
+      "x": 21,
+      "y": 372.578125,
+      "w": 298,
+      "h": 957,
+      "display": "block",
+      "overflow": "visible",
+      "scrollHeight": 957,
+      "clientHeight": 957,
+      "scrollTop": 0
+    },
+    "visibleFormHeight": 67.421875,
+    "details": [
+      null,
+      null
+    ],
+    "canvases": [],
+    "alerts": [],
+    "case": "b-960"
+  },
+  {
+    "w": 960,
+    "h": 440,
+    "dpr": 2,
+    "documentWidth": 945,
+    "clientWidth": 945,
+    "controls": null,
+    "results": null,
+    "switcher": null,
+    "aside": {
+      "x": 20,
+      "y": 16.1875,
+      "w": 315,
+      "h": 408,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 1176,
+      "clientHeight": 406,
+      "scrollTop": 260
+    },
+    "groups": {
+      "x": 21,
+      "y": -70.421875,
+      "w": 298,
+      "h": 957,
+      "display": "block",
+      "overflow": "visible",
+      "scrollHeight": 957,
+      "clientHeight": 957,
+      "scrollTop": 0
+    },
+    "visibleFormHeight": 408,
+    "details": [
+      null,
+      null
+    ],
+    "canvases": [],
+    "alerts": [],
+    "case": "b-editor-960"
+  },
+  {
+    "w": 3440,
+    "h": 1320,
+    "dpr": 1,
+    "documentWidth": 3425,
+    "clientWidth": 3425,
+    "controls": null,
+    "results": null,
+    "switcher": null,
+    "aside": {
+      "x": 32,
+      "y": 204.1875,
+      "w": 370,
+      "h": 1257.390625,
+      "display": "flex",
+      "overflow": "hidden",
+      "scrollHeight": 1255,
+      "clientHeight": 1255,
+      "scrollTop": 0
+    },
+    "groups": {
+      "x": 33,
+      "y": 430.578125,
+      "w": 368,
+      "h": 973,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 973,
+      "clientHeight": 973,
+      "scrollTop": 0
+    },
+    "visibleFormHeight": 889.421875,
+    "details": [
+      null,
+      null
+    ],
+    "canvases": [],
+    "alerts": [],
+    "case": "b-3440"
+  },
+  {
+    "w": 1920,
+    "h": 940,
+    "dpr": 1,
+    "documentWidth": 1905,
+    "clientWidth": 1905,
+    "controls": null,
+    "results": null,
+    "switcher": null,
+    "aside": {
+      "x": 30,
+      "y": 207,
+      "w": 335,
+      "h": 910,
+      "display": "flex",
+      "overflow": "hidden",
+      "scrollHeight": 908,
+      "clientHeight": 908,
+      "scrollTop": 0
+    },
+    "groups": {
+      "x": 31,
+      "y": 380,
+      "w": 333,
+      "h": 681,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 1198,
+      "clientHeight": 681,
+      "scrollTop": 0
+    },
+    "visibleFormHeight": 560,
+    "details": [
+      null,
+      null
+    ],
+    "canvases": [
+      {
+        "id": "speedPlot",
+        "w": 706,
+        "buffer": 708
+      },
+      {
+        "id": "distancePlot",
+        "w": 706,
+        "buffer": 708
+      },
+      {
+        "id": "parameterPlot",
+        "w": 1434,
+        "buffer": 300
+      }
+    ],
+    "alerts": [],
+    "case": "c-1920"
+  },
+  {
+    "w": 1536,
+    "h": 734,
+    "dpr": 1.25,
+    "documentWidth": 1521,
+    "clientWidth": 1521,
+    "controls": null,
+    "results": null,
+    "switcher": null,
+    "aside": {
+      "x": 30,
+      "y": 207,
+      "w": 310,
+      "h": 704,
+      "display": "flex",
+      "overflow": "hidden",
+      "scrollHeight": 702,
+      "clientHeight": 702,
+      "scrollTop": 0
+    },
+    "groups": {
+      "x": 31,
+      "y": 380,
+      "w": 308,
+      "h": 475,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 1198,
+      "clientHeight": 475,
+      "scrollTop": 0
+    },
+    "visibleFormHeight": 354,
+    "details": [
+      null,
+      null
+    ],
+    "canvases": [
+      {
+        "id": "speedPlot",
+        "w": 529,
+        "buffer": 663
+      },
+      {
+        "id": "distancePlot",
+        "w": 529,
+        "buffer": 663
+      },
+      {
+        "id": "parameterPlot",
+        "w": 1079,
+        "buffer": 300
+      }
+    ],
+    "alerts": [],
+    "case": "c-1536"
+  },
+  {
+    "w": 1280,
+    "h": 600,
+    "dpr": 1.5,
+    "documentWidth": 1265,
+    "clientWidth": 1265,
+    "controls": null,
+    "results": null,
+    "switcher": null,
+    "aside": {
+      "x": 30,
+      "y": 207,
+      "w": 310,
+      "h": 570,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 1384,
+      "clientHeight": 568,
+      "scrollTop": 0
+    },
+    "groups": {
+      "x": 31,
+      "y": 351,
+      "w": 293,
+      "h": 1197.5,
+      "display": "block",
+      "overflow": "visible",
+      "scrollHeight": 1198,
+      "clientHeight": 1198,
+      "scrollTop": 0
+    },
+    "visibleFormHeight": 249,
+    "details": [
+      null,
+      null
+    ],
+    "canvases": [
+      {
+        "id": "speedPlot",
+        "w": 401,
+        "buffer": 604
+      },
+      {
+        "id": "distancePlot",
+        "w": 401,
+        "buffer": 604
+      },
+      {
+        "id": "parameterPlot",
+        "w": 823,
+        "buffer": 300
+      }
+    ],
+    "alerts": [],
+    "case": "c-1280"
+  },
+  {
+    "w": 1280,
+    "h": 600,
+    "dpr": 1.5,
+    "documentWidth": 1265,
+    "clientWidth": 1265,
+    "controls": null,
+    "results": null,
+    "switcher": null,
+    "aside": {
+      "x": 30,
+      "y": 16,
+      "w": 310,
+      "h": 570,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 1384,
+      "clientHeight": 568,
+      "scrollTop": 260
+    },
+    "groups": {
+      "x": 31,
+      "y": -100,
+      "w": 293,
+      "h": 1197.5,
+      "display": "block",
+      "overflow": "visible",
+      "scrollHeight": 1198,
+      "clientHeight": 1198,
+      "scrollTop": 0
+    },
+    "visibleFormHeight": 570,
+    "details": [
+      null,
+      null
+    ],
+    "canvases": [
+      {
+        "id": "speedPlot",
+        "w": 401,
+        "buffer": 604
+      },
+      {
+        "id": "distancePlot",
+        "w": 401,
+        "buffer": 604
+      },
+      {
+        "id": "parameterPlot",
+        "w": 823,
+        "buffer": 300
+      }
+    ],
+    "alerts": [],
+    "case": "c-editor-1280"
+  },
+  {
+    "w": 960,
+    "h": 440,
+    "dpr": 2,
+    "documentWidth": 945,
+    "clientWidth": 945,
+    "controls": null,
+    "results": null,
+    "switcher": null,
+    "aside": {
+      "x": 20,
+      "y": 199,
+      "w": 285,
+      "h": 410,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 1384,
+      "clientHeight": 408,
+      "scrollTop": 0
+    },
+    "groups": {
+      "x": 21,
+      "y": 343,
+      "w": 268,
+      "h": 1197.5,
+      "display": "block",
+      "overflow": "visible",
+      "scrollHeight": 1198,
+      "clientHeight": 1198,
+      "scrollTop": 0
+    },
+    "visibleFormHeight": 97,
+    "details": [
+      null,
+      null
+    ],
+    "canvases": [
+      {
+        "id": "speedPlot",
+        "w": 564,
+        "buffer": 1132
+      },
+      {
+        "id": "distancePlot",
+        "w": 564,
+        "buffer": 1132
+      },
+      {
+        "id": "parameterPlot",
+        "w": 564,
+        "buffer": 300
+      }
+    ],
+    "alerts": [],
+    "case": "c-960"
+  },
+  {
+    "w": 960,
+    "h": 440,
+    "dpr": 2,
+    "documentWidth": 945,
+    "clientWidth": 945,
+    "controls": null,
+    "results": null,
+    "switcher": null,
+    "aside": {
+      "x": 20,
+      "y": 16,
+      "w": 285,
+      "h": 410,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 1384,
+      "clientHeight": 408,
+      "scrollTop": 260
+    },
+    "groups": {
+      "x": 21,
+      "y": -100,
+      "w": 268,
+      "h": 1197.5,
+      "display": "block",
+      "overflow": "visible",
+      "scrollHeight": 1198,
+      "clientHeight": 1198,
+      "scrollTop": 0
+    },
+    "visibleFormHeight": 410,
+    "details": [
+      null,
+      null
+    ],
+    "canvases": [
+      {
+        "id": "speedPlot",
+        "w": 564,
+        "buffer": 1132
+      },
+      {
+        "id": "distancePlot",
+        "w": 564,
+        "buffer": 1132
+      },
+      {
+        "id": "parameterPlot",
+        "w": 564,
+        "buffer": 300
+      }
+    ],
+    "alerts": [],
+    "case": "c-editor-960"
+  },
+  {
+    "w": 3440,
+    "h": 1320,
+    "dpr": 1,
+    "documentWidth": 3425,
+    "clientWidth": 3425,
+    "controls": null,
+    "results": null,
+    "switcher": null,
+    "aside": {
+      "x": 30,
+      "y": 207,
+      "w": 335,
+      "h": 1290,
+      "display": "flex",
+      "overflow": "hidden",
+      "scrollHeight": 1288,
+      "clientHeight": 1288,
+      "scrollTop": 0
+    },
+    "groups": {
+      "x": 31,
+      "y": 380,
+      "w": 333,
+      "h": 1061,
+      "display": "block",
+      "overflow": "auto",
+      "scrollHeight": 1198,
+      "clientHeight": 1061,
+      "scrollTop": 0
+    },
+    "visibleFormHeight": 940,
+    "details": [
+      null,
+      null
+    ],
+    "canvases": [
+      {
+        "id": "speedPlot",
+        "w": 1466,
+        "buffer": 1468
+      },
+      {
+        "id": "distancePlot",
+        "w": 1466,
+        "buffer": 1468
+      },
+      {
+        "id": "parameterPlot",
+        "w": 2954,
+        "buffer": 300
+      }
+    ],
+    "alerts": [],
+    "case": "c-3440"
+  }
+]

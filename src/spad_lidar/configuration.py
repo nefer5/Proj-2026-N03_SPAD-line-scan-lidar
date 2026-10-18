@@ -65,14 +65,11 @@ def read_yaml(name):
 
 
 def default_values():
-    doc = read_yaml("defaults.yaml")
-    if set(doc) != {"schema_version", "simulation", "experiments"} or doc["schema_version"] != 1:
-        raise ValueError("defaults.yaml requires schema_version: 1, simulation and experiments")
-    if not isinstance(doc["simulation"], dict):
-        raise ValueError("simulation must be a mapping")
+    from .default_composition import compose_defaults
     from .numerics.curves import SpectralInputs
-    SpectralInputs.model_validate(doc['simulation']['spectral_inputs'])
-    return doc["simulation"]
+    values = compose_defaults('a').values
+    SpectralInputs.model_validate(values['spectral_inputs'])
+    return values
 
 
 class Algorithms(BaseModel):

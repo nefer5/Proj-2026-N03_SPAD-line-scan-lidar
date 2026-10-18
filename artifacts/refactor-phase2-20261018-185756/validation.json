@@ -1,0 +1,33 @@
+{
+  "ok": true,
+  "links": 345,
+  "documents": 48,
+  "broken_links": [],
+  "changed_frontend": [],
+  "changed_other_yaml": [],
+  "test_count": 482,
+  "numeric_cases_equal": 19,
+  "migration_backup": "artifacts/default-layout-migrations/6e22c73692774a8a9b2c7bbfe47d2238",
+  "browser_platforms": [
+    "a",
+    "spad",
+    "system",
+    "columns",
+    "budget"
+  ],
+  "live": {
+    "defaults_equal": {
+      "a": true,
+      "spad": true,
+      "system": true,
+      "scan": true,
+      "columns": true,
+      "budget": true
+    },
+    "preview_unchanged": true,
+    "base_url": "http://127.0.0.1:8016"
+  },
+  "formal_text_equals_tested_candidate": true,
+  "candidate_line_endings": "CRLF",
+  "formal_line_endings": "LF"
+}

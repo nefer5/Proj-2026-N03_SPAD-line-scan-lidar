@@ -1,3 +1,4 @@
+from .chrome import workspace_chrome
 from pathlib import Path
 from hashlib import sha256
 import json
@@ -17,11 +18,11 @@ WEB = Path(__file__).resolve().parents[3]/'web'
 
 def lab_page(kind):
     html = (WEB/'labs.html').read_text(encoding='utf-8').replace('__KIND__', kind)
-    for name in ('shared/units.js', 'shared/theme.css', 'shared/theme.js', 'styles.css', 'shared/labs.css', 'shared/labs.js', 'shared/spatial.js', 'shared/scan.js', 'curve-editor.js',
+    for name in ('shared/defaults.js', 'shared/defaults.css', 'shared/units.js', 'shared/theme.css', 'shared/theme.js', 'styles.css', 'shared/labs.css', 'shared/labs.js', 'shared/spatial.js', 'shared/scan.js', 'curve-editor.js',
                  'vendor/katex/katex.min.js', 'vendor/katex/katex.min.css'):
         digest = sha256((WEB/name).read_bytes()).hexdigest()
         html = html.replace(f'/static/{name}"', f'/static/{name}?v={digest}"')
-    return HTMLResponse(html)
+    return HTMLResponse(workspace_chrome(html, kind, WEB))
 
 
 @router.get('/spad')
@@ -37,10 +38,10 @@ def system_page():
 def workspace_page(kind):
     html=(WEB/'system.html').read_text(encoding='utf-8')
     html=html.replace('data-lab="system"',f'data-lab="{kind}"')
-    for name in ('shared/units.js', 'shared/theme.css', 'shared/theme.js', 'system.css','system.js','shared/channel-locator.css','shared/channel-locator.js','shared/b-acquisition.css','shared/b-acquisition.js','shared/scan-workspace.js','shared/optical-panels.js','shared/plot-series.js','shared/histogram-window.js','curve-editor.js',
+    for name in ('shared/defaults.js', 'shared/defaults.css', 'shared/units.js', 'shared/theme.css', 'shared/theme.js', 'system.css','system.js','shared/channel-locator.css','shared/channel-locator.js','shared/b-acquisition.css','shared/b-acquisition.js','shared/scan-workspace.js','shared/optical-panels.js','shared/plot-series.js','shared/histogram-window.js','curve-editor.js',
                  'vendor/katex/katex.min.js','vendor/katex/katex.min.css'):
         html=html.replace(f'/static/{name}"',f'/static/{name}?v={sha256((WEB/name).read_bytes()).hexdigest()}"')
-    return HTMLResponse(html)
+    return HTMLResponse(workspace_chrome(html, kind, WEB))
 
 
 @router.get('/system/scan')
@@ -62,7 +63,7 @@ def export_optical_data(kind: str, config: dict):
     try:
         if kind not in ('system','scan'):
             raise ValueError('Optical data export requires a system experiment')
-        from ..experiments.spatial import optical_dataset
+        from ..optics import optical_dataset
         a=Algorithms.load()
         cfg=SimulationConfig.for_experiment(kind,config,a)
         return optical_dataset(cfg,a).model_dump()
@@ -335,7 +336,7 @@ def system_form(kind:str,config:dict):
 
 @router.post('/api/experiments/system/preview')
 def system_preview(config:dict):
-    from ..experiments.spatial import project_illumination
+    from ..optics import project_illumination
     from ..experiments.lab import stamp_result
     from ..reporting.spatial_view import optical_view
     from ..reporting.readout_layout import channel_display_values
@@ -356,7 +357,7 @@ def system_preview(config:dict):
 
 @router.post('/api/experiments/scan/workspace-preview')
 def scan_workspace_preview(config:dict):
-    from ..experiments.spatial import project_illumination
+    from ..optics import project_illumination
     from ..experiments.lab import stamp_result
     from ..reporting.spatial_view import optical_view
     from ..scan.schedule import build_schedule

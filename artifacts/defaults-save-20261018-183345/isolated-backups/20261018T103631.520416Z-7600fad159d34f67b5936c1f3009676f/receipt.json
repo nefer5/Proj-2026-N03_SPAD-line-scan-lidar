@@ -1,0 +1,24 @@
+{
+  "revision": "56fa75f48e02f2abf04ca33a3db9f4f45ba385cfbd5f0cac2769366857c82907",
+  "changes": [
+    {
+      "parameter": "illumination.signal_photons_per_pulse",
+      "before": 20.0,
+      "after": 22.0,
+      "source": "experiments.spad.illumination.signal_photons_per_pulse"
+    }
+  ],
+  "affected": [
+    {
+      "kind": "spad",
+      "label": "独立 SPAD",
+      "count": 1
+    }
+  ],
+  "path": "config/defaults.yaml",
+  "unchanged": false,
+  "kind": "spad",
+  "original_sha256": "30282178e83ec150efaba17c98823a2e5bd23526d6d946c02308bb184b927d8f",
+  "saved_sha256": "c3e1f094b70a229f777af0a960cf6ac103d1aa4a03defa4ed333dc9b0d902f83",
+  "utc": "2026-10-18T10:36:31.520842+00:00"
+}

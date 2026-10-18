@@ -1,0 +1,7 @@
+{
+  "checked": 97,
+  "previously_valid": 25,
+  "previously_invalid": 72,
+  "regressed": [],
+  "note": "Pre-existing invalid snapshots remain unsupported; missing defaults are never synthesized."
+}

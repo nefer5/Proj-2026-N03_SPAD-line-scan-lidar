@@ -8,6 +8,8 @@ from pydantic import ValidationError
 from pydantic import BaseModel, ConfigDict
 from typing import Literal
 import yaml
+import os
+from datetime import datetime, timezone
 
 from .models import SimulationConfig
 from .simulator import simulate, derived_quantities
@@ -18,6 +20,7 @@ from .performance import performance_sweep
 ROOT = Path(__file__).resolve().parents[2]
 WEB = ROOT / "web"
 
+from .webapi.chrome import workspace_chrome
 from . import __version__
 app = FastAPI(title="SPAD Line-Scanning LiDAR Model", version=__version__)
 from .webapi.labs import router as labs_router
@@ -26,6 +29,8 @@ from .webapi.columns import router as columns_router
 app.include_router(columns_router)
 from .webapi.budget import router as budget_router
 app.include_router(budget_router)
+from .webapi.defaults import router as defaults_router
+app.include_router(defaults_router)
 app.mount("/static", StaticFiles(directory=WEB), name="static")
 
 
@@ -52,10 +57,22 @@ def index():
     html = (WEB / "index.html").read_text(encoding="utf-8")
     # Content-addressed URLs bypass already cached unversioned JS/CSS as well.
     # Recompute on every navigation so editable source requires no release step.
-    for name in ('shared/units.js', 'shared/theme.css', 'shared/theme.js', "app.js", "curve-editor.js", "photon-flow.js", "styles.css", "shared/histogram-window.js", "vendor/katex/katex.min.js", "vendor/katex/katex.min.css"):
+    for name in ('shared/defaults.js', 'shared/defaults.css', 'shared/units.js', 'shared/theme.css', 'shared/theme.js', "app.js", "curve-editor.js", "photon-flow.js", "styles.css", "shared/histogram-window.js", "vendor/katex/katex.min.js", "vendor/katex/katex.min.css"):
         digest = sha256((WEB / name).read_bytes()).hexdigest()
         html = html.replace(f'/static/{name}"', f'/static/{name}?v={digest}"')
-    return HTMLResponse(html)
+    return HTMLResponse(workspace_chrome(html, "a", WEB))
+
+
+_RUNTIME_STARTED = datetime.now(timezone.utc).isoformat()
+
+
+@app.get('/api/runtime')
+def runtime_identity():
+    """Read-only identity for verified local restart; no stop endpoint is exposed."""
+    return {'project_root':str(ROOT.resolve()), 'server_pid':os.getpid(),
+            'parent_pid':os.getppid(), 'software_version':__version__,
+            'instance_id':os.environ.get('SPAD_LIDAR_INSTANCE_ID'),
+            'started_at':_RUNTIME_STARTED}
 
 
 @app.get("/api/defaults")

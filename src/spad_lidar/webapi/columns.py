@@ -1,4 +1,5 @@
 """Formal column-C read-only planning, job views and exports."""
+from .chrome import workspace_chrome
 from pathlib import Path
 from hashlib import sha256
 import csv,io,json
@@ -20,10 +21,10 @@ _results=OrderedDict();_result_lock=Lock()
 
 def column_page():
     html=(WEB/'columns.html').read_text(encoding='utf8')
-    for name in ('shared/units.js', 'shared/theme.css', 'shared/theme.js', 'columns.css','columns.js','shared/column-layout.css','shared/plot-series.js',
+    for name in ('shared/defaults.js', 'shared/defaults.css', 'shared/units.js', 'shared/theme.css', 'shared/theme.js', 'columns.css','columns.js','shared/column-layout.css','shared/plot-series.js',
                  'shared/histogram-window.js','curve-editor.js','vendor/katex/katex.min.js','vendor/katex/katex.min.css'):
         html=html.replace(f'/static/{name}"',f'/static/{name}?v={sha256((WEB/name).read_bytes()).hexdigest()}"')
-    return HTMLResponse(html)
+    return HTMLResponse(workspace_chrome(html, "columns", WEB))
 
 
 @router.get('/system/columns')

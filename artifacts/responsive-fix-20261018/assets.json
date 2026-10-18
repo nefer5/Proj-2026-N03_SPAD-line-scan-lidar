@@ -1,0 +1,276 @@
+[
+  {
+    "route": "/",
+    "assets": [
+      {
+        "file": "shared/units.js",
+        "sha256": "eeb8f78c330aa70bfeb75e859474911f701999420943a84d8d1b3de6bc8a5ac9"
+      },
+      {
+        "file": "styles.css",
+        "sha256": "ae460907c52105e4b1fe3209e828763fe619e58973affcf3ac191fb86b2378f9"
+      },
+      {
+        "file": "vendor/katex/katex.min.css",
+        "sha256": "19095127357ed6d29fe0a63a6b000c913a89f7f1963b765dd3715e97c9852e75"
+      },
+      {
+        "file": "shared/theme.css",
+        "sha256": "5c1c4288989c6dd28ee99110c93baad06fc61893b300e5f04f7c0c4b229576e3"
+      },
+      {
+        "file": "shared/theme.js",
+        "sha256": "85938257c8bd131af4b76e708593586d006e3c30c8d03cc9c55d23ef71764270"
+      },
+      {
+        "file": "vendor/katex/katex.min.js",
+        "sha256": "e8d885505949f3a5f4abdd5dd0d53696bd1371ad26ffbf4f310dcd77c8cdae89"
+      },
+      {
+        "file": "curve-editor.js",
+        "sha256": "c23e1eabd140a28b879493f175f3d0e1887877cd1dd9e501e3e1d463029ae793"
+      },
+      {
+        "file": "photon-flow.js",
+        "sha256": "ad527f4f39b8f9f71b7bb103980c25e8987bfcd3b720e9678e817199408598aa"
+      },
+      {
+        "file": "shared/histogram-window.js",
+        "sha256": "cfdc3d08ed2c521d8f460427f459a2d7e3580fc326685fc26837817f3f0924cd"
+      },
+      {
+        "file": "app.js",
+        "sha256": "c17739c28ce16e1aef16eb9ac9d4c69c1f0499dc75f81ae7785f7ffcbcb4958c"
+      }
+    ],
+    "no_store": true
+  },
+  {
+    "route": "/debug",
+    "assets": [
+      {
+        "file": "shared/units.js",
+        "sha256": "eeb8f78c330aa70bfeb75e859474911f701999420943a84d8d1b3de6bc8a5ac9"
+      },
+      {
+        "file": "styles.css",
+        "sha256": "ae460907c52105e4b1fe3209e828763fe619e58973affcf3ac191fb86b2378f9"
+      },
+      {
+        "file": "vendor/katex/katex.min.css",
+        "sha256": "19095127357ed6d29fe0a63a6b000c913a89f7f1963b765dd3715e97c9852e75"
+      },
+      {
+        "file": "shared/theme.css",
+        "sha256": "5c1c4288989c6dd28ee99110c93baad06fc61893b300e5f04f7c0c4b229576e3"
+      },
+      {
+        "file": "shared/theme.js",
+        "sha256": "85938257c8bd131af4b76e708593586d006e3c30c8d03cc9c55d23ef71764270"
+      },
+      {
+        "file": "vendor/katex/katex.min.js",
+        "sha256": "e8d885505949f3a5f4abdd5dd0d53696bd1371ad26ffbf4f310dcd77c8cdae89"
+      },
+      {
+        "file": "curve-editor.js",
+        "sha256": "c23e1eabd140a28b879493f175f3d0e1887877cd1dd9e501e3e1d463029ae793"
+      },
+      {
+        "file": "photon-flow.js",
+        "sha256": "ad527f4f39b8f9f71b7bb103980c25e8987bfcd3b720e9678e817199408598aa"
+      },
+      {
+        "file": "shared/histogram-window.js",
+        "sha256": "cfdc3d08ed2c521d8f460427f459a2d7e3580fc326685fc26837817f3f0924cd"
+      },
+      {
+        "file": "app.js",
+        "sha256": "c17739c28ce16e1aef16eb9ac9d4c69c1f0499dc75f81ae7785f7ffcbcb4958c"
+      }
+    ],
+    "no_store": true
+  },
+  {
+    "route": "/system/budget",
+    "assets": [
+      {
+        "file": "shared/units.js",
+        "sha256": "eeb8f78c330aa70bfeb75e859474911f701999420943a84d8d1b3de6bc8a5ac9"
+      },
+      {
+        "file": "budget.css",
+        "sha256": "945d928a9b6569f52ae1923bcaf76e1819a5d0151823143d90b77f661530cd59"
+      },
+      {
+        "file": "vendor/katex/katex.min.css",
+        "sha256": "19095127357ed6d29fe0a63a6b000c913a89f7f1963b765dd3715e97c9852e75"
+      },
+      {
+        "file": "vendor/katex/katex.min.js",
+        "sha256": "e8d885505949f3a5f4abdd5dd0d53696bd1371ad26ffbf4f310dcd77c8cdae89"
+      },
+      {
+        "file": "shared/number-format.js",
+        "sha256": "f9ba22ac62ca0b4878684a2b1e65a91683ae36a5451159e70a87ed5af41893d6"
+      },
+      {
+        "file": "curve-editor.js",
+        "sha256": "c23e1eabd140a28b879493f175f3d0e1887877cd1dd9e501e3e1d463029ae793"
+      },
+      {
+        "file": "budget-pipeline.js",
+        "sha256": "1badab4d60f80f9aaa2e8de0217793ac1dd246560584da2d7b85be29b2d78eed"
+      },
+      {
+        "file": "budget-charts.js",
+        "sha256": "1f06f59bc94ba617e6ad5c319107af791bd7893a443e7264e330cbdb8e9dc543"
+      },
+      {
+        "file": "budget-hardware.js",
+        "sha256": "6b7460e278670244f47ed6733071f862ee5c2b346a3b3ae091ad7f541e114aac"
+      },
+      {
+        "file": "budget.js",
+        "sha256": "8b167ec9a778d7f0aeb831e720f24ff326d7c03995eaec5aa6cba28b91e71151"
+      },
+      {
+        "file": "budget-scene.css",
+        "sha256": "fe945aae1fa4cbf04e1d2f15fdf0ab18c6d00ad572b63fe228b24c19281e95cc"
+      },
+      {
+        "file": "shared/theme.css",
+        "sha256": "5c1c4288989c6dd28ee99110c93baad06fc61893b300e5f04f7c0c4b229576e3"
+      },
+      {
+        "file": "shared/theme.js",
+        "sha256": "85938257c8bd131af4b76e708593586d006e3c30c8d03cc9c55d23ef71764270"
+      },
+      {
+        "file": "budget-scene.js",
+        "sha256": "19c3fc127cdd6cbe8284a0876d638948e7855aa35ba7f9dd0f31858c12430ad0"
+      }
+    ],
+    "no_store": true
+  },
+  {
+    "route": "/system",
+    "assets": [
+      {
+        "file": "shared/units.js",
+        "sha256": "eeb8f78c330aa70bfeb75e859474911f701999420943a84d8d1b3de6bc8a5ac9"
+      },
+      {
+        "file": "system.css",
+        "sha256": "9c94d5614600943fc0ac071254998fa23213d410f57af7788f28fd9bcc313ac8"
+      },
+      {
+        "file": "shared/channel-locator.css",
+        "sha256": "9c2b326014b5d58522badcc73143380bab399b2c23d9ef6cc97c8bf5c16459aa"
+      },
+      {
+        "file": "shared/b-acquisition.css",
+        "sha256": "6eabeb0c4567db4625f7d9b7bc4e88a5a762ebf3b0b928a863b66749ae7ecd5e"
+      },
+      {
+        "file": "vendor/katex/katex.min.css",
+        "sha256": "19095127357ed6d29fe0a63a6b000c913a89f7f1963b765dd3715e97c9852e75"
+      },
+      {
+        "file": "vendor/katex/katex.min.js",
+        "sha256": "e8d885505949f3a5f4abdd5dd0d53696bd1371ad26ffbf4f310dcd77c8cdae89"
+      },
+      {
+        "file": "shared/histogram-window.js",
+        "sha256": "cfdc3d08ed2c521d8f460427f459a2d7e3580fc326685fc26837817f3f0924cd"
+      },
+      {
+        "file": "shared/plot-series.js",
+        "sha256": "d82f04b9678b1840fbe04eeeccb9c32bb54d4f393b2fe39a74d4f13e3be3bdd3"
+      },
+      {
+        "file": "shared/optical-panels.js",
+        "sha256": "fb84218f5bb13947ca8f5dfff7c865d3d1ca5676330302bcebdc259900f56c4b"
+      },
+      {
+        "file": "curve-editor.js",
+        "sha256": "c23e1eabd140a28b879493f175f3d0e1887877cd1dd9e501e3e1d463029ae793"
+      },
+      {
+        "file": "shared/scan-workspace.js",
+        "sha256": "48bdeb1e078bc39a66d89317e4bae1c4c64b54d1a8839133d7cd918ab946fdad"
+      },
+      {
+        "file": "shared/channel-locator.js",
+        "sha256": "00e515f32442bfc97163d3e821dd63c11697ba2beb8812fb59b23ef057059e72"
+      },
+      {
+        "file": "shared/b-acquisition.js",
+        "sha256": "580270c5b9de84e1506b1c8546c45856d6abe08887ed0f6da5ce7867b6083699"
+      },
+      {
+        "file": "system.js",
+        "sha256": "0598e6cf76757df8221c267deb88a5109edd148415e1e09e5b0fb2b5e05e2650"
+      },
+      {
+        "file": "shared/theme.css",
+        "sha256": "5c1c4288989c6dd28ee99110c93baad06fc61893b300e5f04f7c0c4b229576e3"
+      },
+      {
+        "file": "shared/theme.js",
+        "sha256": "85938257c8bd131af4b76e708593586d006e3c30c8d03cc9c55d23ef71764270"
+      }
+    ],
+    "no_store": true
+  },
+  {
+    "route": "/system/columns",
+    "assets": [
+      {
+        "file": "shared/units.js",
+        "sha256": "eeb8f78c330aa70bfeb75e859474911f701999420943a84d8d1b3de6bc8a5ac9"
+      },
+      {
+        "file": "shared/column-layout.css",
+        "sha256": "c4848d38b4d0fc13fea3e7ff7e31f975ea3d42579cf24cd1e23c8b7725ba02d2"
+      },
+      {
+        "file": "columns.css",
+        "sha256": "7f8e337d8f0367ddbe76d403c42e0221daa027603de21e3d4e28e7451b226a2f"
+      },
+      {
+        "file": "vendor/katex/katex.min.css",
+        "sha256": "19095127357ed6d29fe0a63a6b000c913a89f7f1963b765dd3715e97c9852e75"
+      },
+      {
+        "file": "vendor/katex/katex.min.js",
+        "sha256": "e8d885505949f3a5f4abdd5dd0d53696bd1371ad26ffbf4f310dcd77c8cdae89"
+      },
+      {
+        "file": "curve-editor.js",
+        "sha256": "c23e1eabd140a28b879493f175f3d0e1887877cd1dd9e501e3e1d463029ae793"
+      },
+      {
+        "file": "shared/plot-series.js",
+        "sha256": "d82f04b9678b1840fbe04eeeccb9c32bb54d4f393b2fe39a74d4f13e3be3bdd3"
+      },
+      {
+        "file": "shared/histogram-window.js",
+        "sha256": "cfdc3d08ed2c521d8f460427f459a2d7e3580fc326685fc26837817f3f0924cd"
+      },
+      {
+        "file": "columns.js",
+        "sha256": "24d4668a5a4760ff68b0bead9daae4f1e4ece390f705846169f2983e218c884b"
+      },
+      {
+        "file": "shared/theme.css",
+        "sha256": "5c1c4288989c6dd28ee99110c93baad06fc61893b300e5f04f7c0c4b229576e3"
+      },
+      {
+        "file": "shared/theme.js",
+        "sha256": "85938257c8bd131af4b76e708593586d006e3c30c8d03cc9c55d23ef71764270"
+      }
+    ],
+    "no_store": true
+  }
+]

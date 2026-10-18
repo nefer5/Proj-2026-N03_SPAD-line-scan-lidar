@@ -115,3 +115,5 @@ init().catch(fail);
 
 window.budgetExtensions={request,collect,fill,calculate,catalog:()=>catalog,changed};
 $('collapseAll').onclick=()=>document.querySelectorAll('.controls details').forEach(d=>d.open=false);$('expandAll').onclick=()=>document.querySelectorAll('.controls details').forEach(d=>d.open=true);
+
+ProjectDefaults.bind('budget', collect, 'reset');

@@ -1,0 +1,134 @@
+{
+  "status": "self-verified; user/manual acceptance not implied",
+  "phase": "backend shared layers / phase 1",
+  "generated": "2026-10-18T17:12:37.199752+08:00",
+  "head": "a19f273d2c3c74db065e5601f7f7bd3cea6c1864",
+  "scope": [
+    "shared domain field definitions with compatibility exports",
+    "optical projection independent of experiment/display layer",
+    "periodic record adapter above unchanged SPAD engine",
+    "explicit TrialPlan and lazy ordered repetition for A/B/C",
+    "pure background-bin numeric helpers"
+  ],
+  "preservation": {
+    "ok": true,
+    "head_at_start": "a19f273d2c3c74db065e5601f7f7bd3cea6c1864",
+    "baseline": "dirty working checkout including existing 1080P/launcher changes",
+    "protected_files": 223,
+    "all_existing_frontend_bytes_unchanged": true,
+    "all_yaml_bytes_unchanged": true,
+    "state_core_and_launcher_unchanged": true,
+    "changed_since_checkpoint": [
+      "src/spad_lidar/photon_flow.py",
+      "src/spad_lidar/system_budget.py",
+      "src/spad_lidar/experiments/a_acquisition.py",
+      "src/spad_lidar/experiments/columns.py",
+      "src/spad_lidar/experiments/configuration.py",
+      "src/spad_lidar/experiments/lab.py",
+      "src/spad_lidar/experiments/scanning.py",
+      "src/spad_lidar/experiments/spatial.py",
+      "src/spad_lidar/experiments/spatial_analysis.py",
+      "src/spad_lidar/experiments/system_config.py",
+      "src/spad_lidar/reporting/background_bins.py",
+      "src/spad_lidar/reporting/column_view.py",
+      "src/spad_lidar/webapi/labs.py",
+      "docs/release-notes.md",
+      "docs/roadmap.md",
+      "docs/design/architecture-decisions.md",
+      "docs/design/architecture.md"
+    ],
+    "missing": [],
+    "violations": []
+  },
+  "numerical_equivalence": {
+    "ok": true,
+    "cases": {
+      "live_config_a": true,
+      "live_config_spad": true,
+      "live_config_system": true,
+      "live_config_scan": true,
+      "live_config_columns": true,
+      "live_config_budget": true,
+      "A_independent_first": true,
+      "A_independent_multi": true,
+      "A_shared_first": true,
+      "A_shared_multi": true,
+      "A_shared_multitdc": true,
+      "A_coincidence_fixed": true,
+      "A_coincidence_sliding": true,
+      "A_analytic_reference": true,
+      "SPAD": true,
+      "B_candidate": true,
+      "B_sampled": true,
+      "C_repeated": true,
+      "budget": true
+    },
+    "excluded_fields": [
+      "utc"
+    ],
+    "comparison": "exact canonical JSON equality; no numeric tolerance",
+    "sha256": "71e0329c60cd01cd7f84c6ba7a67897dd2e024c09dc0044a4974610dd22b6c49"
+  },
+  "tests": {
+    "before": {
+      "command": "python -m pytest -q --disable-warnings --maxfail=1",
+      "passed": 431,
+      "seconds": 111.78
+    },
+    "after_existing_suite": {
+      "command": "python -m pytest -q --disable-warnings --maxfail=1",
+      "passed": 431,
+      "seconds": 121.08,
+      "note": "collection occurred before new boundary-test file was added"
+    },
+    "new_boundaries": {
+      "command": "python -m pytest -q tests/test_refactor_boundaries.py --disable-warnings",
+      "passed": 13
+    },
+    "distinct_tests_passed": 444
+  },
+  "new_files": [
+    "src/spad_lidar/acquisition/__init__.py",
+    "src/spad_lidar/acquisition/adapters/__init__.py",
+    "src/spad_lidar/acquisition/adapters/periodic.py",
+    "src/spad_lidar/acquisition/executor.py",
+    "src/spad_lidar/acquisition/trials.py",
+    "src/spad_lidar/domains/__init__.py",
+    "src/spad_lidar/domains/acquisition.py",
+    "src/spad_lidar/domains/optical.py",
+    "src/spad_lidar/domains/system.py",
+    "src/spad_lidar/optics/__init__.py",
+    "src/spad_lidar/optics/service.py",
+    "src/spad_lidar/processing/background.py",
+    "tests/test_refactor_boundaries.py"
+  ],
+  "new_file_sha256": {
+    "src/spad_lidar/acquisition/__init__.py": "e4c36638fc6cdf3b50be4342539504e1abac166a0ff86e38f60cba1e7d5b9ee4",
+    "src/spad_lidar/acquisition/adapters/__init__.py": "b2b028df7a06b372f029a8a755362ea824d28f3c6a4c1c0268c5f801648f95ca",
+    "src/spad_lidar/acquisition/adapters/periodic.py": "37b66afdefaa8510ad3b46d485dd654bd75f2760885929a6eaf97665de4ad352",
+    "src/spad_lidar/acquisition/executor.py": "23ed534298a1ab5915d95846401bd92a8e9df3fa70f6acf8c322fd4446edf799",
+    "src/spad_lidar/acquisition/trials.py": "d365f3c1f318c8ee57babbd866013905fe4208c4cd4f5b5fbe801fe75cd60c8d",
+    "src/spad_lidar/domains/__init__.py": "91914fd907f8c243ca4aca62b4dba248b83316b29d8bb16c29109e1062b4324c",
+    "src/spad_lidar/domains/acquisition.py": "adfb7d01a0c048f8ebff4215afa5707eb283ee81bf647a09e6e2280f969ee297",
+    "src/spad_lidar/domains/optical.py": "e6c72e4f39a9a6939965ffc4aa5991bb684c14565ef4cb7f0e1055046fdf1d28",
+    "src/spad_lidar/domains/system.py": "c4fb410a32d1e1249e111fd66960246b61bbfb08eef53062edd7b2c05ec67774",
+    "src/spad_lidar/optics/__init__.py": "f8497b4102117c0b563ff1696457d715758502c7068e37f7604a77e672b9a1b7",
+    "src/spad_lidar/optics/service.py": "1636b5d0bc844482dad7b11554eb5305309ad7ed971e3dfc9adb8841ab2c576c",
+    "src/spad_lidar/processing/background.py": "94cc0882f5d24b4308061480c4b00e4a32a455708acd16f65730534aa2da97ca",
+    "tests/test_refactor_boundaries.py": "f0ed68eb14682cd22480d28af563c23d8e529027de67305c8ac2d91f71ef6e42"
+  },
+  "rollback": {
+    "archive": "before.zip",
+    "archive_sha256": "d7c4645d2475cda9625c713d9c4d95e4a3a8576ca1238cfeb5c44f87e949bd9b",
+    "manifest": "before-manifest.json",
+    "warning": "Restore only reviewed individual paths. Existing uncommitted 1080P and launcher edits are included; do not reset to HEAD or overwrite later work."
+  },
+  "deferred": [
+    "three-workbench frontend redesign; preserve current 1080P changes",
+    "C inter-column reset and duration",
+    "A/B physical equivalence changes",
+    "C/budget transport algorithm merge",
+    "C/budget full config composition migration and whole R03/R04 audit"
+  ],
+  "deployment": "No intentional running-service restart, package install, Git commit or push. Existing reload service may reload edited Python; application-level deployment was not separately asserted."
+}

@@ -1,0 +1,6 @@
+{
+  "software_version": "0.6.15.dev0",
+  "a_model_version": "0.2.2",
+  "defaults_layout_schema": 2,
+  "c_electrical_and_output_integration": "deferred"
+}

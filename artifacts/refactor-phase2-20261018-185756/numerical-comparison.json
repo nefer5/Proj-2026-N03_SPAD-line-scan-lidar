@@ -1,0 +1,29 @@
+{
+  "ok": true,
+  "cases": {
+    "live_config_a": true,
+    "live_config_spad": true,
+    "live_config_system": true,
+    "live_config_scan": true,
+    "live_config_columns": true,
+    "live_config_budget": true,
+    "A_independent_first": true,
+    "A_independent_multi": true,
+    "A_shared_first": true,
+    "A_shared_multi": true,
+    "A_shared_multitdc": true,
+    "A_coincidence_fixed": true,
+    "A_coincidence_sliding": true,
+    "A_analytic_reference": true,
+    "SPAD": true,
+    "B_candidate": true,
+    "B_sampled": true,
+    "C_repeated": true,
+    "budget": true
+  },
+  "excluded_fields": [
+    "utc"
+  ],
+  "comparison": "exact canonical JSON equality; no numeric tolerance",
+  "sha256": "71e0329c60cd01cd7f84c6ba7a67897dd2e024c09dc0044a4974610dd22b6c49"
+}

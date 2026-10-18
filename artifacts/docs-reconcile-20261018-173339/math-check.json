@@ -1,0 +1,6 @@
+{
+  "ok": true,
+  "equations": 83,
+  "failures": [],
+  "renderer": "project bundled KaTeX; parsing only, not VS Code screenshot acceptance"
+}

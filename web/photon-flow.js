@@ -1,7 +1,7 @@
 /* Shared formula/logic/value renderer for live evaluation and expert snapshots. */
 globalThis.renderPhotonFlow = function(container, flow, options={}) {
   const make=(tag,text,className)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=text;if(className)node.className=className;return node;};
-  const number=value=>typeof value==="boolean"?(value?"启用":"关闭"):typeof value==="number"?(Number.isFinite(value)?Number(value.toPrecision(8)).toString():"—"):String(value);
+  const number=value=>typeof value==="boolean"?(value?"启用":"关闭"):typeof value==="number"?(Number.isFinite(value)?LidarNumbers.format(value):"—"):String(value);
   const heading=make("h2",flow.title);
   const stamp=make("p",options.snapshot?"本次仿真快照 · "+options.snapshot:"实时预算 · 当前有效输入","photon-stamp");
   const bounds=make("p","背景比较波段 B："+number(flow.values.band_min_nm)+"–"+number(flow.values.band_max_nm)+" nm；回波按每脉冲、背景按每门统计。","formula-note");

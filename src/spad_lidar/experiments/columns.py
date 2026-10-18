@@ -13,9 +13,11 @@ from ..scan.column_optics import ColumnPulseProjection
 from ..scan.transport import transport_plan
 from ..numerics.temporal import temporal_cdf
 from ..processing.column_reconstruction import reconstruct_columns,histogram_for_records
-from .spatial import project_illumination
+from ..optics import project_illumination
 from .scanning import channel_directions
 from .lab import stamp_result
+from ..acquisition.trials import TrialPlan
+from ..acquisition.executor import execute_trials
 
 
 def noise_resource_probe(cfg,a,light,program):
@@ -104,19 +106,24 @@ def _single(cfg,a,progress,cancelled,*,optical_inputs=None,reconstruct=True):
 
 
 def run_columns(cfg,a,progress,cancelled):
+    plan=TrialPlan((('observation',1),('repeat',cfg.acquisition.trial_count-1),
+                    ('noise',cfg.acquisition.noise_trial_count)))
     optical=project_illumination(cfg,a,progress,cancelled)
     main=_single(cfg,a,progress,cancelled,optical_inputs=optical)
     if main['audit']['source']['expected_work']*(cfg.acquisition.trial_count+cfg.acquisition.noise_trial_count)>a.max_column_analysis_candidates:
         raise ValueError('Requested repeat/noise candidate workload exceeds max_column_analysis_candidates')
     samples=[main['records']];noise=[];seeds=[cfg.rng_seed];noise_seeds=[];record_count=len(main['records'])
     roots=np.random.SeedSequence(cfg.rng_seed).spawn(max(a.lab_analysis_seed_streams.values())+1)
-    for kind,count,stream in [('trials',cfg.acquisition.trial_count-1,a.lab_analysis_seed_streams['trials']),
-                               ('noise',cfg.acquisition.noise_trial_count,a.lab_analysis_seed_streams['noise'])]:
-        for seed_sequence in roots[stream].spawn(count):
-            seed=int(seed_sequence.generate_state(1)[0]);acq=cfg.acquisition.model_copy(update={'rng_seed':seed})
+    for kind,role,stream in [('trials','repeat',a.lab_analysis_seed_streams['trials']),
+                            ('noise','noise',a.lab_analysis_seed_streams['noise'])]:
+        sequences=roots[stream].spawn(plan.count(role))
+        def independent(index):
+            seed=int(sequences[index].generate_state(1)[0]);acq=cfg.acquisition.model_copy(update={'rng_seed':seed})
             current=cfg.model_copy(update={'acquisition':acq})
             if kind=='noise':current=current.model_copy(update={'exposure':cfg.exposure.model_copy(update={'pulses':[p.model_copy(update={'energy_nj':0.}) for p in cfg.exposure.pulses]})})
             out=_single(current,a,progress,cancelled,optical_inputs=optical,reconstruct=False)
+            return seed,out
+        for seed,out in execute_trials(plan,role,independent):
             record_count+=len(out['records'])
             if record_count>a.max_column_analysis_events:raise ValueError('Saved repeat/noise events exceed analysis resource limit')
             if kind=='noise':noise.append(out['records']);noise_seeds.append(seed)

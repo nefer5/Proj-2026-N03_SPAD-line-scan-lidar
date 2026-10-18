@@ -25,6 +25,16 @@
     window.dispatchEvent(new Event('resize'));
   }
   globalThis.LidarTheme = {
+    gridDash() {
+      const value = getComputedStyle(root).getPropertyValue('--plot-grid-dash').trim();
+      return value ? value.split(/[\s,]+/).map(Number) : [4, 5];
+    },
+    plotColor(role) {
+      // 图表角色色不经过通用深浅反转，保持网格、轴和文字各自的对比。
+      const key = 'plot-' + role;
+      if (!cache.has(key)) cache.set(key, getComputedStyle(root).getPropertyValue('--' + key).trim());
+      return cache.get(key);
+    },
     color(value) {
       if (theme !== 'light' || typeof value !== 'string') return value;
       let hex = value.toLowerCase();
@@ -43,7 +53,7 @@
     button = document.createElement('button');
     button.type = 'button'; button.id = 'themeToggle'; button.className = 'theme-toggle';
     button.addEventListener('click', () => apply(theme === 'dark' ? 'light' : 'dark', true));
-    const host = document.querySelector('body > header nav') || document.querySelector('body > header');
+    const host = document.querySelector('[data-theme-host]') || document.querySelector('body > header nav') || document.querySelector('body > header');
     (host || document.body).append(button);
     updateButton();
   });

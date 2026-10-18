@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "4c5f5c9e-1c23-49bb-a95b-0b196acdcfaa",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "E:\\Proj-2026-N03_SPAD线扫lidar建模\\artifacts\\architecture-review\\20261018-032102\\proposal-20261018-041154\\proposed.json",
+  "output": "E:\\Proj-2026-N03_SPAD线扫lidar建模\\artifacts\\architecture-review\\20261018-032102\\proposal-20261018-041154\\proposed.html",
+  "specification": {
+    "sha256": "133be53c21f9f3a620d5edac9945d0b52d07bb2aec12ff02559499c68ce0ddde",
+    "bytes": 29853
+  },
+  "artifact": {
+    "sha256": "d7eaef15f6ab72e5a9188978d24d2f34f62f9ae31e5d4682c4513a110c8cd1b5",
+    "bytes": 764108
+  }
+}

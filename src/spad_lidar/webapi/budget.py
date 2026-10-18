@@ -1,4 +1,5 @@
 """System budget page and stateless, auditable calculator API."""
+from .chrome import workspace_chrome
 from pathlib import Path
 from hashlib import sha256
 import json
@@ -43,9 +44,9 @@ def page():
         # Keep the budget usable. The module script displays an explicit load error.
         manifest={'imports':{}}
     html=html.replace('__THREE_IMPORT_MAP__',json.dumps({'imports':manifest['imports']}).replace('<','\\u003c'))
-    for name in ('shared/units.js', 'budget-pipeline.js','budget-hardware.js','budget-charts.js','shared/number-format.js','budget-scene.js','budget-scene.css','shared/theme.css', 'shared/theme.js', 'budget.css','budget.js','curve-editor.js','vendor/katex/katex.min.js','vendor/katex/katex.min.css'):
+    for name in ('shared/defaults.js', 'shared/defaults.css', 'shared/units.js', 'budget-pipeline.js','budget-hardware.js','budget-charts.js','shared/number-format.js','budget-scene.js','budget-scene.css','shared/theme.css', 'shared/theme.js', 'budget.css','budget.js','curve-editor.js','vendor/katex/katex.min.js','vendor/katex/katex.min.css'):
         html=html.replace(f'/static/{name}"',f'/static/{name}?v={sha256((WEB/name).read_bytes()).hexdigest()}"')
-    return HTMLResponse(html)
+    return HTMLResponse(workspace_chrome(html, "budget", WEB))
 
 
 @router.get('/api/system-budget')

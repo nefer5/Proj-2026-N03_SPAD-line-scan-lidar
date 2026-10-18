@@ -10,18 +10,18 @@
 
 角域共用原点便于比较，不声明实物收发共轴。纵向距离与横向投影分别缩放，画面标明放大倍率；H/V横向比例一致。光源、入瞳与探测器采用展开示意，器件位置不作为已知尺寸。探测器网格使用实际像素边界，颜色来自独立单通道B光学核心的探测面能量；大型阵列可按显式显示限额转为通道组或仅轮廓，计算采样不变。
 
-1. 通过项目启动器打开系统预算页。默认工况为用户2026-10-03选定的页面配置，由config/defaults.yaml中的budget_*与共享基础值合并；点击“重新加载默认”即可恢复。此工况是分析输入，不是实物认证指标。独立Tx H宽与系统VFOV用于发光归一化，Rx单通道角域仍独立。
+1. 通过项目启动器打开系统预算页。初始工况由config/defaults.yaml中的budget_*与当前共享基础值合并；历史页面选择和后续共用默认更新不在本指南复制数值；点击“重新加载默认”即可恢复。此工况是分析输入，不是实物认证指标。独立Tx H宽与系统VFOV用于发光归一化，Rx单通道角域仍独立。
 2. 核对目标帧率、HFOV、时间利用率和列数，再调整每列发数、发射间隔、单发能量和接收门。
-3. 复位时间、电光效率、功率限额、直方图位宽/列头/净速率默认未知。按实物条件填写；不要用零表示未知。显式填写零复位表示理想假设。
+3. 复位时间、电光效率、功率限额和链路净速率等可保持未知；字宽/列头等是否已有数值以本次解析后的配置为准。按实物条件核对，不沿用旧指南对所有字段均为未知的描述，也不要用零表示未知。显式填写零复位表示理想假设。
 4. 点击“保存为对比基准”，再修改参数。输入修改后显示旧结果提示，成功计算后切换到新结果；计算失败保留旧结果和明确错误，不将它标成当前参数结果。
 5. 使用“导出工况”保存可导入的配置；“导出完整快照”保存完整结果、工况、算法、共享公式定义、时间、版本、指纹和可选基准。高级JSON支持未在简表展开的所有B参数。
 6. “送入B验证”将当前成功计算的静态光学/器件/采集配置送入B；不会触发采集。系统目标、复位、电热和PRBS预算不属于B，未随之执行。C可从顶部导航进入，需明确逐发计划及实际扫描几何。
 
 ## 默认值与计算入口
 
-- 配置总入口为 `SimulationConfig.for_experiment('budget', overrides)`；组合B工况、系统目标、预算假设和现有C transport配置。所有默认只读自 `config/defaults.yaml`，先校验完整默认，再合并用户覆盖。
+- 配置总入口为 `SimulationConfig.for_experiment('budget', overrides)`；组合B光学参考、系统目标、预算假设与预算专用transport/electrical配置，和C transport保持独立。所有默认只读自 `config/defaults.yaml`，先校验完整默认，再合并用户覆盖。
 - 新增假设位于 `experiments.budget`，未测量数值为 `null`。光谱使用现有Curve输入组件及Python积分，不维护第二组光谱标量。
-- `system_budget.py`复用 `uniform_column_budget` 和B的 `project_illumination`。展示公式维护在 `formulas.yaml` / `formula-notes.yaml`；光子链路复用 `photon-flow.yaml` 的spatial定义。
+- `system_budget.py`复用 `uniform_column_budget` 和公共 `optics/service.py:project_illumination`。展示公式维护在 `formulas.yaml` / `formula-notes.yaml`；光子链路复用 `photon-flow.yaml` 的spatial定义。
 - 时间图输出行数受 `algorithms.yaml` 的 `budget_timeline_max_pulses` 约束；截断只影响绘图，所有发数仍参与预算。
 - 表单枚举按字符串提交。JS只收集、显示及做单位/绘图坐标换算；预算运算在Python中完成。
 

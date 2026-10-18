@@ -55,3 +55,25 @@ class ScanSettings(StrictConfig):
 class SceneMotion(StrictConfig):
     range_gradient_m_per_rad: float
     radial_velocity_m_s: float = Field(gt=-C,lt=C)
+
+
+class ColumnMotion(StrictConfig):
+    trajectory: Literal['sawtooth','triangle','sinusoidal','static']
+    optical_multiplier: float
+    optical_offset_mrad: float
+    phase_offset_ns: float
+    laser_time_offset_ns: float
+    laser_jitter_std_ns: float = Field(ge=0)
+    encoder_latency_ns: float
+    encoder_angle_offset_mrad: float
+    rx_scan_scale: float
+    rx_angle_offset_mrad: float
+    channel_direction_mode: Literal['optical_centroid','explicit']
+    channel_h_mrad: list[float]
+    channel_v_mrad: list[float]
+
+
+
+class ScanAcquisition(ScanTiming):
+    calibration_delay_ns: float
+    rng_seed: int = Field(ge=0, strict=True)

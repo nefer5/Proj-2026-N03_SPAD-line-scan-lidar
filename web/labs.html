@@ -1,11 +1,11 @@
 <!doctype html>
 <html lang="zh-CN"><head><script src="/static/shared/units.js"></script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SPAD · 模块化研究台</title>
+<title>SPAD 器件研究 · 仿真工作台</title>
 <link rel="stylesheet" href="/static/styles.css"><link rel="stylesheet" href="/static/shared/labs.css">
-<link rel="stylesheet" href="/static/vendor/katex/katex.min.css"><link rel="stylesheet" href="/static/shared/theme.css"><script src="/static/shared/theme.js"></script></head>
+<link rel="stylesheet" href="/static/vendor/katex/katex.min.css"><link rel="stylesheet" href="/static/shared/theme.css"><script src="/static/shared/theme.js"></script><link rel="stylesheet" href="/static/shared/defaults.css"><script src="/static/shared/defaults.js"></script></head>
 <body data-lab="__KIND__">
-<header><div><p class="eyebrow">PHYSICS LAB / SHARED DETECTOR CORE</p><h1 id="title">SPAD 研究台</h1><p class="lede" id="subtitle">直接设定探测面入射光，研究器件与读出。</p><p id="sourceBanner" class="muted"></p></div>
-<nav class="toolbar"><a href="/system/budget">系统预算</a><a href="/spad">SPAD 研究</a><a href="/system">静态 B</a><a href="/system/scan">扫描 C</a><a href="/">A 单通道</a><a href="/debug">A 专家调试</a></nav></header>
+__PLATFORM_HEADER__
+<section class="page-intro"><div><p class="eyebrow">PHYSICS LAB / SHARED DETECTOR CORE</p><h1 id="title">SPAD 器件研究</h1><p class="lede" id="subtitle">直接设定探测面入射光，研究器件与读出。</p><p id="sourceBanner" class="muted"></p></div><nav class="page-tools"><a href="/debug">A 专家调试</a></nav></section>
 <main class="lab-layout"><aside class="panel controls">
 <div class="toolbar"><button class="primary" id="runLab">提交仿真</button><button id="resetLab">恢复默认</button></div>
 <div class="toolbar hidden" id="scanActions"><button id="previewScan">预览轨迹与发数</button></div>
@@ -15,7 +15,7 @@
 <div class="toolbar hidden" id="opticalFiles"><button id="exportOptics">导出当前光学数据</button><label class="file-button">导入光学数据<input id="importOptics" type="file" accept=".json,.yaml,.yml"></label></div>
 </aside><section class="lab-results">
 <div id="error" role="alert" class="lab-error hidden"></div>
-<section class="panel lab-card"><div class="card-heading"><h2>运行任务</h2><button id="refreshJobs">刷新任务</button></div><p class="muted">任务持续在后台运行。刷新页面后可继续查看。</p><div id="jobs"></div></section>
+<section class="panel lab-card jobs-card"><details id="labJobsDetails"><summary><strong>运行与历史任务</strong><span id="labJobsSummary">正在读取任务…</span></summary><div class="card-heading"><p class="muted">任务持续在后台运行。刷新页面后可继续查看。</p><button id="refreshJobs">刷新任务</button></div><div id="jobs"></div></details></section>
 <section class="panel lab-card hidden" id="scanPanel">
 <div class="card-heading"><h2>C · 逐脉冲扫描</h2><span id="scanViewStatus" class="muted"></span></div>
 <div id="scanMetrics" class="metric-grid"></div>

@@ -10,8 +10,8 @@ from .configuration import read_yaml
 from .curves import merge_config, Curve
 from .models import SimulationConfig
 from .spad.config import StrictConfig
-from .experiments.system_config import BSystemConfig
-from .experiments.spatial import project_illumination
+from .domains.optical_system import BSystemConfig
+from .optics import project_illumination
 from .scan.planning import SystemTargets, uniform_column_budget
 from .numerics.temporal import temporal_pdf, pulse_interval_fractions
 from .constants import C
@@ -81,12 +81,8 @@ def budget_channel_config(cfg,algorithms):
 
 
 def resolve_budget(overrides, algorithms):
-    sections = read_yaml('defaults.yaml')['experiments']
-    from .experiments.configuration import experiment_defaults
-    default_system=BSystemConfig.model_validate(experiment_defaults('system'))
-    values = dict(system=merge_config(default_system.model_dump(),sections['budget_system']),
-                  targets=SimulationConfig.system_targets({}).model_dump(),
-                  assumptions=sections['budget'], transport=sections['budget_transport'],geometry=sections['budget_geometry'],rx_channel=sections['budget_rx_channel'],electrical=sections['budget_electrical'],range_reference=sections['budget_range_reference'])
+    from .default_composition import compose_defaults
+    values = compose_defaults('budget').values
     HardwareBudgetConfig.model_validate(values)  # Validate defaults before applying any overrides.
     from .legacy_config import migrate_pulse_energy
     overrides=dict(overrides)

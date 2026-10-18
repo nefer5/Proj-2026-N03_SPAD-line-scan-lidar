@@ -1,0 +1,55 @@
+........................................................................ [ 14%]
+........................................................................ [ 29%]
+........................................................................ [ 44%]
+........................................................................ [ 59%]
+........................................................................ [ 74%]
+........................................................................ [ 89%]
+.............F...................................                        [100%]
+================================== FAILURES ===================================
+___________ test_missing_default_cannot_be_hidden_by_user_override ____________
+
+    def test_missing_default_cannot_be_hidden_by_user_override():
+        snapshot=copy.deepcopy(yaml_snapshot())
+        snapshot['defaults.yaml']['experiments']['system_targets'].pop('hfov_deg')
+        with frozen_yaml(snapshot),pytest.raises(ValidationError):
+>           SimulationConfig.system_targets({'hfov_deg':120})
+
+tests\test_system_planning.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+src\spad_lidar\models.py:48: in system_targets
+    return resolve_system_targets(overrides)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\spad_lidar\scan\planning.py:22: in resolve_system_targets
+    values=normalize_layout(read_yaml('defaults.yaml')).document['domains']['system_targets']
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+src\spad_lidar\default_layout.py:121: in normalize_layout
+    _validate_layout(layout.document)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+doc = {'domains': {'acquisition': {'calibration_delay_ns': 0, 'frame_count': 1, 'gate_start_ns': 0, 'gate_width_ns': 2048, .... 0.8, 'angle_bin_max_mrad': 20, 'angle_bin_min_mrad': -20, 'angle_bin_width_mrad': 2, ...}}, ...}, 'schema_version': 2}
+
+    def _validate_layout(doc):
+        from .scan.config import ColumnMotion, SceneMotion
+        from .scan.planning import SystemTargets
+        expected = {
+            'tx': set(TxConfig.model_fields), 'scene': set(SceneConfig.model_fields),
+            'rx': set(RxConfig.model_fields), 'spad': set(SpadArrayConfig.model_fields),
+            'readout': set(ReadoutConfig.model_fields), 'background': set(BackgroundConfig.model_fields),
+            'acquisition': set(A_GROUPS['acquisition']) | {'frame_count'},
+            'spectral_inputs': {'filter', 'other', 'pde', 'solar'},
+            'motion': set(ColumnMotion.model_fields), 'scene_motion': set(SceneMotion.model_fields),
+            'system_targets': set(SystemTargets.model_fields),
+        }
+        domains = get(doc, ('domains',))
+        if not isinstance(domains, dict) or set(domains) != set(expected):
+            raise ValueError('defaults.yaml domain groups are missing or unknown')
+        for group, keys in expected.items():
+            value = domains[group]
+            if not isinstance(value, dict) or set(value) != keys:
+>               raise ValueError(f'defaults.yaml domains.{group} fields are missing or unknown')
+E               ValueError: defaults.yaml domains.system_targets fields are missing or unknown
+
+src\spad_lidar\default_layout.py:143: ValueError
+=========================== short test summary info ===========================
+FAILED tests/test_system_planning.py::test_missing_default_cannot_be_hidden_by_user_override
+1 failed, 480 passed in 115.43s (0:01:55)

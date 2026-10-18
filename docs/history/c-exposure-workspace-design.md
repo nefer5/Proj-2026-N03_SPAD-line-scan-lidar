@@ -1,3 +1,5 @@
+> **历史资料，仅供追溯，不是现行规范。** 文中“当前”、数值和验证状态指记录当时。现行入口见[文档目录](../index.md)、[架构](../design/architecture.md)和[路标](../roadmap.md)。
+
 # C 线扫曝光与资源规划工作台：历史设计草案
 
 > 本文保留实施前的设计讨论与预览记录；下文“待审核/待实现”描述当时状态。当前实现见[列级扫描](../models/column-scanning.md)，后续计划见[路标](../roadmap.md)；[C人工精细验收](../validation/c-manual-review.md)仍待完成。

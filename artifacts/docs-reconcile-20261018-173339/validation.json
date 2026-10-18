@@ -1,0 +1,299 @@
+{
+  "ok": true,
+  "markdown_documents": 47,
+  "local_links_checked": 330,
+  "broken_links": [],
+  "protected_source_config_frontend": 177,
+  "altered_protected_files": [],
+  "originals_preserved_in": "before.zip",
+  "archive_map": {
+    "docs/models/scanning.md": "docs/history/legacy-periodic-scanning.md",
+    "docs/models/detection-performance.md": "docs/references/legacy-detection-performance.md",
+    "docs/design/lidar-3d-schematic-prompt.md": "docs/references/lidar-3d-schematic-prompt.md",
+    "docs/design/architecture.md": "docs/history/architecture-before-c4-20261018.md",
+    "docs/guides/debug-guide.md": "docs/history/debug-guide-through-v0.2.md",
+    "docs/guides/histogram-display.md": "docs/history/histogram-guide-before-20261018.md",
+    "docs/design/column-accumulation-design.md": "docs/history/column-accumulation-discussion-20260925.md",
+    "README.md": "docs/history/readme-before-docs-reconcile-20261018.md"
+  },
+  "redirect_stubs": [
+    "docs/design/lidar-3d-schematic-prompt.md",
+    "docs/models/detection-performance.md",
+    "docs/models/scanning.md"
+  ],
+  "changed_original_documents": [
+    "README.md",
+    "AGENTS.md",
+    "docs/design/architecture-decisions.md",
+    "docs/design/architecture.md",
+    "docs/design/column-accumulation-design.md",
+    "docs/design/lidar-3d-schematic-prompt.md",
+    "docs/design/spad-data-timing-design.md",
+    "docs/guides/debug-guide.md",
+    "docs/guides/histogram-display.md",
+    "docs/guides/system-budget.md",
+    "docs/history/2026-10-03-hardware-budget-phase.md",
+    "docs/history/a-review.md",
+    "docs/history/c-exposure-workspace-design.md",
+    "docs/history/c-implementation-progress.md",
+    "docs/history/model-design.md",
+    "docs/history/readme-through-0.6.0.md",
+    "docs/index.md",
+    "docs/models/column-scanning.md",
+    "docs/models/detection-performance.md",
+    "docs/models/noise-model.md",
+    "docs/models/readout-modes.md",
+    "docs/models/scanning.md",
+    "docs/models/spatial-optics.md",
+    "docs/models/spectral-background.md",
+    "docs/release-notes.md",
+    "docs/roadmap.md"
+  ],
+  "classifications": [
+    {
+      "path": "README.md",
+      "status": "current",
+      "sha256": "78feafd2feca50eb5b3c8bc9e8388997fafba0973eb08b533fb97871bed24c28"
+    },
+    {
+      "path": "AGENTS.md",
+      "status": "current",
+      "sha256": "f07800e387cff3a88458af5dbbc63e054fe12eb64f6097aef9220352b10ecb45"
+    },
+    {
+      "path": "docs/design/architecture-decisions.md",
+      "status": "dated decision authority; current implementation via architecture/roadmap",
+      "sha256": "a09b004ce58680c97cc0d0b52802b53e411a012151fc401b6da6845ccb15f5b9"
+    },
+    {
+      "path": "docs/design/architecture.md",
+      "status": "current",
+      "sha256": "54a9f1af96ab2655d028cba3a1446ef5af05708786e0ff33636e48b4781fcc3c"
+    },
+    {
+      "path": "docs/design/column-accumulation-design.md",
+      "status": "current",
+      "sha256": "dc7797f49574ae2954725301ca23d6f15f4ab6fff57b70e1dcc4c0627efcee20"
+    },
+    {
+      "path": "docs/design/lidar-3d-schematic-prompt.md",
+      "status": "redirect-only",
+      "sha256": "afd420f93d6c4d32ac55cd44541ee9f9fe7e800577dcf96d88c03e8c50da7432"
+    },
+    {
+      "path": "docs/design/spad-data-timing-design.md",
+      "status": "current",
+      "sha256": "b0d706198b3d460f7fc648b4afe87888dfdb34e161ada021ba4807281167aa88"
+    },
+    {
+      "path": "docs/design/ui-design-guidelines.md",
+      "status": "current",
+      "sha256": "f4e36b723fa391e16c15dd642307e533a0b804ee7f52bcbef13234a33c2902f8"
+    },
+    {
+      "path": "docs/guides/configuration-and-data.md",
+      "status": "current",
+      "sha256": "eb673e30ddcf33b7e1145c16bfa040b2aca0fcd49d555b84b990ca5b10bd162f"
+    },
+    {
+      "path": "docs/guides/debug-guide.md",
+      "status": "current",
+      "sha256": "a13dc757cc39248d6f88f0680f7f58adb39bfc989221289b997c12837f8e6b56"
+    },
+    {
+      "path": "docs/guides/histogram-display.md",
+      "status": "current",
+      "sha256": "6ea6ca060c5c9e702a51f10d2663787bc8f5efee3b3e29ec167bfc76373d0a87"
+    },
+    {
+      "path": "docs/guides/launcher.md",
+      "status": "current",
+      "sha256": "bddabfe7a3dda869d4e3b4f4bb1289fe9753b973af2d8c64c5bbf1f31726943a"
+    },
+    {
+      "path": "docs/guides/run-artifacts.md",
+      "status": "current",
+      "sha256": "5a8e9e5428117362978763af771d2163657345ee8245c5d3054ea952edb79b6a"
+    },
+    {
+      "path": "docs/guides/system-budget.md",
+      "status": "current",
+      "sha256": "b6eb0a25e4855efb51c85f837a06caa2247b4b7fd893d992eddb95989bf41454"
+    },
+    {
+      "path": "docs/guides/threejs.md",
+      "status": "current",
+      "sha256": "538f59824e31923e9e4ee6db23a5ca75521d9b7c966a37534a0128a89119963d"
+    },
+    {
+      "path": "docs/history/2026-10-03-hardware-budget-phase.md",
+      "status": "historical-only",
+      "sha256": "a9beb4e43439fd51c9110f558ffc47fd20f1373d279a3e150ffb399c7ccb2dd2"
+    },
+    {
+      "path": "docs/history/a-review.md",
+      "status": "historical-only",
+      "sha256": "0e842706ea03973dfca348618f2e01356bb94560de401df725374e850b2a398f"
+    },
+    {
+      "path": "docs/history/architecture-before-c4-20261018.md",
+      "status": "historical-only",
+      "sha256": "fba4bfd774fd490e0a4fbd5261b184e52a93ac34ee039af86f205f27a514a032"
+    },
+    {
+      "path": "docs/history/c-exposure-workspace-design.md",
+      "status": "historical-only",
+      "sha256": "28175cdfc9046ff4a78632c82589ea1ef78b052b4b6929e08d8f189eca70439e"
+    },
+    {
+      "path": "docs/history/c-implementation-progress.md",
+      "status": "historical-only",
+      "sha256": "783832bb9ea356e0370cd89d93d3213b9a166c0019f3fc2e6987af008020d355"
+    },
+    {
+      "path": "docs/history/column-accumulation-discussion-20260925.md",
+      "status": "historical-only",
+      "sha256": "ef4cd8065019677652b0e5fffb71679bd09dc8b49195748323728482176003b0"
+    },
+    {
+      "path": "docs/history/debug-guide-through-v0.2.md",
+      "status": "historical-only",
+      "sha256": "e333ac6889589b54ae28a8be1ab8280209aa813428e51afd0da87681f4409764"
+    },
+    {
+      "path": "docs/history/histogram-guide-before-20261018.md",
+      "status": "historical-only",
+      "sha256": "c53dd1d3ff4a3a02379fd815e276a9c7b1d2b6a691d373cb30075e467bf45fab"
+    },
+    {
+      "path": "docs/history/legacy-periodic-scanning.md",
+      "status": "historical-only",
+      "sha256": "16db7b81fa16636760c61dcc19a3759ea3c1524460e9803bd6a36b31c44b9fd5"
+    },
+    {
+      "path": "docs/history/model-design.md",
+      "status": "historical-only",
+      "sha256": "83a14880e09cf16f63ae95d257956239212a939710be9bb8545809fe95be8c56"
+    },
+    {
+      "path": "docs/history/readme-before-docs-reconcile-20261018.md",
+      "status": "historical-only",
+      "sha256": "e059fa50310363dc888355f1a2db1f7d7a850fe9b4257fee3a935c787fbb32a7"
+    },
+    {
+      "path": "docs/history/readme-through-0.6.0.md",
+      "status": "historical-only",
+      "sha256": "d5f6ae86a316ec3a8fcf4ea536d5b88f6665e662d2f9d9c4667005f1e30955bb"
+    },
+    {
+      "path": "docs/history/README.md",
+      "status": "historical-only",
+      "sha256": "9f5e1d67f05c8ff87a9e64b8c07578f155669546acb893d280b11d2c3b2f4803"
+    },
+    {
+      "path": "docs/index.md",
+      "status": "current",
+      "sha256": "449293aafe314cf974775c97612b3cfd190ac4dfc164783ce721b4925ded1f63"
+    },
+    {
+      "path": "docs/models/binning.md",
+      "status": "current",
+      "sha256": "1694c41860014da974c624e44c6d841473adf24458b930871916b4e53e104709"
+    },
+    {
+      "path": "docs/models/column-scanning.md",
+      "status": "current",
+      "sha256": "e99d24d8ebdf17577aa651f63b870e9f2bca73e8dc60046b0dab4a96853cb94b"
+    },
+    {
+      "path": "docs/models/curve-inputs.md",
+      "status": "current",
+      "sha256": "979fdd16b92228d2c7b35a90cdeee9c0d3be8b27d09828bc46c94faba13adf9d"
+    },
+    {
+      "path": "docs/models/detection-performance.md",
+      "status": "redirect-only",
+      "sha256": "3c801f56ad0787597533fc2ed516b693fbe5a3b874e1cf9fd0c8a1ed226f5cc1"
+    },
+    {
+      "path": "docs/models/noise-model.md",
+      "status": "current",
+      "sha256": "4fb3328bdbca694ab94172eaec09229191a7794a02f8beb641931979e79c5951"
+    },
+    {
+      "path": "docs/models/photon-budget.md",
+      "status": "generated-current; checked against shared YAML",
+      "sha256": "9dab8096e72fd20f41c2cfece1449e30279250651319b7bd6b270acbe1209c08"
+    },
+    {
+      "path": "docs/models/readout-modes.md",
+      "status": "current",
+      "sha256": "af436914547db588c95c0cfbd4f9381c5fd11ea21d779f9aa3df503f7dedcb41"
+    },
+    {
+      "path": "docs/models/scanning.md",
+      "status": "redirect-only",
+      "sha256": "28a231f585b83140bd8ab7ca1520b9d3dcd711ecfebf225b9fc8216704ad5e2f"
+    },
+    {
+      "path": "docs/models/spatial-optics.md",
+      "status": "current",
+      "sha256": "208395759e2a138249591fdf6d5449accdd13333462245f416d9aeae8023ad07"
+    },
+    {
+      "path": "docs/models/spatial-profiles.md",
+      "status": "generated-current; checked against shared YAML",
+      "sha256": "7681aaddcacb5869dca9010b9b320dc63188e8d663d7c262beb8eae4ccfdaf34"
+    },
+    {
+      "path": "docs/models/spectral-background.md",
+      "status": "current",
+      "sha256": "4f012dd985ae7f56d7c9c7426e6e311d6082ce5fe56bdcaa56c5884a9b858d99"
+    },
+    {
+      "path": "docs/references/legacy-detection-performance.md",
+      "status": "reference/compatibility, not current defaults",
+      "sha256": "c7c1ead22b90ce464c9e88b9e941283ad707cc2a00a4947a5afa577b2185ea76"
+    },
+    {
+      "path": "docs/references/lidar-3d-schematic-prompt.md",
+      "status": "reference/compatibility, not current defaults",
+      "sha256": "c0af919626729316c69d06c825b2609674bfa4012fdf62fe41ea36db2b1310a6"
+    },
+    {
+      "path": "docs/references/pde-literature.md",
+      "status": "reference/compatibility, not current defaults",
+      "sha256": "8f84da26282bfb4f5a30771ad72d8b9f7d15f46c720c939248b773f14d7bcd2e"
+    },
+    {
+      "path": "docs/references/sony-reference.md",
+      "status": "reference/compatibility, not current defaults",
+      "sha256": "58b197d0ff8239bff1843524e0c31c9fb2c74a8db914b310ff114f79a246c2d0"
+    },
+    {
+      "path": "docs/release-notes.md",
+      "status": "dated release history; not current specification",
+      "sha256": "49c11beea24b17767c7dc445e5b5bfbfe0b32cf5ed7cab556fd05358d459fd9f"
+    },
+    {
+      "path": "docs/roadmap.md",
+      "status": "current",
+      "sha256": "aec153597b451ec6a2e56d2c6d0b6a4aab4ab239278002bddc80b33cb4527fad"
+    },
+    {
+      "path": "docs/validation/c-manual-review.md",
+      "status": "current",
+      "sha256": "4a361b746a7cbcac2633069f66422e4d74ba7c2a17d64330177f3b6be4ef5764"
+    }
+  ],
+  "code_or_config_changes": false,
+  "current_authorities": {
+    "navigation": "docs/index.md",
+    "structure": "docs/design/architecture.md",
+    "configuration_and_user_data": "docs/guides/configuration-and-data.md",
+    "decisions": "docs/design/architecture-decisions.md",
+    "implementation_and_acceptance": "docs/roadmap.md",
+    "defaults": "config/defaults.yaml",
+    "policy": "AGENTS.md"
+  }
+}

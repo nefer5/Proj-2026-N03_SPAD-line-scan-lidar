@@ -1,0 +1,34 @@
+(async () => {
+  const assert = (ok, why) => { if (!ok) throw Error(why); };
+  const canvas = document.querySelector('#histZoom'), overview = document.querySelector('#histFull');
+  const before = [document.querySelector('#histWindowStart').value, document.querySelector('#histWindowEnd').value];
+  const writes = [], fetch = window.fetch;
+  window.fetch = function(url, options) {
+    if (options?.method && options.method !== 'GET') writes.push(String(url));
+    return fetch.apply(this, arguments);
+  };
+  const theme = document.documentElement.dataset.auditTheme;
+  if (document.documentElement.dataset.theme !== theme) document.querySelector('#themeToggle').click();
+  await new Promise(resolve => setTimeout(resolve, 150));
+  const rgb = value => value.startsWith('#') ? value.slice(1).match(/../g).map(x=>parseInt(x,16)) : value.match(/[\d.]+/g).slice(0,3).map(Number);
+  const luminance = value => rgb(value).map(x=>x/255).map(x=>x<=.04045?x/12.92:((x+.055)/1.055)**2.4).reduce((s,x,i)=>s+x*[.2126,.7152,.0722][i],0);
+  const contrast = (a,b) => { const aa=luminance(a),bb=luminance(b);return (Math.max(aa,bb)+.05)/(Math.min(aa,bb)+.05); };
+  const background = getComputedStyle(canvas).backgroundColor;
+  const colors = Object.fromEntries(['grid','axis','text'].map(role=>[role,LidarTheme.plotColor(role)]));
+  const ratios = Object.fromEntries(Object.entries(colors).map(([role,value])=>[role,contrast(value,background)]));
+  assert(ratios.grid >= 3, '网格对比不足：'+ratios.grid);
+  assert(ratios.axis >= 4.5 && ratios.text >= 4.5, '坐标轴或文字对比不足');
+  assert(canvas.dataset.axisFont === '13' && overview.dataset.axisFont === '13', '坐标字号未生效');
+  assert(JSON.stringify(before) === JSON.stringify([document.querySelector('#histWindowStart').value, document.querySelector('#histWindowEnd').value]), '换主题改变了观察窗口');
+  const center=[(Number(before[0])+Number(before[1]))/2],span=Number(before[1])-Number(before[0]);
+  document.querySelector('#histWindowStart').value=String(center[0]-span/4);
+  document.querySelector('#histWindowEnd').value=String(center[0]+span/4);
+  document.querySelector('#histWindowApply').click();
+  document.querySelector('#histWindowStart').value=before[0];
+  document.querySelector('#histWindowEnd').value=before[1];
+  document.querySelector('#histWindowApply').click();
+  window.fetch = fetch;
+  assert(writes.length === 0, '主题或观察窗口调整触发采集');
+  assert(document.documentElement.scrollWidth <= innerWidth + 1, '页面横向溢出');
+  return {theme,viewport:[innerWidth,innerHeight],background,colors,contrast:ratios,font:canvas.getContext('2d').font,writes};
+})();

@@ -11,7 +11,7 @@ from ..scan.column_schedule import build_column_schedule,scheduled_energy,acquis
 from ..scan.column_optics import ColumnPulseProjection
 from ..scan.trajectory import mirror_pose
 from ..scan.transport import transport_plan
-from ..experiments.spatial import project_illumination
+from ..optics import project_illumination
 from ..experiments.columns import noise_resource_probe
 from ..experiments.lab import stamp_result
 from ..spad.device import effective_pde
@@ -35,7 +35,7 @@ def motion_view(cfg,a,rows,column_id):
     ranges=sorted(set([*a.performance_sweep_range_values,cfg.scene.range_m]))
     output=[];previous={};table=None
     if cfg.rx.rx_model not in ('gaussian_psf','super_gaussian_psf'):
-        from ..experiments.spatial import optical_dataset
+        from ..optics import optical_dataset
         from ..rx.response import ReceiverResponse
         rx=optical_dataset(cfg,a).rx;table=ReceiverResponse(rx,cfg.optics,a)
         xc=(np.asarray(rx.x_edges_um[:-1])+rx.x_edges_um[1:])/2

@@ -17,14 +17,12 @@ from ..tx import transmit
 from ..numerics.temporal import pulse_interval_fractions
 from ..spad.source import sample_varying_candidates
 from ..spad.device import effective_pde
-from .spatial import project_illumination
+from ..optics import project_illumination
 from .system_config import BSystemConfig
 from .lab import acquire_candidates,stamp_result
 
 
-class ScanAcquisition(ScanTiming):
-    calibration_delay_ns: float
-    rng_seed: int = Field(ge=0,strict=True)
+from ..scan.config import ScanAcquisition  # Compatibility export.
 
 
 class ScanConfig(BSystemConfig):

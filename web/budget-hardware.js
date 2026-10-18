@@ -22,8 +22,9 @@
   return '<h3>MIPI最忙链路 · 一帧输出包范围</h3><svg viewBox="0 0 920 151" role="img" aria-label="MIPI逐列输出与帧截止时间">'+body+'</svg>';
  }
  function curve(points,measured,key,mkey,title,unit){const valid=points.filter(p=>p[key]!==null),lo=points[0].distance_m,hi=points[points.length-1].distance_m,values=[...valid.map(p=>p[key]),...measured.filter(p=>p[mkey]!==null).map(p=>p[mkey])],max=Math.max(0,...values)||1,x=v=>60+(v-lo)/(hi-lo)*310,y=v=>180-v/max*135;
-  let b='<path d="M60 28V180H370" class="detail-axis"/>';
-  for(let i=0;i<=3;i++){const value=max*i/3,xx=lo+(hi-lo)*i/3;b+=`<path d="M60 ${y(value)}H370" class="detail-grid"/><text x="52" y="${y(value)+4}" text-anchor="end">${f(value)}</text><text x="${x(xx)}" y="201" text-anchor="middle">${f(xx)}</text>`;}
+  let b='';
+  for(let i=0;i<=3;i++){const value=max*i/3,xx=lo+(hi-lo)*i/3;b+=`<path d="M60 ${y(value)}H370 M${x(xx)} 28V180" class="detail-grid"/><text x="52" y="${y(value)+4}" text-anchor="end">${f(value)}</text><text x="${x(xx)}" y="201" text-anchor="middle">${f(xx)}</text>`;}
+  b+='<path d="M60 28V180H370" class="detail-axis"/>';
   b+=`<polyline points="${valid.map(p=>x(p.distance_m)+','+y(p[key])).join(' ')}" class="reference-line"/>`;
   for(const p of measured)if(p[mkey]!==null&&p.distance_m>=lo&&p.distance_m<=hi)b+=`<circle cx="${x(p.distance_m)}" cy="${y(p[mkey])}" r="4" class="reference-measured"><title>实测 ${f(p.distance_m)}m / ${f(p[mkey])}${unit}</title></circle>`;
   b+=`<text x="16" y="20">${unit}</text><text x="370" y="222" text-anchor="end">距离 / m →</text>`;

@@ -1,0 +1,26 @@
+[
+  {
+    "page": "a",
+    "light_theme": true,
+    "ordinary_reload": true,
+    "console_errors": ""
+  },
+  {
+    "page": "budget",
+    "light_theme": true,
+    "ordinary_reload": true,
+    "console_errors": ""
+  },
+  {
+    "page": "b",
+    "light_theme": true,
+    "ordinary_reload": true,
+    "console_errors": ""
+  },
+  {
+    "page": "c",
+    "light_theme": true,
+    "ordinary_reload": true,
+    "console_errors": ""
+  }
+]

@@ -1,6 +1,6 @@
-# A版数字SPAD读出模式
+# 数字SPAD读出模式与初始化
 
-本轮实现7类可参数化数字dToF架构，外加1个理想解析参考。分类参考 [Incoronato等，Statistical Modelling of SPADs for Time-of-Flight LiDAR，2021](https://doi.org/10.3390/s21134481) 的single-hit、multi-hit、coincidence、gating与multi-TDC讨论；这里的离散事件实现与仲裁约定是本项目明确选择的模型，不代表所有芯片都采用相同细节。
+公共事件核心支持7类可参数化数字dToF架构；A另有理想解析参考，SPAD/B/C事件采集不使用该解析模式。分类参考 [Incoronato等，Statistical Modelling of SPADs for Time-of-Flight LiDAR，2021](https://doi.org/10.3390/s21134481) 的single-hit、multi-hit、coincidence、gating与multi-TDC讨论；这里的离散事件实现与仲裁约定是本项目明确选择的模型，不代表所有芯片都采用相同细节。
 
 | 模式ID | 逻辑 | TDC/容量 | 时间戳约定 |
 |---|---|---|---|

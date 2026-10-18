@@ -19,8 +19,8 @@ const local=plot.scales(data,[0,1],[0,1],layers,false);
 assert(local[0].max<local[1].max);assert(local[0].max<a[0].max);
 assert.equal(plot.scales(data,[0],[0,1],layers,true)[0].max,a[0].max);
 const labels=[],bars=[];
-const context={scale(){},clearRect(){},beginPath(){},moveTo(){},lineTo(){},stroke(){},save(){},rect(){},clip(){},restore(){},
- fillRect(...v){bars.push(v)},fillText(text,x,y){if(x<43)labels.push({text,y})}};
+const context={measureText:text=>({width:String(text).length*7}),setLineDash(){},scale(){},clearRect(){},beginPath(){},moveTo(){},lineTo(){},stroke(){},save(){},rect(){},clip(){},restore(){},
+ fillRect(...v){bars.push(v)},fillText(text,x,y){if(x<58)labels.push({text,y})}};
 const canvas={width:0,height:0,dataset:{},getBoundingClientRect:()=>({width:600,height:240}),getContext:()=>context};
 plot.draw(canvas,data,0,[0,1],2.3,layers);
 assert.deepEqual(labels.map(x=>x.text),['0','1','2','3']);

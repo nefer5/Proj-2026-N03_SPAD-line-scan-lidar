@@ -2,7 +2,8 @@
 from dataclasses import replace
 from types import SimpleNamespace
 import numpy as np
-from .spatial import project_illumination, finish_system, system_program
+from ..optics import project_illumination
+from .spatial import finish_system, system_program
 from .lab import run_illumination
 from .system_config import BSystemConfig
 from ..curves import Curve
@@ -11,6 +12,8 @@ from ..contracts.spectral_product import zero_spectral
 from ..processing.statistics import histogram_sample_range
 from ..reporting.a_view import signal_ground_truth
 from ..reporting.spatial_view import optical_view
+from ..acquisition.trials import TrialPlan
+from ..acquisition.executor import execute_trials
 
 
 def with_seed(cfg,seed):
@@ -40,14 +43,15 @@ def channel_references(cfg,a,light,groups,edges,bin_ps):
 
 def run_system_analysis(cfg,a,progress,cancelled):
     repeats=cfg.acquisition.monte_carlo_trials
-    actual=max(1,repeats)
     noise_trials=a.readout_expected_trials if a.b_noise_reference=='sampled_output_mean' else 0
+    plan=TrialPlan((('observation',1),('repeat',max(0,repeats-1)),('noise',noise_trials)))
+    actual=plan.count('observation')+plan.count('repeat')
     channels=cfg.spad.channels_h*cfg.spad.channels_v
     bins=int(np.ceil(cfg.timing.gate_width_ns*1000/cfg.readout.tdc_bin_ps))
     if (actual+noise_trials)*channels*bins>a.max_lab_analysis_histogram_cells:
         raise ValueError('Repeated histogram arrays exceed max_lab_analysis_histogram_cells')
     light,groups,optics=project_illumination(cfg,a,progress,cancelled)
-    total=actual+noise_trials
+    total=plan.total
     program=system_program(cfg,a)
     def acquire(c,source,index,label):
         if cancelled():raise InterruptedError('Cancelled between repeated acquisitions')
@@ -60,15 +64,19 @@ def run_system_analysis(cfg,a,progress,cancelled):
     trials=[first['histogram']['counts']] if repeats else []
     trial_seeds=[cfg.rng_seed] if repeats else []
     streams=a.lab_analysis_seed_streams
-    seeds=np.random.SeedSequence(cfg.rng_seed,spawn_key=(streams['trials'],)).spawn(max(0,repeats-1))
-    for i,sequence in enumerate(seeds,1):
-        seed=int(sequence.generate_state(1)[0]);out=acquire(with_seed(cfg,seed),light,i,'重复采集与误差棒')
+    seeds=np.random.SeedSequence(cfg.rng_seed,spawn_key=(streams['trials'],)).spawn(plan.count('repeat'))
+    def repeated(index):
+        seed=int(seeds[index].generate_state(1)[0])
+        return seed,acquire(with_seed(cfg,seed),light,index+1,'重复采集与误差棒')
+    for seed,out in execute_trials(plan,'repeat',repeated):
         trials.append(out['histogram']['counts']);trial_seeds.append(seed)
     noise_source=replace(light,signal_photons_per_pulse=zero_spectral(light.signal_photons_per_pulse))
     noise=[];noise_seeds=[]
     sequences=np.random.SeedSequence(cfg.rng_seed,spawn_key=(streams['noise'],)).spawn(noise_trials)
-    for i,sequence in enumerate(sequences):
-        seed=int(sequence.generate_state(1)[0]);out=acquire(with_seed(cfg,seed),noise_source,actual+i,'纯噪声期望')
+    def pure_noise(index):
+        seed=int(sequences[index].generate_state(1)[0])
+        return seed,acquire(with_seed(cfg,seed),noise_source,actual+index,'纯噪声期望')
+    for seed,out in execute_trials(plan,'noise',pure_noise):
         noise.append(out['histogram']['counts']);noise_seeds.append(seed)
     result=finish_system(cfg,a,first,light,groups,optics)
     bounds=histogram_sample_range(trials)

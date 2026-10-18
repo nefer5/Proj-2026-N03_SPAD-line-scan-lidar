@@ -3,7 +3,7 @@
  */
 (function(){
 'use strict';
-const fmt=(n,d=2)=>Number(n).toLocaleString('en-US',{maximumFractionDigits:d});
+const fmt=(n,d=2)=>LidarNumbers.format(Number(n));
 const number=n=>n!==0&&Math.abs(n)<.001?n.toExponential(3):fmt(n,3);
 const id=n=>String(n).padStart(2,'0');
 const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

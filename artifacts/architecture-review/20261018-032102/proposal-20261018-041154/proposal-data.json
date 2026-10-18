@@ -1,0 +1,145 @@
+{
+  "status": "discussion-only",
+  "implemented": false,
+  "basis": "a19f273d2c3c74db065e5601f7f7bd3cea6c1864",
+  "updated": "2026-10-18",
+  "headline": "三个工作台 · 五种研究模式 · 一套公共采集核心",
+  "changes": [
+    {
+      "area": "页面与工作台",
+      "action": "整合入口",
+      "kind": "merge",
+      "current": "A、SPAD、B、C、预算各自页面和控制器。",
+      "proposed": "器件、LiDAR、系统方案三个工作台；LiDAR 内保留 A/B/C 模式。",
+      "boundary": "先共用外壳、任务和结果浏览；不把五种物理问题改成一个大表单。"
+    },
+    {
+      "area": "重复实验编排",
+      "action": "提取共用",
+      "kind": "merge",
+      "current": "A 三种统计计数；B 重复/噪声参考；C 重复记录各自编排。",
+      "proposed": "TrialPlan 明确角色、次数、首份观测、初始状态、seed 与保存级别；公共执行器运行。",
+      "boundary": "保留历史 RNG、各统计意义、取消检查与资源保护。"
+    },
+    {
+      "area": "光学组合",
+      "action": "下沉复用",
+      "kind": "merge",
+      "current": "空间投影位于 experiments/spatial.py；C、预算、部分视图调用。",
+      "proposed": "optics/ 提供照明、pixel_groups 和 OpticalAudit；Tx/scene/Rx 基础实现继续保留。",
+      "boundary": "A 单角适配、B 静态与 C 逐发姿态仍为不同策略；A 不自动等于 B 单通道。"
+    },
+    {
+      "area": "配置领域",
+      "action": "定义统一",
+      "kind": "merge",
+      "current": "A 扁平、Lab 分组、B 领域、C 继承 B、预算嵌套完整 B。",
+      "proposed": "领域类型放 domains/；各用例按需组合，不共享完整实验配置。",
+      "boundary": "默认仍仅 YAML；SPAD 无需填写孔径，预算无需构造采集作业。"
+    },
+    {
+      "area": "器件与读出核心",
+      "action": "继续复用",
+      "kind": "reuse",
+      "current": "四条事件路径已调用同一 AcquisitionSession。",
+      "proposed": "spad/ 保持独立、可注入和可测试，公共执行器消费它。",
+      "boundary": "核心不反向依赖网页、任务、整机配置或光学层。"
+    },
+    {
+      "area": "记录与处理",
+      "action": "按契约提取",
+      "kind": "merge",
+      "current": "A 直接直方图，B 周期记录，C 含列/绝对时间/门碎片。",
+      "proposed": "共用量化纯函数、直方图、测距和统计；保留 periodic / columns 适配。",
+      "boundary": "时间原点、TDC 身份和列归属不可悄悄改；真值仍与观测分开。"
+    },
+    {
+      "area": "SPAD / A / B / C 模式",
+      "action": "保留用例",
+      "kind": "keep",
+      "current": "输入参考面和实验问题不同。",
+      "proposed": "保留四个薄用例，选择照明、时序、记录和结果适配器。",
+      "boundary": "A 解析参考、历史数值/RNG、SPAD 直照、C 跨列连续状态继续明确。"
+    },
+    {
+      "area": "系统预算",
+      "action": "保持独立",
+      "kind": "keep",
+      "current": "确定性预算，借用 B 单角光学参考，不执行完整事件采集。",
+      "proposed": "system/budget.py 消费公共光学与领域类型，输出预算约束与方案比较。",
+      "boundary": "候选期望不当成混合记录；未知参数不按零计算。"
+    },
+    {
+      "area": "C / 预算输出调度",
+      "action": "统一接口 · 策略独立",
+      "kind": "keep",
+      "current": "transport_plan 与 schedule_link 具有不同硬件假设。",
+      "proposed": "先定义工作负载/拓扑/调度结果接口，保留 column_transport 与 hardware_budget 两种策略。",
+      "boundary": "同工况验证后再决定能共享多少；不直接合并 payload/缓冲/丢列规则。"
+    },
+    {
+      "area": "历史入口与 C 复位",
+      "action": "单独处理",
+      "kind": "keep",
+      "current": "历史 C 与兼容导出仍在；C 列间完全复位未接入。",
+      "proposed": "迁移期间保留兼容入口；复位另设设计与验收任务。",
+      "boundary": "不把结构重排当成复位实现，不删除旧配置/基线。"
+    }
+  ],
+  "directory": "建议目录草案 · 以下新名称均未创建\n\nconfig/                          [保留] 默认、算法、帮助、公式仍唯一维护\nsrc/spad_lidar/\n├─ constants.py                 [保留] SI 常数\n├─ configuration.py             [保留] YAML 加载、校验、快照\n├─ legacy_config.py             [兼容] 历史配置迁移，不作为新参数源\n├─ contracts/                   [扩展] 照明、事件、程序、记录契约\n│  ├─ illumination.py           [保留] SensorIllumination\n│  ├─ events.py                 [保留] 候选事件、显式程序\n│  └─ records.py                [建议] 记录基础语义及扩展字段\n├─ domains/                     [建议提取] 共享领域类型，不存默认数值\n│  ├─ optical.py                Tx / scene / Rx / array\n│  ├─ acquisition.py            时序、初始状态和统计计划类型\n│  └─ hardware.py               硬件资源/预算配置，不捆绑 B 实验\n├─ optics/                      [建议提取] 光学组合服务\n│  ├─ service.py                照明 + pixel_groups + OpticalAudit\n│  └─ angular_reference.py      A / 预算各自参考策略，语义不混同\n├─ tx/ · scene/ · rx/            [保留] 公共光学基础计算\n├─ numerics/                    [保留] Curve、时间/空间数值\n├─ experiments/                 [精简] 每个文件只组装自己的研究用例\n│  ├─ direct_spad.py            [建议名] 探测面直接照明\n│  ├─ single_channel.py         [保留角色] A 单角/解析/兼容策略\n│  ├─ static_optical.py         [建议名] B 静态全光斑\n│  └─ column_scan.py            [建议名] C 显式扫描\n├─ acquisition/                 [建议提取] 实验编排，位于器件核心之上\n│  ├─ executor.py               公共执行/取消/限额/结果组织\n│  ├─ trials.py                 TrialPlan / 角色计数 / seed 分流\n│  └─ adapters/\n│     ├─ a_legacy.py            A 源与历史 RNG 兼容\n│     ├─ periodic.py            SPAD / B 周期记录\n│     └─ columns.py             C 门碎片/触发参考/列级记录\n├─ spad/                        [继续复用] 器件与数字读出公共核心\n│  ├─ acquisition.py            AcquisitionSession / evolve_program\n│  ├─ source.py                 公共固定/变化照明候选源\n│  ├─ device/                   恢复、响应和诊断\n│  └─ readout/                  OR / 符合 / TDC / FragmentAware\n├─ timing/ · scan/              [保留专用] 周期预设 / 扫描计划和轨迹\n├─ processing/                  [继续复用] 量化工具/重分箱/测距/统计\n├─ system/                      [建议整理] 系统研究，不归属于 B 采集\n│  ├─ budget.py                 确定性系统预算与方案约束\n│  └─ output/\n│     ├─ contracts.py           [先定义] 工作负载/拓扑/结果接口\n│     ├─ column_transport.py    [独立策略] C 记录驱动调度\n│     └─ hardware_budget.py     [独立策略] bank/chip/link/FIFO 预算\n├─ reporting/                   [收敛] 结果展示/审计装配，避免持有新物理公式\n├─ runtime/                     [保留] JobManager、进程池、任务快照\n└─ webapi/                      [薄路由] 调用用例与公共预览服务\n\nweb/\n├─ workbench.html               [建议] 共用外壳；旧 URL 可继续映射\n├─ workspaces/\n│  ├─ device.js                 独立 SPAD 工作台\n│  ├─ lidar.js                  A / B / C 三种模式\n│  └─ system-budget.js          系统方案工作台\n└─ shared/                      [继续复用] 表单、曲线、图表、单位、主题\n\ntests/                          [保留扩展] 数值基线、契约与跨平台对照\ndocs/                           [保留] 决策/模型/指南/验收\nartifacts/                      [保留] 结果/快照/图表，不放模型实现\n\n说明：acquisition/ 是上层实验执行，不替代 spad/acquisition.py 的状态核心。\n目录名是职责草案；迁移时先增加接口/兼容导出，再决定物理移动与命名。",
+  "mapping": [
+    [
+      "experiments/spatial.py",
+      "optics/service.py + experiments/static_optical.py",
+      "把公共光学投影与 B 用例组织拆开"
+    ],
+    [
+      "experiments/a_acquisition.py · spatial_analysis.py · columns.py",
+      "acquisition/trials.py + executor.py",
+      "提取重复计划/seed/取消/限额；专用源和记录适配保留"
+    ],
+    [
+      "experiments/system_config.py · configuration.py · scan/column_config.py",
+      "domains/* + 各 experiments 配置组合",
+      "共享领域类型，取消对完整 B 实验的过度依附"
+    ],
+    [
+      "spad/*",
+      "spad/*",
+      "继续复用现有核心，不复制也不为统一页面而重写"
+    ],
+    [
+      "system_budget.py · electrical_budget.py · budget_pipeline.py",
+      "system/budget.py + system/output/hardware_budget.py",
+      "整理预算职责，保持专用策略"
+    ],
+    [
+      "scan/transport.py",
+      "system/output/column_transport.py",
+      "在接口对齐之后评估移动，暂不合并调度算法"
+    ],
+    [
+      "web/app.js · shared/labs.js · system.js · columns.js · budget.js",
+      "web/workspaces/* + shared/*",
+      "外壳整合，研究模式、配置草稿和历史结果分开"
+    ]
+  ],
+  "phases": [
+    [
+      "1 · 契约",
+      "先确认参考面、时序、统计角色、记录身份与初始状态；不改现有数值。"
+    ],
+    [
+      "2 · 采集编排",
+      "提取 TrialPlan 与执行器，保留 A RNG/统计意义及各源/记录适配。"
+    ],
+    [
+      "3 · 光学与配置",
+      "下沉公共光学；配置按领域组合；保留退化对照与兼容导出。"
+    ],
+    [
+      "4 · 界面与系统",
+      "再整合三个工作台；C/预算输出接口对齐后做同工况对照。"
+    ]
+  ]
+}

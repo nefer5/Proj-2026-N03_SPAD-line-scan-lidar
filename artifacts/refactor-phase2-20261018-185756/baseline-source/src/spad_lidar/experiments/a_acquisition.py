@@ -1,0 +1,77 @@
+"""Independent A acquisitions start fully recovered and share the detector core."""
+import numpy as np
+from ..constants import C, FWHM_TO_SIGMA
+from .a_router import route_events
+from ..spad.device import apply_jitter
+from ..numerics.temporal import sample_pulse_offsets
+from ..acquisition.trials import TrialPlan
+from ..acquisition.executor import execute_trials
+
+
+def _trial_plan(cfg):
+    return TrialPlan((('observation', 1), ('repeat', max(cfg.monte_carlo_trials-1, 0)),
+                      ('signal_mean', cfg.readout_mean_trials), ('noise', cfg.noise_mean_trials)))
+
+def event_histogram(cfg,budget,rng,algorithms,edges,signal=True,trace=False):
+    period=1e9/cfg.laser_prf_hz
+    duration=period if cfg.detector_operation=="free_running" else cfg.gate_width_ns
+    noise_mu=(budget.background_detected_per_gate+budget.dark_detected_per_gate+budget.other_detected_per_gate)*duration/cfg.gate_width_ns
+    tof=2*cfg.range_m/C*1e9+cfg.calibration_delay_ns
+    all_times=[];all_pixels=[]
+    raw_count=0
+    for cycle in range(cfg.laser_shots):
+        ns=int(rng.poisson(budget.signal_detected_per_pulse)) if signal else 0
+        nb=int(rng.poisson(noise_mu))
+        raw_count+=ns+nb
+        if raw_count>algorithms.max_readout_events_per_run:
+            raise ValueError("Event count exceeds configured limit; reduce flux, pulses or gate duration")
+        laser=sample_pulse_offsets(rng,cfg.pulse_shape,cfg.pulse_fwhm_ps,ns)
+        sig=apply_jitter(rng,tof+laser,cfg.spad_jitter_fwhm_ps)
+        start=0 if cfg.detector_operation=="free_running" else cfg.gate_start_ns
+        noise=start+rng.uniform(0,duration,nb)
+        all_times.extend(np.r_[sig,noise]+cycle*period)
+        all_pixels.extend(rng.integers(0,cfg.spads_per_channel,ns+nb))
+    timestamps,stats,log=route_events(cfg,all_times,all_pixels,algorithms.readout_trace_events if trace else 0)
+    # Electronics timing noise is applied only to recorded timestamps, not SPAD recovery.
+    timestamps=apply_jitter(rng,timestamps,cfg.other_jitter_fwhm_ps)
+    hist=np.histogram(timestamps,bins=edges)[0].astype(float)
+    stats["timestamp_outside_gate_losses"]=stats["recorded"]-int(hist.sum())
+    return hist,stats,log
+
+
+def readout_work_estimate(cfg,budget,algorithms):
+    period=1e9/cfg.laser_prf_hz
+    ratio=period/cfg.gate_width_ns if cfg.detector_operation=="free_running" else 1
+    noise=(budget.background_detected_per_gate+budget.dark_detected_per_gate+budget.other_detected_per_gate)*ratio
+    plan=_trial_plan(cfg)
+    signal_runs=plan.count('observation')+plan.count('repeat')+plan.count('signal_mean')
+    noise_runs=plan.count('noise')+(algorithms.detector_calibration_trials+algorithms.detector_null_trials if cfg.detection_enabled else 0)
+    cycles=cfg.laser_shots
+    return {'signal_runs':signal_runs,'noise_runs':noise_runs,'runs':signal_runs+noise_runs,'cycles':cycles*(signal_runs+noise_runs),
+            'events':cycles*((budget.signal_detected_per_pulse+noise)*signal_runs+noise*noise_runs)}
+
+
+def event_acquisition(cfg,budget,algorithms,edges):
+    workload=readout_work_estimate(cfg,budget,algorithms)
+    if workload['cycles']>algorithms.max_readout_cycles:
+        raise ValueError('Cycle work exceeds configured limit; reduce pulse count or repetitions')
+    if workload['events']>algorithms.max_readout_expected_work:
+        raise ValueError(f"Event simulation work exceeds configured limit: estimated {workload['events']:.0f} > max_readout_expected_work={algorithms.max_readout_expected_work}; signal batches={workload['signal_runs']}, noise batches={workload['noise_runs']}; reduce configured statistics batches, flux or pulses")
+    plan=_trial_plan(cfg)
+    seeds=np.random.SeedSequence(cfg.rng_seed).spawn(4)
+    observation_rng,trial_rng,mean_rng,noise_rng=[np.random.default_rng(s) for s in seeds]
+    observed,stats,trace=event_histogram(cfg,budget,observation_rng,algorithms,edges,trace=True)
+    expected=np.zeros_like(observed);noise=np.zeros_like(observed)
+    for sample in execute_trials(plan,'signal_mean',lambda _:event_histogram(cfg,budget,mean_rng,algorithms,edges)):
+        expected+=sample[0]
+    for sample in execute_trials(plan,'noise',lambda _:event_histogram(cfg,budget,noise_rng,algorithms,edges,signal=False)):
+        noise+=sample[0]
+    trial_histograms=([observed.copy()]+[sample[0] for sample in execute_trials(plan,'repeat',
+        lambda _:event_histogram(cfg,budget,trial_rng,algorithms,edges))]) if cfg.monte_carlo_trials else []
+    return observed,expected/cfg.readout_mean_trials,noise/cfg.noise_mean_trials,trial_histograms,{
+        "mode":cfg.readout_mode,"engine":"event_monte_carlo",
+        "expected_trials":cfg.readout_mean_trials,"noise_mean_trials":cfg.noise_mean_trials,
+        "work_estimate":workload,"warmup_cycles":0,"initial_condition":"fully_recovered",
+        "losses":stats,"trace":trace,"trace_truncated":stats["logic_triggers"]>len(trace),
+        "note":"MC mean is not an exact expectation. Nonparalyzable dead times; gate controls TDC input; free_running allows out-of-gate SPAD avalanches. Coincidence counts distinct cells. No afterpulse or avalanche crosstalk yet.",
+    }

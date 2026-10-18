@@ -1,3 +1,5 @@
+> **历史资料，仅供追溯，不是现行规范。** 文中“当前”、数值和验证状态指记录当时。现行入口见[文档目录](../index.md)、[架构](../design/architecture.md)和[路标](../roadmap.md)。
+
 # 历史 README：A阶段至0.6.0开发版
 
 > 2026-09-25整理时保留的历史原文。“当前”“默认”等措辞只代表各段写作时点；当前能力、限制和启动方式以[项目首页](../../README.md)和[路标](../roadmap.md)为准。历史数值不构成第二份配置默认源。
@@ -14,13 +16,13 @@
 - 后台任务支持进度、取消、刷新后找回结果及完整导出；记录可重放分箱。
 - 默认 B 光学与C扫描/场景参数明确属于**构造研究工况**；可替换为实际数据。C距离和点云仍是未经检测门限判定的原始估计。
 
-设计见 [架构说明](../design/architecture.md)，B见 [空间光学](../models/spatial-optics.md)，正式C见 [列级扫描使用与模型](../models/column-scanning.md)，旧周期C见 [扫描机制](../models/scanning.md)。新设计快照在 `artifacts/c-design-review/`，实现验收记录在 `artifacts/c-implementation/`；历史记录仍保留在 `artifacts/scan-upgrade/` 与 `artifacts/architecture-upgrade/`。普通刷新即可获取内容指纹更新后的页面资源。
+设计见 [架构说明](../design/architecture.md)，B见 [空间光学](../models/spatial-optics.md)，正式C见 [列级扫描使用与模型](../models/column-scanning.md)，旧周期C见 [扫描机制](legacy-periodic-scanning.md)。新设计快照在 `artifacts/c-design-review/`，实现验收记录在 `artifacts/c-implementation/`；历史记录仍保留在 `artifacts/scan-upgrade/` 与 `artifacts/architecture-upgrade/`。普通刷新即可获取内容指纹更新后的页面资源。
 
 默认强环境光的整帧事件数可能超过明确的资源限额。可以显式选择“两列局部实验”保留当前背景，或载入关闭太阳/其他环境光但保留DCR的具名快速示例；两者都不会改写YAML默认值。未仿真区域显示未知，不当成零回波或完整帧结果。
 
 下面保留 A 阶段的历史版本记录；当前模型状态以 [路标](../roadmap.md) 为准。
 
-**V0.2.1：两个P0优化。** 增加全门检测门限、独立无目标PFA验证、Pd及精确二项区间；性能扫参支持距离/太阳照度/累计发数，每点调用当前读出引擎。未检出与原始寻峰结果分开，详见 [检测与性能扫参](../models/detection-performance.md)。V0.2基线已保留为Git标签v0.2.0。
+**V0.2.1：两个P0优化。** 增加全门检测门限、独立无目标PFA验证、Pd及精确二项区间；性能扫参支持距离/太阳照度/累计发数，每点调用当前读出引擎。未检出与原始寻峰结果分开，详见 [检测与性能扫参](../references/legacy-detection-performance.md)。V0.2基线已保留为Git标签v0.2.0。
 
 **当前阶段基线：V0.2（0.2.0），仍属于A单角通道模型。** 包含纯信号解析GT、首次观测与MC范围误差棒、参数批量展开/折叠，以及当前用户工况。默认独立多次记录、累计1发、SPAD死时间6ns、TDC死时间0、每周期记录上限1000。以下旧版本记录保留为历史，不再将V0.2等同于B全光斑模型。
 

@@ -1,0 +1,38 @@
+{
+  "before": {
+    "runtime": {
+      "project_root": "E:\\Proj-2026-N03_SPAD线扫lidar建模",
+      "server_pid": 95828,
+      "parent_pid": 52196,
+      "software_version": "0.6.14.dev0",
+      "instance_id": "149d5753eeb84e358c49c4d08ca486c0",
+      "started_at": "2026-10-15T11:55:29.343052+00:00"
+    },
+    "old_processes": [
+      {
+        "pid": 94416,
+        "started": 134365389234690310
+      },
+      {
+        "pid": 52196,
+        "started": 134365389278910750
+      },
+      {
+        "pid": 95828,
+        "started": 134365389280917570
+      }
+    ]
+  },
+  "after": {
+    "project_root": "E:\\Proj-2026-N03_SPAD线扫lidar建模",
+    "server_pid": 44192,
+    "parent_pid": 82536,
+    "software_version": "0.6.14.dev0",
+    "instance_id": "608467db42f9408b96f541744a3ece74",
+    "started_at": "2026-10-15T11:59:38.287718+00:00"
+  },
+  "launcher_pid": 83080,
+  "job_name": "Local\\SPAD-LiDAR-608467db42f9408b96f541744a3ece74",
+  "old_processes_remaining": [],
+  "status": "verified"
+}

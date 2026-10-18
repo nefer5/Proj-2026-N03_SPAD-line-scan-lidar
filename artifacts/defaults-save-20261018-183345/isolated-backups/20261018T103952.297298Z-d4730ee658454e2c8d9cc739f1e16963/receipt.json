@@ -1,0 +1,24 @@
+{
+  "revision": "2fbe04d251013b9e19b465313dcd493dff9e205c0d0dc8487eb3766adaaa712e",
+  "changes": [
+    {
+      "parameter": "geometry.vfov_deg",
+      "before": 20.0,
+      "after": 22.0,
+      "source": "experiments.budget_geometry.vfov_deg"
+    }
+  ],
+  "affected": [
+    {
+      "kind": "budget",
+      "label": "系统预算",
+      "count": 5
+    }
+  ],
+  "path": "config/defaults.yaml",
+  "unchanged": false,
+  "kind": "budget",
+  "original_sha256": "2ba9bf1bfd1d91366872fc108410202c096ce40852b168ed356b0a9a9d95296d",
+  "saved_sha256": "2764fdd5301cf62bb6208f80d8eb7b8e3092a52da88234a9ec98bce63b08f740",
+  "utc": "2026-10-18T10:39:52.297829+00:00"
+}

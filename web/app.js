@@ -19,7 +19,7 @@ const colors = { cyan: "#41d9d0", blue: "#659cff", orange: "#ffb55b", muted: "#8
 
 function fillForm(config) {
   inputEls().forEach(el => { if (config[el.dataset.key] !== undefined) {
-    if(el.type==='checkbox')el.checked=config[el.dataset.key];else el.value=LidarUnits.display(config[el.dataset.key],el.dataset.key);
+    if(el.type==='checkbox')el.checked=config[el.dataset.key];else if(el.type==='number')LidarNumbers.setInput(el,LidarUnits.display(config[el.dataset.key],el.dataset.key));else el.value=LidarUnits.display(config[el.dataset.key],el.dataset.key);
   }});
   curveEditors.fill(config.spectral_inputs);
 }
@@ -34,7 +34,7 @@ function collectConfig() {
       if (!el.value || !Array.from(el.options).some(option=>option.value===el.value)) throw new Error(`参数 ${key} 需要选择有效选项，请刷新页面后重试。`);
       cfg[key] = el.value;
     } else {
-      cfg[key] = LidarUnits.canonical(Number(el.value),key);
+      cfg[key] = LidarUnits.canonical(LidarNumbers.readInput(el),key);
       if (el.value.trim() === '' || !Number.isFinite(cfg[key]) || (isInteger && !Number.isInteger(cfg[key]))) throw new Error(`参数 ${key} 需要有效${isInteger ? '整数' : '数值'}`);
     }
   });
@@ -44,8 +44,7 @@ function collectConfig() {
 
 function fmt(x, digits=3) {
   if (!Number.isFinite(x)) return "—";
-  if (Math.abs(x) >= 1e5 || (Math.abs(x) > 0 && Math.abs(x) < 1e-3)) return x.toExponential(2);
-  return x.toFixed(digits);
+  return LidarNumbers.format(x,digits);
 }
 
 function setupCanvas(canvas) {
@@ -74,7 +73,7 @@ function niceTicks(min, max, count=5) {
 
 function drawLines(canvas, x, series, opts={}) {
   const {ctx,w,h} = setupCanvas(canvas);
-  const pad = {l:58,r:18,t:18,b:40};
+  const pad = {l:72,r:22,t:20,b:44};
   const pw=w-pad.l-pad.r, ph=h-pad.t-pad.b;
   const i0=opts.i0 ?? 0, i1=opts.i1 ?? x.length;
   const xx=x.slice(i0,i1);
@@ -87,10 +86,12 @@ function drawLines(canvas, x, series, opts={}) {
   const sx=v=>pad.l+(v-xmin)/(xmax-xmin||1)*pw;
   const sy=v=>pad.t+ph-(v-ymin)/(ymax-ymin||1)*ph;
   ctx.clearRect(0,0,w,h);
-  ctx.font="11px ui-monospace, Consolas";
-  ctx.fillStyle=(globalThis.LidarTheme?.color(colors.muted) ?? (colors.muted)); ctx.strokeStyle=(globalThis.LidarTheme?.color(colors.grid) ?? (colors.grid)); ctx.lineWidth=1;
-  niceTicks(xmin,xmax,6).forEach(v=>{ const px=sx(v); ctx.beginPath();ctx.moveTo(px,pad.t);ctx.lineTo(px,pad.t+ph);ctx.stroke();ctx.fillText(fmt(v, opts.xDigits??1),px-12,h-18); });
+  ctx.font="13px ui-monospace, Consolas";
+  ctx.fillStyle=(globalThis.LidarTheme?.plotColor('text') || (globalThis.LidarTheme?.color(colors.muted) ?? (colors.muted))); ctx.strokeStyle=(globalThis.LidarTheme?.plotColor('grid') || (globalThis.LidarTheme?.color(colors.grid) ?? (colors.grid))); ctx.lineWidth=1;
+  ctx.setLineDash(globalThis.LidarTheme?.gridDash?.()||[4,5]);
+  niceTicks(xmin,xmax,6).forEach(v=>{ const px=sx(v); ctx.beginPath();ctx.moveTo(px,pad.t);ctx.lineTo(px,pad.t+ph);ctx.stroke();ctx.textAlign=px> w-pad.r-1?"right":px<pad.l+1?"left":"center";ctx.fillText(fmt(v, opts.xDigits??1),px,h-18);ctx.textAlign="left"; });
   niceTicks(ymin,ymax,5).forEach(v=>{ const py=sy(v);ctx.beginPath();ctx.moveTo(pad.l,py);ctx.lineTo(w-pad.r,py);ctx.stroke();ctx.fillText(fmt(v, opts.yDigits ?? (v<10?2:0)),6,py+4); });
+  ctx.setLineDash([]);ctx.strokeStyle=globalThis.LidarTheme?.plotColor('axis')||'#afbfcc';ctx.lineWidth=1.25;ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l,pad.t+ph);ctx.lineTo(w-pad.r,pad.t+ph);ctx.stroke();ctx.lineWidth=1;
   sliced.forEach(s=>{
     if (s.bars) {
       ctx.fillStyle=(globalThis.LidarTheme?.color(s.color) ?? (s.color)); ctx.globalAlpha=0.75;
@@ -123,14 +124,14 @@ function drawLines(canvas, x, series, opts={}) {
     }
     ctx.restore();
   });
-  ctx.fillStyle=(globalThis.LidarTheme?.color(colors.muted) ?? (colors.muted)); ctx.textAlign="center"; ctx.fillText(opts.xLabel||"",pad.l+pw/2,h-4);ctx.textAlign="left";
+  ctx.fillStyle=(globalThis.LidarTheme?.plotColor('text') || (globalThis.LidarTheme?.color(colors.muted) ?? (colors.muted))); ctx.textAlign="center"; ctx.fillText(opts.xLabel||"",pad.l+pw/2,h-4);ctx.textAlign="left";
   let lx=pad.l+6;
   sliced.forEach(s=>{
     ctx.save();ctx.fillStyle=(globalThis.LidarTheme?.color(s.color) ?? (s.color));ctx.strokeStyle=(globalThis.LidarTheme?.color(s.color) ?? (s.color));
     if(s.errorBars){ctx.beginPath();ctx.moveTo(lx+6,pad.t);ctx.lineTo(lx+6,pad.t+8);ctx.moveTo(lx+2,pad.t);ctx.lineTo(lx+10,pad.t);ctx.moveTo(lx+2,pad.t+8);ctx.lineTo(lx+10,pad.t+8);ctx.stroke();}
     else if(s.points){ctx.beginPath();ctx.arc(lx+6,pad.t+4,3,0,2*Math.PI);ctx.fill();}
     else{ctx.setLineDash(s.dash||[]);ctx.beginPath();ctx.moveTo(lx,pad.t+4);ctx.lineTo(lx+13,pad.t+4);ctx.stroke();}
-    ctx.restore();ctx.fillStyle=(globalThis.LidarTheme?.color(colors.muted) ?? (colors.muted));ctx.fillText(s.name,lx+18,pad.t+7);lx+=ctx.measureText(s.name).width+34;
+    ctx.restore();ctx.fillStyle=(globalThis.LidarTheme?.plotColor('text') || (globalThis.LidarTheme?.color(colors.muted) ?? (colors.muted)));ctx.fillText(s.name,lx+18,pad.t+7);lx+=ctx.measureText(s.name).width+34;
   });
   const scatterGroups=opts.scatterGroups || (opts.scatter ? [opts.scatter] : []);
   scatterGroups.filter(group=>group.x.length).forEach(group=>{
@@ -141,7 +142,7 @@ function drawLines(canvas, x, series, opts={}) {
       ctx.fillStyle=(globalThis.LidarTheme?.color(color) ?? (color));ctx.fill();ctx.strokeStyle=(globalThis.LidarTheme?.color("#eef6ff") ?? ("#eef6ff"));ctx.lineWidth=1;ctx.stroke();
     });
     ctx.restore();ctx.fillStyle=(globalThis.LidarTheme?.color(color) ?? (color));ctx.beginPath();ctx.arc(lx+6,pad.t+4,4,0,2*Math.PI);ctx.fill();
-    ctx.fillStyle=(globalThis.LidarTheme?.color(colors.muted) ?? (colors.muted));ctx.fillText(label,lx+18,pad.t+7);lx+=ctx.measureText(label).width+48;
+    ctx.fillStyle=(globalThis.LidarTheme?.plotColor('text') || (globalThis.LidarTheme?.color(colors.muted) ?? (colors.muted)));ctx.fillText(label,lx+18,pad.t+7);lx+=ctx.measureText(label).width+48;
   });
   if (opts.marker) {
     const px=sx(opts.marker.x),py=sy(opts.marker.y);
@@ -153,16 +154,18 @@ function drawLines(canvas, x, series, opts={}) {
 
 function drawRange(canvas, points) {
   const x=points.map(p=>p.range_m), counts=points.map(p=>p.signal_counts), snr=points.map(p=>p.shot_noise_snr);
-  const {ctx,w,h}=setupCanvas(canvas); const pad={l:58,r:55,t:22,b:40}; const pw=w-pad.l-pad.r,ph=h-pad.t-pad.b;
+  const {ctx,w,h}=setupCanvas(canvas); const pad={l:72,r:60,t:24,b:44}; const pw=w-pad.l-pad.r,ph=h-pad.t-pad.b;
   const xmin=Math.min(...x),xmax=Math.max(...x),ymax=Math.max(...counts)*1.08,smax=Math.max(...snr)*1.08;
   const sx=v=>pad.l+(v-xmin)/(xmax-xmin||1)*pw, sy=v=>pad.t+ph-v/(ymax||1)*ph, ss=v=>pad.t+ph-v/(smax||1)*ph;
-  ctx.clearRect(0,0,w,h);ctx.font="11px ui-monospace, Consolas";ctx.strokeStyle=(globalThis.LidarTheme?.color(colors.grid) ?? (colors.grid));ctx.fillStyle=(globalThis.LidarTheme?.color(colors.muted) ?? (colors.muted));
+  ctx.clearRect(0,0,w,h);ctx.font="13px ui-monospace, Consolas";ctx.strokeStyle=(globalThis.LidarTheme?.plotColor('grid') || (globalThis.LidarTheme?.color(colors.grid) ?? (colors.grid)));ctx.fillStyle=(globalThis.LidarTheme?.plotColor('text') || (globalThis.LidarTheme?.color(colors.muted) ?? (colors.muted)));
+  ctx.setLineDash(globalThis.LidarTheme?.gridDash?.()||[4,5]);
   niceTicks(xmin,xmax,5).forEach(v=>{let px=sx(v);ctx.beginPath();ctx.moveTo(px,pad.t);ctx.lineTo(px,pad.t+ph);ctx.stroke();ctx.fillText(fmt(v,0),px-10,h-18)});
   niceTicks(0,ymax,5).forEach(v=>{let py=sy(v);ctx.beginPath();ctx.moveTo(pad.l,py);ctx.lineTo(w-pad.r,py);ctx.stroke();ctx.fillText(fmt(v,0),5,py+4)});
+  ctx.setLineDash([]);ctx.strokeStyle=globalThis.LidarTheme?.plotColor('axis')||'#afbfcc';ctx.lineWidth=1.25;ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l,pad.t+ph);ctx.lineTo(w-pad.r,pad.t+ph);ctx.stroke();ctx.lineWidth=1;
   const line=(arr,map,color)=>{ctx.beginPath();ctx.strokeStyle=(globalThis.LidarTheme?.color(color) ?? (color));ctx.lineWidth=2;arr.forEach((v,i)=>i?ctx.lineTo(sx(x[i]),map(v)):ctx.moveTo(sx(x[i]),map(v)));ctx.stroke();};
   line(counts,sy,colors.cyan);line(snr,ss,colors.orange);
-  ctx.fillStyle=(globalThis.LidarTheme?.color(colors.muted) ?? (colors.muted));ctx.textAlign="center";ctx.fillText("距离 (m)",pad.l+pw/2,h-4);ctx.textAlign="left";
-  ctx.fillStyle=(globalThis.LidarTheme?.color(colors.cyan) ?? (colors.cyan));ctx.fillText("信号累计计数",pad.l+6,pad.t+8);ctx.fillStyle=(globalThis.LidarTheme?.color(colors.orange) ?? (colors.orange));ctx.fillText("SNR（右轴）",pad.l+98,pad.t+8);ctx.fillStyle=(globalThis.LidarTheme?.color(colors.muted) ?? (colors.muted));ctx.fillText(fmt(smax,1),w-pad.r+8,pad.t+4);ctx.fillText("0",w-pad.r+8,pad.t+ph+4);
+  ctx.fillStyle=(globalThis.LidarTheme?.plotColor('text') || (globalThis.LidarTheme?.color(colors.muted) ?? (colors.muted)));ctx.textAlign="center";ctx.fillText("距离 (m)",pad.l+pw/2,h-4);ctx.textAlign="left";
+  ctx.fillStyle=(globalThis.LidarTheme?.color(colors.cyan) ?? (colors.cyan));ctx.fillText("信号累计计数",pad.l+6,pad.t+8);ctx.fillStyle=(globalThis.LidarTheme?.color(colors.orange) ?? (colors.orange));ctx.fillText("SNR（右轴）",pad.l+98,pad.t+8);ctx.fillStyle=(globalThis.LidarTheme?.plotColor('text') || (globalThis.LidarTheme?.color(colors.muted) ?? (colors.muted)));ctx.fillText(fmt(smax,1),w-pad.r+8,pad.t+4);ctx.fillText("0",w-pad.r+8,pad.t+ph+4);
 }
 
 function drawHeatmap(canvas, matrix) {
@@ -173,7 +176,7 @@ function drawHeatmap(canvas, matrix) {
     const t=Math.sqrt(matrix[row][col]/max); const r=Math.round(20+45*t),g=Math.round(31+186*t),b=Math.round(44+164*t);
     ctx.fillStyle=(globalThis.LidarTheme?.color(`rgb(${r},${g},${b})`) ?? (`rgb(${r},${g},${b})`));ctx.fillRect(pad.l+col*cw,pad.t+row*cw,cw+.4,cw+.4);
   }
-  ctx.fillStyle=(globalThis.LidarTheme?.color(colors.muted) ?? (colors.muted));ctx.font="11px ui-monospace, Consolas";ctx.fillText("受扰",4,pad.t+side/2);ctx.textAlign="center";ctx.fillText("源通道",pad.l+side/2,h-6);ctx.textAlign="left";
+  ctx.fillStyle=(globalThis.LidarTheme?.plotColor('text') || (globalThis.LidarTheme?.color(colors.muted) ?? (colors.muted)));ctx.font="13px ui-monospace, Consolas";ctx.fillText("受扰",4,pad.t+side/2);ctx.textAlign="center";ctx.fillText("源通道",pad.l+side/2,h-6);ctx.textAlign="left";
   const step=Math.max(1,Math.ceil(n/8));for(let i=0;i<n;i+=step){ctx.fillText(String(i),pad.l+i*cw,pad.t+side+15);ctx.fillText(String(i),pad.l-25,pad.t+(i+.7)*cw);}
 }
 
@@ -250,7 +253,7 @@ function drawHistogramView() {
   const {data,gate,range,layers}=histogramView;
   PhotonHistogram.draw($('histZoom'),data,0,range,PhotonHistogram.maximum(data,0,range,layers),layers);
   PhotonHistogram.draw($('histFull'),data,0,gate,PhotonHistogram.maximum(data,0,gate,{observed:true}),{observed:true},true,range);
-  $('histWindowStart').value=String(range[0]);$('histWindowEnd').value=String(range[1]);
+  LidarNumbers.setInput($('histWindowStart'),range[0]);LidarNumbers.setInput($('histWindowEnd'),range[1]);
   $('histWindowStatus').textContent='当前窗口 '+fmt(range[0],3)+'–'+fmt(range[1],3)+' ns · 全门 '+fmt(gate[0],3)+'–'+fmt(gate[1],3)+' ns；局部纵轴随窗口自适应。';
 }
 
@@ -265,8 +268,8 @@ function setHistogramWindow(range) {
 }
 
 $('histWindowApply').addEventListener('click',()=>setHistogramWindow([
-  $('histWindowStart').value.trim()===''?NaN:$('histWindowStart').valueAsNumber,
-  $('histWindowEnd').value.trim()===''?NaN:$('histWindowEnd').valueAsNumber
+  $('histWindowStart').value.trim()===''?NaN:LidarNumbers.readInput($('histWindowStart')),
+  $('histWindowEnd').value.trim()===''?NaN:LidarNumbers.readInput($('histWindowEnd'))
 ]));
 for(const id of ['histWindowStart','histWindowEnd'])$(id).addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('histWindowApply').click();}});
 $('histWindowPeak').addEventListener('click',()=>{if(histogramView)setHistogramWindow(histogramView.peak);});
@@ -547,11 +550,39 @@ $("saveDebug").addEventListener("click",()=>download("spad_debug_report.json",JS
 $("binsPrevious").addEventListener("click",()=>{debugPage--;renderBins();});
 $("binsNext").addEventListener("click",()=>{debugPage++;renderBins();});
 $("modeLink").addEventListener("click",()=>{try{sessionStorage.setItem("lidar-config",JSON.stringify(collectConfig()));}catch{}});
-window.addEventListener("resize",()=>{
+function redrawAWorkspace() {
   if(lastPerformance)renderPerformance(lastPerformance);
   if(lastResult)render(lastResult);
   if(latestDerived)renderDerived(latestDerived);
+}
+window.addEventListener("resize",redrawAWorkspace);
+
+// View changes preserve the existing form, acquisition and histogram state.
+const aNarrowWorkspace=window.matchMedia('(max-width: 760px)');
+function showAWorkspace(view,focus=false) {
+  $('aWorkspace').dataset.view=view;
+  document.querySelectorAll('[data-a-view]').forEach(button=>{
+    button.setAttribute('aria-pressed',String(button.dataset.aView===view));
+  });
+  requestAnimationFrame(()=>{
+    redrawAWorkspace();
+    if(focus&&aNarrowWorkspace.matches) {
+      const panel=$(view==='parameters'?'aParameters':'aResults');
+      panel.focus({preventScroll:true});
+      panel.scrollIntoView({block:'start'});
+    }
+  });
+}
+document.querySelectorAll('[data-a-view]').forEach(button=>{
+  button.addEventListener('click',()=>showAWorkspace(button.dataset.aView,true));
 });
+$('runButton').addEventListener('click',()=>{
+  if(aNarrowWorkspace.matches)showAWorkspace('results',true);
+});
+document.querySelector('a[href="#photonBudgetPanel"]').addEventListener('click',()=>{
+  showAWorkspace('results');
+});
+aNarrowWorkspace.addEventListener('change',()=>showAWorkspace($('aWorkspace').dataset.view));
 
 (async()=>{
   try {
@@ -579,3 +610,5 @@ window.addEventListener("resize",()=>{
     await updateDerived();await run(localStorage.getItem('lidar-a-job'));
   }catch(error){showError(error);}
 })();
+
+ProjectDefaults.bind('a', collectConfig, 'resetButton');

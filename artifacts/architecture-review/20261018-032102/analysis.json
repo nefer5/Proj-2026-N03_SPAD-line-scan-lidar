@@ -1,0 +1,1684 @@
+{
+  "platforms": [
+    {
+      "id": "a",
+      "short": "A",
+      "title": "单角通道研究",
+      "route": " / 、 /debug",
+      "type": "SimulationConfig",
+      "entry": {
+        "path": "src/spad_lidar/experiments/single_channel.py",
+        "line": 22,
+        "end": 170,
+        "label": "simulate"
+      },
+      "input": "当前角通道在 Tx 前的脉冲能量、场景距离、独立 IFOV；信号均匀分到通道内 SPAD。",
+      "output": "直方图、原始距离、统计误差；历史检测与串扰诊断仍在代码中。",
+      "state": "每份事件采集从完全恢复状态开始，不预热；解析分支理想逐周期复位。",
+      "runtime": "当前网页提交 kind=a 后台任务；/api/simulate 同步 API 保留。",
+      "separate": "单角预算、旧随机协议、analytic_reference、历史诊断。",
+      "chain": [
+        "rx/budget.photon_budget",
+        "a_acquisition.event_histogram",
+        "a_router.route_events",
+        "AcquisitionSession",
+        "_estimate_range"
+      ],
+      "evidence": [
+        {
+          "path": "web/app.js",
+          "line": 1,
+          "end": 50,
+          "label": "app.js"
+        },
+        {
+          "path": "src/spad_lidar/experiments/a_acquisition.py",
+          "line": 46,
+          "end": 69,
+          "label": "event_acquisition"
+        },
+        {
+          "path": "src/spad_lidar/experiments/a_router.py",
+          "line": 8,
+          "end": 23,
+          "label": "route_events"
+        }
+      ]
+    },
+    {
+      "id": "spad",
+      "short": "SPAD",
+      "title": "独立器件 / 读出实验",
+      "route": "/spad",
+      "type": "LabConfig",
+      "entry": {
+        "path": "src/spad_lidar/experiments/lab.py",
+        "line": 70,
+        "end": 76,
+        "label": "run_lab"
+      },
+      "input": "直接给探测面光子/发、背景光子/秒/像素、波形与空间权重；不需要距离和收光孔径。",
+      "output": "周期记录、直方图、源/死时间/读出审计。",
+      "state": "默认周期程序使用 readout_warmup_cycles；每次实验新建 Session。",
+      "runtime": "kind=spad 后台任务；公共 labs 页面。",
+      "separate": "直接照明适配；PDE 子集光谱；无需构造整机光学参数。",
+      "chain": [
+        "lab_illumination",
+        "run_illumination",
+        "sample_candidates",
+        "evolve_program",
+        "AcquisitionSession",
+        "histogram_records"
+      ],
+      "evidence": [
+        {
+          "path": "src/spad_lidar/experiments/configuration.py",
+          "line": 53,
+          "end": 71,
+          "label": "LabConfig"
+        },
+        {
+          "path": "src/spad_lidar/experiments/lab.py",
+          "line": 28,
+          "end": 36,
+          "label": "run_illumination"
+        }
+      ]
+    },
+    {
+      "id": "system",
+      "short": "B",
+      "title": "全光斑空间光学",
+      "route": "/system",
+      "type": "BSystemConfig",
+      "entry": {
+        "path": "src/spad_lidar/experiments/spatial_analysis.py",
+        "line": 41,
+        "end": 87,
+        "label": "run_system_analysis"
+      },
+      "input": "Tx 角分布、场景、Rx 数据/PSF、阵列几何与光谱 → 完整像素照明。",
+      "output": "逐通道记录、直方图、空间光学真值、重复统计和未标定距离。",
+      "state": "system_program 决定完全恢复/预热；当前算法默认 fully_recovered。",
+      "runtime": "kind=system 后台重复采集；参数/光学预览为独立请求。",
+      "separate": "Tx/Rx 空间积分与像素映射；重复采集协议；参数预览不改历史采集。",
+      "chain": [
+        "project_illumination",
+        "system_program",
+        "run_illumination",
+        "AcquisitionSession",
+        "finish_system",
+        "estimate_channels"
+      ],
+      "evidence": [
+        {
+          "path": "src/spad_lidar/experiments/spatial.py",
+          "line": 158,
+          "end": 324,
+          "label": "project_illumination"
+        },
+        {
+          "path": "src/spad_lidar/experiments/spatial.py",
+          "line": 327,
+          "end": 331,
+          "label": "system_program"
+        },
+        {
+          "path": "src/spad_lidar/experiments/spatial.py",
+          "line": 340,
+          "end": 357,
+          "label": "finish_system"
+        }
+      ]
+    },
+    {
+      "id": "columns",
+      "short": "C",
+      "title": "正式列级扫描",
+      "route": "/system/scan 、 /system/columns",
+      "type": "ColumnConfig",
+      "entry": {
+        "path": "src/spad_lidar/experiments/columns.py",
+        "line": 106,
+        "end": 126,
+        "label": "run_columns"
+      },
+      "input": "复用 B 光学域，增加高层目标、逐发时间/能量、轨迹、门并集、缓冲与输出调度。",
+      "output": "列级量化记录、按需直方图与点云、逐发真值、输出可交付列、重复/噪声记录。",
+      "state": "每次完整扫描内状态跨列连续；列间完全复位尚未接入。",
+      "runtime": "kind=columns 后台任务；重复扫描由 run_columns 编排。",
+      "separate": "列/发归属、门碎片、绝对时钟、运动投影、输出丢列；不能用 B 周期量化简单替换。",
+      "chain": [
+        "build_column_schedule",
+        "ColumnPulseProjection",
+        "sample_varying_candidates",
+        "evolve_program",
+        "quantize_column_records",
+        "reconstruct_columns",
+        "transport_plan"
+      ],
+      "evidence": [
+        {
+          "path": "src/spad_lidar/experiments/columns.py",
+          "line": 52,
+          "end": 103,
+          "label": "_single"
+        },
+        {
+          "path": "src/spad_lidar/scan/column_schedule.py",
+          "line": 56,
+          "end": 141,
+          "label": "build_column_schedule"
+        },
+        {
+          "path": "src/spad_lidar/scan/column_config.py",
+          "line": 119,
+          "end": 173,
+          "label": "ColumnConfig"
+        }
+      ]
+    },
+    {
+      "id": "budget",
+      "short": "预算",
+      "title": "系统预算与方案研究",
+      "route": "/system/budget",
+      "type": "HardwareBudgetConfig",
+      "entry": {
+        "path": "src/spad_lidar/system_budget.py",
+        "line": 125,
+        "end": 283,
+        "label": "calculate_budget"
+      },
+      "input": "高层系统目标、均匀独立角通道 B 光学参考、电热、芯片/链路容量与假设。",
+      "output": "时间、能量、电热、Range/Hist/Echo、CSI-2/D-PHY、SRAM/FIFO 的确定性预算与方案比较。",
+      "state": "不执行 Session，不生成最终混合记录；未知复位时间保留未知。",
+      "runtime": "无状态 calculate API；草稿/比较基准在网页保存，不创建采集作业。",
+      "separate": "单角参考缩放、硬件拓扑、固定角色 bank/FIFO/背压；不同于 C 的记录驱动调度。",
+      "chain": [
+        "budget_channel_config",
+        "project_illumination",
+        "uniform_column_budget",
+        "electrical_budget",
+        "schedule_link"
+      ],
+      "evidence": [
+        {
+          "path": "src/spad_lidar/system_budget.py",
+          "line": 66,
+          "end": 80,
+          "label": "budget_channel_config"
+        },
+        {
+          "path": "src/spad_lidar/electrical_budget.py",
+          "line": 25,
+          "end": 144,
+          "label": "electrical_budget"
+        },
+        {
+          "path": "src/spad_lidar/budget_pipeline.py",
+          "line": 18,
+          "end": 111,
+          "label": "schedule_link"
+        }
+      ]
+    }
+  ],
+  "rows": [
+    {
+      "id": "cap0",
+      "title": "严格配置入口",
+      "group": "配置",
+      "cells": [
+        {
+          "kind": "shared",
+          "text": "SimulationConfig 扁平 A + legacy 迁移",
+          "sources": [
+            {
+              "path": "src/spad_lidar/models.py",
+              "line": 57,
+              "end": 63,
+              "label": "resolve_defaults"
+            }
+          ]
+        },
+        {
+          "kind": "adapter",
+          "text": "for_experiment → LabConfig",
+          "sources": [
+            {
+              "path": "src/spad_lidar/experiments/configuration.py",
+              "line": 105,
+              "end": 159,
+              "label": "resolve_experiment"
+            }
+          ]
+        },
+        {
+          "kind": "adapter",
+          "text": "BSystemConfig 领域分组与只读平铺视图",
+          "sources": [
+            {
+              "path": "src/spad_lidar/experiments/system_config.py",
+              "line": 52,
+              "end": 92,
+              "label": "BSystemConfig"
+            }
+          ]
+        },
+        {
+          "kind": "adapter",
+          "text": "ColumnConfig 继承 B；覆盖 acquisition 并增加扫描域",
+          "sources": [
+            {
+              "path": "src/spad_lidar/scan/column_config.py",
+              "line": 119,
+              "end": 173,
+              "label": "ColumnConfig"
+            }
+          ]
+        },
+        {
+          "kind": "adapter",
+          "text": "HardwareBudgetConfig 嵌套 B + 预算域",
+          "sources": [
+            {
+              "path": "src/spad_lidar/system_budget.py",
+              "line": 83,
+              "end": 122,
+              "label": "resolve_budget"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cap1",
+      "title": "Curve / 光谱数值",
+      "group": "物理",
+      "cells": [
+        {
+          "kind": "shared",
+          "text": "完整 spectral_inputs",
+          "sources": [
+            {
+              "path": "src/spad_lidar/numerics/curves.py",
+              "line": 97,
+              "end": 206,
+              "label": "Curve"
+            }
+          ]
+        },
+        {
+          "kind": "shared",
+          "text": "只消费 PDE 曲线",
+          "sources": [
+            {
+              "path": "src/spad_lidar/experiments/lab.py",
+              "line": 28,
+              "end": 36,
+              "label": "run_illumination"
+            }
+          ]
+        },
+        {
+          "kind": "shared",
+          "text": "共同 Curve + 光谱积分",
+          "sources": [
+            {
+              "path": "src/spad_lidar/experiments/spatial.py",
+              "line": 158,
+              "end": 324,
+              "label": "project_illumination"
+            }
+          ]
+        },
+        {
+          "kind": "shared",
+          "text": "共同 Curve；逐发源",
+          "sources": [
+            {
+              "path": "src/spad_lidar/experiments/columns.py",
+              "line": 52,
+              "end": 103,
+              "label": "_single"
+            }
+          ]
+        },
+        {
+          "kind": "shared",
+          "text": "通过 B 光学参考复用",
+          "sources": [
+            {
+              "path": "src/spad_lidar/system_budget.py",
+              "line": 125,
+              "end": 283,
+              "label": "calculate_budget"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cap2",
+      "title": "Tx / 场景 / Rx 光学",
+      "group": "物理",
+      "cells": [
+        {
+          "kind": "separate",
+          "text": "rx/budget 单角预算，无真实二维 PSF",
+          "sources": [
+            {
+              "path": "src/spad_lidar/rx/budget.py",
+              "line": 62,
+              "end": 98,
+              "label": "photon_budget"
+            }
+          ]
+        },
+        {
+          "kind": "none",
+          "text": "不经过整机光学",
+          "sources": []
+        },
+        {
+          "kind": "shared",
+          "text": "project_illumination 空间核心",
+          "sources": [
+            {
+              "path": "src/spad_lidar/experiments/spatial.py",
+              "line": 158,
+              "end": 324,
+              "label": "project_illumination"
+            }
+          ]
+        },
+        {
+          "kind": "shared",
+          "text": "B 光学 + ColumnPulseProjection",
+          "sources": [
+            {
+              "path": "src/spad_lidar/experiments/columns.py",
+              "line": 52,
+              "end": 103,
+              "label": "_single"
+            }
+          ]
+        },
+        {
+          "kind": "adapter",
+          "text": "单角 B 参考再缩放，不等于全 B 采集",
+          "sources": [
+            {
+              "path": "src/spad_lidar/system_budget.py",
+              "line": 66,
+              "end": 80,
+              "label": "budget_channel_config"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cap3",
+      "title": "候选雪崩生成",
+      "group": "采集",
+      "cells": [
+        {
+          "kind": "separate",
+          "text": "event_histogram 保留 A 专用采样",
+          "sources": [
+            {
+              "path": "src/spad_lidar/experiments/a_acquisition.py",
+              "line": 8,
+              "end": 32,
+              "label": "event_histogram"
+            }
+          ]
+        },
+        {
+          "kind": "shared",
+          "text": "sample_candidates",
+          "sources": [
+            {
+              "path": "src/spad_lidar/spad/source.py",
+              "line": 36,
+              "end": 70,
+              "label": "sample_candidates"
+            }
+          ]
+        },
+        {
+          "kind": "shared",
+          "text": "sample_candidates",
+          "sources": [
+            {
+              "path": "src/spad_lidar/experiments/lab.py",
+              "line": 28,
+              "end": 36,
+              "label": "run_illumination"
+            }
+          ]
+        },
+        {
+          "kind": "adapter",
+          "text": "sample_varying_candidates",
+          "sources": [
+            {
+              "path": "src/spad_lidar/spad/source.py",
+              "line": 73,
+              "end": 117,
+              "label": "sample_varying_candidates"
+            }
+          ]
+        },
+        {
+          "kind": "bypass",
+          "text": "预算候选期望数，不生成事件",
+          "sources": [
+            {
+              "path": "src/spad_lidar/system_budget.py",
+              "line": 125,
+              "end": 283,
+              "label": "calculate_budget"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cap4",
+      "title": "器件 / 读出状态核心",
+      "group": "采集",
+      "cells": [
+        {
+          "kind": "shared",
+          "text": "事件模式经 a_router 调 Session",
+          "sources": [
+            {
+              "path": "src/spad_lidar/experiments/a_router.py",
+              "line": 8,
+              "end": 23,
+              "label": "route_events"
+            }
+          ]
+        },
+        {
+          "kind": "shared",
+          "text": "run_illumination → evolve_program",
+          "sources": [
+            {
+              "path": "src/spad_lidar/experiments/lab.py",
+              "line": 39,
+              "end": 67,
+              "label": "acquire_candidates"
+            }
+          ]
+        },
+        {
+          "kind": "shared",
+          "text": "同一 run_illumination 链",
+          "sources": [
+            {
+              "path": "src/spad_lidar/experiments/spatial_analysis.py",
+              "line": 41,
+              "end": 87,
+              "label": "run_system_analysis"
+            }
+          ]
+        },
+        {
+          "kind": "shared",
+          "text": "同一 evolve_program，注入 Trace/FragmentAware",
+          "sources": [
+            {
+              "path": "src/spad_lidar/experiments/columns.py",
+              "line": 52,
+              "end": 103,
+              "label": "_single"
+            }
+          ]
+        },
+        {
+          "kind": "bypass",
+          "text": "不模拟有限死时间导致的最终记录",
+          "sources": [
+            {
+              "path": "src/spad_lidar/system_budget.py",
+              "line": 125,
+              "end": 283,
+              "label": "calculate_budget"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cap5",
+      "title": "时序程序",
+      "group": "采集",
+      "cells": [
+        {
+          "kind": "adapter",
+          "text": "周期 program，首发 0，无预热",
+          "sources": [
+            {
+              "path": "src/spad_lidar/experiments/a_router.py",
+              "line": 8,
+              "end": 23,
+              "label": "route_events"
+            }
+          ]
+        },
+        {
+          "kind": "adapter",
+          "text": "周期 program + 公共预热策略",
+          "sources": [
+            {
+              "path": "src/spad_lidar/experiments/lab.py",
+              "line": 28,
+              "end": 36,
+              "label": "run_illumination"
+            }
+          ]
+        },
+        {
+          "kind": "adapter",
+          "text": "system_program 控制初始状态",
+          "sources": [
+            {
+              "path": "src/spad_lidar/experiments/spatial.py",
+              "line": 327,
+              "end": 331,
+              "label": "system_program"
+            }
+          ]
+        },
+        {
+          "kind": "separate",
+          "text": "GatedProgram / 门并集 / 暗锚点",
+          "sources": [
+            {
+              "path": "src/spad_lidar/scan/column_schedule.py",
+              "line": 56,
+              "end": 141,
+              "label": "build_column_schedule"
+            }
+          ]
+        },
+        {
+          "kind": "bypass",
+          "text": "列时间/包络预算，无事件 program",
+          "sources": [
+            {
+              "path": "src/spad_lidar/system_budget.py",
+              "line": 125,
+              "end": 283,
+              "label": "calculate_budget"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cap6",
+      "title": "记录量化 / 分箱",
+      "group": "处理",
+      "cells": [
+        {
+          "kind": "separate",
+          "text": "时间戳加抖动后 np.histogram",
+          "sources": [
+            {
+              "path": "src/spad_lidar/experiments/a_acquisition.py",
+              "line": 8,
+              "end": 32,
+              "label": "event_histogram"
+            }
+          ]
+        },
+        {
+          "kind": "shared",
+          "text": "acquire_candidates 周期量化 + histogram_records",
+          "sources": [
+            {
+              "path": "src/spad_lidar/experiments/lab.py",
+              "line": 39,
+              "end": 67,
+              "label": "acquire_candidates"
+            }
+          ]
+        },
+        {
+          "kind": "shared",
+          "text": "同一周期记录适配",
+          "sources": [
+            {
+              "path": "src/spad_lidar/experiments/lab.py",
+              "line": 39,
+              "end": 67,
+              "label": "acquire_candidates"
+            }
+          ]
+        },
+        {
+          "kind": "separate",
+          "text": "列级归属、门碎片、相对码与绝对时间",
+          "sources": [
+            {
+              "path": "src/spad_lidar/experiments/columns.py",
+              "line": 32,
+              "end": 49,
+              "label": "quantize_column_records"
+            }
+          ]
+        },
+        {
+          "kind": "bypass",
+          "text": "仅估算 bin/位宽/载荷",
+          "sources": [
+            {
+              "path": "src/spad_lidar/electrical_budget.py",
+              "line": 25,
+              "end": 144,
+              "label": "electrical_budget"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cap7",
+      "title": "重复 / 含信号均值 / 噪声",
+      "group": "处理",
+      "cells": [
+        {
+          "kind": "separate",
+          "text": "三项计数分开：MC / readout_mean / noise_mean",
+          "sources": [
+            {
+              "path": "src/spad_lidar/experiments/a_acquisition.py",
+              "line": 46,
+              "end": 69,
+              "label": "event_acquisition"
+            }
+          ]
+        },
+        {
+          "kind": "none",
+          "text": "单次独立采集，无完整重复编排",
+          "sources": []
+        },
+        {
+          "kind": "adapter",
+          "text": "MC 采集 + 算法控制噪声参考",
+          "sources": [
+            {
+              "path": "src/spad_lidar/experiments/spatial_analysis.py",
+              "line": 41,
+              "end": 87,
+              "label": "run_system_analysis"
+            }
+          ]
+        },
+        {
+          "kind": "adapter",
+          "text": "trial_count / noise_trial_count；保存各次 records",
+          "sources": [
+            {
+              "path": "src/spad_lidar/experiments/columns.py",
+              "line": 106,
+              "end": 126,
+              "label": "run_columns"
+            }
+          ]
+        },
+        {
+          "kind": "bypass",
+          "text": "确定性预算，非 MC 统计",
+          "sources": []
+        }
+      ]
+    },
+    {
+      "id": "cap8",
+      "title": "测距内核",
+      "group": "处理",
+      "cells": [
+        {
+          "kind": "shared",
+          "text": "_estimate_range；历史阈值路径仍可调用",
+          "sources": [
+            {
+              "path": "src/spad_lidar/experiments/single_channel.py",
+              "line": 22,
+              "end": 170,
+              "label": "simulate"
+            }
+          ]
+        },
+        {
+          "kind": "none",
+          "text": "独立 SPAD 不要求场景距离",
+          "sources": []
+        },
+        {
+          "kind": "shared",
+          "text": "estimate_channels → _estimate_range",
+          "sources": [
+            {
+              "path": "src/spad_lidar/processing/spatial_ranges.py",
+              "line": 7,
+              "end": 17,
+              "label": "estimate_channels"
+            }
+          ]
+        },
+        {
+          "kind": "shared",
+          "text": "reconstruct_columns → _estimate_range",
+          "sources": [
+            {
+              "path": "src/spad_lidar/processing/column_reconstruction.py",
+              "line": 37,
+              "end": 89,
+              "label": "reconstruct_columns"
+            }
+          ]
+        },
+        {
+          "kind": "separate",
+          "text": "range_reference 是理想预算/参考输入",
+          "sources": [
+            {
+              "path": "src/spad_lidar/system_budget.py",
+              "line": 125,
+              "end": 283,
+              "label": "calculate_budget"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cap9",
+      "title": "DSP / MIPI 调度",
+      "group": "系统",
+      "cells": [
+        {
+          "kind": "none",
+          "text": "无",
+          "sources": []
+        },
+        {
+          "kind": "none",
+          "text": "无",
+          "sources": []
+        },
+        {
+          "kind": "none",
+          "text": "静态 B 无输出调度",
+          "sources": []
+        },
+        {
+          "kind": "separate",
+          "text": "scan/transport：缓冲占用、DSP、FIFO、丢列",
+          "sources": [
+            {
+              "path": "src/spad_lidar/scan/transport.py",
+              "line": 5,
+              "end": 60,
+              "label": "transport_plan"
+            }
+          ]
+        },
+        {
+          "kind": "separate",
+          "text": "budget_pipeline：固定 bank / chip-link / FIFO 背压",
+          "sources": [
+            {
+              "path": "src/spad_lidar/budget_pipeline.py",
+              "line": 18,
+              "end": 111,
+              "label": "schedule_link"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cap10",
+      "title": "审计封装",
+      "group": "系统",
+      "cells": [
+        {
+          "kind": "separate",
+          "text": "simulate 内构造 provenance / configuration",
+          "sources": [
+            {
+              "path": "src/spad_lidar/experiments/single_channel.py",
+              "line": 22,
+              "end": 170,
+              "label": "simulate"
+            }
+          ]
+        },
+        {
+          "kind": "shared",
+          "text": "stamp_result",
+          "sources": [
+            {
+              "path": "src/spad_lidar/experiments/lab.py",
+              "line": 79,
+              "end": 87,
+              "label": "stamp_result"
+            }
+          ]
+        },
+        {
+          "kind": "shared",
+          "text": "stamp_result + 光学数据指纹",
+          "sources": [
+            {
+              "path": "src/spad_lidar/experiments/spatial.py",
+              "line": 340,
+              "end": 357,
+              "label": "finish_system"
+            }
+          ]
+        },
+        {
+          "kind": "shared",
+          "text": "stamp_result + 逐发/统计记录",
+          "sources": [
+            {
+              "path": "src/spad_lidar/experiments/columns.py",
+              "line": 106,
+              "end": 126,
+              "label": "run_columns"
+            }
+          ]
+        },
+        {
+          "kind": "separate",
+          "text": "预算专用结果与假设",
+          "sources": [
+            {
+              "path": "src/spad_lidar/system_budget.py",
+              "line": 125,
+              "end": 283,
+              "label": "calculate_budget"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cap11",
+      "title": "任务执行服务",
+      "group": "运行",
+      "cells": [
+        {
+          "kind": "shared",
+          "text": "当前 UI kind=a；兼容同步 API 另在",
+          "sources": [
+            {
+              "path": "src/spad_lidar/runtime/jobs.py",
+              "line": 60,
+              "end": 101,
+              "label": "worker"
+            }
+          ]
+        },
+        {
+          "kind": "shared",
+          "text": "kind=spad",
+          "sources": [
+            {
+              "path": "src/spad_lidar/runtime/jobs.py",
+              "line": 60,
+              "end": 101,
+              "label": "worker"
+            }
+          ]
+        },
+        {
+          "kind": "shared",
+          "text": "kind=system",
+          "sources": [
+            {
+              "path": "src/spad_lidar/runtime/jobs.py",
+              "line": 60,
+              "end": 101,
+              "label": "worker"
+            }
+          ]
+        },
+        {
+          "kind": "shared",
+          "text": "kind=columns",
+          "sources": [
+            {
+              "path": "src/spad_lidar/runtime/jobs.py",
+              "line": 60,
+              "end": 101,
+              "label": "worker"
+            }
+          ]
+        },
+        {
+          "kind": "bypass",
+          "text": "无状态计算；不入采集任务队列",
+          "sources": [
+            {
+              "path": "src/spad_lidar/webapi/budget.py",
+              "line": 62,
+              "end": 68,
+              "label": "calculate"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cap12",
+      "title": "网页与共享组件",
+      "group": "界面",
+      "cells": [
+        {
+          "kind": "adapter",
+          "text": "app.js；共享直方图/曲线/单位",
+          "sources": [
+            {
+              "path": "web/app.js",
+              "line": 1,
+              "end": 50,
+              "label": "app.js"
+            }
+          ]
+        },
+        {
+          "kind": "adapter",
+          "text": "shared/labs.js + labs.html",
+          "sources": [
+            {
+              "path": "web/shared/labs.js",
+              "line": 1,
+              "end": 50,
+              "label": "labs.js"
+            }
+          ]
+        },
+        {
+          "kind": "adapter",
+          "text": "system.js + shared/*",
+          "sources": [
+            {
+              "path": "web/system.js",
+              "line": 1,
+              "end": 50,
+              "label": "system.js"
+            }
+          ]
+        },
+        {
+          "kind": "adapter",
+          "text": "columns.js + shared/*",
+          "sources": [
+            {
+              "path": "web/columns.js",
+              "line": 1,
+              "end": 50,
+              "label": "columns.js"
+            }
+          ]
+        },
+        {
+          "kind": "adapter",
+          "text": "budget.js + budget-*；共享曲线/单位/主题",
+          "sources": [
+            {
+              "path": "web/budget.js",
+              "line": 1,
+              "end": 50,
+              "label": "budget.js"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "parameterGroups": [
+    {
+      "name": "通道内像素数",
+      "paths": [
+        "H_binning / V_binning",
+        "device.H_binning / device.V_binning",
+        "spad.H_binning / spad.V_binning",
+        "spad.H_binning / spad.V_binning",
+        "system.spad.H_binning / system.spad.V_binning"
+      ],
+      "meaning": "每通道物理 SPAD 总数仅由 H×V 派生；B/C 另有 channels_h×channels_v。A 不从 H/V 自动修改 IFOV。",
+      "decision": "保持一个 DeviceConfig 核，保留阵列几何单独域。",
+      "sources": [
+        {
+          "path": "src/spad_lidar/spad/config.py",
+          "line": 9,
+          "end": 21,
+          "label": "DeviceConfig"
+        },
+        {
+          "path": "src/spad_lidar/scan/column_config.py",
+          "line": 119,
+          "end": 173,
+          "label": "ColumnConfig"
+        }
+      ]
+    },
+    {
+      "name": "脉冲能量 / 功率参考面",
+      "paths": [
+        "pulse_energy_nj",
+        "illumination.signal_photons_per_pulse",
+        "tx.pulse_average_power_w",
+        "exposure.pulses[].energy_nj",
+        "system.tx.pulse_average_power_w"
+      ],
+      "meaning": "A 是当前角通道的 Tx 前能量；SPAD 是探测面入射光子；B 是 Tx 输入波形能量；C 可逐发覆盖；预算以单角参考缩放。不能机械改成同一个标量。",
+      "decision": "先统一参考面和单位转换契约，再共用波形/能量工具。",
+      "sources": [
+        {
+          "path": "src/spad_lidar/experiments/single_channel.py",
+          "line": 22,
+          "end": 170,
+          "label": "simulate"
+        },
+        {
+          "path": "src/spad_lidar/experiments/lab.py",
+          "line": 16,
+          "end": 25,
+          "label": "lab_illumination"
+        },
+        {
+          "path": "src/spad_lidar/system_budget.py",
+          "line": 66,
+          "end": 80,
+          "label": "budget_channel_config"
+        }
+      ]
+    },
+    {
+      "name": "脉冲重复率 / 时间轴",
+      "paths": [
+        "laser_prf_hz",
+        "timing.period_ns",
+        "acquisition.period_ns",
+        "exposure.pulses[].time_offset_ns",
+        "system.acquisition.period_ns + targets"
+      ],
+      "meaning": "A 的 Hz 转为 ns；SPAD/B 是周期实验；C 的列级逐发列表才是正式时钟，旧 period 字段不是列程序基准。",
+      "decision": "周期预设与显式 program 可共用契约，保留不同配置适配器。",
+      "sources": [
+        {
+          "path": "src/spad_lidar/experiments/configuration.py",
+          "line": 74,
+          "end": 102,
+          "label": "experiment_defaults"
+        },
+        {
+          "path": "src/spad_lidar/scan/column_config.py",
+          "line": 64,
+          "end": 79,
+          "label": "ColumnAcquisition"
+        },
+        {
+          "path": "src/spad_lidar/scan/column_schedule.py",
+          "line": 56,
+          "end": 141,
+          "label": "build_column_schedule"
+        }
+      ]
+    },
+    {
+      "name": "门控",
+      "paths": [
+        "gate_start_ns / gate_width_ns",
+        "timing.gate_*",
+        "acquisition.gate_*",
+        "exposure.gate_mode + acquisition.gate_*",
+        "system.acquisition.gate_*"
+      ],
+      "meaning": "B/SPAD 为周期门；C 可 per_pulse 或 column，门重叠取并集并保留碎片。器件门与读出门在底层是可分开的。",
+      "decision": "保留 AcquisitionProgram 的显式门契约，不把 C 并集门降成一个宽度。",
+      "sources": [
+        {
+          "path": "src/spad_lidar/contracts/events.py",
+          "line": 6,
+          "end": 18,
+          "label": "AcquisitionWindow"
+        },
+        {
+          "path": "src/spad_lidar/scan/column_schedule.py",
+          "line": 56,
+          "end": 141,
+          "label": "build_column_schedule"
+        }
+      ]
+    },
+    {
+      "name": "初始状态 / 复位",
+      "paths": [
+        "事件采集固定 fully_recovered",
+        "algorithms.readout_warmup_cycles",
+        "algorithms.b_initial_condition",
+        "跨列连续 + 预热程序",
+        "assumptions.reset_time_ns"
+      ],
+      "meaning": "A/B 的独立采集恢复、C 的列间硬件复位、预算中的复位耗时，描述三个不同问题。预算填了复位时间不代表 C 已实现复位。",
+      "decision": "先定义 reset 边界/状态/耗时；后续单独扩展核心契约。",
+      "sources": [
+        {
+          "path": "src/spad_lidar/experiments/a_acquisition.py",
+          "line": 46,
+          "end": 69,
+          "label": "event_acquisition"
+        },
+        {
+          "path": "src/spad_lidar/experiments/spatial.py",
+          "line": 327,
+          "end": 331,
+          "label": "system_program"
+        },
+        {
+          "path": "src/spad_lidar/scan/column_schedule.py",
+          "line": 56,
+          "end": 141,
+          "label": "build_column_schedule"
+        }
+      ]
+    },
+    {
+      "name": "统计次数",
+      "paths": [
+        "monte_carlo_trials / readout_mean_trials / noise_mean_trials",
+        "单次 run_lab",
+        "acquisition.monte_carlo_trials + algorithms.b_noise_reference",
+        "acquisition.trial_count / noise_trial_count",
+        "不适用"
+      ],
+      "meaning": "计数职责、是否复用首份观测、噪声参考方式和保存格式不同；不能只合并名称。",
+      "decision": "可先提取明确的 TrialPlan，再保持各源和结果适配器。",
+      "sources": [
+        {
+          "path": "src/spad_lidar/experiments/a_acquisition.py",
+          "line": 46,
+          "end": 69,
+          "label": "event_acquisition"
+        },
+        {
+          "path": "src/spad_lidar/experiments/spatial_analysis.py",
+          "line": 41,
+          "end": 87,
+          "label": "run_system_analysis"
+        },
+        {
+          "path": "src/spad_lidar/experiments/columns.py",
+          "line": 106,
+          "end": 126,
+          "label": "run_columns"
+        }
+      ]
+    },
+    {
+      "name": "光谱与 PDE",
+      "paths": [
+        "spectral_inputs.*",
+        "spectral_inputs.pde",
+        "spectral_inputs.*",
+        "spectral_inputs.*",
+        "system.spectral_inputs.*"
+      ],
+      "meaning": "共同 Curve；只有当前模式生效。PDE/FF 在器件响应处应用，输入照明是完整像素参考面。",
+      "decision": "继续共用曲线类型和数值；保留 Lab 的 PDE 子集。",
+      "sources": [
+        {
+          "path": "src/spad_lidar/numerics/curves.py",
+          "line": 97,
+          "end": 206,
+          "label": "Curve"
+        },
+        {
+          "path": "src/spad_lidar/contracts/illumination.py",
+          "line": 7,
+          "end": 39,
+          "label": "SensorIllumination"
+        }
+      ]
+    },
+    {
+      "name": "TDC 硬件分箱 / 观察分箱",
+      "paths": [
+        "tdc_bin_ps",
+        "readout.tdc_bin_ps",
+        "readout.tdc_bin_ps",
+        "readout.tdc_bin_ps + acquisition.analysis_bin_ps",
+        "system.readout.tdc_bin_ps"
+      ],
+      "meaning": "保存记录的硬件量化精度不可恢复；观察重分箱只能取原宽度整数倍。C 另有分析分箱。",
+      "decision": "硬件量化配置与显示参数分离，统一重分箱校验。",
+      "sources": [
+        {
+          "path": "src/spad_lidar/experiments/lab.py",
+          "line": 39,
+          "end": 67,
+          "label": "acquire_candidates"
+        },
+        {
+          "path": "src/spad_lidar/scan/column_config.py",
+          "line": 157,
+          "end": 173,
+          "label": "column_valid"
+        }
+      ]
+    },
+    {
+      "name": "Rx / Tx 角域",
+      "paths": [
+        "channel_ifov_h_mrad / channel_ifov_v_mrad",
+        "不适用",
+        "tx.angle_* / rx.rx_angle_*",
+        "B 光学域 + motion/world yaw",
+        "geometry / rx_channel + system.rx"
+      ],
+      "meaning": "A 独立 IFOV 不等同 B/C 二维接收域；预算的均匀单角参考也不是实测全阵列。R01 模型实现与实物域验收要区分。",
+      "decision": "共用接收核，保持输入域与场景意义显式。",
+      "sources": [
+        {
+          "path": "src/spad_lidar/experiments/spatial.py",
+          "line": 158,
+          "end": 324,
+          "label": "project_illumination"
+        },
+        {
+          "path": "src/spad_lidar/system_budget.py",
+          "line": 66,
+          "end": 80,
+          "label": "budget_channel_config"
+        }
+      ]
+    },
+    {
+      "name": "DSP / MIPI / 缓冲",
+      "paths": [
+        "不适用",
+        "不适用",
+        "不适用",
+        "transport.*",
+        "electrical.* + transport.*"
+      ],
+      "meaning": "C 的 payload_format=points/histogram/events；预算研究 Range/Hist/Echo、chip/link、bank/FIFO，模型假设和字节定义不完全相同。",
+      "decision": "先对齐工作负载/资源/结果契约，再讨论共用调度器；不直接合并现有字段。",
+      "sources": [
+        {
+          "path": "src/spad_lidar/scan/column_config.py",
+          "line": 35,
+          "end": 61,
+          "label": "TransportSpec"
+        },
+        {
+          "path": "src/spad_lidar/scan/transport.py",
+          "line": 5,
+          "end": 60,
+          "label": "transport_plan"
+        },
+        {
+          "path": "src/spad_lidar/budget_pipeline.py",
+          "line": 18,
+          "end": 111,
+          "label": "schedule_link"
+        }
+      ]
+    }
+  ],
+  "proposals": [
+    {
+      "title": "保持一套器件与读出核心",
+      "tag": "继续共用",
+      "scope": "A / SPAD / B / C",
+      "fact": "四条事件路径均到 AcquisitionSession；核心包不依赖整机配置/IO 的边界已有 AST 测试。",
+      "proposal": "精简上层入口时保留独立光学输入与状态引擎；用适配器接入，避免拷贝 SPAD。",
+      "risk": "A 的解析分支与数字事件分支适用条件不同，不应强行归到同一数值路径。",
+      "check": "保留器件门/读出门、同流分块/恢复、注入后端、单角退化测试。",
+      "sources": [
+        {
+          "path": "src/spad_lidar/spad/acquisition.py",
+          "line": 26,
+          "end": 133,
+          "label": "AcquisitionSession"
+        },
+        {
+          "path": "tests/test_modular_core.py",
+          "line": 1,
+          "end": 50,
+          "label": "test_modular_core.py"
+        }
+      ]
+    },
+    {
+      "title": "重复采集协议可成为第一批提取对象",
+      "tag": "建议提取",
+      "scope": "A / B / C",
+      "fact": "独立 seed、含信号/纯噪声采集与统计编排各有实现；A 三计数、B MC、C records 格式不同。",
+      "proposal": "先设计 TrialPlan（角色、次数、初始状态、seed 分流、保存级别），执行器只消费协议；保留各平台源与量化适配。",
+      "risk": "首份观测是否计入统计、历史 RNG 序列、B 噪声参考模式与 C 记录体积不能暗改。",
+      "check": "固定 seed 基线、请求/完成计数、超限报错、逐次重分箱后 extrema 守恒。",
+      "sources": [
+        {
+          "path": "src/spad_lidar/experiments/a_acquisition.py",
+          "line": 46,
+          "end": 69,
+          "label": "event_acquisition"
+        },
+        {
+          "path": "src/spad_lidar/experiments/spatial_analysis.py",
+          "line": 41,
+          "end": 87,
+          "label": "run_system_analysis"
+        },
+        {
+          "path": "src/spad_lidar/experiments/columns.py",
+          "line": 106,
+          "end": 126,
+          "label": "run_columns"
+        }
+      ]
+    },
+    {
+      "title": "记录语义先对齐，再谈合并量化代码",
+      "tag": "先分离定义",
+      "scope": "A / SPAD / B / C",
+      "fact": "A 直接做直方图；B 保存周期区间；C 含列/触发参考和绝对时间，支持门碎片。",
+      "proposal": "明确 RecordSchema、时间原点、允许负码、TDC 身份、列归属，再提取可共享的抖动/量化纯函数。",
+      "risk": "用隐藏真值归属事件或用 B 的单门过滤替换 C 会产生物理错误。",
+      "check": "相同门起点整数倍重分箱；边界、重叠门、跨列尾部、记录数守恒。",
+      "sources": [
+        {
+          "path": "src/spad_lidar/experiments/lab.py",
+          "line": 39,
+          "end": 67,
+          "label": "acquire_candidates"
+        },
+        {
+          "path": "src/spad_lidar/experiments/columns.py",
+          "line": 32,
+          "end": 49,
+          "label": "quantize_column_records"
+        },
+        {
+          "path": "src/spad_lidar/processing/column_reconstruction.py",
+          "line": 17,
+          "end": 23,
+          "label": "histogram_edges"
+        }
+      ]
+    },
+    {
+      "title": "C 与预算的输出调度暂时保持独立",
+      "tag": "先定义接口",
+      "scope": "C / 系统预算",
+      "fact": "C 用 scan/transport；预算用 electrical_budget → budget_pipeline；二者只有目标词汇相似。",
+      "proposal": "建立 ColumnWorkload、ResourceTopology、ScheduleResult 的共同术语；先用同工况对照，再决定哪些资源模型可提取。",
+      "risk": "实际记录驱动与确定性上界预算不同；两种 payload 语义、bank 角色、背压和丢列规则不可互相冒充。",
+      "check": "同字节/链路/时序约束对照、过载时不延迟输入掩盖丢列、FIFO/缓冲寿命边界。",
+      "sources": [
+        {
+          "path": "src/spad_lidar/scan/transport.py",
+          "line": 5,
+          "end": 60,
+          "label": "transport_plan"
+        },
+        {
+          "path": "src/spad_lidar/electrical_budget.py",
+          "line": 25,
+          "end": 144,
+          "label": "electrical_budget"
+        },
+        {
+          "path": "src/spad_lidar/budget_pipeline.py",
+          "line": 18,
+          "end": 111,
+          "label": "schedule_link"
+        }
+      ]
+    },
+    {
+      "title": "将 B 光学投影从 experiments 组合层下沉",
+      "tag": "建议评估",
+      "scope": "B / C / 预算 / reporting",
+      "fact": "预算和部分 reporting 直接导入 experiments.spatial.project_illumination；光学公共能力实际位于实验层。",
+      "proposal": "可考虑单独 optical composition 服务，输入规范光学域，输出 SensorIllumination + pixel_groups + OpticalAudit；先明确依赖方向。",
+      "risk": "不是移动文件就完成：配置类型、视图依赖和光学审计返回结构存在相互引用。",
+      "check": "能量参考面、积分守恒、Rx 边缘损失、B 单通道退化、预算与 B 光学参考一致性。",
+      "sources": [
+        {
+          "path": "src/spad_lidar/system_budget.py",
+          "line": 125,
+          "end": 283,
+          "label": "calculate_budget"
+        },
+        {
+          "path": "src/spad_lidar/reporting/column_view.py",
+          "line": 69,
+          "end": 105,
+          "label": "column_preview"
+        },
+        {
+          "path": "src/spad_lidar/experiments/spatial.py",
+          "line": 158,
+          "end": 324,
+          "label": "project_illumination"
+        }
+      ]
+    },
+    {
+      "title": "前端入口可以整合，物理范围不必合成一个模型",
+      "tag": "界面可整合",
+      "scope": "全部平台",
+      "fact": "独立页面已共用曲线、主题、单位和部分直方图；表单与配置结构仍分开。",
+      "proposal": "可建立统一工作台外壳：选研究范围 → 类型化参数 → 预览/采集 → 历史结果；明确 SPAD、单角、光学、扫描、预算能力。",
+      "risk": "单一“大配置”会让 SPAD 被迫填写距离/孔径；预算也不能显示为完整事件仿真。",
+      "check": "切换模块不污染历史结果，配置转移显示覆盖范围，普通刷新/旧缓存/单位联动验证。",
+      "sources": [
+        {
+          "path": "web/app.js",
+          "line": 1,
+          "end": 50,
+          "label": "app.js"
+        },
+        {
+          "path": "web/system.js",
+          "line": 1,
+          "end": 50,
+          "label": "system.js"
+        },
+        {
+          "path": "web/columns.js",
+          "line": 1,
+          "end": 50,
+          "label": "columns.js"
+        }
+      ]
+    }
+  ],
+  "transfers": [
+    {
+      "from": "预算",
+      "to": "B",
+      "status": "已实现 · 前端草稿转移",
+      "detail": "预算 sendB 将 result.configuration.experiment.system 存入 sessionStorage；B /form 重新解析后装入表单。转移的是规范化 B 配置，不是预算结果或已采集记录。",
+      "keep": "预算的 electrical / geometry / rx_channel / assumptions / range_reference 不随 B 配置转移。",
+      "sources": [
+        {
+          "path": "web/budget.js",
+          "line": 1,
+          "end": 50,
+          "label": "budget.js"
+        },
+        {
+          "path": "web/system.js",
+          "line": 1,
+          "end": 50,
+          "label": "system.js"
+        }
+      ]
+    },
+    {
+      "from": "B",
+      "to": "C",
+      "status": "已实现 · API 显式映射",
+      "detail": "from-system 复制 tx / scene / rx / spad / readout / background / spectral_inputs，并复制 calibration_delay_ns。C 当前草稿及默认值为其余字段提供基础。",
+      "keep": "不复制 B 的 laser_shots、monte_carlo_trials、rng_seed 等整个 acquisition；保留 C 的高层目标、运动、曝光、transport。",
+      "sources": [
+        {
+          "path": "src/spad_lidar/webapi/columns.py",
+          "line": 79,
+          "end": 87,
+          "label": "from_system"
+        },
+        {
+          "path": "web/system.js",
+          "line": 1,
+          "end": 50,
+          "label": "system.js"
+        }
+      ]
+    },
+    {
+      "from": "历史周期 C",
+      "to": "正式列级 C",
+      "status": "兼容保留 · 不是同一入口",
+      "detail": "旧 kind=scan 仍由 experiments/scanning.run_scan 执行；正式 kind=columns 用 run_columns。历史页面 /system/scan/legacy 和旧任务仍可访问。",
+      "keep": "历史周期扫描不是列级控制程序；不要把删除兼容入口当成普通页面合并。",
+      "sources": [
+        {
+          "path": "src/spad_lidar/runtime/jobs.py",
+          "line": 60,
+          "end": 101,
+          "label": "worker"
+        },
+        {
+          "path": "src/spad_lidar/webapi/labs.py",
+          "line": 47,
+          "end": 53,
+          "label": "scan_page"
+        },
+        {
+          "path": "src/spad_lidar/experiments/scanning.py",
+          "line": 156,
+          "end": 207,
+          "label": "run_scan"
+        }
+      ]
+    },
+    {
+      "from": "SPAD / A",
+      "to": "B / C",
+      "status": "未发现现成的通用配置转移",
+      "detail": "已共享核心与默认参数引用；本次未发现网页上 SPAD↔A↔B 的通用转换器。核心复用、配置默认继承、网页转移是三件事。",
+      "keep": "A 的通道能量/IFOV和 SPAD 的直接照明无法在缺少光学假设时自动转换。",
+      "sources": [
+        {
+          "path": "src/spad_lidar/experiments/configuration.py",
+          "line": 74,
+          "end": 102,
+          "label": "experiment_defaults"
+        },
+        {
+          "path": "src/spad_lidar/experiments/system_config.py",
+          "line": 95,
+          "end": 104,
+          "label": "domain_defaults"
+        }
+      ]
+    }
+  ],
+  "contracts": [
+    {
+      "name": "SensorIllumination",
+      "meaning": "完整像素、PDE/FF 之前；[pixel,wavelength]，单位 photons/pulse 或 photons/s，已含光谱积分权重。",
+      "source": {
+        "path": "src/spad_lidar/contracts/illumination.py",
+        "line": 7,
+        "end": 39,
+        "label": "SensorIllumination"
+      }
+    },
+    {
+      "name": "CandidateEvents",
+      "meaning": "内部候选雪崩的绝对时间 ns 与物理 pixel_id；不能冒充光学输入。",
+      "source": {
+        "path": "src/spad_lidar/contracts/events.py",
+        "line": 48,
+        "end": 62,
+        "label": "CandidateEvents"
+      }
+    },
+    {
+      "name": "AcquisitionProgram",
+      "meaning": "显式周期/参考区间、器件门、读出门、measured 标识；C 可通过 GatedProgram 表达门碎片。",
+      "source": {
+        "path": "src/spad_lidar/contracts/events.py",
+        "line": 21,
+        "end": 44,
+        "label": "AcquisitionProgram"
+      }
+    },
+    {
+      "name": "AcquisitionSession",
+      "meaning": "器件/读出状态、水位、记录；合法分块等价；仅内置后端有通用 checkpoint/restore。",
+      "source": {
+        "path": "src/spad_lidar/spad/acquisition.py",
+        "line": 83,
+        "end": 98,
+        "label": "checkpoint"
+      }
+    },
+    {
+      "name": "周期/列级 records",
+      "meaning": "周期相对区间 vs 带 column_id / frame / pulse_reference / time_ns 的列级记录；不恢复共享读出丢失的像素身份。",
+      "source": {
+        "path": "src/spad_lidar/experiments/columns.py",
+        "line": 32,
+        "end": 49,
+        "label": "quantize_column_records"
+      }
+    }
+  ],
+  "roles": {
+    "src/spad_lidar/contracts": "稳定物理与采集数据契约",
+    "src/spad_lidar/numerics": "曲线、时域与空间分布的公共数值工具",
+    "src/spad_lidar/spad": "器件/读出核心，避免反向依赖整机或网页",
+    "src/spad_lidar/spad/device": "PDE/FF、抖动、恢复状态和诊断",
+    "src/spad_lidar/spad/readout": "OR/符合/TDC/门碎片与数字记录",
+    "src/spad_lidar/tx": "发射功率与角分布",
+    "src/spad_lidar/scene": "目标传播与扫描目标",
+    "src/spad_lidar/rx": "单角预算、投影、空间响应和 PSF",
+    "src/spad_lidar/scan": "扫描计划/轨迹/列级时序/输出调度",
+    "src/spad_lidar/experiments": "A/SPAD/B/C 的配置适配与编排；部分光学公共组合仍在此层",
+    "src/spad_lidar/processing": "直方图、重分箱、距离、统计与点云重建",
+    "src/spad_lidar/reporting": "Python 展示数据与审计流程装配，含核心调用",
+    "src/spad_lidar/runtime": "JobManager、进程池与持久任务；launcher 为当前未提交改动",
+    "src/spad_lidar/webapi": "实验/预算/列级 HTTP 路由",
+    "src/spad_lidar/adapters": "外部光学数据导入与验证",
+    "src/spad_lidar/timing": "周期程序与门工具",
+    "config": "唯一默认值、算法限额、帮助、公式和曲线数据",
+    "web": "页面与各平台控制器",
+    "web/shared": "跨页面组件：曲线以外的直方图、扫描、单位、主题等",
+    "web/vendor": "本地 KaTeX / Three.js 依赖；目录统计包含，源码浏览省略",
+    "web/prototypes": "历史设计预览；不是正式运行入口",
+    "tests": "现有回归资产，本次只索引而未重跑物理模型测试",
+    "docs": "设计/模型/使用/验收/历史文档",
+    "scripts": "生成、校验与截图脚本（主目录说明，不计入本次 HEAD 源码快照）",
+    "artifacts": "运行结果、验证证据、架构快照；与源码分开"
+  }
+}

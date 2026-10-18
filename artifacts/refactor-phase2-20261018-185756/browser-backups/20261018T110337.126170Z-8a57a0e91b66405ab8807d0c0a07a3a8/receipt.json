@@ -1,0 +1,44 @@
+{
+  "revision": "61289295178a5cc12d9a07513d40facd52ab9339dca88a8c4f73baa2cdcf3125",
+  "changes": [
+    {
+      "parameter": "scene.range_m",
+      "before": 100.0,
+      "after": 107.0,
+      "source": "domains.scene.range_m"
+    }
+  ],
+  "affected": [
+    {
+      "kind": "a",
+      "label": "A 单角",
+      "count": 1
+    },
+    {
+      "kind": "system",
+      "label": "B 光学",
+      "count": 1
+    },
+    {
+      "kind": "scan",
+      "label": "旧扫描",
+      "count": 1
+    },
+    {
+      "kind": "columns",
+      "label": "C 列扫描",
+      "count": 1
+    },
+    {
+      "kind": "budget",
+      "label": "系统预算",
+      "count": 1
+    }
+  ],
+  "path": "config/defaults.yaml",
+  "unchanged": false,
+  "kind": "system",
+  "original_sha256": "fee9380de4e818eb2c5b5f6e68296220d2d6029dbfdb0a0c213e98a350389aef",
+  "saved_sha256": "5af1cfb647414ba1be8a3b5df1c1f37d2f53d1b5c4f0a0ebad07cc990bb7a60c",
+  "utc": "2026-10-18T11:03:37.126926+00:00"
+}

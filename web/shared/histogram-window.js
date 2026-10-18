@@ -16,13 +16,23 @@ function scales(data,channels,range,series,shared){
  return maxima.map(max=>countAxis(shared?common:max));
 }
 function drawHistogram(canvas,data,ch,range,ymax,series,overview=false,windowRange=range){
- const [c,w,h]=canvasSetup(canvas),left=overview?43:43,right=15,top=overview?5:22,bottom=overview?16:32,pw=w-left-right,ph=h-top-bottom;
+ const [c,w,h]=canvasSetup(canvas);
+ c.font=(canvas.dataset.axisFont||'13')+'px Consolas,"Microsoft YaHei",sans-serif';
  const axis=countAxis(ymax);if(!overview)ymax=axis.max;
+ const labelWidth=overview?0:Math.max(...axis.ticks.map(t=>c.measureText(fmt(t,0)).width));
+ const left=overview?43:Math.max(58,Math.ceil(labelWidth)+16),right=overview?15:20,top=overview?5:24,bottom=overview?18:38,pw=w-left-right,ph=h-top-bottom;
  canvas.dataset.yMax=String(ymax);canvas.dataset.yTicks=overview?'':JSON.stringify(axis.ticks);
  const sx=t=>left+(t-range[0])/(range[1]-range[0])*pw,sy=y=>top+ph-y/ymax*ph;
- c.clearRect(0,0,w,h);c.font=(canvas.dataset.axisFont||'9')+'px Consolas,"Microsoft YaHei",sans-serif';c.lineWidth=1;
- if(!overview){for(const tick of axis.ticks){const y=sy(tick);c.strokeStyle=(globalThis.LidarTheme?.color('#1b3041') ?? ('#1b3041'));c.beginPath();c.moveTo(left,y);c.lineTo(w-right,y);c.stroke();c.fillStyle=(globalThis.LidarTheme?.color('#68899f') ?? ('#68899f'));c.textAlign='right';c.fillText(fmt(tick,0),left-9,y+3);}c.fillStyle=(globalThis.LidarTheme?.color('#85a3b6') ?? ('#85a3b6'));c.textAlign='left';c.fillText('计数 / 时间分箱',left,11);}
- for(let i=0;i<=4;i++){const t=range[0]+(range[1]-range[0])*i/4;c.fillStyle=(globalThis.LidarTheme?.color('#6f90a5') ?? ('#6f90a5'));c.textAlign='center';c.fillText(fmt(t,1),sx(t),h-(overview?2:14));}if(!overview){c.textAlign='right';c.fillText(data.x_axis_label||'时间 · ns',w-right,h-1,pw);}
+ c.clearRect(0,0,w,h);c.lineWidth=1;
+ c.strokeStyle=globalThis.LidarTheme?.plotColor('grid')||'#3b4f63';
+ c.setLineDash(globalThis.LidarTheme?.gridDash?.()||[4,5]);
+ // 两个数值方向都提供辅助网格；概览只保留一条轻量横向参考线。
+ for(const y of overview?[top+ph/2]:axis.ticks.filter(t=>t>0).map(sy)){c.beginPath();c.moveTo(left,y);c.lineTo(w-right,y);c.stroke();}
+ for(let i=1;i<=4;i++){const x=left+pw*i/4;c.beginPath();c.moveTo(x,top);c.lineTo(x,top+ph);c.stroke();}
+ c.setLineDash([]);
+ if(!overview){for(const tick of axis.ticks){const y=sy(tick);c.fillStyle=(globalThis.LidarTheme?.plotColor('text') || (globalThis.LidarTheme?.color('#68899f') ?? ('#68899f')));c.textAlign='right';c.fillText(fmt(tick,0),left-9,y+3);}c.fillStyle=(globalThis.LidarTheme?.plotColor('text') || (globalThis.LidarTheme?.color('#85a3b6') ?? ('#85a3b6')));c.textAlign='left';c.fillText('计数 / 时间分箱',left,11);}
+ c.setLineDash([]);c.strokeStyle=globalThis.LidarTheme?.plotColor('axis')||'#9eb4c6';c.lineWidth=1.25;c.beginPath();if(!overview){c.moveTo(left,top);c.lineTo(left,top+ph);}c.moveTo(left,top+ph);c.lineTo(w-right,top+ph);c.stroke();c.lineWidth=1;
+ for(let i=0;i<=4;i++){const t=range[0]+(range[1]-range[0])*i/4;c.fillStyle=(globalThis.LidarTheme?.plotColor('text') || (globalThis.LidarTheme?.color('#6f90a5') ?? ('#6f90a5')));c.textAlign=i===0?'left':i===4?'right':'center';c.fillText(fmt(t,1),sx(t),h-(overview?2:18));}if(!overview){c.textAlign='right';c.fillText(data.x_axis_label||'时间 · ns',w-right,h-2,pw);}
  c.save();c.beginPath();c.rect(left,top,pw,ph);c.clip();
  const counts=data.histogram.counts[ch],edges=data.histogram.edges_ns,centers=data.histogram.time_ns;
 

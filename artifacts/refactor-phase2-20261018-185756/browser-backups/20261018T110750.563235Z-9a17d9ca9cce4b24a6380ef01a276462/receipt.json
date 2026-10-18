@@ -1,0 +1,24 @@
+{
+  "revision": "f758baad5f4676b419c9d6107f76454e25f31b0eb0c921010329889dccec6035",
+  "changes": [
+    {
+      "parameter": "pulse_energy_nj",
+      "before": 24.0,
+      "after": 25.0,
+      "source": "experiments.a.tx.pulse_energy_nj"
+    }
+  ],
+  "affected": [
+    {
+      "kind": "a",
+      "label": "A 单角",
+      "count": 1
+    }
+  ],
+  "path": "config/defaults.yaml",
+  "unchanged": false,
+  "kind": "a",
+  "original_sha256": "b5e4ce931e9546fe329baff39b7e42d230e4a8f8185d41853c5535fead3fc72f",
+  "saved_sha256": "c14d47dce260e548587568ced78cd1229727e1452bfe15af1e89d1c98dd49e99",
+  "utc": "2026-10-18T11:07:50.564120+00:00"
+}

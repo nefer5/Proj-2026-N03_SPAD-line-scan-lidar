@@ -1,0 +1,556 @@
+diff --git a/README.md b/README.md
+index 2d1d6ea..2d087b7 100644
+--- a/README.md
++++ b/README.md
+@@ -11,7 +11,7 @@ python -m venv .venv
+ .\.venv\Scripts\python.exe -m pip install -e .
+ ```
+ 
+-之后双击根目录 `start-dev.cmd`，或执行 `.\.venv\Scripts\python.exe run.py --reload --open`。默认端口由 `run.py` 统一维护为8016。启动脚本优先使用项目虚拟环境，未创建时使用PATH中的Python；后者也须已安装项目依赖。
++之后双击根目录 `start-dev.cmd`，或执行 `.\.venv\Scripts\python.exe run.py --restart --reload --open`。一键启动现在会先停止经项目身份核验的旧启动器、重载器及计算子进程，再验证新实例就绪后打开网页。端口属于其他程序时拒绝处理，不直接杀端口。详见[启动与重启](docs/guides/launcher.md)。默认端口由 `run.py` 统一维护为8016。启动脚本优先使用项目虚拟环境，未创建时使用PATH中的Python；后者也须已安装项目依赖。
+ 
+ | 入口 | 适用研究 |
+ |---|---|
+diff --git a/docs/design/architecture-decisions.md b/docs/design/architecture-decisions.md
+index 6aeb585..77848bd 100644
+--- a/docs/design/architecture-decisions.md
++++ b/docs/design/architecture-decisions.md
+@@ -123,3 +123,12 @@ AD15是目标硬件的显式假设，不是所有SPAD器件的通用规律。电
+ 各平台继承含义相同的器件、接收、背景和采集参数；撤掉预算页对共用Tx脉冲形状/效率、H_binning/FF和采集发数/周期的覆盖，以及B重复次数覆盖。保留Tx全角域功率、空间通道布局、扫描计划/曝光列表等不同物理定义，不能把A单通道能量直接复制成全Tx能量。DCR界面统一kHz，配置/API/导出仍为cps，单位换算由共享LidarUnits完成，旧草稿单位不变。
+ 
+ 扩大binning导致部分无色差构造模型的密集空间×光谱计算超过资源上限；在既有精确分离开关允许时，复用外积表示处理超限的无色差构造Rx。保留全谱积分/采样，不用于有色差数据集，不提高资源限额；审计记录dense_integration_work和resource_factorization，对照测试与密集积分相对误差在1e-12内。证据见[默认工况收口](../../artifacts/a-defaults-closeout/README.md)。
++
++## 2026-10-15：一键启动必须重新启动本项目服务
++
++用户要求避免旧版本进程残留。一键cmd改为--restart，并传绝对run.py路径；run.py负责项目身份/创建时间/端口归属核验、启动锁、旧实例清理和新实例就绪验证。Uvicorn服务树通过Windows Job Object托管，子进程在暂停状态加入Job后才执行，避免启动器异常退出留下worker。浏览器在服务器Job外打开，不依赖全机Python清理。保留显式复用CLI与停止CLI，未知端口/无法判定归属时拒绝强杀，不提供通用HTTP停止接口。操作定义见[启动与重启](../guides/launcher.md)。
++
++
++## 2026-10-18：桌面保留左参数栏并扩大工作区
++
++用户明确偏好桌面同时编辑左侧参数并核对右侧结果，要求放宽工作区；不将普通1080P或缩放后的桌面窗口默认改为互斥视图。很窄窗口可采用视图切换，矮窗口单独处理滚动，细节图按实际容器重排。唯一具体行为和尺寸规则维护在[界面规范](ui-design-guidelines.md)，实施证据见[适配验收](../../artifacts/responsive-fix-20261018/README.md)。本次不涉及仿真计算逻辑；R05与C人工验收不由此关闭。
+diff --git a/docs/design/ui-design-guidelines.md b/docs/design/ui-design-guidelines.md
+index df7f890..4026d01 100644
+--- a/docs/design/ui-design-guidelines.md
++++ b/docs/design/ui-design-guidelines.md
+@@ -54,6 +54,16 @@
+ 
+ 整体偏好是：物理含义清晰、结构紧凑、可精确控制、可核对和复用。视觉设计服务于建模判断，不掩盖数据来源或模型限制。
+ 
++## 2026-10-18 桌面工作区与缩放适配
++
++用户明确要求保留左侧参数、右侧图形/结果的桌面工作方式，放宽整个应用的横向工作区。A/SPAD、预算、B和正式列级C的主要内容不再受原1600–1800px总宽上限约束；参数栏仍限制宽度，额外空间给结果。按浏览器CSS视口适配，不绑定物理分辨率。
++
++- A评估与调试在宽度大于760px时保持左右并排，参数栏按空间调整；仅≤760px使用固定的“参数配置 / 图形与结果”切换，默认显示结果。表单、任务结果和直方图窗口保留；切换仅重绘，不提交采集。窄窗点击运行后转到结果区，宽窗恢复时两侧同时可见。
++- 预算细节图根据自身区域宽度重排：区域≤1100px时卡片上下排列。双坐标与成像图保留最小绘图宽度，过窄时在图卡内部滚动，避免缩小文字或改变科学坐标比例。
++- B和正式列级C在可用高度≤700px时压紧头尾操作区，整个参数面板承担滚动；表单内部不再形成第二层滚动。运行、恢复、导入导出和说明仍保留，可向上/向下滚动访问。高窗口维持原来的头尾常驻、表单滚动方式。
++
++仅修改展示与交互，不调整模型、默认工况、算法限额或采集协议。自验范围与截图见[适配实施验收](../../artifacts/responsive-fix-20261018/README.md)；真实Windows系统缩放、跨显示器和用户人工验收单列，不以浏览器模拟代替。
++
+ 
+ ## 2026-10-02 参数理解与空间视图
+ 
+diff --git a/docs/index.md b/docs/index.md
+index 39a8194..bdffe72 100644
+--- a/docs/index.md
++++ b/docs/index.md
+@@ -68,3 +68,5 @@
+ - 近期验收入口：[采集范围](../artifacts/b-acquisition-scopes/README.md)、[Tx归一化](../artifacts/tx-domain-normalization/README.md)、[直方图核验](../artifacts/histogram-display-audit/README.md)、[双轴光学](../artifacts/optical-shapes/README.md)、[带外漏光](../artifacts/filter-leakage/README.md)、[A/B背景差异](../artifacts/b-noise-audit/README.md)。部分原始数组仅保存在本机运行目录，报告会注明。
+ 
+ 2026-10-15收口：[共用默认与DCR单位](../artifacts/a-defaults-closeout/README.md)、[A无预热初始化](../artifacts/a-fully-recovered/README.md)、[历史架构图快照](../artifacts/architecture-review/README.md)。
++
++本地服务启动、重启和进程归属边界见[启动与重启](guides/launcher.md)。
+diff --git a/docs/release-notes.md b/docs/release-notes.md
+index f9b59d2..448565d 100644
+--- a/docs/release-notes.md
++++ b/docs/release-notes.md
+@@ -2,6 +2,14 @@
+ 
+ 当前版本：**0.6.14.dev0**。版本号描述软件实现，不代表实测器件符合性；当前状态见[路标](roadmap.md)。
+ 
++## 2026-10-18 桌面布局适配（工作树增量）
++
++保留左参数/右结果并放宽工作区；预算细节图按容器重排，A仅在很窄窗口提供参数/结果切换，B/C矮窗口改为参数面板单层滚动。计算核心、工况默认值和算法限额未改。使用规则见[界面规范](design/ui-design-guidelines.md)，自验及实际系统验证边界见[证据](../artifacts/responsive-fix-20261018/README.md)。
++
++## 2026-10-15启动器修复（工作树增量）
++
++- 一键入口显式重启，核验项目身份、进程创建时间、端口和新实例标识；清理旧重载器/服务/计算worker并等待退出。Windows Job Object覆盖异常退出的子进程清理，其他服务占用端口时拒绝误杀。详见[使用说明](guides/launcher.md)。
++
+ ## 0.6.14.dev0（2026-10-15）
+ 
+ 本轮收口A直方图显示与交互恢复、三项统计次数配置、无预热完全恢复初始化、共用默认工况和DCR kHz输入。保留A模型版本0.2.2，软件版本升级为0.6.14.dev0。
+diff --git a/docs/roadmap.md b/docs/roadmap.md
+index 9bf5a14..737485d 100644
+--- a/docs/roadmap.md
++++ b/docs/roadmap.md
+@@ -25,7 +25,7 @@
+ | R02 | **C平台人工精细验收** | 已有自动测试和浏览器自检，尚缺用户逐项精细核验 | 逐项核对高层预算、列/触发归属、发射/返回角、距离/拖尾、门、状态边界、统计、DSP/MIPI、导出和旧任务；保存审核意见、复现工况、截图及结论 |
+ | R03 | **各平台命名统一** | A/SPAD/B/C、历史C、工作台标题和部分术语仍有历史差异 | 确定正式命名表，统一菜单、标题、帮助、文档和导出；保持旧链接/配置可追溯；明确角度单元、时间分箱、通道、slot与触发周期 |
+ | R04 | **参数配置唯一化，定义与后台逻辑共用** | 已有YAML唯一源和公共核心，但跨平台字段、别名、定义和处理路径仍需系统审计 | 建立参数/定义/实现映射，消除重复默认及含义不同的同名项；兼容别名只在迁移层；共同逻辑复用并通过跨平台一致性与极限对照 |
+-| R05 | **UI设计统一** | B多轮优化已形成规范，A/SPAD/C及历史入口尚未全部按同一标准复核 | 统一模块分组、H/V组合、折叠/标题、图表与色标、选择联动、范围/单位/来源标注、错误与导出；共享组件并进行桌面、窄屏、普通刷新验收 |
++| R05 | **UI设计统一** | B多轮优化已形成规范；2026-10-18补充宽桌面工作区、预算细节图重排、A窄窗切换与B/C矮窗口滚动，见[专项证据](../artifacts/responsive-fix-20261018/README.md)。跨平台完整统一及真实系统缩放/人工验收仍待 | 统一模块分组、H/V组合、折叠/标题、图表与色标、选择联动、范围/单位/来源标注、错误与导出；共享组件并进行桌面、窄屏、普通刷新验收 |
+ 
+ R01是收光/场景角域的物理建模工作，不只是把前端输入框改名。当前“全阵列背景”指显式Rx角域对所有像素的贡献；域外设为不接收，实际接收域若更大仍可能漏算，需实测确定。
+ 
+diff --git a/run.py b/run.py
+index 47dc9ae..9e7320e 100644
+--- a/run.py
++++ b/run.py
+@@ -1,81 +1,132 @@
++"""Foreground Windows launcher with explicit, project-verified restart."""
+ from pathlib import Path
+ import argparse
+-import json
+-import socket
++import os
++import subprocess
+ import sys
+-import threading
+ import time
+-from urllib.request import ProxyHandler, build_opener
++import uuid
+ import webbrowser
+ 
+ ROOT = Path(__file__).resolve().parent
+-sys.path.insert(0, str(ROOT / "src"))
++sys.path.insert(0, str(ROOT/'src'))
+ DEFAULT_PORT = 8016
+ 
+-URL_OPENER = build_opener(ProxyHandler({}))
+-
+-
+-def is_lidar_server(url):
+-    try:
+-        with URL_OPENER.open(url + "/openapi.json", timeout=1) as response:
+-            schema = json.load(response)
+-        return schema.get("info", {}).get("title") == "SPAD Line-Scanning LiDAR Model"
+-    except (OSError, ValueError):
+-        return False
+-
+-
+-def open_when_ready(url):
+-    # Wait for successful application startup, rather than opening an error page.
+-    for _ in range(60):
+-        if is_lidar_server(url):
+-            webbrowser.open(url)
+-            return
+-        time.sleep(0.5)
+-    print("Browser not opened: startup timed out. Check the server log above.", flush=True)
+-
+ 
+ def main():
+-    parser = argparse.ArgumentParser(description="Start the LiDAR modeling server",
+-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+-    parser.add_argument("--reload", action="store_true", help="Reload when Python source changes")
+-    parser.add_argument("--open", action="store_true", dest="open_browser", help="Open the browser when ready")
+-    parser.add_argument("--port", type=int, default=DEFAULT_PORT, help="Local HTTP port")
+-    args = parser.parse_args()
+-    if not 1 <= args.port <= 65535:
+-        parser.error("port must be between 1 and 65535")
+-
+-    url = f"http://127.0.0.1:{args.port}"
+-    with socket.socket() as probe:
+-        probe.settimeout(1)
+-        occupied = probe.connect_ex(("127.0.0.1", args.port)) == 0
+-    if occupied:
+-        if args.open_browser and is_lidar_server(url):
+-            print(f"LiDAR server already running: {url}")
+-            print("Reusing it. Restart its original launcher to change reload settings.")
+-            webbrowser.open(url)
+-            return
+-        parser.exit(1, f"Port {args.port} is already in use. Choose another --port.\n")
+-
++    parser=argparse.ArgumentParser(description='Start the LiDAR modeling server',
++                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
++    parser.add_argument('--reload',action='store_true',help='Reload when Python source changes')
++    parser.add_argument('--open',action='store_true',dest='open_browser',help='Open browser after verified startup')
++    parser.add_argument('--restart',action='store_true',help='Stop verified old project processes before starting')
++    parser.add_argument('--stop',action='store_true',help='Stop verified project instances on this port and exit')
++    parser.add_argument('--port',type=int,default=DEFAULT_PORT,help='Local HTTP port')
++    args=parser.parse_args()
++    if not 1<=args.port<=65535:parser.error('port must be between 1 and 65535')
++    if os.name!='nt':
++        parser.exit(1,'This verified one-click launcher requires Windows. Use python -m uvicorn spad_lidar.api:app on other platforms.\n')
++    from spad_lidar.runtime.launcher import (StartupLock,identity,port_open,port_owners,
++        process_snapshot,select_roots,stop_trees,read_record,write_record,same_path,child_process_info,ServerJob)
++    from spad_lidar import __version__
++    if not args.stop:
++        # Fail before shutting down a working server if this Python lacks dependencies.
++        try:
++            import uvicorn
++            import spad_lidar.api
++            from spad_lidar.models import SimulationConfig
++            SimulationConfig()
++        except ImportError as exc:
++            print(f'Missing dependency: {exc}. Install with this Python: python -m pip install -e .',flush=True)
++            return 1
++        except (ValueError,RuntimeError,OSError) as exc:
++            print('Invalid project configuration: '+str(exc),file=sys.stderr,flush=True)
++            return 1
++    directory=ROOT/'artifacts'/'runtime';directory.mkdir(parents=True,exist_ok=True)
++    record_path=directory/f'launcher-{args.port}.json'
++    url=f'http://127.0.0.1:{args.port}'
++    instance=uuid.uuid4().hex
++    child=None;child_identity=None;server_job=None
+     try:
+-        import uvicorn
+-        import spad_lidar.api  # Check application dependencies before starting.
+-    except ImportError as exc:
+-        print(f"Missing dependency: {exc}")
+-        print('Install dependencies with this Python: python -m pip install -e .')
++        with StartupLock(directory/f'launcher-{args.port}.lock'):
++            occupied=port_open(args.port)
++            runtime=identity(url) if occupied else None
++            if occupied and not args.restart and not args.stop:
++                if runtime and same_path(runtime.get('project_root',''),ROOT):
++                    print(f'Project server already running: {url}. Use --restart for a fresh process.',flush=True)
++                    if args.open_browser:webbrowser.open(url)
++                    return 0
++                raise RuntimeError(f'Port {args.port} is occupied by an unverified service; no process was stopped.')
++            snapshot=process_snapshot()
++            roots=select_roots(ROOT,args.port,DEFAULT_PORT,snapshot,occupied,
++                               port_owners(args.port) if occupied else set(),runtime,
++                               read_record(record_path),os.getpid())
++            if roots:
++                stopped=stop_trees(roots)
++                print('Stopped old project Python processes: '+', '.join(map(str,stopped)),flush=True)
++            deadline=time.monotonic()+10
++            while port_open(args.port) and time.monotonic()<deadline:time.sleep(.1)
++            if port_open(args.port):raise RuntimeError('Old port has not been released; new server was not started.')
++            remaining=select_roots(ROOT,args.port,DEFAULT_PORT,process_snapshot(),False,set(),None,None,os.getpid())
++            if remaining:raise RuntimeError('A project launcher remains; new server was not started.')
++            if args.stop:
++                old_record=read_record(record_path)
++                if old_record and old_record.get('project_root')==str(ROOT):
++                    old_record['status']='stopped';write_record(record_path,old_record)
++                print(f'No project server remains on port {args.port}.',flush=True)
++                return 0
++            current=process_snapshot()[os.getpid()]
++            record={'project_root':str(ROOT),'port':args.port,'launcher_pid':os.getpid(),
++                    'launcher_started':current.started,'instance_id':instance,'status':'starting'}
++            write_record(record_path,record)
++            command=[sys.executable,'-m','uvicorn','spad_lidar.api:app','--app-dir',str(ROOT/'src'),
++                     '--host','127.0.0.1','--port',str(args.port)]
++            if args.reload:command+=['--reload','--reload-dir',str(ROOT/'src')]
++            environment=os.environ.copy();environment['SPAD_LIDAR_INSTANCE_ID']=instance
++            print(f'Starting fresh LiDAR {__version__}: {url}',flush=True)
++            server_job=ServerJob('Local\\SPAD-LiDAR-'+instance)
++            record['job_name']=server_job.name;write_record(record_path,record)
++            child=subprocess.Popen(command,cwd=str(ROOT),env=environment,
++                                   creationflags=subprocess.CREATE_NEW_PROCESS_GROUP | 0x4)  # CREATE_SUSPENDED
++            child_identity=child_process_info(child,command)
++            server_job.assign_and_resume(child)
++            record['server_root_pid']=child.pid;record['server_root_started']=child_identity.started
++            write_record(record_path,record)
++            deadline=time.monotonic()+30
++            while time.monotonic()<deadline:
++                if child.poll() is not None:raise RuntimeError('Server process exited during startup; see log above.')
++                runtime=identity(url)
++                if runtime and runtime.get('instance_id')==instance and same_path(runtime.get('project_root',''),ROOT):
++                    if runtime.get('software_version')!=__version__:raise RuntimeError('New server version does not match this checkout.')
++                    record.update(status='ready',server_pid=runtime['server_pid'],software_version=__version__)
++                    write_record(record_path,record)
++                    break
++                time.sleep(.25)
++            else:raise RuntimeError('Fresh server health/identity check timed out.')
++            print(f"Ready: server PID {runtime['server_pid']}, instance {instance[:8]}, version {__version__}",flush=True)
++        # Release startup lock after readiness so the next click can restart us.
++        if args.open_browser:webbrowser.open(url)
++        print('Keep this console open. Ctrl+C stops this instance.',flush=True)
++        return child.wait()
++    except KeyboardInterrupt:
++        return 0
++    except (OSError,RuntimeError,subprocess.SubprocessError) as exc:
++        print('Startup failed: '+str(exc),file=sys.stderr,flush=True)
+         return 1
+-
+-    print(f"LiDAR model: {url}", flush=True)
+-    print("Keep this console open. Press Ctrl+C to stop the server.", flush=True)
+-    if args.reload:
+-        print("Python changes reload automatically. Refresh the browser for HTML/CSS/JS changes.", flush=True)
+-    if args.open_browser:
+-        threading.Thread(target=open_when_ready, args=(url,), daemon=True).start()
+-    uvicorn.run(
+-        "spad_lidar.api:app", host="127.0.0.1", port=args.port,
+-        reload=args.reload,
+-        reload_dirs=[str(ROOT / "src")] if args.reload else None,
+-    )
++    finally:
++        if server_job is not None:
++            server_job.close()
++        if child_identity is not None:
++            try:stop_trees([child_identity])
++            except (OSError,RuntimeError,subprocess.SubprocessError) as exc:
++                print('Cleanup could not be confirmed: '+str(exc),file=sys.stderr,flush=True)
++        elif child is not None:
++            try:stop_trees([child_process_info(child,command)])
++            except (OSError,RuntimeError,subprocess.SubprocessError) as exc:
++                print('Startup cleanup could not be confirmed: '+str(exc),file=sys.stderr,flush=True)
++        record=read_record(record_path)
++        if record and record.get('instance_id')==instance:
++            record['status']='stopped';write_record(record_path,record)
+ 
+ 
+-if __name__ == "__main__":
++if __name__=='__main__':
+     sys.exit(main())
+diff --git a/src/spad_lidar/api.py b/src/spad_lidar/api.py
+index 5148964..8660c6c 100644
+--- a/src/spad_lidar/api.py
++++ b/src/spad_lidar/api.py
+@@ -8,6 +8,8 @@ from pydantic import ValidationError
+ from pydantic import BaseModel, ConfigDict
+ from typing import Literal
+ import yaml
++import os
++from datetime import datetime, timezone
+ 
+ from .models import SimulationConfig
+ from .simulator import simulate, derived_quantities
+@@ -58,6 +60,18 @@ def index():
+     return HTMLResponse(html)
+ 
+ 
++_RUNTIME_STARTED = datetime.now(timezone.utc).isoformat()
++
++
++@app.get('/api/runtime')
++def runtime_identity():
++    """Read-only identity for verified local restart; no stop endpoint is exposed."""
++    return {'project_root':str(ROOT.resolve()), 'server_pid':os.getpid(),
++            'parent_pid':os.getppid(), 'software_version':__version__,
++            'instance_id':os.environ.get('SPAD_LIDAR_INSTANCE_ID'),
++            'started_at':_RUNTIME_STARTED}
++
++
+ @app.get("/api/defaults")
+ def defaults():
+     return SimulationConfig().model_dump()
+diff --git a/start-dev.cmd b/start-dev.cmd
+index cade138..aba033a 100644
+--- a/start-dev.cmd
++++ b/start-dev.cmd
+@@ -3,9 +3,9 @@ setlocal
+ cd /d "%~dp0"
+ title LiDAR Model - Development Server
+ if exist "%~dp0.venv\Scripts\python.exe" (
+-    "%~dp0.venv\Scripts\python.exe" run.py --reload --open
++    "%~dp0.venv\Scripts\python.exe" "%~dp0run.py" --restart --reload --open
+ ) else (
+-    python run.py --reload --open
++    python "%~dp0run.py" --restart --reload --open
+ )
+ if errorlevel 1 (
+     echo.
+diff --git a/web/app.js b/web/app.js
+index c613d4e..d222fc9 100644
+--- a/web/app.js
++++ b/web/app.js
+@@ -547,11 +547,39 @@ $("saveDebug").addEventListener("click",()=>download("spad_debug_report.json",JS
+ $("binsPrevious").addEventListener("click",()=>{debugPage--;renderBins();});
+ $("binsNext").addEventListener("click",()=>{debugPage++;renderBins();});
+ $("modeLink").addEventListener("click",()=>{try{sessionStorage.setItem("lidar-config",JSON.stringify(collectConfig()));}catch{}});
+-window.addEventListener("resize",()=>{
++function redrawAWorkspace() {
+   if(lastPerformance)renderPerformance(lastPerformance);
+   if(lastResult)render(lastResult);
+   if(latestDerived)renderDerived(latestDerived);
++}
++window.addEventListener("resize",redrawAWorkspace);
++
++// View changes preserve the existing form, acquisition and histogram state.
++const aNarrowWorkspace=window.matchMedia('(max-width: 760px)');
++function showAWorkspace(view,focus=false) {
++  $('aWorkspace').dataset.view=view;
++  document.querySelectorAll('[data-a-view]').forEach(button=>{
++    button.setAttribute('aria-pressed',String(button.dataset.aView===view));
++  });
++  requestAnimationFrame(()=>{
++    redrawAWorkspace();
++    if(focus&&aNarrowWorkspace.matches) {
++      const panel=$(view==='parameters'?'aParameters':'aResults');
++      panel.focus({preventScroll:true});
++      panel.scrollIntoView({block:'start'});
++    }
++  });
++}
++document.querySelectorAll('[data-a-view]').forEach(button=>{
++  button.addEventListener('click',()=>showAWorkspace(button.dataset.aView,true));
++});
++$('runButton').addEventListener('click',()=>{
++  if(aNarrowWorkspace.matches)showAWorkspace('results',true);
++});
++document.querySelector('a[href="#photonBudgetPanel"]').addEventListener('click',()=>{
++  showAWorkspace('results');
+ });
++aNarrowWorkspace.addEventListener('change',()=>showAWorkspace($('aWorkspace').dataset.view));
+ 
+ (async()=>{
+   try {
+diff --git a/web/budget-scene.css b/web/budget-scene.css
+index eb0de9e..32639e6 100644
+--- a/web/budget-scene.css
++++ b/web/budget-scene.css
+@@ -92,6 +92,17 @@
+ 
+ .scene-inspector{align-items:start}
+ 
++/* Decide from the actual result area, including space taken by the sidebar. */
++.scene-inspector { container:budget-details / inline-size; }
++.scene-detail-card { min-width:0; overflow-x:auto; }
++.scene-detail-card .detector-diagram { min-width:620px; }
++.scene-detail-card .mapping-diagram { min-width:520px; }
++@container budget-details (max-width:1100px) {
++  .scene-inspector .scene-detail-card,
++  .scene-inspector #sceneVerticalCard,
++  .scene-inspector #sceneImageCard { grid-column:1 / -1; }
++}
++
+ .scene-axis-label{position:absolute;transform:translate(-50%,-50%);pointer-events:none;font-size:11px;font-weight:600;line-height:1.3;padding:2px 4px;border-radius:2px;background:color-mix(in srgb,var(--bg) 88%,transparent);text-shadow:0 1px 1px var(--bg)}.scene-axis-label.angle{font-size:12px;border:1px solid color-mix(in srgb,currentColor 35%,transparent);padding:2px 5px}
+ 
+ .scene-compass{max-width:calc(100% - 24px);line-height:1.5}
+diff --git a/web/budget.css b/web/budget.css
+index e37e57e..0abb0a9 100644
+--- a/web/budget.css
++++ b/web/budget.css
+@@ -140,3 +140,9 @@ header{padding-top:24px;padding-bottom:20px}h1{font-size:28px}.intro{font-size:1
+ .timing-navigation small{font-size:10px}.pipeline-svg{cursor:grab;touch-action:pan-y}.pipeline-view.dragging .pipeline-svg{cursor:grabbing}.pipeline-view:focus{outline:none}.pipeline-view:focus-visible{outline:1px solid var(--cyan);outline-offset:4px}
+ .phy-send-summary{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:12px;border-top:1px solid var(--line);padding:10px 0}.phy-send-summary strong{color:var(--cyan);font-weight:500}.phy-send-summary span{font-size:10px;color:var(--muted)}
+ .phy-details summary{font-size:11px;color:var(--muted)}.phy-details .pipeline-facts{border:0}.pipeline-formula{overflow:auto;max-width:100%;font-size:12px}.phy-details table{font-size:11px}
++
++/* Use the available desktop workspace while keeping parameter widths bounded. */
++main { max-width:none; margin-inline:28px; }
++header, .intro { max-width:none; }
++.intro { margin-inline:28px; }
++@media(max-width:1150px) { main, .intro { margin-inline:18px; } }
+diff --git a/web/columns.css b/web/columns.css
+index 491b857..b710299 100644
+--- a/web/columns.css
++++ b/web/columns.css
+@@ -2,6 +2,18 @@
+ @media(max-width:570px){.workspace-tabs button{font-size:10px;padding:10px 8px}.series-toggles{gap:12px;font-size:10px}.main-actions{flex-wrap:wrap}.hist-controls label{max-width:45%}.job-strip select{max-width:160px}.figure-controls{flex-wrap:wrap}.two-plots>article{min-width:0}.side-foot button{font-size:10px}.high-target>strong{font-size:32px}.map-canvas{height:240px}.hist-inputs input{width:95px}}
+ .scope-button{width:100%;font-size:10px;margin-top:8px;padding:6px;background:var(--theme-color-19313c, #19313c);color:var(--theme-ink-8fc9cb, #8fc9cb)}.error-box button{margin-top:9px;font-size:11px}button:disabled{opacity:.45;cursor:default}
+ 
++/* Scroll the complete editor on short windows, rather than a tiny inner form. */
++main, .heading { max-width:none; }
++@media(max-height:700px) {
++  main > aside { display:block; overflow:auto; max-height:calc(100dvh - 30px); overscroll-behavior:contain; }
++  #parameters { overflow:visible; max-height:none; }
++  .side-head { padding:10px 14px; }
++  .side-head > div:first-child { margin-bottom:7px; }
++  .side-head .fold-tools { margin-top:6px; }
++  .side-head .scope-button { margin-top:6px; }
++  .side-foot { padding:7px 12px; }
++}
++
+ .hv-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;border:1px solid var(--line,var(--theme-color-28414e, #28414e));border-radius:6px;padding:10px;min-width:0;margin:0}.hv-pair legend{color:var(--cyan,var(--theme-ink-58d9cf, #58d9cf));font-size:11px;padding:0 6px}canvas[data-hist]{height:360px}
+ 
+ @media(max-width:570px){canvas[data-hist]{height:300px}}
+diff --git a/web/index.html b/web/index.html
+index e22b02f..653c581 100644
+--- a/web/index.html
++++ b/web/index.html
+@@ -17,8 +17,12 @@
+     <nav class="toolbar"><a href="/system/budget">系统预算</a><a href="/spad">SPAD 研究台</a><a href="/system">静态 B</a><a href="/system/scan">扫描 C</a><a href="#photonBudgetPanel">光子计算公式与逻辑 ↓</a><a id="modeLink" href="/debug">专家调试版 →</a><div class="status"><span></span> A / V0.2.2</div></nav>
+   </header>
+ 
+-  <main>
+-    <aside class="panel controls">
++  <div class="a-workspace-switch" role="group" aria-label="A工作区切换">
++    <button type="button" data-a-view="parameters" aria-controls="aParameters" aria-pressed="false">参数配置</button>
++    <button type="button" data-a-view="results" aria-controls="aResults" aria-pressed="true">图形与结果</button>
++  </div>
++  <main id="aWorkspace" data-view="results">
++    <aside id="aParameters" class="panel controls" tabindex="-1" aria-label="参数配置">
+       <div class="toolbar">
+         <button id="runButton" class="primary">运行仿真</button>
+         <button id="cancelAJob" disabled>取消任务</button>
+@@ -136,7 +140,7 @@
+       </div>
+     </aside>
+ 
+-    <section class="results">
++    <section id="aResults" class="results" tabindex="-1" aria-label="图形与结果">
+       <div id="errorBox" class="error hidden"></div>
+       <p id="resultStatus" class="result-status" aria-live="polite"></p>
+       <article class="panel chart-card"><h2>当前角通道时间脉冲</h2><p>Tx 光学前的功率波形；面积对应单脉冲能量，PRF 决定时间平均功率。</p><canvas id="pulseChart" height="210"></canvas></article>
+diff --git a/web/styles.css b/web/styles.css
+index 31d3291..c6cf283 100644
+--- a/web/styles.css
++++ b/web/styles.css
+@@ -24,7 +24,7 @@ body {
+ }
+ 
+ header {
+-  max-width: 1600px;
++  max-width: none;
+   margin: auto;
+   padding: 28px 32px 22px;
+   display: flex;
+@@ -40,7 +40,7 @@ p { margin: 0; }
+ .status { color: var(--muted); font-size: 12px; border: 1px solid var(--line); padding: 8px 11px; border-radius: 99px; }
+ .status span { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 10px var(--cyan); margin-right: 7px; }
+ 
+-main { max-width: 1600px; margin: 0 auto; padding: 24px 32px 50px; display: grid; grid-template-columns: 420px 1fr; gap: 22px; }
++main { max-width: none; margin: 0 auto; padding: 24px 32px 50px; display: grid; grid-template-columns: clamp(310px, 24vw, 420px) minmax(0, 1fr); gap: 22px; }
+ .panel { background: var(--theme-rgba-121923f0, rgba(18,25,35,.94)); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 18px 50px var(--theme-rgba-00000026, rgba(0,0,0,.15)); }
+ .controls { padding: 16px; align-self: start; position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow: auto; }
+ .toolbar { display: flex; gap: 8px; }
+@@ -159,3 +159,32 @@ details>summary{font-weight:700}.subdetails>summary,.explanation>summary,.wave-d
+ .a-histogram-controls label { width: 150px; max-width: 100%; }
+ .a-histogram-controls button { min-height: 36px; }
+ @media(max-width:570px) { #histZoom { height:300px; } }
++
++/* Keep desktop parameters beside results; reserve view switching for narrow windows. */
++.a-workspace-switch { display:none; }
++#aParameters:focus, #aResults:focus { outline:none; }
++@media(max-width:1450px) {
++  #aParameters > .toolbar:first-child { display:grid; grid-template-columns:1fr 1fr; }
++  #aParameters > .toolbar:first-child > .primary { grid-column:1 / -1; }
++}
++@media(min-width:761px) and (max-width:1100px) {
++  #aWorkspace { grid-template-columns:300px minmax(0,1fr); }
++  #aWorkspace > .controls { position:sticky; max-height:calc(100vh - 24px); }
++}
++@media(max-width:1100px) {
++  body:has(#aWorkspace) header { align-items:flex-start; flex-direction:column; gap:12px; }
++  body:has(#aWorkspace) header .toolbar { flex-wrap:wrap; align-items:center; gap:10px; }
++}
++@media(max-width:760px) {
++  .a-workspace-switch { display:flex; gap:8px; position:sticky; top:0; z-index:30; padding:10px 32px; background:var(--bg); border-bottom:1px solid var(--line); }
++  .a-workspace-switch button { flex:1; }
++  .a-workspace-switch [aria-pressed="true"] { border-color:var(--cyan); color:var(--cyan); background:var(--cyan-soft); }
++  #aWorkspace { display:block; }
++  #aWorkspace > .controls { position:static; max-height:none; }
++  #aWorkspace[data-view="results"] > .controls,
++  #aWorkspace[data-view="parameters"] > .results { display:none; }
++  #aParameters, #aResults { scroll-margin-top:76px; }
++}
++@media(max-width:760px) {
++  .a-workspace-switch { padding-inline:15px; }
++}
+diff --git a/web/system.css b/web/system.css
+index d65a432..288c2f3 100644
+--- a/web/system.css
++++ b/web/system.css
+@@ -4,6 +4,21 @@
+ .app-header{height:65px;padding:0 32px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);background:var(--theme-color-0d1520, #0d1520);gap:24px}.brand{display:flex;gap:11px;align-items:center;font-weight:650;letter-spacing:2px;font-size:15px}.brand-mark{border:1px solid var(--theme-color-397371, #397371);color:var(--cyan);font:26px/32px var(--mono);padding:0 5px;border-radius:6px;letter-spacing:-5px;width:34px;height:34px}.brand-mark span{color:var(--theme-ink-ffffff, white)}.brand-sub{display:block;font:8px/1.8 var(--mono);letter-spacing:2.4px;color:var(--muted)}nav{display:flex;align-self:stretch;gap:28px}nav a{font-size:12px;display:flex;align-items:center;color:var(--muted);position:relative}nav a:hover{color:var(--text)}nav a.active{color:var(--cyan)}nav a.active:after{position:absolute;height:2px;background:var(--cyan);bottom:0;left:0;right:0;content:""}.preview-badge{display:flex;align-items:center;font-size:10px;color:var(--amber);gap:8px}.preview-badge i{width:6px;height:6px;border:1px solid var(--amber);border-radius:50%}.preview-badge b{font-family:var(--mono);border:1px solid var(--theme-color-59472f, #59472f);padding:2px 5px;border-radius:3px}.page-heading{max-width:1720px;margin:0 auto;padding:29px 32px 24px;display:flex;justify-content:space-between;gap:20px;align-items:center}.eyebrow{font:9px/1.5 var(--mono);letter-spacing:2px;color:var(--theme-ink-70889d, #70889d);margin-bottom:10px}.eyebrow span{padding:0 9px;color:var(--theme-ink-3d586b, #3d586b)}h1{font-size:29px;font-weight:550;display:flex;gap:12px;align-items:center;color:var(--cyan);line-height:1.3}h1>span:first-child{color:var(--text)}h1 .version{color:var(--muted);font-size:10px;font-weight:400;border-left:1px solid var(--theme-color-344554, #344554);padding-left:14px;margin-left:4px}.heading-note{color:var(--muted);font-size:11px;margin-top:10px}.preview-notice{display:flex;align-items:flex-start;border-left:1px solid var(--line);padding-left:19px;gap:5px;font-size:11px;line-height:1.8;color:var(--muted)}.preview-notice strong{font-weight:500;color:var(--theme-ink-becdd9, #becdd9)}.preview-notice .dot{background:var(--amber);margin-top:8px}.preview-notice p{font-size:10px}
+ .workspace{max-width:1720px;margin:auto;display:grid;grid-template-columns:345px minmax(0,1fr);gap:22px;padding:0 32px 30px;align-items:start}.parameter-panel{border:1px solid var(--line);border-radius:var(--radius);background:var(--theme-color-101b27, #101b27);position:sticky;top:16px;max-height:calc(100vh - 32px);display:flex;flex-direction:column;overflow:hidden}.parameter-head{padding:19px 18px 12px;border-bottom:1px solid var(--line);flex-shrink:0;background:var(--theme-color-13202d, #13202d)}.label-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}.label-row h2{font-size:14px}.primary-actions{display:flex;gap:8px}.primary-actions .primary{flex:1;display:flex;gap:8px;align-items:center;justify-content:center;padding:10px}.primary-actions .quiet{font-size:11px}.fold-actions{display:flex;align-items:center;justify-content:space-between;margin-top:12px}.fold-actions>div{display:flex;align-items:center;gap:1px;color:var(--theme-ink-435869, #435869)}.parameter-groups{overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--theme-color-344a5c, #344a5c) transparent}.parameter-group{border-bottom:1px solid var(--line)}.parameter-group>summary{padding:15px 18px;cursor:pointer;display:flex;align-items:center;gap:10px;list-style:none;color:var(--cyan)}summary::-webkit-details-marker{display:none}.parameter-group>summary:before{content:"›";font-size:16px;line-height:1;color:var(--theme-ink-54888d, #54888d);transition:transform .15s}.parameter-group[open]>summary:before{transform:rotate(90deg)}.group-text{flex:1}.group-text strong{font-size:12px;font-weight:600}.group-text small{display:block;color:var(--theme-ink-7f94a7, #7f94a7);font-size:10px;margin-top:4px;line-height:1.5}.group-code{font:9px var(--mono);color:var(--theme-ink-4e7880, #4e7880)}.group-body{padding:0 18px 18px}.subhead{display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--theme-ink-c0d0dd, #c0d0dd);letter-spacing:.4px;margin:15px 0 10px}.subhead:first-child{margin-top:1px}.subhead:after{content:"";height:1px;background:var(--theme-color-253746, #253746);flex:1;margin-left:12px}.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px 10px}.field{display:flex;flex-direction:column;gap:6px;min-width:0;font-size:10px;color:var(--theme-ink-95aabc, #95aabc)}.field.wide{grid-column:1/-1}.field-title{display:flex;justify-content:space-between;align-items:center;gap:5px}.input-unit{position:relative}.input-unit input{padding-right:38px}.input-unit>.unit{position:absolute;right:8px;top:10px;font-size:9px;pointer-events:none}.compact-matrix{border:1px solid var(--theme-color-273b4c, #273b4c);border-radius:6px;overflow:hidden;margin-top:7px;background:var(--theme-color-0e1a26, #0e1a26)}.matrix-head{padding:8px 9px;border-bottom:1px solid var(--theme-color-273b4c, #273b4c);display:flex;justify-content:space-between;font-size:10px;color:var(--theme-ink-a8bccb, #a8bccb)}.matrix-row{display:grid;grid-template-columns:32px 1fr 1fr;gap:7px;padding:5px 8px;align-items:center}.matrix-row.headers{font-size:9px;color:var(--theme-ink-7892a6, #7892a6);text-align:center;padding-top:8px;padding-bottom:1px}.matrix-row:last-child{padding-bottom:9px}.matrix-row>span{font:10px var(--mono);color:var(--theme-ink-9fb6c5, #9fb6c5)}.matrix-row input{padding:6px 7px;font-size:11px}.matrix-row label{min-width:0}.derived{padding:9px 10px;border-left:2px solid var(--theme-color-347576, #347576);background:var(--theme-color-102b32, #102b32);color:var(--theme-ink-9ebfc2, #9ebfc2);font-size:10px;margin-top:10px;line-height:1.7}.derived b{font:11px var(--mono);color:var(--theme-ink-d0e2e5, #d0e2e5)}.field-note{font-size:10px;color:var(--theme-ink-7c92a5, #7c92a5);line-height:1.7;margin-top:8px}.subdetails{margin-top:13px}.subdetails>summary{font-size:10px;color:var(--theme-ink-9bb2c5, #9bb2c5);cursor:pointer;list-style:none}.subdetails>summary:before{content:"＋ ";color:var(--theme-ink-678ca0, #678ca0)}.subdetails[open]>summary:before{content:"− "}.subdetails .field-grid{margin-top:11px}.toggle-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px;gap:10px;font-size:11px}.switch{position:relative;display:inline-flex;align-items:center;gap:6px}.switch input{appearance:none;width:28px;height:16px;background:var(--theme-color-273b4b, #273b4b);border-radius:10px;border:0;position:relative;cursor:pointer}.switch input:before{position:absolute;content:"";width:10px;height:10px;border-radius:50%;background:var(--theme-color-8197aa, #8197aa);top:3px;left:3px;transition:left .15s}.switch input:checked{background:var(--theme-color-205858, #205858)}.switch input:checked:before{background:var(--cyan);left:15px}.curve-modes{display:flex;border:1px solid var(--theme-color-2a3d4e, #2a3d4e);border-radius:5px;overflow:hidden;margin:8px 0}.curve-modes button{flex:1;padding:6px 2px;border:0;border-radius:0;background:var(--theme-color-101d29, #101d29);font-size:9px;color:var(--theme-ink-7896ac, #7896ac)}.curve-modes button.active{background:var(--theme-color-1b3e46, #1b3e46);color:var(--cyan)}.curve-summary{padding:10px;background:var(--theme-color-0b1723, #0b1723);border:1px solid var(--theme-color-223747, #223747);border-radius:5px;font-size:10px;color:var(--theme-ink-88a3b8, #88a3b8);line-height:1.7}.curve-mini{height:68px;width:100%;display:block;margin-top:8px}.parameter-footer{padding:12px 15px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--theme-color-13202d, #13202d)}.parameter-footer .quiet{font-size:10px}.content{display:flex;flex-direction:column;gap:15px;min-width:0}.panel{border:1px solid var(--line);background:var(--surface);border-radius:var(--radius);padding:22px;min-width:0}.card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}.overview{padding:20px 22px 0;background:linear-gradient(120deg,var(--theme-color-142534, #142534),var(--theme-color-111c29, #111c29) 70%)}.overview .card-head{margin-bottom:19px}.overview h2{font-size:15px}.pipeline{display:flex;align-items:center;justify-content:space-between;gap:3px;padding:0 0 20px}.pipeline button{display:flex;gap:9px;align-items:center;background:none;padding:8px 6px;border-color:transparent;text-align:left}.pipeline button:hover,.pipeline button.selected{background:var(--theme-color-13303a, #13303a);border-color:var(--theme-color-315b64, #315b64)}.pipeline-symbol{font:27px/1 var(--mono);color:var(--theme-ink-78c8ca, #78c8ca);min-width:29px}.pipeline strong{display:block;font-size:11px;font-weight:550;white-space:nowrap}.pipeline small{font-size:9px;color:var(--theme-ink-7f99ac, #7f99ac);white-space:nowrap;display:block;margin-top:5px}.flow-arrow{color:var(--theme-ink-476574, #476574);font-size:15px}.overview-foot{border-top:1px solid var(--theme-color-274051, #274051);padding:11px 0;display:flex;gap:20px;font-size:9px;color:var(--theme-ink-8fa9bd, #8fa9bd)}.overview-foot>span:last-child{margin-left:auto}.overview-detail{padding:13px 15px;border:1px solid var(--theme-color-2a4959, #2a4959);background:var(--theme-color-0e202d, #0e202d);border-radius:6px;font-size:11px;line-height:1.8;margin:0 0 17px;color:var(--theme-ink-adc6d7, #adc6d7)}.overview-detail strong{color:var(--cyan)}.job-strip{display:flex;gap:13px;align-items:center;padding:1px 6px;font-size:10px;min-height:24px}.job-strip .text-button{margin-left:auto}.job-state{color:var(--theme-ink-a9c7c7, #a9c7c7);white-space:nowrap}.job-history{font-size:11px;padding:14px 18px}.job-history>div{display:flex;gap:15px;align-items:center}.job-history p{color:var(--muted);font-size:10px;margin-top:10px}.stale-banner{background:var(--theme-color-2d271d, #2d271d);border:1px solid var(--theme-color-5b472b, #5b472b);color:var(--theme-ink-e7bf88, #e7bf88);padding:9px 12px;border-radius:6px;font-size:11px;display:flex;justify-content:space-between;align-items:center}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.metric{background:var(--theme-color-101b27, #101b27);border:1px solid var(--line);border-radius:9px;padding:14px 17px;min-width:0}.metric-label{font-size:10px;color:var(--theme-ink-8ea4b9, #8ea4b9)}.metric-number{font:26px/1.55 var(--mono);letter-spacing:-1px;color:var(--theme-ink-e2f0f7, #e2f0f7)}.metric-number.accent{color:var(--cyan)}.metric-note{font-size:9px;color:var(--theme-ink-657f92, #657f92)}.spatial-grid,.mapping-grid{display:grid;grid-template-columns:1fr 1fr;gap:26px}.plot-block{min-width:0}.plot-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.plot-heading h3{font-size:12px;color:var(--theme-ink-c7d9e6, #c7d9e6)}.heatmap{background:var(--theme-color-0b1520, #0b1520);border:1px solid var(--theme-color-1f3344, #1f3344);border-radius:6px;width:100%;overflow:hidden}.heatmap svg{display:block;width:100%;height:auto}.heatmap text{font-family:var(--mono);fill:var(--theme-color-90a8bb, #90a8bb);font-size:9px}.heatmap .cell{transition:stroke .08s}.heatmap .cell:hover{stroke:var(--theme-color-e5fffa, #e5fffa);stroke-width:1.1}.heatmap .channel-frame{fill:none;stroke:var(--theme-color-e3ebe5, #e3ebe5);stroke-opacity:.58;stroke-width:1;stroke-dasharray:4 3;pointer-events:none}.heatmap .channel-label{fill:var(--theme-color-c7edf1, #c7edf1);font-size:8px;pointer-events:none;paint-order:stroke;stroke:var(--theme-color-0b1623, #0b1623);stroke-width:2px}.plot-caption{display:flex;justify-content:space-between;gap:10px;align-items:center;color:var(--theme-ink-6f899e, #6f899e);font-size:9px;line-height:1.7;margin-top:11px}.readout-line{border-top:1px solid var(--theme-color-213545, #213545);padding-top:12px;margin-top:15px;font:10px var(--mono);color:var(--theme-ink-82a5b9, #82a5b9);min-height:25px}.hist-controls{display:grid;grid-template-columns:1fr 1.1fr;gap:28px;padding:14px;background:var(--theme-color-0e1925, #0e1925);border:1px solid var(--theme-color-223445, #223445);border-radius:7px}.hist-controls label{font-size:10px;color:var(--theme-ink-c3d2df, #c3d2df);display:block;margin-bottom:7px}.hist-controls label span{font-size:9px;margin-left:7px;color:var(--theme-ink-69899f, #69899f)}.input-action,.range-input{display:flex;align-items:center;gap:7px}.input-action input{font:11px var(--mono)}.range-input input{width:100%;padding:8px}.range-input>span{color:var(--theme-ink-648196, #648196)}.range-input .quiet{flex-shrink:0}.channel-picker{display:grid;gap:5px;margin-top:8px}.channel-picker button{font:9px var(--mono);border-color:var(--theme-color-233f4e, #233f4e);color:var(--theme-ink-82a1b4, #82a1b4);padding:5px 1px;background:var(--theme-color-101f2b, #101f2b)}.channel-picker button.selected{color:var(--theme-ink-6fe3d5, #6fe3d5);border-color:var(--theme-color-398581, #398581);background:var(--theme-color-153a40, #153a40)}.window-presets{display:flex;gap:10px;margin-top:8px;align-items:center}.window-presets .inline-check{margin:0 0 0 auto;display:flex;font-size:9px;color:var(--theme-ink-8fa8b9, #8fa8b9)}.hist-legend{display:flex;flex-wrap:wrap;gap:20px;margin:19px 0 13px}.hist-legend label{font-size:10px;color:var(--theme-ink-9ab1c3, #9ab1c3);display:flex;align-items:center;gap:5px;cursor:pointer}.hist-legend input{width:11px;height:11px}.legend-bar{width:8px;height:10px;background:var(--blue);display:inline-block;margin-left:3px}.legend-line{width:17px;height:0;border-top:2px dashed;display:inline-block;margin-left:3px}.legend-line.cyan{border-color:var(--cyan)}.legend-line.orange{border-color:var(--amber)}.legend-error{height:11px;width:6px;border:1px solid var(--theme-color-8bb2f0, #8bb2f0);border-width:1px 0;position:relative;margin-left:3px}.legend-error:before{position:absolute;content:"";height:11px;left:3px;top:-1px;border-left:1px solid var(--theme-color-8bb2f0, #8bb2f0)}.histogram-plots{display:grid;gap:16px}.histogram-plots.multi{grid-template-columns:1fr 1fr}.hist-plot{min-width:0;background:var(--theme-color-0b1520, #0b1520);border:1px solid var(--theme-color-203545, #203545);border-radius:7px;padding:12px 12px 5px}.hist-plot-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 3px;font-size:10px}.hist-plot-head strong{font:11px var(--mono);color:var(--theme-ink-d3e6ef, #d3e6ef)}.hist-plot-head span{font-size:9px;color:var(--theme-ink-819caf, #819caf)}.hist-plot canvas{width:100%;height:234px;display:block}.hist-plot canvas.overview-canvas{height:59px;cursor:crosshair}.overview-chart-label{font-size:9px;color:var(--theme-ink-57788f, #57788f);display:flex;justify-content:space-between;padding:2px 7px 0}.histogram-foot{flex-wrap:wrap}.explanation{margin-top:15px;border-top:1px solid var(--theme-color-243848, #243848);padding-top:12px}.explanation summary{font-size:10px;color:var(--theme-ink-8aa6b9, #8aa6b9);cursor:pointer}.explanation p{font-size:11px;color:var(--theme-ink-8ca5b8, #8ca5b8);line-height:1.9;margin-top:11px}.inline-error{color:var(--theme-ink-f2a29e, #f2a29e);font-size:11px;margin-top:10px}.mapping-help{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--theme-ink-91aabc, #91aabc);margin-bottom:18px}.step-dot{border:1px solid var(--theme-color-31515c, #31515c);background:var(--theme-color-153039, #153039);color:var(--cyan);font:9px/18px var(--mono);height:20px;width:20px;text-align:center;border-radius:50%}.mapping-arrow{padding:0 10px;color:var(--theme-ink-507181, #507181)}.mapping-notation{margin-left:auto;color:var(--theme-ink-99c3c9, #99c3c9);font:12px var(--mono)}.angle-toolbar{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:18px;background:var(--theme-color-0f1a26, #0f1a26);padding:11px 13px;border:1px solid var(--theme-color-223747, #223747);border-radius:6px}.angle-fields{display:flex;gap:12px}.angle-fields label{display:flex;gap:7px;align-items:center;font-size:10px;color:var(--theme-ink-93aebf, #93aebf);white-space:nowrap}.angle-fields select{width:65px;padding:5px 7px}.selected-angle{text-align:right;font:11px var(--mono);color:var(--cyan);line-height:1.8}.selected-angle small{display:block;font-size:9px;color:var(--theme-ink-7c96aa, #7c96aa)}.interactive .cell{cursor:pointer}.heatmap .selected-cell{fill:none;stroke:var(--theme-color-fff5d8, #fff5d8);stroke-width:2;pointer-events:none}.mapping-bottom{display:grid;grid-template-columns:180px 1fr;gap:24px;margin-top:20px;padding-top:17px;border-top:1px solid var(--theme-color-223747, #223747)}.capture-box{display:flex;flex-direction:column;justify-content:center}.capture-box>span{font-size:10px}.capture-box strong{font:25px/1.8 var(--mono);color:var(--cyan)}.capture-box small{font-size:9px;color:var(--theme-ink-7d97aa, #7d97aa);line-height:1.6}.channel-share .plot-heading{margin-bottom:11px}.share-row{display:grid;grid-template-columns:85px 1fr 55px;gap:10px;align-items:center;margin:7px 0;font:9px var(--mono);color:var(--theme-ink-91aabd, #91aabd)}.share-track{height:6px;background:var(--theme-color-203242, #203242);border-radius:2px;overflow:hidden}.share-fill{height:100%;background:var(--theme-color-40b9b0, #40b9b0)}.share-value{text-align:right;color:var(--theme-ink-d0e5e8, #d0e5e8)}.audit-panel{padding:17px 22px}.audit-panel summary{display:flex;justify-content:space-between;align-items:center;font-size:12px;cursor:pointer}.audit-panel summary:after{content:"＋";color:var(--theme-ink-7395a9, #7395a9)}.audit-panel details[open] summary:after{content:"−"}.audit-panel table{width:100%;font-size:11px;border-collapse:collapse;margin-top:14px}.audit-panel td{padding:9px 2px;border-bottom:1px solid var(--theme-color-223747, #223747);color:var(--theme-ink-95aabd, #95aabd)}.audit-panel td:last-child{text-align:right;font-family:var(--mono);color:var(--theme-ink-cadce7, #cadce7)}.audit-panel pre{max-height:220px;overflow:auto;font:10px/1.6 var(--mono);color:var(--theme-ink-9ebacc, #9ebacc)}.page-footer{font-size:9px;color:var(--theme-ink-4f6c80, #4f6c80);display:flex;justify-content:space-between;padding:8px 3px}.toast{position:fixed;bottom:25px;left:50%;transform:translateX(-50%);padding:13px 22px;background:var(--theme-color-193540, #193540);border:1px solid var(--theme-color-3d787d, #3d787d);color:var(--theme-ink-d0e9e7, #d0e9e7);border-radius:7px;box-shadow:0 8px 35px #0006;z-index:50;font-size:12px;max-width:80vw}.loading-error{position:fixed;inset:25%;background:var(--theme-color-321c23, #321c23);padding:25px;border:1px solid var(--theme-color-965357, #965357);z-index:60;white-space:pre-wrap;overflow:auto}dialog{max-width:660px;width:calc(100% - 40px);max-height:85vh;overflow:auto;border:1px solid var(--theme-color-365161, #365161);border-radius:12px;background:var(--theme-color-122332, #122332);color:var(--text);padding:23px;box-shadow:0 20px 80px #0009}dialog::backdrop{background:#030b13bd;backdrop-filter:blur(3px)}.dialog-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px}.dialog-head h2{color:var(--cyan)}.dialog-footer{display:flex;justify-content:flex-end;margin-top:22px}#dialogBody{color:var(--theme-ink-a9c0d2, #a9c0d2);font-size:12px;line-height:1.9;overflow-wrap:anywhere}#dialogBody pre{max-height:250px;overflow:auto;background:var(--theme-color-0b1722, #0b1722);padding:12px;font:10px/1.6 var(--mono)}#dialogBody table{width:100%;border-collapse:collapse;font-size:11px}#dialogBody td{padding:8px;border-bottom:1px solid var(--theme-color-2a4354, #2a4354)}#dialogBody tr td:last-child{color:var(--amber)}
+ .input-action .quiet{flex-shrink:0;white-space:nowrap}
++
++.workspace, .page-heading { max-width:none; }
++
++/* A short viewport has one scroll owner for the full parameter editor. */
++@media(max-height:700px) {
++  .parameter-panel { display:block; overflow:auto; max-height:calc(100dvh - 32px); overscroll-behavior:contain; }
++  .parameter-groups { overflow:visible; max-height:none; }
++  .parameter-head { padding:10px 14px; }
++  .parameter-head .label-row { margin-bottom:6px; }
++  .parameter-head .primary-actions .primary { padding:7px; }
++  .parameter-head .fold-actions { margin-top:6px; }
++  .parameter-head .defaults-note { margin-top:5px; }
++  .parameter-panel .config-tools { padding:6px 14px; }
++  .parameter-footer { padding:7px 14px; }
++}
+ .heatmap .selected-cell{stroke:var(--theme-color-f28e57, #f28e57);stroke-width:2.5;filter:drop-shadow(0 0 1px var(--theme-color-07151f, #07151f))}
+ .defaults-note{font-size:9px;color:var(--theme-ink-7898ac, #7898ac);margin-top:9px;line-height:1.6}
+ .parameter-viz-panel{padding:18px 22px}

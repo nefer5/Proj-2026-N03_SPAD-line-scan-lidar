@@ -1,0 +1,20 @@
+{
+  "software_version": "0.6.15.dev0",
+  "pytest": {
+    "passed": 492,
+    "failed": 0
+  },
+  "documents": 48,
+  "local_links": 363,
+  "broken_links": 0,
+  "vscode_katex_equations": 83,
+  "generated_photon_budget": "passed",
+  "generated_spatial_profiles": "passed",
+  "theme_palette": "passed",
+  "frontend_form_spectral": "passed",
+  "dcr_units": "passed",
+  "histogram_axis_alignment": "passed",
+  "timing_viewport": "passed",
+  "staged_credentials_marker_scan": "no findings",
+  "github_sync": "verify Git remote after push; not implied by this precommit report"
+}

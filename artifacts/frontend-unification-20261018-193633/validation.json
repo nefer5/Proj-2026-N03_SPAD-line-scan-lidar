@@ -1,0 +1,32 @@
+{
+  "ok": true,
+  "browser_cases": 30,
+  "small_ui_text": 0,
+  "changed_config": [],
+  "changed_existing_backend": [
+    "src/spad_lidar/api.py",
+    "src/spad_lidar/webapi/budget.py",
+    "src/spad_lidar/webapi/columns.py",
+    "src/spad_lidar/webapi/labs.py"
+  ],
+  "new_backend": [
+    "src/spad_lidar/webapi/chrome.py"
+  ],
+  "calculation_core_unchanged": true,
+  "docs_checked": 48,
+  "links_checked": 353,
+  "broken_links": [],
+  "visual_review": "主线程与视觉专家实际截图复审通过；采用用户改稿后的低亮度直角文字导航",
+  "c_model_changes": false,
+  "full_suite_passed": 491,
+  "live_pages": 5,
+  "visual_expert_review": "通过：低亮度直角导航、SPAD首屏与实际结果、B光学图、C有效小工况计划",
+  "interaction_checks": [
+    "SPAD实际采集及结果显示",
+    "B像素悬停显示H/V通道",
+    "B角度选择联动",
+    "主题和缩放不提交计算",
+    "当前页禁点、其余四个URL入口",
+    "普通刷新使用新资源指纹"
+  ]
+}

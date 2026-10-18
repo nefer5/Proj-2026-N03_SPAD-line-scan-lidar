@@ -1,0 +1,137 @@
+/* 五个平台的共同阅读尺度与外壳；只使用CSS像素，不缩放整页。 */
+:root {
+  --workspace-font: "Segoe UI", "Microsoft YaHei", sans-serif;
+  --workspace-text: #e5edf5;
+  --workspace-muted: #a5b9c9;
+  --workspace-surface: #0d1721;
+  --workspace-line: #32495b;
+  --workspace-accent: #66dfd0;
+  --workspace-link-bg: #123f43;
+  --workspace-link-text: #a8f5e7;
+  --workspace-nav-text: #bacbd7;
+  --workspace-nav-hover: #17232e;
+  --workspace-current-bg: #1c2732;
+  --workspace-current-text: #aebbc6;
+  --workspace-current-line: #6f818e;
+  font-family: var(--workspace-font);
+  font-size: 15px;
+}
+html[data-theme="light"] {
+  --workspace-text: #172d3e;
+  --workspace-muted: #4b6171;
+  --workspace-surface: #f8fbfd;
+  --workspace-line: #bccbd5;
+  --workspace-accent: #007567;
+  --workspace-link-bg: #ddf3ed;
+  --workspace-link-text: #075b50;
+  --workspace-current-bg: #e3e8ed;
+  --workspace-current-text: #4c5b68;
+  --workspace-nav-text: #415b6e;
+  --workspace-nav-hover: #eaf0f3;
+  --workspace-current-line: #71808c;
+}
+body {font-family:var(--workspace-font);font-size:15px;line-height:1.6;--muted:var(--workspace-muted);--text:var(--workspace-text);}
+body > header.workspace-header {
+  width:100%;max-width:none;min-height:64px;height:auto;margin:0;padding:8px 24px;
+  display:flex;align-items:center;justify-content:space-between;gap:20px;
+  background:var(--workspace-surface);border-bottom:1px solid var(--workspace-line);
+}
+.workspace-header .workspace-brand {flex:none;display:flex;align-items:baseline;gap:12px;white-space:nowrap;}
+.workspace-brand strong {font:700 20px/1.4 var(--workspace-font);letter-spacing:.3px;color:var(--workspace-text);}
+.workspace-brand strong span {color:var(--workspace-accent);}
+.workspace-brand small {font:400 13px/1.5 var(--workspace-font);color:var(--workspace-muted);}
+.workspace-header nav.platform-nav {display:flex;flex-wrap:wrap;align-items:center;align-self:center;justify-content:center;gap:4px;min-width:0;}
+.workspace-header .platform-nav .platform-link {
+  display:inline-flex;align-items:center;justify-content:center;flex:none;min-height:44px;
+  padding:9px 16px;margin:0;border:0;border-bottom:2px solid transparent;border-radius:0;
+  background:transparent;color:var(--workspace-nav-text);
+  font:600 15px/1.5 var(--workspace-font);letter-spacing:0;white-space:nowrap;text-decoration:none;
+}
+.workspace-header .platform-link::after {display:none;}
+.workspace-header a.platform-link:hover {background:var(--workspace-nav-hover);color:var(--workspace-text);border-bottom-color:var(--workspace-line);}
+.workspace-header .platform-nav .platform-link.is-current {
+  opacity:1;border-bottom-color:var(--workspace-current-line);background:var(--workspace-current-bg);
+  color:var(--workspace-current-text);cursor:default;box-shadow:none;
+}
+.workspace-header .platform-link:focus-visible {outline:3px solid var(--workspace-accent);outline-offset:3px;}
+.workspace-header-tools {display:flex;align-items:center;flex:none;}
+.workspace-header-tools .theme-toggle {font-size:14px;min-height:40px;margin:0;background:transparent;color:var(--workspace-nav-text);border:0;border-radius:0;}
+.workspace-header-tools .theme-toggle:hover {background:var(--workspace-nav-hover);color:var(--workspace-text);}
+.page-intro,.page-heading,.heading {max-width:none;margin:0;padding:22px 24px 20px;}
+.page-intro {display:flex;justify-content:space-between;gap:20px;align-items:center;}
+.page-intro h1,.page-heading h1,.heading h1 {font-size:28px;line-height:1.35;letter-spacing:0;}
+.page-intro .lede,.page-intro .subtitle,.heading>div>p:not(.eyebrow),.heading-note {font-size:14px;line-height:1.6;color:var(--workspace-muted);margin-top:8px;}
+.page-intro .eyebrow,.page-heading .eyebrow,.heading .eyebrow {font-size:13px;line-height:1.5;letter-spacing:.7px;margin:0 0 6px;}
+nav.page-tools {display:flex;flex-wrap:wrap;gap:10px;align-items:center;align-self:center;}
+.heading-aside {display:flex;flex-direction:column;align-items:flex-end;gap:10px;}
+.page-tools a {display:inline-flex;align-items:center;min-height:36px;padding:5px 10px;border:0;border-bottom:1px solid var(--workspace-line);border-radius:0;font-size:14px;color:var(--workspace-nav-text);}
+.page-tools .status {font-size:13px;}
+body main,.workspace {min-width:0;}
+body main input:not([type=checkbox]):not([type=range]):not([type=file]),body main select {font-size:15px;min-height:36px;line-height:1.4;padding:7px 9px;}
+body main select {font-size:15px!important;}
+body main button,.file-button {font-size:14px;line-height:1.5;}
+body main h2 {font-size:18px;line-height:1.4;}
+body main h3 {font-size:16px;line-height:1.5;}
+body main label:not(.file-button),body main .field-title {font-size:14px;line-height:1.5;}
+body main small,.unit,.micro,.tiny {font-size:13px;line-height:1.5;}
+body main table {font-size:14px;line-height:1.5;}
+body main pre,body main textarea {font-size:13px;line-height:1.6;}
+.scientific-figure-scroll {max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;}
+.scientific-figure-scroll > svg {display:block;width:100%;height:auto;max-width:none;max-height:none;}
+.scientific-figure-scroll:focus-visible {outline:2px solid var(--workspace-accent);outline-offset:2px;}
+.plot-coordinate-note {font:13px/1.6 var(--workspace-font);color:var(--workspace-muted);margin:8px 0 0;}
+.jobs-card > details {border:0;margin:0;padding:0;}
+.jobs-card > details > summary {display:flex;justify-content:space-between;align-items:center;gap:16px;list-style:none;margin:0;font-size:15px;}
+.jobs-card > details > summary::before {content:'▸';color:var(--workspace-muted);}
+.jobs-card > details[open] > summary::before {content:'▾';}
+.jobs-card summary strong {margin-right:auto;}
+.jobs-card summary span {color:var(--workspace-muted);font-size:13px;font-weight:400;}
+.jobs-card .card-heading {margin-top:16px;}
+body main button:focus-visible,body main summary:focus-visible {outline:2px solid var(--workspace-accent);outline-offset:3px;}
+@media(min-width:1101px) {
+  body main:not(.workspace),body main.workspace {padding-left:24px;padding-right:24px;gap:22px;}
+  body main.workspace {grid-template-columns:clamp(360px,23vw,420px) minmax(0,1fr);}
+  body main.lab-layout,body main:not([class]) {grid-template-columns:clamp(360px,23vw,420px) minmax(0,1fr);}
+  body main:not([class]) {margin-left:0;margin-right:0;}
+}
+@media(min-width:761px) and (max-width:1100px) {
+  .workspace-header .workspace-brand {justify-content:space-between;}
+  body > header.workspace-header {flex-wrap:wrap;gap:12px;padding:12px 20px;}
+  .workspace-header .platform-nav {order:3;flex-basis:100%;justify-content:flex-start;}
+}
+@media(max-width:1400px) and (min-width:761px) {
+  body main.workspace {grid-template-columns:350px minmax(0,1fr);}
+  body main.lab-layout,body main:not([class]) {grid-template-columns:350px minmax(0,1fr);}
+  .page-intro {align-items:flex-start;flex-direction:column;gap:10px;}
+  .page-intro .page-tools {align-self:flex-start;}
+  body[data-lab="spad"] .page-intro {flex-direction:row;align-items:center;}
+  body[data-lab="spad"] .page-intro .page-tools {align-self:center;}
+  .page-heading,.heading {gap:16px;}
+}
+@media(max-width:760px) {
+  body > header.workspace-header {padding:12px 16px;gap:12px;flex-wrap:wrap;}
+  .workspace-brand small {display:none;}
+  .workspace-header .platform-nav {order:3;flex-basis:100%;justify-content:flex-start;gap:8px;}
+  .workspace-header .platform-nav .platform-link {padding:7px 10px;font-size:14px;}
+  .page-intro,.page-heading,.heading {padding:18px 16px;flex-direction:column;align-items:flex-start;}
+  .heading-aside {align-items:flex-start;}
+  .page-intro h1,.page-heading h1,.heading h1 {font-size:24px;flex-wrap:wrap;}
+}
+/* 浅色表面按职责分层；结构边界与图表辅助网格分别定义。 */
+html[data-theme="light"] body {background:#e8eef3;background-image:none;}
+html[data-theme="light"] main :is(.panel,.parameter-panel,.lab-card),
+html[data-theme="light"] main>aside {background:#fff;background-image:none;border-color:#aebfcd;}
+html[data-theme="light"] :is(.parameter-head,.side-head,.config-tools) {background:#edf2f6;border-color:#b5c5d1;}
+html[data-theme="light"] :is(.parameter-group,.parameter-section) {background:#fff;border-color:#b5c5d1;}
+html[data-theme="light"] :is(.parameter-group,.parameter-module)>summary,
+html[data-theme="light"] .controls>details>summary,
+html[data-theme="light"] #fields>details>summary {background:#dce6ed;color:#075e59;border-color:#adbfcc;padding:12px 14px;font-weight:650;}
+html[data-theme="light"] :is(.group-body,.parameter-body) {background:#fff;}
+html[data-theme="light"] :is(.compact-matrix,.hv-pair,.parameter-card) {background:#f2f5f8;border-color:#bfccd6;}
+html[data-theme="light"] :is(.matrix-head,.parameter-card-header) {background:#e4ebf1;border-color:#bfccd6;color:#314c60;}
+html[data-theme="light"] .subhead {color:#314c60;border-color:#b8c7d2;}
+html[data-theme="light"] main input:not([type=checkbox]):not([type=range]):not([type=file]),
+html[data-theme="light"] main select,html[data-theme="light"] main textarea {background:#fff;color:#172d3e;border-color:#8fa3b3;}
+html[data-theme="light"] main input[readonly],html[data-theme="light"] :is(.derived,.derived-panel) {background:#edf4f2;border-color:#a7c3bb;}
+html[data-theme="light"] main :is(.plot-block,.scene-detail-card,.bh-stat,.metric) {border-color:#c0cdd7;}
+html[data-theme="light"] main :is(button[aria-pressed="true"],button.active) {background:#e3efec;border-color:#438a80;color:#075e59;}

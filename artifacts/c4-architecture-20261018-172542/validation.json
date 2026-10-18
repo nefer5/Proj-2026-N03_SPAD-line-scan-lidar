@@ -1,0 +1,313 @@
+{
+  "ok": true,
+  "workingTreeSnapshot": "2026-10-18T17:27:44.782115+08:00",
+  "productHead": "a19f273d2c3c74db065e5601f7f7bd3cea6c1864",
+  "localProofRevision": "89605e9465fc9f555165187f3309faf2553c3ea8",
+  "productCommitCreated": false,
+  "protectedFilesUnchanged": 177,
+  "pages": 4,
+  "c4Levels": [
+    "C1",
+    "C2",
+    "C3"
+  ],
+  "expertC4SectionConfirmed": true,
+  "expertHostLoadingVerified": false,
+  "desktopChecks": 37,
+  "narrowChecks": 37,
+  "graphGates": {
+    "c1": {
+      "sha256": "342ede28f060b300c37db0d27b63617993748684269e16a9167b97c2d7a089e3",
+      "gates": {
+        "validate": "pass",
+        "deliver": "pass",
+        "check": "pass",
+        "browser-check": "pass"
+      }
+    },
+    "c2": {
+      "sha256": "57c280cb7c5c9355a0eb15124594dca67594f29c98b95f5eb0c8783f17fd6aa5",
+      "gates": {
+        "validate": "pass",
+        "deliver": "pass",
+        "check": "pass",
+        "browser-check": "pass"
+      }
+    },
+    "c3": {
+      "sha256": "e51fdc7873db830e835d2bd45a63251728c14e5699d6f03a8cfd02f8cbded04f",
+      "gates": {
+        "validate": "pass",
+        "deliver": "pass",
+        "check": "pass",
+        "browser-check": "pass"
+      }
+    }
+  },
+  "reportSha256": "6793b03d0ce7b16e7b9c952e29fe63629b9dc99047cec987add58f95b5a9d849",
+  "localSourceBundleSha256": "dd95e597a07413fcd092e915a5d651023d34c0d621d21641a46433a39255c3c3",
+  "reviewedScreenshots": [
+    "c2-page-desktop.png",
+    "data-page-desktop.png",
+    "c1-visual/c1.visual-check.1440x900.light.png",
+    "c3-visual/c3.visual-check.1440x900.light.png",
+    "c4-final-narrow.png"
+  ],
+  "checks": [
+    {
+      "name": "self-contained report bytes",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "diagram c1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source web/index.html:1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/api.py:53",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/runtime/jobs.py:60",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/system_budget.py:125",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "diagram c2",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source web/app.js:1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source web/system.js:1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source web/columns.js:1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/api.py:53",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/runtime/jobs.py:123",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/webapi/budget.py:62",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/runtime/jobs.py:18",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/runtime/jobs.py:123",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source web/system.js:1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source web/shared/labs.js:1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source web/columns.js:1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/configuration.py:55",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/experiments/system_config.py:62",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source config/defaults.yaml:1",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/runtime/jobs.py:123",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/runtime/jobs.py:60",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/runtime/jobs.py:175",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "diagram c3",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/webapi/labs.py:119",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/runtime/jobs.py:60",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/models.py:33",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/configuration.py:55",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/domains/system.py:24",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/experiments/spatial_analysis.py:44",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/experiments/columns.py:108",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/experiments/a_acquisition.py:54",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/system_budget.py:125",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/optics/service.py:62",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/optics/service.py:21",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/acquisition/trials.py:10",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/acquisition/executor.py:9",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/acquisition/adapters/periodic.py:7",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/scan/transport.py:5",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/budget_pipeline.py:18",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/processing/ranging.py:10",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/processing/records.py:4",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/experiments/lab.py:46",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/spad/acquisition.py:26",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source src/spad_lidar/spad/readout/engine.py:5",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "browser desktop",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "browser narrow",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "source/frontend/config unchanged",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "name": "expert source unchanged",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "name": "no product commit",
+      "ok": true,
+      "detail": null
+    }
+  ]
+}

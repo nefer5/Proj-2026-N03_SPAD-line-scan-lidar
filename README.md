@@ -1,6 +1,6 @@
 # SPAD 线扫 LiDAR 建模器
 
-当前研究版本 **0.6.14.dev0**：独立SPAD研究、B空间光学、C列级扫描共用同一Python器件与读出核心。网页负责配置、绘图和审计；构造光学/扫描样例不代表实测整机。
+当前研究版本 **0.6.15.dev0**：独立SPAD研究、B空间光学、C列级扫描共用同一Python器件与读出核心。网页负责配置、绘图和审计；构造光学/扫描样例不代表实测整机。
 
 ## 启动与入口
 
@@ -11,7 +11,7 @@ python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -e .
 ```
 
-之后双击根目录 `start-dev.cmd`，或执行 `.\.venv\Scripts\python.exe run.py --reload --open`。默认端口由 `run.py` 统一维护为8016。启动脚本优先使用项目虚拟环境，未创建时使用PATH中的Python；后者也须已安装项目依赖。
+之后双击根目录 `start-dev.cmd`，或执行 `.\.venv\Scripts\python.exe run.py --restart --reload --open`。一键启动现在会先停止经项目身份核验的旧启动器、重载器及计算子进程，再验证新实例就绪后打开网页。端口属于其他程序时拒绝处理，不直接杀端口。详见[启动与重启](docs/guides/launcher.md)。默认端口由 `run.py` 统一维护为8016。启动脚本优先使用项目虚拟环境，未创建时使用PATH中的Python；后者也须已安装项目依赖。
 
 | 入口 | 适用研究 |
 |---|---|
@@ -37,6 +37,8 @@ python -m venv .venv
 
 参数草稿、当前预览、历史采集和记录重放分别标记。修改物理参数后须提交新任务；只改变通道选择、观察窗口或合法重放分箱不会改写原记录。
 
+本版完成公共后台与领域化默认配置两阶段重构、五平台“设为默认”及导航/1080P阅读优化。浅色分组和科学图表层级统一，普通数值简洁显示，计算/导出保留原始精度。版本范围与验证见[0.6.15.dev0记录](docs/release-notes.md#0615dev02026-10-18)；未完成或暂缓项继续以[路标](docs/roadmap.md)为准。
+
 ## 必须一起理解的模型边界
 
 1. **Rx接收域需按实物确认。** 背景已按独立Rx域积分，与Tx归一化域分开；域外设为不接收，不能把有限配置域等同于已实测的整机环境视场。
@@ -57,6 +59,8 @@ python -m venv .venv
 | 公式与光子链路 | `config/formulas.yaml`、`config/formula-notes.yaml`、`config/photon-flow.yaml` |
 | 任务输入和结果 | `artifacts/runs/<任务ID>/request.json`、`result.json` |
 | 任务状态索引 | `artifacts/runs/jobs.sqlite3` |
+| 当前架构 | [C4现行架构](docs/design/architecture.md)、[四页架构快照](artifacts/c4-architecture-20261018-172542/index.html) |
+| 参数和用户数据归属 | [初始值/草稿/覆盖/结果](docs/guides/configuration-and-data.md) |
 | 规范与当前状态 | [文档目录](docs/index.md)、[架构决策与偏好](docs/design/architecture-decisions.md)、[界面规范](docs/design/ui-design-guidelines.md)、[路标](docs/roadmap.md) |
 
 运行数据、下载的论文PDF和本机客户端缓存不会随Git推送；需要另行备份。源码、配置、文档、选定验收报告和快照进入版本管理。保存与复现方式见[运行数据说明](docs/guides/run-artifacts.md)。
@@ -74,8 +78,5 @@ node scripts/check-histogram-rendering.cjs
 ```
 
 模型变更验证量纲、能量、极限和共享核心一致性；界面变更实际检查表单、联动、普通刷新及图形。详细约束见[AGENTS.md](AGENTS.md)。
-## 系统预算入口（2026-09-28）
 
-启动平台后打开 `/system/budget`，或通过A/B/C顶部“系统预算”进入。支持单方案与基准对比、列时序、光子预算、硬件约束及可审计快照；初始值继承现有配置。[使用说明与模型边界](docs/guides/system-budget.md)。
-
-2026-10-15：已保存用户当前工况为各平台共用默认，DCR界面为4000kHz/SPAD（配置/API为4000000cps/SPAD）；A每份独立采集从完全恢复状态开始，无预热。已有草稿/任务保留，恢复默认后运行新采集生效。来源、验证与提交边界见[收口记录](artifacts/a-defaults-closeout/README.md)。
+文档按当前说明、兼容参考、历史归档分开；[文档目录](docs/index.md)为统一导航，旧报告中的默认数值和架构快照不自动成为现行规范。

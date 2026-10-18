@@ -32,14 +32,15 @@ def test_yaml_is_complete_and_all_parameters_documented():
 
 def test_defaults_are_reread_without_server_restart(tmp_path, monkeypatch):
     values = configuration.read_yaml("defaults.yaml")
-    values["simulation"]["laser_shots"] = 123
+    target = values['simulation'] if values['schema_version'] == 1 else values['domains']['acquisition']
+    target["laser_shots"] = 123
     (tmp_path / "readout-modes.yaml").write_text(yaml.safe_dump(configuration.read_yaml("readout-modes.yaml")), encoding="utf-8")
     (tmp_path / "defaults.yaml").write_text(yaml.safe_dump(values), encoding="utf-8")
     (tmp_path / "algorithms.yaml").write_text(
         yaml.safe_dump(configuration.read_yaml("algorithms.yaml")), encoding="utf-8")
     monkeypatch.setattr(configuration, "CONFIG_DIR", tmp_path)
     assert client.get("/api/defaults").json()["laser_shots"] == 123
-    values["simulation"]["laser_shots"] = 321
+    target["laser_shots"] = 321
     (tmp_path / "defaults.yaml").write_text(yaml.safe_dump(values), encoding="utf-8")
     assert client.get("/api/defaults").json()["laser_shots"] == 321
     assert SimulationConfig(laser_shots=456).laser_shots == 456

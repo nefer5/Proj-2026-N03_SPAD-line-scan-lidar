@@ -1,0 +1,27 @@
+{
+  "/spad": {
+    "navigation": true,
+    "fingerprint": true,
+    "no_store": true
+  },
+  "/system/budget": {
+    "navigation": true,
+    "fingerprint": true,
+    "no_store": true
+  },
+  "/": {
+    "navigation": true,
+    "fingerprint": true,
+    "no_store": true
+  },
+  "/system": {
+    "navigation": true,
+    "fingerprint": true,
+    "no_store": true
+  },
+  "/system/scan": {
+    "navigation": true,
+    "fingerprint": true,
+    "no_store": true
+  }
+}
