@@ -1,0 +1,40 @@
+name: 发布 C4 架构说明
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'artifacts/c4-architecture-20261018-172542/index.html'
+      - 'scripts/build-architecture-site.py'
+      - '.github/workflows/architecture-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: architecture-pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: 读取仓库
+        uses: actions/checkout@v6
+      - name: 配置 Pages
+        uses: actions/configure-pages@v5
+      - name: 准备独立架构网页
+        run: python3 scripts/build-architecture-site.py --output "$RUNNER_TEMP/architecture-site"
+      - name: 上传网页
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ${{ runner.temp }}/architecture-site
+      - name: 发布网页
+        id: deployment
+        uses: actions/deploy-pages@v4

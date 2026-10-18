@@ -49,6 +49,12 @@ python -m venv .venv
 
 强背景完整帧可能超过资源限额。可显式选局部列实验，或载入具名快速示例；程序不静默关光、减少发数或降低采样来绕过限制。
 
+## 在线架构说明
+
+[直接打开 C4 架构说明](https://nefer5.github.io/Proj-2026-N03_SPAD-line-scan-lidar/)（2026-10-18分析快照，含C1/C2/C3、参数与用户数据、目录职责和模块复用）。这是带时间的分析快照；当前实现和规范仍见下方现行文档。
+
+GitHub Pages由`.github/workflows/architecture-pages.yml`自动发布。仅打包指定的独立HTML与发布来源清单，不发布运行数据；更新对应HTML或构建脚本后推送main即可重新部署。可在Actions手动运行；本地检查运行`python scripts/build-architecture-site.py`，输出到`temp/github-pages/site/`。
+
 ## 配置、结果与文档
 
 | 内容 | 唯一来源 / 入口 |
